@@ -1,4 +1,4 @@
-﻿namespace Ched
+﻿namespace Ched.UI
 {
     partial class MainForm
     {
