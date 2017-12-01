@@ -46,6 +46,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\Air.cs" />
+    <Compile Include="Components\AirAction.cs" />
+    <Compile Include="Components\Damage.cs" />
+    <Compile Include="Components\ExTap.cs" />
+    <Compile Include="Components\Flick.cs" />
+    <Compile Include="Components\GraphicsExtensions.cs" />
+    <Compile Include="Components\Hold.cs" />
+    <Compile Include="Components\LongNoteBase.cs" />
+    <Compile Include="Components\NoteBase.cs" />
+    <Compile Include="Components\ShortNoteBase.cs" />
+    <Compile Include="Components\Slide.cs" />
+    <Compile Include="Components\Tap.cs" />
+    <Compile Include="Components\TappableBase.cs" />
     <Compile Include="UI\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
