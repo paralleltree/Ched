@@ -148,6 +148,7 @@ namespace Ched.UI
                 this.Menu = menuStrip;
                 //this.Controls.Add(picBox);
                 this.Controls.Add(new NoteView() { Dock = DockStyle.Fill });
+                this.Controls.Add(new VScrollBar() { Dock = DockStyle.Right });
                 this.Controls.AddRange(new Control[] { toolStrip, editStrip });
             }
 
