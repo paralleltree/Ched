@@ -145,6 +145,8 @@ namespace Ched.Components
         {
             public int Offset { get; set; }
 
+            public bool IsVisible { get; set; } = true;
+
             public override bool IsTap { get; set; }
 
             public override int Tick { get { return parent.StartTick + Offset; } }
