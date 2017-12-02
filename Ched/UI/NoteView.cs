@@ -124,7 +124,16 @@ namespace Ched.UI
             Notes.Add(tap);
             Notes.Add(airaction);
 
-            //HeadTick = 240;
+            var slide = new Slide() { Width = 4, StartTick = 480 * 4 };
+            slide.StartNote.LaneIndex = 8;
+            slide.StepNotes.Add(new Slide.StepTap(slide) { Offset = 240, LaneIndex = 12 });
+            slide.StepNotes.Add(new Slide.StepTap(slide) { Offset = 240 * 2, LaneIndex = 8 });
+            slide.StepNotes.Add(new Slide.StepTap(slide) { Offset = 240 * 3, LaneIndex = 12 });
+            slide.StepNotes.Add(new Slide.StepTap(slide) { Offset = 240 * 4, LaneIndex = 8 });
+            slide.StepNotes.Add(new Slide.StepTap(slide) { Offset = 240 * 5, LaneIndex = 12 });
+            Notes.Add(slide);
+
+            HeadTick = 240;
         }
 
         protected override void OnPaint(PaintEventArgs pe)
@@ -173,17 +182,32 @@ namespace Ched.UI
             var holds = Notes.Holds.Where(p => p.StartTick >= HeadTick && p.StartTick <= tailTick).ToList();
             // ロングノーツ背景
             // HOLD
-            foreach (var note in holds)
+            foreach (var hold in holds)
             {
-                note.DrawBackground(pe.Graphics, new RectangleF(
-                    (UnitLaneWidth + BorderThickness) * note.LaneIndex + BorderThickness,
-                    GetYPositionFromTick(note.StartTick),
-                    (UnitLaneWidth + BorderThickness) * note.Width - BorderThickness,
-                    GetYPositionFromTick(note.Duration)
+                hold.DrawBackground(pe.Graphics, new RectangleF(
+                    (UnitLaneWidth + BorderThickness) * hold.LaneIndex + BorderThickness,
+                    GetYPositionFromTick(hold.StartTick),
+                    (UnitLaneWidth + BorderThickness) * hold.Width - BorderThickness,
+                    GetYPositionFromTick(hold.Duration)
                     ));
             }
 
             // SLIDE
+            var slides = Notes.Slides.Where(p => p.StartTick >= HeadTick && p.StartTick <= tailTick).ToList();
+            foreach (var slide in slides)
+            {
+                var bg = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.OrderBy(p => p.Tick)).ToList();
+                for (int i = 0; i < bg.Count - 1; i++)
+                {
+                    slide.DrawBackground(pe.Graphics,
+                        (UnitLaneWidth + BorderThickness) * slide.Width - BorderThickness,
+                        (UnitLaneWidth + BorderThickness) * bg[i].LaneIndex,
+                        GetYPositionFromTick(bg[i].Tick),
+                        (UnitLaneWidth + BorderThickness) * bg[i + 1].LaneIndex,
+                        GetYPositionFromTick(bg[i + 1].Tick),
+                        ShortNoteHeight);
+                }
+            }
 
             // AIR-ACTION(ガイド線)
             var airActions = Notes.AirActions.Where(p => p.StartTick >= HeadTick && p.StartTick <= tailTick).ToList();
@@ -198,13 +222,22 @@ namespace Ched.UI
 
             // ショートノーツ
             // HOLD始点
-            foreach (var note in holds)
+            foreach (var hold in holds)
             {
-                note.StartNote.Draw(pe.Graphics, GetRectFromNotePosition(note.StartTick, note.LaneIndex, note.Width));
-                note.EndNote.Draw(pe.Graphics, GetRectFromNotePosition(note.StartTick + note.Duration, note.LaneIndex, note.Width));
+                hold.StartNote.Draw(pe.Graphics, GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width));
+                hold.EndNote.Draw(pe.Graphics, GetRectFromNotePosition(hold.StartTick + hold.Duration, hold.LaneIndex, hold.Width));
             }
 
             // SLIDE始点
+            foreach (var slide in slides)
+            {
+                slide.StartNote.Draw(pe.Graphics, GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.Width));
+                foreach (var step in slide.StepNotes)
+                {
+                    step.Draw(pe.Graphics, GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width));
+                }
+            }
+
             // TAP, ExTAP, FLICK, DAMAGE
             foreach (var note in Notes.Taps.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
             {
@@ -217,11 +250,11 @@ namespace Ched.UI
             }
 
             // AIR-ACTION(ActionNote)
-            foreach (var note in airActions)
+            foreach (var action in airActions)
             {
-                foreach (var action in note.ActionNotes)
+                foreach (var note in action.ActionNotes)
                 {
-                    action.Draw(pe.Graphics, GetRectFromNotePosition(note.StartTick + action.Offset, note.ParentNote.LaneIndex, note.ParentNote.Width).Expand(-ShortNoteHeight * 0.28f));
+                    note.Draw(pe.Graphics, GetRectFromNotePosition(action.StartTick + note.Offset, action.ParentNote.LaneIndex, action.ParentNote.Width).Expand(-ShortNoteHeight * 0.28f));
                 }
             }
 
