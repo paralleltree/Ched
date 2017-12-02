@@ -229,6 +229,7 @@ namespace Ched.UI
                 slide.StartNote.Draw(pe.Graphics, GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.Width));
                 foreach (var step in slide.StepNotes)
                 {
+                    if (!step.IsVisible) continue;
                     step.Draw(pe.Graphics, GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width));
                 }
             }
