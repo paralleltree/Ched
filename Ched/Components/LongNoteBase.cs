@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 
 namespace Ched.Components
 {
+    public interface IHasParentLongNote
+    {
+        int StartTick { get; }
+    }
+
     public abstract class LongNoteBase : NoteBase
     {
         private int startTick;

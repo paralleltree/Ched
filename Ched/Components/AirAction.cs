@@ -10,10 +10,11 @@ namespace Ched.Components
 {
     public class AirAction : LongNoteBase
     {
-        private static readonly Color LineColor = Color.FromArgb(216, 0, 146, 0);
+        private static readonly Color LineColor = Color.FromArgb(216, 0, 196, 0);
 
-        public List<ActionNote> ActionNotesOffset { get; } = new List<ActionNote>();
+        public List<ActionNote> ActionNotes { get; } = new List<ActionNote>();
         public IAirable ParentNote { get; }
+        public new int StartTick { get { return ParentNote.Tick; } }
 
         public AirAction(IAirable parent)
         {
@@ -22,7 +23,7 @@ namespace Ched.Components
 
         public override int GetDuration()
         {
-            return ParentNote.Tick + ActionNotesOffset.Max(p => p.Offset);
+            return ActionNotes.Max(p => p.Offset);
         }
 
         internal void DrawLine(Graphics g, float x, float y1, float y2, float noteHeight)
