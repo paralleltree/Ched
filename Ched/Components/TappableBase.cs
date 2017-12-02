@@ -8,8 +8,9 @@ using System.Drawing.Drawing2D;
 
 namespace Ched.Components
 {
-    public abstract class TappableBase : ShortNoteBase
+    public abstract class TapBase : ShortNoteBase
     {
+
         internal virtual void Draw(Graphics g, RectangleF rect)
         {
             DrawNote(g, rect);
@@ -19,7 +20,7 @@ namespace Ched.Components
         protected virtual void DrawBorder(Graphics g, RectangleF rect)
         {
             float borderWidth = rect.Height * 0.1f;
-            using (var brush = new LinearGradientBrush(rect.Expand(borderWidth), LightBorderColor, DarkBorderColor, LinearGradientMode.Vertical))
+            using (var brush = new LinearGradientBrush(rect.Expand(borderWidth), DarkBorderColor, LightBorderColor, LinearGradientMode.Vertical))
             {
                 using (var pen = new Pen(brush, borderWidth))
                 {
@@ -33,11 +34,71 @@ namespace Ched.Components
 
         protected abstract void DrawNote(Graphics g, RectangleF rect);
 
+        protected void DrawNote(Graphics g, RectangleF rect, Color darkColor, Color lightColor)
+        {
+            using (var path = rect.ToRoundedPath(rect.Height * 0.3f))
+            {
+                using (var brush = new LinearGradientBrush(rect, darkColor, lightColor, LinearGradientMode.Vertical))
+                {
+                    g.FillPath(brush, path);
+                }
+            }
+        }
+
         protected void DrawTapSymbol(Graphics g, RectangleF noteRect)
         {
             using (var pen = new Pen(Color.White, noteRect.Height * 0.1f))
             {
                 g.DrawLine(pen, noteRect.Left + noteRect.Width * 0.2f, noteRect.Top + noteRect.Height / 2f, noteRect.Right - noteRect.Width * 0.2f, noteRect.Top + noteRect.Height / 2);
+            }
+        }
+    }
+
+    public abstract class TappableBase : TapBase, IAirable
+    {
+        private int tick;
+        private int laneIndex;
+        private int width = 1;
+
+        /// <summary>
+        /// ノートの位置を表すTickを設定します。
+        /// </summary>
+        public int Tick
+        {
+            get { return tick; }
+            set
+            {
+                if (tick == value) return;
+                if (tick < 0) throw new ArgumentOutOfRangeException("value", "value must not be negative.");
+                tick = value;
+            }
+        }
+
+        /// <summary>
+        /// ノートの配置されるレーン番号を設定します。。
+        /// </summary>
+        public int LaneIndex
+        {
+            get { return laneIndex; }
+            set
+            {
+                if (laneIndex == value) return;
+                if (value < 0 || value >= Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
+                laneIndex = value;
+            }
+        }
+
+        /// <summary>
+        /// ノートのレーン幅を設定します。
+        /// </summary>
+        public int Width
+        {
+            get { return width; }
+            set
+            {
+                if (width == value) return;
+                if (value < 1 || value + LaneIndex > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid note width.");
+                width = value;
             }
         }
     }

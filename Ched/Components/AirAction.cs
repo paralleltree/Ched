@@ -12,22 +12,41 @@ namespace Ched.Components
     {
         private static readonly Color LineColor = Color.FromArgb(216, 0, 146, 0);
 
-        internal void Draw(Graphics g, RectangleF targetNoteRect)
+        public List<ActionNote> ActionNotesOffset { get; } = new List<ActionNote>();
+        public IAirable ParentNote { get; }
+
+        public AirAction(IAirable parent)
         {
+            ParentNote = parent;
         }
 
-        internal class ActionNote : ShortNoteBase
+        public override int GetDuration()
+        {
+            return ParentNote.Tick + ActionNotesOffset.Max(p => p.Offset);
+        }
+
+        internal void DrawLine(Graphics g, float x, float y1, float y2, float noteHeight)
+        {
+            using (var pen = new Pen(LineColor, noteHeight / 2))
+            {
+                g.DrawLine(pen, x, y1, x, y2);
+            }
+        }
+
+        public class ActionNote : ShortNoteBase
         {
             private readonly Color LightNoteColor = Color.FromArgb(212, 92, 255);
             private readonly Color DarkNoteColor = Color.FromArgb(146, 0, 192);
 
+            public int Offset { get; set; }
+
             internal void Draw(Graphics g, RectangleF rect)
             {
-                using (var brush = new LinearGradientBrush(rect, LightNoteColor, DarkNoteColor, LinearGradientMode.Vertical))
+                using (var brush = new LinearGradientBrush(rect, DarkNoteColor, LightNoteColor, LinearGradientMode.Vertical))
                 {
                     g.FillRectangle(brush, rect);
                 }
-                using (var brush = new LinearGradientBrush(rect.Expand(rect.Height * 0.1f), LightBorderColor, DarkBorderColor, LinearGradientMode.Vertical))
+                using (var brush = new LinearGradientBrush(rect.Expand(rect.Height * 0.1f), DarkBorderColor, LightBorderColor, LinearGradientMode.Vertical))
                 {
                     using (var pen = new Pen(brush, rect.Height * 0.1f))
                     {

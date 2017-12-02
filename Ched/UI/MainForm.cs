@@ -146,7 +146,8 @@ namespace Ched.UI
             using (var manager = this.WorkWithLayout())
             {
                 this.Menu = menuStrip;
-                this.Controls.Add(picBox);
+                //this.Controls.Add(picBox);
+                this.Controls.Add(new NoteView() { Dock = DockStyle.Fill });
                 this.Controls.AddRange(new Control[] { toolStrip, editStrip });
             }
 
@@ -160,10 +161,15 @@ namespace Ched.UI
                 //g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 tap.Draw(g, new RectangleF(10, 30, 16, 4));
                 hold.DrawBackground(g, new RectangleF(100, 10, 40, 120));
-                new Air() { HorizontalDirection = HorizontalAirDirection.Right }.Draw(g, new RectangleF(10, 60, 60, 5));
+                //new Air(tap) { HorizontalDirection = HorizontalAirDirection.Right }.Draw(g, new RectangleF(10, 60, 60, 5));
                 tap.Draw(g, new RectangleF(10, 60, 60, 5));
                 tap.Draw(g, new RectangleF(10, 80, 80, 20));
             }
+        }
+
+        private ToolStrip GenerateNoteTypesToolStrip(bool airTypeSelectable)
+        {
+            throw new NotImplementedException();
         }
     }
 

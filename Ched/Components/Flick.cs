@@ -19,7 +19,7 @@ namespace Ched.Components
         {
             using (var path = rect.ToRoundedPath(rect.Height * 0.3f))
             {
-                using (var backgroundBrush = new LinearGradientBrush(rect, LightBackgroundColor, DarkBackgroundColor, LinearGradientMode.Vertical))
+                using (var backgroundBrush = new LinearGradientBrush(rect, DarkBackgroundColor, LightBackgroundColor, LinearGradientMode.Vertical))
                 {
                     g.FillPath(backgroundBrush, path);
                 }
@@ -28,7 +28,7 @@ namespace Ched.Components
             var foregroundRect = new RectangleF(rect.Left + rect.Width / 4, rect.Top, rect.Width / 2, rect.Height);
             using (var path = foregroundRect.ToRoundedPath(rect.Height * 0.3f))
             {
-                using (var foregroundBrush = new LinearGradientBrush(foregroundRect, LightForegroundColor, DarkForegroundColor, LinearGradientMode.Vertical))
+                using (var foregroundBrush = new LinearGradientBrush(foregroundRect, DarkForegroundColor, LightForegroundColor, LinearGradientMode.Vertical))
                 {
                     g.FillPath(foregroundBrush, path);
                 }
