@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Components\Air.cs" />
     <Compile Include="Components\AirAction.cs" />
+    <Compile Include="Components\Constants.cs" />
     <Compile Include="Components\Damage.cs" />
     <Compile Include="Components\ExTap.cs" />
     <Compile Include="Components\Flick.cs" />

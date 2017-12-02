@@ -32,21 +32,9 @@ namespace Ched.Components
             }
         }
 
-        public class Tap : LongNoteTapBase
+        public override int GetDuration()
         {
-            private readonly Color DarkNoteColor = Color.FromArgb(0, 16, 138);
-            private readonly Color LightNoteColor = Color.FromArgb(86, 106, 255);
-
-            protected override void DrawNote(Graphics g, RectangleF rect)
-            {
-                using (var path = rect.ToRoundedPath(rect.Height * 0.3f))
-                {
-                    using (var brush = new LinearGradientBrush(rect, LightNoteColor, DarkNoteColor, LinearGradientMode.Vertical))
-                    {
-                        g.FillPath(brush, path);
-                    }
-                }
-            }
+            throw new NotImplementedException();
         }
     }
 }

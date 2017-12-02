@@ -17,14 +17,8 @@ namespace Ched.Components
 
         protected override void DrawNote(Graphics g, RectangleF rect)
         {
-            using (var path = rect.ToRoundedPath(rect.Height * 0.3f))
-            {
-                using (var brush = new LinearGradientBrush(rect, LightNoteColor, DarkNoteColor, LinearGradientMode.Vertical))
-                {
-                    g.FillPath(brush, path);
-                }
-                DrawTapSymbol(g, rect);
-            }
+            DrawNote(g, rect, DarkNoteColor, LightNoteColor);
+            DrawTapSymbol(g, rect);
         }
     }
 }
