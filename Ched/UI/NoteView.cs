@@ -107,6 +107,18 @@ namespace Ched.UI
                 Notes.Add(new Tap() { Tick = 240 * (1 + i) + 480 * 4, LaneIndex = i * 4, Width = 4 });
             }
 
+            var tap = new Tap() { Tick = 480 * 6, LaneIndex = 0, Width = 3 };
+            Notes.Add(new Air(tap));
+            var airaction = new AirAction(tap);
+            airaction.ActionNotes.Add(new AirAction.ActionNote() { Offset = 480 });
+
+            var tap2 = new Tap() { Tick = 480 * 7, LaneIndex = 0, Width = 3 };
+            var air2 = new Air(tap2) { VerticalDirection = VerticalAirDirection.Down };
+            Notes.Add(tap2);
+            Notes.Add(air2);
+            Notes.Add(tap);
+            Notes.Add(airaction);
+
             HeadTick = 240;
         }
 
@@ -168,6 +180,17 @@ namespace Ched.UI
 
             // SLIDE
 
+            // AIR-ACTION(ガイド線)
+            var airActions = Notes.AirActions.Where(p => p.StartTick >= HeadTick && p.StartTick <= tailTick).ToList();
+            foreach (var note in airActions)
+            {
+                note.DrawLine(pe.Graphics,
+                    (UnitLaneWidth + BorderThickness) * note.ParentNote.LaneIndex + BorderThickness + UnitLaneWidth * note.ParentNote.Width / 2,
+                    GetYPositionFromTick(note.StartTick),
+                    GetYPositionFromTick(note.StartTick + note.GetDuration()),
+                    ShortNoteHeight);
+            }
+
             // ショートノーツ
             // HOLD始点
             foreach (var note in holds)
@@ -188,15 +211,13 @@ namespace Ched.UI
                 note.Draw(pe.Graphics, GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
             }
 
-            // AIR-ACTION(line -> action-note)
-            var airActions = Notes.AirActions.Where(p => p.StartTick >= HeadTick && p.StartTick <= tailTick).ToList();
+            // AIR-ACTION(ActionNote)
             foreach (var note in airActions)
             {
-                note.DrawLine(pe.Graphics,
-                    (UnitLaneWidth + BorderThickness) * note.ParentNote.LaneIndex + BorderThickness + UnitLaneWidth * note.ParentNote.Width / 2,
-                    GetYPositionFromTick(note.StartTick),
-                    GetYPositionFromTick(note.StartTick + note.GetDuration()),
-                    ShortNoteHeight);
+                foreach (var action in note.ActionNotes)
+                {
+                    action.Draw(pe.Graphics, GetRectFromNotePosition(note.StartTick + action.Offset, note.ParentNote.LaneIndex, note.ParentNote.Width).Expand(-ShortNoteHeight * 0.28f));
+                }
             }
 
             // AIR
