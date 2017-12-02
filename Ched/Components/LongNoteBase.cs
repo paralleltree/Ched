@@ -36,6 +36,20 @@ namespace Ched.Components
         public abstract int GetDuration();
     }
 
+    public abstract class MovableLongNoteTapBase : TapBase, IAirable
+    {
+        public abstract bool IsTap { get; set; }
+        public abstract int LaneIndex { get; set; }
+        public abstract int Tick { get; }
+        public abstract int Width { get; }
+
+        internal override void Draw(Graphics g, RectangleF rect)
+        {
+            base.Draw(g, rect);
+            if (IsTap) DrawTapSymbol(g, rect);
+        }
+    }
+
     public abstract class LongNoteTapBase : TapBase, IAirable
     {
         public abstract bool IsTap { get; }
