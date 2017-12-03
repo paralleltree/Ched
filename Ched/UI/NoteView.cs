@@ -250,6 +250,8 @@ namespace Ched.UI
                 note.Draw(pe.Graphics, GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
             }
 
+            // TODO: Air付きロングノーツ終点(緑色)
+
             // AIR-ACTION(ActionNote)
             foreach (var action in airActions)
             {
