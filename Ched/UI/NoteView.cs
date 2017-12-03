@@ -146,6 +146,8 @@ namespace Ched.UI
             var matrix = new Matrix();
             matrix.Scale(1, -1);
             matrix.Translate(0, ClientSize.Height - 1, MatrixOrder.Append);
+            // さらにずらして下端とHeadTickを合わせる
+            matrix.Translate(0, HeadTick * UnitBeatHeight / UnitBeatTick, MatrixOrder.Append);
             pe.Graphics.Transform = matrix;
 
             float laneWidth = UnitLaneWidth * Constants.LanesCount + BorderThickness * (Constants.LanesCount - 1);
@@ -157,12 +159,10 @@ namespace Ched.UI
                 for (int i = 0; i <= Constants.LanesCount; i++)
                 {
                     float x = i * (UnitLaneWidth + BorderThickness);
-                    pe.Graphics.DrawLine(pen, x, 0, x, ClientSize.Height);
+                    pe.Graphics.DrawLine(pen, x, GetYPositionFromTick(HeadTick), x, GetYPositionFromTick(tailTick));
                 }
             }
 
-            // さらにずらして下端とHeadTickを合わせる
-            pe.Graphics.TranslateTransform(0, HeadTick * UnitBeatHeight / UnitBeatTick, MatrixOrder.Append);
 
             // 時間ガイドの描画
             using (var beatPen = new Pen(BeatLineColor, BorderThickness))
