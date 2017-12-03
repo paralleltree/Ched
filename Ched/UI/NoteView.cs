@@ -60,6 +60,11 @@ namespace Ched.UI
         /// </summary>
         public int HeadTick { get; set; }
 
+        /// <summary>
+        /// クォンタイズを行うTick数を指定します。
+        /// </summary>
+        public int QuantizeTick { get; set; }
+
         public NoteCollection Notes { get; } = new NoteCollection();
 
         public NoteView()
@@ -69,6 +74,9 @@ namespace Ched.UI
             this.BackColor = Color.Black;
             this.SetStyle(ControlStyles.ResizeRedraw, true);
             this.SetStyle(ControlStyles.Opaque, true);
+
+            QuantizeTick = UnitBeatTick;
+
             /*Notes.Add(new Tap() { Tick = 480, LaneIndex = 4, Width = 4 });
             Notes.Add(new Flick() { Tick = 480, LaneIndex = 0, Width = 4 });
             var tap1 = new ExTap() { Tick = 960, LaneIndex = 4, Width = 8 };
@@ -134,6 +142,22 @@ namespace Ched.UI
             Notes.Add(slide);
 
             HeadTick = 240;
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            var revMatrix = GetDrawingMatrix(new Matrix());
+            revMatrix.Invert();
+            var destPoint = new Point[] { e.Location };
+            revMatrix.TransformPoints(destPoint);
+            var srcPoint = destPoint.Single();
+
+            int tick = (int)(srcPoint.Y * UnitBeatTick / UnitBeatHeight);
+            int quantized = (int)Math.Round((float)tick / QuantizeTick) * QuantizeTick;
+            int laneIndex = (int)(srcPoint.X / (UnitLaneWidth + BorderThickness));
+            System.Diagnostics.Debug.WriteLine("Tick: {0} ({1}), LaneIndex: {2}", tick, quantized, laneIndex);
+
+            base.OnMouseMove(e);
         }
 
         protected override void OnPaint(PaintEventArgs pe)
