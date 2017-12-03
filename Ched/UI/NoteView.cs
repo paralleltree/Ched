@@ -167,12 +167,7 @@ namespace Ched.UI
             // Y軸の正方向をTick増加方向として描画 (y = 0 はコントロール下端)
             // コントロールの中心に描画したいなら後でTranslateしといてね
             var prevMatrix = pe.Graphics.Transform;
-            var matrix = new Matrix();
-            matrix.Scale(1, -1);
-            matrix.Translate(0, ClientSize.Height - 1, MatrixOrder.Append);
-            // さらにずらして下端とHeadTickを合わせる
-            matrix.Translate(0, HeadTick * UnitBeatHeight / UnitBeatTick, MatrixOrder.Append);
-            pe.Graphics.Transform = matrix;
+            pe.Graphics.Transform = GetDrawingMatrix(prevMatrix);
 
             float laneWidth = UnitLaneWidth * Constants.LanesCount + BorderThickness * (Constants.LanesCount - 1);
             int tailTick = HeadTick + (int)(ClientSize.Height * UnitBeatTick / UnitBeatHeight);
@@ -293,6 +288,19 @@ namespace Ched.UI
 
 
             pe.Graphics.Transform = prevMatrix;
+        }
+
+        private Matrix GetDrawingMatrix(Matrix baseMatrix)
+        {
+            Matrix matrix = baseMatrix.Clone();
+            // 反転してY軸増加方向を時間軸に
+            matrix.Scale(1, -1);
+            // ずれたコントロール高さ分を補正
+            matrix.Translate(0, ClientSize.Height - 1, MatrixOrder.Append);
+            // さらにずらして下端とHeadTickを合わせる
+            matrix.Translate(0, HeadTick * UnitBeatHeight / UnitBeatTick, MatrixOrder.Append);
+
+            return matrix;
         }
 
         private float GetYPositionFromTick(int tick)
