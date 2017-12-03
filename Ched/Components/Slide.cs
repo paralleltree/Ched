@@ -8,7 +8,7 @@ using System.Drawing.Drawing2D;
 
 namespace Ched.Components
 {
-    public class Slide : LongNoteBase
+    public class Slide : MovableLongNoteBase
     {
         private static readonly Color BackgroundMiddleColor = Color.FromArgb(216, 0, 164, 146);
         private static readonly Color BackgroundEdgeColor = Color.FromArgb(216, 166, 44, 168);

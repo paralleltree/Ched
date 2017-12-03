@@ -7,12 +7,26 @@ using System.Threading.Tasks;
 
 namespace Ched.Components
 {
-    public interface IHasParentLongNote
+    public interface ILongNote
     {
         int StartTick { get; }
+        int GetDuration();
     }
 
-    public abstract class LongNoteBase : NoteBase
+    public abstract class LongNoteBase : NoteBase, ILongNote
+    {
+        /// <summary>
+        /// ノートの開始位置を表すTickを設定します。
+        /// </summary>
+        public abstract int StartTick { get; }
+
+        /// <summary>
+        /// ノートの長さを表すTickを取得します。
+        /// </summary>
+        public abstract int GetDuration();
+    }
+
+    public abstract class MovableLongNoteBase : NoteBase, ILongNote
     {
         private int startTick;
 
