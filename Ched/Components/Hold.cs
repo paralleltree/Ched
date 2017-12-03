@@ -8,7 +8,7 @@ using System.Drawing.Drawing2D;
 
 namespace Ched.Components
 {
-    public class Hold : LongNoteBase
+    public class Hold : MovableLongNoteBase
     {
         private static readonly Color BackgroundMiddleColor = Color.FromArgb(216, 216, 216, 0);
         private static readonly Color BackgroundEdgeColor = Color.FromArgb(216, 166, 44, 168);

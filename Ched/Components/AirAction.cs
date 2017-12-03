@@ -14,7 +14,7 @@ namespace Ched.Components
 
         public List<ActionNote> ActionNotes { get; } = new List<ActionNote>();
         public IAirable ParentNote { get; }
-        public new int StartTick { get { return ParentNote.Tick; } }
+        public override int StartTick { get { return ParentNote.Tick; } }
 
         public AirAction(IAirable parent)
         {
