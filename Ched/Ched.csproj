@@ -75,6 +75,7 @@
       <DependentUpon>NoteView.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\Operations\CompositeOperation.cs" />
+    <Compile Include="UI\Operations\EditNoteOperation.cs" />
     <Compile Include="UI\Operations\IOperation.cs" />
     <Compile Include="UI\Operations\OperationManager.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
