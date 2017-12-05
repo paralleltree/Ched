@@ -30,6 +30,16 @@ namespace Ched.UI.Operations
             get { return RedoStack.Select(p => p.Description); }
         }
 
+        /// <summary>
+        /// 操作を元に戻せるかどうかを取得します。
+        /// </summary>
+        public bool CanUndo { get { return UndoStack.Count > 0; } }
+
+        /// <summary>
+        /// 操作をやり直せるかどうかを取得します。
+        /// </summary>
+        public bool CanRedo { get { return RedoStack.Count > 0; } }
+
 
         /// <summary>
         /// 新たな操作を記録します。
