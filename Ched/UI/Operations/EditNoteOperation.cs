@@ -105,8 +105,9 @@ namespace Ched.UI.Operations
         protected NoteView.NoteCollection Collection { get; }
         public abstract string Description { get; }
 
-        public ManageShortNoteOperation(T note)
+        public ManageShortNoteOperation(NoteView.NoteCollection collection, T note)
         {
+            Collection = collection;
             Note = note;
         }
 
@@ -118,7 +119,7 @@ namespace Ched.UI.Operations
     {
         public override string Description { get { return "TAPの追加"; } }
 
-        public InsertTapOperation(Tap note) : base(note)
+        public InsertTapOperation(NoteView.NoteCollection collection, Tap note) : base(collection, note)
         {
         }
 
@@ -137,7 +138,7 @@ namespace Ched.UI.Operations
     {
         public override string Description { get { return "TAPの削除"; } }
 
-        public RemoveShortNoteOperation(Tap note) : base(note)
+        public RemoveShortNoteOperation(NoteView.NoteCollection collection, Tap note) : base(collection, note)
         {
         }
 
