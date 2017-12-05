@@ -8,8 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Reactive;
+using System.Reactive.Linq;
 
 using Ched.Components;
+using Ched.UI.Operations;
 
 namespace Ched.UI
 {
@@ -74,6 +77,8 @@ namespace Ched.UI
         public int QuantizeTick { get; set; }
 
         public NoteCollection Notes { get; } = new NoteCollection();
+
+        internal OperationManager OperationManager { get; } = new OperationManager();
 
         public NoteView()
         {
@@ -150,6 +155,100 @@ namespace Ched.UI
             Notes.Add(slide);
 
             HeadTick = 240;
+
+            var mouseDown = this.MouseDownAsObservable();
+            var mouseMove = this.MouseMoveAsObservable();
+            var mouseUp = this.MouseUpAsObservable();
+
+            mouseDown
+                .SelectMany(p =>
+                {
+                    var from = p.Location;
+                    Matrix matrix = GetDrawingMatrix(new Matrix());
+                    matrix.Invert();
+                    PointF scorePos = matrix.TransformPoint(p.Location);
+
+                    foreach (var note in Notes.Taps.Where(q => q.Tick >= HeadTick && q.Tick <= TailTick))
+                    {
+                        RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                        RectangleF leftThumb = new RectangleF(rect.X, rect.Y, rect.Width * 0.2f, rect.Height);
+                        RectangleF rightThumb = new RectangleF(rect.Right - rect.Width * 0.2f, rect.Y, rect.Width * 0.2f, rect.Height);
+                        // ノートの左側
+                        if (leftThumb.Contains(scorePos))
+                        {
+                            System.Diagnostics.Debug.WriteLine("leftThumb");
+                            PointF startCursorPos = scorePos;
+                            var beforePos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
+                            return mouseMove
+                                .TakeUntil(mouseUp)
+                                .Do(q =>
+                                {
+                                    var currentCursorPos = matrix.TransformPoint(q.Location);
+                                    int xdiff = (int)((currentCursorPos.X - startCursorPos.X) / (UnitLaneWidth + BorderThickness));
+                                    int startx = (int)(startCursorPos.X / (UnitLaneWidth + BorderThickness));
+                                    xdiff = Math.Min(beforePos.Width - 1, Math.Max(-startx, xdiff));
+                                    int width = beforePos.Width - xdiff;
+                                    int laneIndex = beforePos.LaneIndex + xdiff;
+                                    System.Diagnostics.Debug.WriteLine("xdiff: {0}, width: {1}, laneIndex: {2}", xdiff, width, laneIndex);
+                                    note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
+                                    note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
+                                })
+                                .Finally(() =>
+                                {
+                                    var afterPos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
+                                    OperationManager.Push(new ChangeShortNoteWidthOperation(note, beforePos, afterPos));
+                                });
+                        }
+
+                        // ノートの右側
+                        if (rightThumb.Contains(scorePos))
+                        {
+                            System.Diagnostics.Debug.WriteLine("rightThumb");
+                            PointF startCursorPos = scorePos;
+                            var beforePos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
+                            return mouseMove
+                                .TakeUntil(mouseUp)
+                                .Do(q =>
+                                {
+                                    var currentCursorPos = matrix.TransformPoint(q.Location);
+                                    int xdiff = (int)((currentCursorPos.X - startCursorPos.X) / (UnitLaneWidth + BorderThickness));
+                                    int width = beforePos.Width + xdiff;
+                                    note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
+                                })
+                                .Finally(() =>
+                                {
+                                    var afterPos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
+                                    OperationManager.Push(new ChangeShortNoteWidthOperation(note, beforePos, afterPos));
+                                });
+                        }
+
+                        // ノート本体
+                        if (rect.Contains(scorePos))
+                        {
+                            System.Diagnostics.Debug.WriteLine("noteRect");
+                            PointF startCursorPos = scorePos;
+                            var beforePos = new MoveShortNoteOperation.NotePosition(note.Tick, note.LaneIndex);
+                            return mouseMove
+                                .TakeUntil(mouseUp)
+                                .Do(q =>
+                                {
+                                    var currentCursorPos = matrix.TransformPoint(q.Location);
+                                    int tick = GetQuantizedTick(GetTickFromYPosition(currentCursorPos.Y));
+                                    note.Tick = tick;
+                                    int xdiff = (int)((currentCursorPos.X - startCursorPos.X) / (UnitLaneWidth + BorderThickness));
+                                    int laneIndex = beforePos.LaneIndex + xdiff;
+                                    note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
+                                })
+                                .Finally(() =>
+                                {
+                                    System.Diagnostics.Debug.WriteLine("move finished.");
+                                    var afterPos = new MoveShortNoteOperation.NotePosition(note.Tick, note.LaneIndex);
+                                    OperationManager.Push(new MoveShortNoteOperation(note, beforePos, afterPos));
+                                });
+                        }
+                    }
+                    return Observable.Empty<MouseEventArgs>();
+                }).Subscribe(p => Invalidate());
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -481,5 +580,32 @@ namespace Ched.UI
         AirAction,
         Flick,
         Damage
+    }
+
+    public static class ControlExtensions
+    {
+        public static IObservable<MouseEventArgs> MouseDownAsObservable(this Control control)
+        {
+            return Observable.FromEvent<MouseEventHandler, MouseEventArgs>(
+                     h => (o, e) => h(e),
+                     h => control.MouseDown += h,
+                     h => control.MouseDown -= h);
+        }
+
+        public static IObservable<MouseEventArgs> MouseMoveAsObservable(this Control control)
+        {
+            return Observable.FromEvent<MouseEventHandler, MouseEventArgs>(
+                     h => (o, e) => h(e),
+                     h => control.MouseMove += h,
+                     h => control.MouseMove -= h);
+        }
+
+        public static IObservable<MouseEventArgs> MouseUpAsObservable(this Control control)
+        {
+            return Observable.FromEvent<MouseEventHandler, MouseEventArgs>(
+                     h => (o, e) => h(e),
+                     h => control.MouseUp += h,
+                     h => control.MouseUp -= h);
+        }
     }
 }
