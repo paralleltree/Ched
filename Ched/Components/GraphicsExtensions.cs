@@ -34,7 +34,19 @@ namespace Ched.Components
 
         public static RectangleF Expand(this RectangleF rect, float size)
         {
-            return new RectangleF(rect.Left - size, rect.Top - size, rect.Width + size * 2, rect.Height + size * 2);
+            return rect.Expand(size, size);
+        }
+
+        public static RectangleF Expand(this RectangleF rect, float dx, float dy)
+        {
+            return new RectangleF(rect.Left - dx, rect.Top - dy, rect.Width + dx * 2, rect.Height + dy * 2);
+        }
+
+        public static PointF TransformPoint(this Matrix matrix, PointF point)
+        {
+            var arr = new PointF[] { point };
+            matrix.TransformPoints(arr);
+            return arr.Single();
         }
     }
 }
