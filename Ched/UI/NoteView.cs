@@ -240,7 +240,30 @@ namespace Ched.UI
                                 });
                         }
                     }
-                    return Observable.Empty<MouseEventArgs>();
+
+                    // なんもねえなら追加だァ！
+                    var newNote = new Tap()
+                    {
+                        Width = 4,
+                        Tick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y))
+                    };
+                    int newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - newNote.Width / 2;
+                    newNoteLaneIndex = Math.Min(Constants.LanesCount - newNote.Width, Math.Max(0, newNoteLaneIndex));
+                    newNote.LaneIndex = newNoteLaneIndex;
+                    Notes.Add(newNote);
+                    Invalidate();
+                    return mouseMove
+                        .TakeUntil(mouseUp)
+                        .Do(q =>
+                        {
+                            var currentCursorPos = matrix.TransformPoint(q.Location);
+                            int tick = GetQuantizedTick(GetTickFromYPosition(currentCursorPos.Y));
+                            newNote.Tick = tick;
+                            int xdiff = (int)((currentCursorPos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                            int laneIndex = newNoteLaneIndex + xdiff;
+                            newNote.LaneIndex = Math.Min(Constants.LanesCount - newNote.Width, Math.Max(0, laneIndex));
+                        })
+                        .Finally(() => OperationManager.Push(new InsertTapOperation(Notes, newNote)));
                 }).Subscribe(p => Invalidate());
         }
 
