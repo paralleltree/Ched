@@ -83,7 +83,7 @@ namespace Ched.Components
             set
             {
                 if (laneIndex == value) return;
-                if (value < 0 || value >= Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
+                if (value < 0 || value + Width > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
                 laneIndex = value;
             }
         }
