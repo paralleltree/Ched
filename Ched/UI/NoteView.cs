@@ -61,6 +61,14 @@ namespace Ched.UI
         public int HeadTick { get; set; }
 
         /// <summary>
+        /// 表示終端のTickを取得します。
+        /// </summary>
+        public int TailTick
+        {
+            get { return HeadTick + (int)(ClientSize.Height * UnitBeatTick / UnitBeatHeight); }
+        }
+
+        /// <summary>
         /// クォンタイズを行うTick数を指定します。
         /// </summary>
         public int QuantizeTick { get; set; }
@@ -155,9 +163,19 @@ namespace Ched.UI
             int tick = (int)(srcPoint.Y * UnitBeatTick / UnitBeatHeight);
             int quantized = (int)Math.Round((float)tick / QuantizeTick) * QuantizeTick;
             int laneIndex = (int)(srcPoint.X / (UnitLaneWidth + BorderThickness));
-            System.Diagnostics.Debug.WriteLine("Tick: {0} ({1}), LaneIndex: {2}", tick, quantized, laneIndex);
+            //System.Diagnostics.Debug.WriteLine("Tick: {0} ({1}), LaneIndex: {2}", tick, quantized, laneIndex);
 
             base.OnMouseMove(e);
+        }
+
+        protected int GetTickFromYPosition(float y)
+        {
+            return (int)(y * UnitBeatTick / UnitBeatHeight);
+        }
+
+        protected int GetQuantizedTick(float tick)
+        {
+            return (int)Math.Round((float)tick / QuantizeTick) * QuantizeTick;
         }
 
         protected override void OnPaint(PaintEventArgs pe)
