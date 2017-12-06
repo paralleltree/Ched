@@ -38,6 +38,14 @@ namespace Ched.UI
         public int UnitLaneWidth { get; set; } = 12;
 
         /// <summary>
+        /// レーンの表示幅を取得します。
+        /// </summary>
+        public int LaneWidth
+        {
+            get { return UnitLaneWidth * Constants.LanesCount + BorderThickness * (Constants.LanesCount - 1); }
+        }
+
+        /// <summary>
         /// レーンのガイド線の幅を取得します。
         /// </summary>
         public int BorderThickness { get { return (int)Math.Round(UnitLaneWidth * 0.1f); } }
@@ -276,7 +284,7 @@ namespace Ched.UI
             var prevMatrix = pe.Graphics.Transform;
             pe.Graphics.Transform = GetDrawingMatrix(prevMatrix);
 
-            float laneWidth = UnitLaneWidth * Constants.LanesCount + BorderThickness * (Constants.LanesCount - 1);
+            float laneWidth = LaneWidth;
             int tailTick = HeadTick + (int)(ClientSize.Height * UnitBeatTick / UnitBeatHeight);
 
             // レーン分割線描画
@@ -404,6 +412,8 @@ namespace Ched.UI
             matrix.Translate(0, ClientSize.Height - 1, MatrixOrder.Append);
             // さらにずらして下端とHeadTickを合わせる
             matrix.Translate(0, HeadTick * UnitBeatHeight / UnitBeatTick, MatrixOrder.Append);
+            // 水平方向に対して中央に寄せる
+            matrix.Translate((ClientSize.Width - LaneWidth) / 2, 0);
 
             return matrix;
         }
