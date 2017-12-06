@@ -109,6 +109,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -126,6 +127,45 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\airleftup.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\airrightdown.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\airrightup.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\airup.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\damage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\extap.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\flick.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\hold.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\slide.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tap.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\airaction.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\airdown.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\airleftdown.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
