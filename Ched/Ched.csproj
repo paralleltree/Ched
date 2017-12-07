@@ -82,6 +82,7 @@
     <Compile Include="Components\Slide.cs" />
     <Compile Include="Components\Tap.cs" />
     <Compile Include="Components\TappableBase.cs" />
+    <Compile Include="UI\ControlExtensions.cs" />
     <Compile Include="UI\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
