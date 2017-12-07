@@ -10,13 +10,11 @@ using System.Windows.Forms;
 
 namespace Ched.UI
 {
-    public partial class MainForm : Form
+    public partial class NoteView : Control
     {
-        public MainForm()
+        public NoteView()
         {
             InitializeComponent();
-
-            this.Controls.Add(new NoteView() { Dock = DockStyle.Fill });
         }
     }
 }
