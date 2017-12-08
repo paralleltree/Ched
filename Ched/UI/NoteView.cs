@@ -399,15 +399,35 @@ namespace Ched.UI
                 note.Draw(pe.Graphics, GetRectFromNotePosition(note.ParentNote.Tick, note.ParentNote.LaneIndex, note.ParentNote.Width));
             }
 
+            // Y軸反転させずにTick = 0をY軸原点とする座標系へ
+            pe.Graphics.Transform = GetDrawingMatrix(prevMatrix, false);
+
+            Font font = new Font("MS Gothic", 8);
+            SizeF strSize = pe.Graphics.MeasureString("000", font);
+
+            // 小節番号描画(4分の4拍子)
+            for (int i = HeadTick / UnitBeatTick / 4; i * UnitBeatTick * 4 <= tailTick; i++)
+            {
+                var point = new PointF(-strSize.Width, -GetYPositionFromTick(i * UnitBeatTick * 4) - strSize.Height);
+                pe.Graphics.DrawString(string.Format("{0:000}", i + 1), font, Brushes.White, point);
+            }
 
             pe.Graphics.Transform = prevMatrix;
         }
 
         private Matrix GetDrawingMatrix(Matrix baseMatrix)
         {
+            return GetDrawingMatrix(baseMatrix, true);
+        }
+
+        private Matrix GetDrawingMatrix(Matrix baseMatrix, bool flipY)
+        {
             Matrix matrix = baseMatrix.Clone();
-            // 反転してY軸増加方向を時間軸に
-            matrix.Scale(1, -1);
+            if (flipY)
+            {
+                // 反転してY軸増加方向を時間軸に
+                matrix.Scale(1, -1);
+            }
             // ずれたコントロール高さ分を補正
             matrix.Translate(0, ClientSize.Height - 1, MatrixOrder.Append);
             // さらにずらして下端とHeadTickを合わせる
