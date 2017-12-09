@@ -313,7 +313,7 @@ namespace Ched.UI
             pe.Graphics.DrawLine(Pens.Red, 0, 0, laneWidth, 0);
 
             // ノート描画
-            var holds = Notes.Holds.Where(p => p.StartTick >= HeadTick && p.StartTick <= tailTick).ToList();
+            var holds = Notes.Holds.Where(p => p.StartTick <= tailTick && p.StartTick + p.GetDuration() >= HeadTick).ToList();
             // ロングノーツ背景
             // HOLD
             foreach (var hold in holds)
@@ -327,7 +327,7 @@ namespace Ched.UI
             }
 
             // SLIDE
-            var slides = Notes.Slides.Where(p => p.StartTick >= HeadTick && p.StartTick <= tailTick).ToList();
+            var slides = Notes.Slides.Where(p => p.StartTick <= tailTick && p.StartTick + p.GetDuration() >= HeadTick).ToList();
             foreach (var slide in slides)
             {
                 var bg = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.OrderBy(p => p.Tick)).ToList();
@@ -344,7 +344,7 @@ namespace Ched.UI
             }
 
             // AIR-ACTION(ガイド線)
-            var airActions = Notes.AirActions.Where(p => p.StartTick >= HeadTick && p.StartTick <= tailTick).ToList();
+            var airActions = Notes.AirActions.Where(p => p.StartTick <= tailTick && p.StartTick + p.GetDuration() >= HeadTick).ToList();
             foreach (var note in airActions)
             {
                 note.DrawLine(pe.Graphics,
