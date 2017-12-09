@@ -162,6 +162,7 @@ namespace Ched.UI
             var mouseUp = this.MouseUpAsObservable();
 
             mouseDown
+                .Where(p => p.Button == MouseButtons.Left)
                 .SelectMany(p =>
                 {
                     var from = p.Location;
@@ -273,6 +274,32 @@ namespace Ched.UI
                         })
                         .Finally(() => OperationManager.Push(new InsertTapOperation(Notes, newNote)));
                 }).Subscribe(p => Invalidate());
+
+            mouseDown
+                .Where(p => p.Button == MouseButtons.Right)
+                .SelectMany(p => mouseMove
+                    .TakeUntil(mouseUp)
+                    .Count()
+                    .Zip(mouseUp, (q, r) => new { Pos = r.Location, Count = q })
+                )
+                .Where(p => p.Count == 0) // ドラッグなし
+                .Do(p =>
+                {
+                    Matrix matrix = GetDrawingMatrix(new Matrix());
+                    matrix.Invert();
+                    PointF cursorPos = matrix.TransformPoint(p.Pos);
+                    foreach (var note in Notes.Taps)
+                    {
+                        RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                        if (rect.Contains(cursorPos))
+                        {
+                            Notes.Remove(note);
+                            OperationManager.Push(new RemoveTapOperation(Notes, note));
+                            return;
+                        }
+                    }
+                })
+                .Subscribe(p => Invalidate());
         }
 
         protected override void OnPaint(PaintEventArgs pe)
