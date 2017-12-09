@@ -152,4 +152,184 @@ namespace Ched.UI.Operations
             Collection.Add(Note);
         }
     }
+
+    internal class ChangeHoldDurationOperation : IOperation
+    {
+        public string Description { get { return "HOLD長さの変更"; } }
+
+        protected Hold Note { get; }
+        protected int BeforeDuration { get; }
+        protected int AfterDuration { get; }
+
+        public ChangeHoldDurationOperation(Hold note, int beforeDuration, int afterDuration)
+        {
+            Note = note;
+            BeforeDuration = beforeDuration;
+            AfterDuration = afterDuration;
+        }
+
+        public void Redo()
+        {
+            Note.Duration = AfterDuration;
+        }
+
+        public void Undo()
+        {
+            Note.Duration = BeforeDuration;
+        }
+    }
+
+    internal class ChangeHoldPositionOperation : IOperation
+    {
+        public string Description { get { return "HOLDの移動"; } }
+
+        protected Hold Note { get; }
+        protected NotePosition BeforePosition { get; }
+        protected NotePosition AfterPosition { get; }
+
+        public ChangeHoldPositionOperation(Hold note, NotePosition before, NotePosition after)
+        {
+            Note = note;
+            BeforePosition = before;
+            AfterPosition = after;
+        }
+
+        public void Redo()
+        {
+            Note.StartTick = AfterPosition.StartTick;
+            Note.LaneIndex = AfterPosition.LaneIndex;
+            Note.Width = AfterPosition.Width;
+        }
+
+        public void Undo()
+        {
+            Note.StartTick = BeforePosition.StartTick;
+            Note.LaneIndex = BeforePosition.LaneIndex;
+            Note.Width = BeforePosition.Width;
+        }
+
+        internal class NotePosition
+        {
+            public int StartTick { get; }
+            public int LaneIndex { get; }
+            public int Width { get; set; }
+
+            public NotePosition(int startTick, int laneIndex, int width)
+            {
+                StartTick = startTick;
+                LaneIndex = laneIndex;
+                Width = width;
+            }
+        }
+    }
+
+    internal class MoveSlideStepNoteOperation : IOperation
+    {
+        public string Description { get { return "SLIDE中継点の移動"; } }
+
+        public Slide.StepTap StepNote { get; }
+        public NotePosition BeforePosition { get; }
+        public NotePosition AfterPosition { get; }
+
+        public MoveSlideStepNoteOperation(Slide.StepTap note, NotePosition before, NotePosition after)
+        {
+            StepNote = note;
+            BeforePosition = before;
+            AfterPosition = after;
+        }
+
+        public void Redo()
+        {
+            StepNote.TickOffset = AfterPosition.TickOffset;
+            StepNote.LaneIndexOffset = AfterPosition.LaneIndexOffset;
+        }
+
+        public void Undo()
+        {
+            StepNote.TickOffset = BeforePosition.TickOffset;
+            StepNote.LaneIndexOffset = BeforePosition.LaneIndexOffset;
+        }
+
+        internal class NotePosition
+        {
+            public int TickOffset { get; }
+            public int LaneIndexOffset { get; }
+
+            public NotePosition(int tickOffset, int laneIndexOffset)
+            {
+                TickOffset = tickOffset;
+                LaneIndexOffset = laneIndexOffset;
+            }
+        }
+    }
+
+    internal class MoveSlideOperation : IOperation
+    {
+        public string Description { get { return "SLIDEの移動"; } }
+
+        protected Slide Note;
+        protected NotePosition BeforePosition { get; }
+        protected NotePosition AfterPosition { get; }
+
+        public MoveSlideOperation(Slide note, NotePosition before, NotePosition after)
+        {
+            Note = note;
+            BeforePosition = before;
+            AfterPosition = after;
+        }
+
+        public void Redo()
+        {
+            Note.StartTick = AfterPosition.StartTick;
+            Note.StartLaneIndex = AfterPosition.StartLaneIndex;
+            Note.Width = AfterPosition.Width;
+        }
+
+        public void Undo()
+        {
+            Note.StartTick = BeforePosition.StartTick;
+            Note.StartLaneIndex = BeforePosition.StartLaneIndex;
+            Note.Width = BeforePosition.Width;
+        }
+
+        internal class NotePosition
+        {
+            public int StartTick { get; }
+            public int StartLaneIndex { get; }
+            public int Width { get; }
+
+            public NotePosition(int startTick, int startLaneIndex, int width)
+            {
+                StartTick = startTick;
+                StartLaneIndex = startLaneIndex;
+                Width = width;
+            }
+        }
+    }
+
+    internal class ChangeAirActionOffsetOperation : IOperation
+    {
+        public string Description { get { return "AIR-ACTION位置の変更"; } }
+
+        protected AirAction.ActionNote Note { get; }
+        protected int BeforeOffset { get; }
+        protected int AfterOffset { get; }
+
+        public ChangeAirActionOffsetOperation(AirAction.ActionNote note, int beforeOffset, int afterOffset)
+        {
+            Note = note;
+            BeforeOffset = beforeOffset;
+            AfterOffset = afterOffset;
+        }
+
+        public void Redo()
+        {
+            Note.Offset = AfterOffset;
+        }
+
+        public void Undo()
+        {
+            Note.Offset = BeforeOffset;
+        }
+    }
 }

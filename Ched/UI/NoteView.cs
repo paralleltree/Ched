@@ -174,6 +174,34 @@ namespace Ched.UI
                     RectangleF scoreRect = new RectangleF(0, GetYPositionFromTick(HeadTick), LaneWidth, GetYPositionFromTick(TailTick) - GetYPositionFromTick(HeadTick));
                     if (!scoreRect.Contains(scorePos)) return Observable.Empty<MouseEventArgs>();
 
+                    // AIR-ACTION
+                    foreach (var note in Notes.AirActions)
+                    {
+                        foreach (var action in note.ActionNotes)
+                        {
+                            RectangleF noteRect = GetRectFromNotePosition(note.ParentNote.Tick + action.Offset, note.ParentNote.LaneIndex, note.ParentNote.Width);
+                            if (noteRect.Contains(scorePos))
+                            {
+                                var offsets = new HashSet<int>(note.ActionNotes.Select(q => q.Offset));
+                                offsets.Remove(action.Offset);
+                                int beforeOffset = action.Offset;
+                                return mouseMove
+                                    .TakeUntil(mouseUp)
+                                    .Do(q =>
+                                    {
+                                        var currentScorePos = matrix.TransformPoint(q.Location);
+                                        int offset = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - note.ParentNote.Tick;
+                                        if (offsets.Contains(offset)) return;
+                                        action.Offset = offset;
+                                    })
+                                    .Finally(() =>
+                                    {
+                                        OperationManager.Push(new ChangeAirActionOffsetOperation(action, beforeOffset, action.Offset));
+                                    });
+                            }
+                        }
+                    }
+
                     Func<TappableBase, IObservable<MouseEventArgs>> moveTappableNoteHandler = note =>
                     {
                         int beforeLaneIndex = note.LaneIndex;
@@ -283,6 +311,187 @@ namespace Ched.UI
                     {
                         var subscription = shortNoteHandler(note);
                         if (subscription != null) return subscription;
+                    }
+
+                    foreach (var note in Notes.Slides.Where(q => q.StartTick <= tailTick && q.StartTick + q.GetDuration() >= HeadTick))
+                    {
+                        foreach (var step in note.StepNotes)
+                        {
+                            RectangleF stepRect = GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
+                            if (stepRect.Contains(scorePos))
+                            {
+                                var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset);
+                                var offsets = new HashSet<int>(note.StepNotes.Select(q => q.TickOffset));
+                                int maxOffset = offsets.Max();
+                                bool isMaxOffsetStep = step.TickOffset == maxOffset;
+                                offsets.Remove(step.TickOffset);
+                                return mouseMove
+                                    .TakeUntil(mouseUp)
+                                    .Do(q =>
+                                    {
+                                        var currentScorePos = matrix.TransformPoint(q.Location);
+                                        int offset = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - note.StartTick;
+                                        int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                        int laneIndexOffset = beforeStepPos.LaneIndexOffset + xdiff;
+                                        step.LaneIndexOffset = Math.Min(Constants.LanesCount - note.Width - note.StartLaneIndex, Math.Max(-note.StartLaneIndex, laneIndexOffset));
+                                        // 最終Step以降に移動はさせないし同じTickに置かせもしない
+                                        if ((!isMaxOffsetStep && offset > maxOffset) || offsets.Contains(offset) || offset <= 0) return;
+                                        step.TickOffset = offset;
+                                    })
+                                    .Finally(() =>
+                                    {
+                                        var afterPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset);
+                                        OperationManager.Push(new MoveSlideStepNoteOperation(step, beforeStepPos, afterPos));
+                                    });
+                            }
+                        }
+
+                        RectangleF startRect = GetRectFromNotePosition(note.StartNote.Tick, note.StartNote.LaneIndex, note.StartNote.Width);
+                        RectangleF leftThumbRect = new RectangleF(startRect.Left, startRect.Top, startRect.Width * 0.2f, startRect.Height);
+                        RectangleF rightThumbRect = new RectangleF(startRect.Right - startRect.Width * 0.2f, startRect.Top, startRect.Width * 0.2f, startRect.Height);
+
+                        int leftStepLaneIndexOffset = Math.Min(0, note.StepNotes.Min(q => q.LaneIndexOffset));
+                        int rightStepLaneIndexOffset = Math.Max(0, note.StepNotes.Max(q => q.LaneIndexOffset));
+
+                        var beforePos = new MoveSlideOperation.NotePosition(note.StartTick, note.StartLaneIndex, note.Width);
+                        if (leftThumbRect.Contains(scorePos))
+                        {
+                            return mouseMove
+                                .TakeUntil(mouseUp)
+                                .Do(q =>
+                                {
+                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                    xdiff = Math.Min(beforePos.Width - 1, Math.Max(-beforePos.StartLaneIndex - leftStepLaneIndexOffset, xdiff));
+                                    int width = beforePos.Width - xdiff;
+                                    int laneIndex = beforePos.StartLaneIndex + xdiff;
+                                    note.StartLaneIndex = Math.Min(Constants.LanesCount - note.Width - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset, laneIndex));
+                                    note.Width = Math.Min(Constants.LanesCount - note.StartLaneIndex - rightStepLaneIndexOffset, Math.Max(1, width));
+                                })
+                                .Finally(() =>
+                                {
+                                    var afterPos = new MoveSlideOperation.NotePosition(note.StartTick, note.StartLaneIndex, note.Width);
+                                    OperationManager.Push(new MoveSlideOperation(note, beforePos, afterPos));
+                                });
+                        }
+
+                        if (rightThumbRect.Contains(scorePos))
+                        {
+                            return mouseMove
+                                .TakeUntil(mouseUp)
+                                .Do(q =>
+                                {
+                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                    int width = beforePos.Width + xdiff;
+                                    note.Width = Math.Min(Constants.LanesCount - note.StartLaneIndex - rightStepLaneIndexOffset, Math.Max(1, width));
+                                })
+                                .Finally(() =>
+                                {
+                                    var afterPos = new MoveSlideOperation.NotePosition(note.StartTick, note.StartLaneIndex, note.Width);
+                                    OperationManager.Push(new MoveSlideOperation(note, beforePos, afterPos));
+                                });
+                        }
+
+                        if (startRect.Contains(scorePos))
+                        {
+                            int beforeLaneIndex = note.StartNote.LaneIndex;
+                            return mouseMove
+                                .TakeUntil(mouseUp)
+                                .Do(q =>
+                                {
+                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    note.StartTick = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y));
+                                    int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                    int laneIndex = beforeLaneIndex + xdiff;
+                                    note.StartLaneIndex = Math.Min(Constants.LanesCount - note.Width - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset, laneIndex));
+                                })
+                                .Finally(() =>
+                                {
+                                    var afterPos = new MoveSlideOperation.NotePosition(note.StartTick, note.StartLaneIndex, note.Width);
+                                    OperationManager.Push(new MoveSlideOperation(note, beforePos, afterPos));
+                                });
+                        }
+                    }
+
+                    foreach (var note in Notes.Holds.Where(q => q.StartTick <= tailTick && q.StartTick + q.GetDuration() >= HeadTick))
+                    {
+                        // HOLD長さ変更
+                        if (GetRectFromNotePosition(note.EndNote.Tick, note.LaneIndex, note.Width).Contains(scorePos))
+                        {
+                            int beforeDuration = note.Duration;
+                            return mouseMove.TakeUntil(mouseUp)
+                                .Do(q =>
+                                {
+                                    var currentCursorPos = matrix.TransformPoint(q.Location);
+                                    note.Duration = Math.Max(QuantizeTick, GetQuantizedTick(GetTickFromYPosition(currentCursorPos.Y)) - note.StartTick);
+                                })
+                                .Finally(() => OperationManager.Push(new ChangeHoldDurationOperation(note, beforeDuration, note.Duration)));
+                        }
+
+                        RectangleF startRect = GetRectFromNotePosition(note.StartTick, note.LaneIndex, note.Width);
+                        RectangleF leftThumbRect = new RectangleF(startRect.Left, startRect.Top, startRect.Width * 0.2f, startRect.Height);
+                        RectangleF rightThumbRect = new RectangleF(startRect.Right - startRect.Width * 0.2f, startRect.Top, startRect.Width * 0.2f, startRect.Height);
+
+                        var beforePos = new ChangeHoldPositionOperation.NotePosition(note.StartTick, note.LaneIndex, note.Width);
+                        if (leftThumbRect.Contains(scorePos))
+                        {
+                            return mouseMove
+                                .TakeUntil(mouseUp)
+                                .Do(q =>
+                                {
+                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                    int startx = (int)(scorePos.X / (UnitLaneWidth + BorderThickness));
+                                    xdiff = Math.Min(beforePos.Width - 1, Math.Max(-startx, xdiff));
+                                    int width = beforePos.Width - xdiff;
+                                    int laneIndex = beforePos.LaneIndex + xdiff;
+                                    note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
+                                    note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
+                                })
+                                .Finally(() =>
+                                {
+                                    var afterPos = new ChangeHoldPositionOperation.NotePosition(note.StartTick, note.LaneIndex, note.Width);
+                                    OperationManager.Push(new ChangeHoldPositionOperation(note, beforePos, afterPos));
+                                });
+                        }
+
+                        if (rightThumbRect.Contains(scorePos))
+                        {
+                            return mouseMove
+                                .TakeUntil(mouseUp)
+                                .Do(q =>
+                                {
+                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                    int width = beforePos.Width + xdiff;
+                                    note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
+                                })
+                                .Finally(() =>
+                                {
+                                    var afterPos = new ChangeHoldPositionOperation.NotePosition(note.StartTick, note.LaneIndex, note.Width);
+                                    OperationManager.Push(new ChangeHoldPositionOperation(note, beforePos, afterPos));
+                                });
+                        }
+
+                        if (startRect.Contains(scorePos))
+                        {
+                            return mouseMove
+                                .TakeUntil(mouseUp)
+                                .Do(q =>
+                                {
+                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    note.StartTick = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y));
+                                    int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                    int laneIndex = beforePos.LaneIndex + xdiff;
+                                    note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
+                                })
+                                .Finally(() =>
+                                {
+                                    var afterPos = new ChangeHoldPositionOperation.NotePosition(note.StartTick, note.LaneIndex, note.Width);
+                                    OperationManager.Push(new ChangeHoldPositionOperation(note, beforePos, afterPos));
+                                });
+                        }
                     }
 
                     // なんもねえなら追加だァ！
