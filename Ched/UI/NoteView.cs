@@ -146,13 +146,12 @@ namespace Ched.UI
             Notes.Add(tap);
             Notes.Add(airaction);
 
-            var slide = new Slide() { Width = 4, StartTick = 480 * 4 };
-            slide.StartNote.LaneIndex = 8;
-            slide.StepNotes.Add(new Slide.StepTap(slide) { Offset = 240, LaneIndex = 12 });
-            slide.StepNotes.Add(new Slide.StepTap(slide) { Offset = 240 * 2, LaneIndex = 8 });
-            slide.StepNotes.Add(new Slide.StepTap(slide) { Offset = 240 * 3, LaneIndex = 12 });
-            slide.StepNotes.Add(new Slide.StepTap(slide) { Offset = 240 * 4, LaneIndex = 8 });
-            slide.StepNotes.Add(new Slide.StepTap(slide) { Offset = 240 * 5, LaneIndex = 12 });
+            var slide = new Slide() { Width = 4, StartTick = 480 * 4, StartLaneIndex = 8 };
+            slide.StepNotes.Add(new Slide.StepTap(slide) { TickOffset = 240, LaneIndexOffset = 4 });
+            slide.StepNotes.Add(new Slide.StepTap(slide) { TickOffset = 240 * 2, LaneIndexOffset = 0 });
+            slide.StepNotes.Add(new Slide.StepTap(slide) { TickOffset = 240 * 3, LaneIndexOffset = 4 });
+            slide.StepNotes.Add(new Slide.StepTap(slide) { TickOffset = 240 * 4, LaneIndexOffset = 0 });
+            slide.StepNotes.Add(new Slide.StepTap(slide) { TickOffset = 240 * 5, LaneIndexOffset = 4 });
             Notes.Add(slide);
 
             HeadTick = 240;

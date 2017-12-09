@@ -15,6 +15,25 @@ namespace Ched.Components
         private static readonly Color BackgroundLineColor = Color.FromArgb(216, 0, 214, 192);
 
         private int width = 1;
+        private int startLaneIndex;
+
+        /// <summary>
+        /// 開始ノートの配置されるレーン番号を設定します。。
+        /// </summary>
+        public int StartLaneIndex
+        {
+            get { return startLaneIndex; }
+            set
+            {
+                if (StepNotes.Any(p =>
+                {
+                    int laneIndex = value + p.LaneIndexOffset;
+                    return laneIndex < 0 || laneIndex + Width > Constants.LanesCount;
+                })) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
+                if (startLaneIndex < 0 || startLaneIndex + Width > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
+                startLaneIndex = value;
+            }
+        }
 
         /// <summary>
         /// ノートのレーン幅を設定します。
@@ -25,10 +44,11 @@ namespace Ched.Components
             set
             {
                 if (width == value) return;
-                if (value < 1 || value > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid note width.");
+                if (value < 1 || StartLaneIndex + (StepNotes.Count > 0 ? StepNotes.Max(p => p.LaneIndexOffset) : 0) + value > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid note width.");
                 width = value;
             }
         }
+
 
         public List<StepTap> StepNotes { get; } = new List<StepTap>();
         public StartTap StartNote { get; }
@@ -78,29 +98,17 @@ namespace Ched.Components
 
         public override int GetDuration()
         {
-            return StepNotes.Max(p => p.Offset);
+            return StepNotes.Max(p => p.TickOffset);
         }
 
-        public abstract class TapBase : MovableLongNoteTapBase
+        public abstract class TapBase : LongNoteTapBase
         {
             private readonly Color DarkNoteColor = Color.FromArgb(0, 16, 138);
             private readonly Color LightNoteColor = Color.FromArgb(86, 106, 255);
 
             protected Slide parent;
-            private int laneIndex;
 
             public override int Width { get { return parent.Width; } }
-
-            public override int LaneIndex
-            {
-                get { return laneIndex; }
-                set
-                {
-                    if (laneIndex == value) return;
-                    if (laneIndex < 0 || laneIndex + Width > 16) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
-                    laneIndex = value;
-                }
-            }
 
             public TapBase(Slide parent)
             {
@@ -115,9 +123,11 @@ namespace Ched.Components
 
         public class StartTap : TapBase
         {
-            public override bool IsTap { get; set; } = true;
+            public override bool IsTap { get { return true; } }
 
             public override int Tick { get { return parent.StartTick; } }
+
+            public override int LaneIndex { get { return parent.StartLaneIndex; } }
 
             public StartTap(Slide parent) : base(parent)
             {
@@ -126,13 +136,29 @@ namespace Ched.Components
 
         public class StepTap : TapBase
         {
-            public int Offset { get; set; }
+            private int laneIndexOffset;
+
+            public int TickOffset { get; set; }
 
             public bool IsVisible { get; set; } = true;
 
-            public override bool IsTap { get; set; }
+            public override bool IsTap { get { return false; } }
 
-            public override int Tick { get { return parent.StartTick + Offset; } }
+            public override int Tick { get { return parent.StartTick + TickOffset; } }
+
+            public override int LaneIndex { get { return parent.StartLaneIndex + LaneIndexOffset; } }
+
+            public int LaneIndexOffset
+            {
+                get { return laneIndexOffset; }
+                set
+                {
+                    if (laneIndexOffset == value) return;
+                    int laneIndex = parent.StartNote.LaneIndex + laneIndexOffset;
+                    if (laneIndex < 0 || laneIndex + Width > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid lane index offset.");
+                    laneIndexOffset = value;
+                }
+            }
 
             public StepTap(Slide parent) : base(parent)
             {
