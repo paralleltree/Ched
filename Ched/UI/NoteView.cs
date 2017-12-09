@@ -164,12 +164,66 @@ namespace Ched.UI
                 .Where(p => p.Button == MouseButtons.Left)
                 .SelectMany(p =>
                 {
+                    int tailTick = TailTick;
                     var from = p.Location;
                     Matrix matrix = GetDrawingMatrix(new Matrix());
                     matrix.Invert();
                     PointF scorePos = matrix.TransformPoint(p.Location);
 
-                    foreach (var note in Notes.Taps.Where(q => q.Tick >= HeadTick && q.Tick <= TailTick))
+                    // そもそも描画領域外であれば何もしない
+                    RectangleF scoreRect = new RectangleF(0, GetYPositionFromTick(HeadTick), LaneWidth, GetYPositionFromTick(TailTick) - GetYPositionFromTick(HeadTick));
+                    if (!scoreRect.Contains(scorePos)) return Observable.Empty<MouseEventArgs>();
+
+                    Func<TappableBase, IObservable<MouseEventArgs>> moveTappableNoteHandler = note =>
+                    {
+                        int beforeLaneIndex = note.LaneIndex;
+                        return mouseMove
+                            .TakeUntil(mouseUp)
+                            .Do(q =>
+                            {
+                                var currentScorePos = matrix.TransformPoint(q.Location);
+                                note.Tick = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y));
+                                int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                int laneIndex = beforeLaneIndex + xdiff;
+                                note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
+                            });
+                    };
+
+                    Func<TappableBase, IObservable<MouseEventArgs>> tappableNoteLeftThumbHandler = note =>
+                    {
+                        var beforePos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
+                        return mouseMove
+                            .TakeUntil(mouseUp)
+                            .Do(q =>
+                            {
+                                var currentScorePos = matrix.TransformPoint(q.Location);
+                                int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                int startx = (int)(scorePos.X / (UnitLaneWidth + BorderThickness));
+                                xdiff = Math.Min(beforePos.Width - 1, Math.Max(-startx, xdiff));
+                                int width = beforePos.Width - xdiff;
+                                int laneIndex = beforePos.LaneIndex + xdiff;
+                                //System.Diagnostics.Debug.WriteLine("xdiff: {0}, width: {1}, laneIndex: {2}", xdiff, width, laneIndex);
+                                note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
+                                note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
+                            });
+                    };
+
+                    Func<TappableBase, IObservable<MouseEventArgs>> tappableNoteRightThumbHandler = note =>
+                    {
+                        int beforeWidth = note.Width;
+                        return mouseMove
+                            .TakeUntil(mouseUp)
+                            .Do(q =>
+                            {
+                                var currentScorePos = matrix.TransformPoint(q.Location);
+                                int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                int width = beforeWidth + xdiff;
+                                note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
+                            });
+                    };
+
+
+                    Func<TappableBase, IObservable<MouseEventArgs>> shortNoteHandler = note =>
                     {
                         RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                         RectangleF leftThumb = new RectangleF(rect.X, rect.Y, rect.Width * 0.2f, rect.Height);
@@ -177,23 +231,8 @@ namespace Ched.UI
                         // ノートの左側
                         if (leftThumb.Contains(scorePos))
                         {
-                            System.Diagnostics.Debug.WriteLine("leftThumb");
-                            PointF startCursorPos = scorePos;
                             var beforePos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
-                            return mouseMove
-                                .TakeUntil(mouseUp)
-                                .Do(q =>
-                                {
-                                    var currentCursorPos = matrix.TransformPoint(q.Location);
-                                    int xdiff = (int)((currentCursorPos.X - startCursorPos.X) / (UnitLaneWidth + BorderThickness));
-                                    int startx = (int)(startCursorPos.X / (UnitLaneWidth + BorderThickness));
-                                    xdiff = Math.Min(beforePos.Width - 1, Math.Max(-startx, xdiff));
-                                    int width = beforePos.Width - xdiff;
-                                    int laneIndex = beforePos.LaneIndex + xdiff;
-                                    System.Diagnostics.Debug.WriteLine("xdiff: {0}, width: {1}, laneIndex: {2}", xdiff, width, laneIndex);
-                                    note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
-                                    note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
-                                })
+                            return tappableNoteLeftThumbHandler(note)
                                 .Finally(() =>
                                 {
                                     var afterPos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
@@ -204,18 +243,8 @@ namespace Ched.UI
                         // ノートの右側
                         if (rightThumb.Contains(scorePos))
                         {
-                            System.Diagnostics.Debug.WriteLine("rightThumb");
-                            PointF startCursorPos = scorePos;
                             var beforePos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
-                            return mouseMove
-                                .TakeUntil(mouseUp)
-                                .Do(q =>
-                                {
-                                    var currentCursorPos = matrix.TransformPoint(q.Location);
-                                    int xdiff = (int)((currentCursorPos.X - startCursorPos.X) / (UnitLaneWidth + BorderThickness));
-                                    int width = beforePos.Width + xdiff;
-                                    note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
-                                })
+                            return tappableNoteRightThumbHandler(note)
                                 .Finally(() =>
                                 {
                                     var afterPos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
@@ -226,27 +255,34 @@ namespace Ched.UI
                         // ノート本体
                         if (rect.Contains(scorePos))
                         {
-                            System.Diagnostics.Debug.WriteLine("noteRect");
-                            PointF startCursorPos = scorePos;
                             var beforePos = new MoveShortNoteOperation.NotePosition(note.Tick, note.LaneIndex);
-                            return mouseMove
-                                .TakeUntil(mouseUp)
-                                .Do(q =>
-                                {
-                                    var currentCursorPos = matrix.TransformPoint(q.Location);
-                                    int tick = GetQuantizedTick(GetTickFromYPosition(currentCursorPos.Y));
-                                    note.Tick = tick;
-                                    int xdiff = (int)((currentCursorPos.X - startCursorPos.X) / (UnitLaneWidth + BorderThickness));
-                                    int laneIndex = beforePos.LaneIndex + xdiff;
-                                    note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
-                                })
+                            return moveTappableNoteHandler(note)
                                 .Finally(() =>
                                 {
-                                    System.Diagnostics.Debug.WriteLine("move finished.");
                                     var afterPos = new MoveShortNoteOperation.NotePosition(note.Tick, note.LaneIndex);
                                     OperationManager.Push(new MoveShortNoteOperation(note, beforePos, afterPos));
                                 });
                         }
+
+                        return null;
+                    };
+
+                    foreach (var note in Notes.Taps.Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
+                    {
+                        var subscription = shortNoteHandler(note);
+                        if (subscription != null) return subscription;
+                    }
+
+                    foreach (var note in Notes.Flicks.Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
+                    {
+                        var subscription = shortNoteHandler(note);
+                        if (subscription != null) return subscription;
+                    }
+
+                    foreach (var note in Notes.Damages.Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
+                    {
+                        var subscription = shortNoteHandler(note);
+                        if (subscription != null) return subscription;
                     }
 
                     // なんもねえなら追加だァ！
