@@ -99,60 +99,6 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal abstract class ManageShortNoteOperation<T> : IOperation
-    {
-        protected T Note { get; }
-        protected NoteView.NoteCollection Collection { get; }
-        public abstract string Description { get; }
-
-        public ManageShortNoteOperation(NoteView.NoteCollection collection, T note)
-        {
-            Collection = collection;
-            Note = note;
-        }
-
-        public abstract void Undo();
-        public abstract void Redo();
-    }
-
-    internal class InsertTapOperation : ManageShortNoteOperation<Tap>
-    {
-        public override string Description { get { return "TAPの追加"; } }
-
-        public InsertTapOperation(NoteView.NoteCollection collection, Tap note) : base(collection, note)
-        {
-        }
-
-        public override void Redo()
-        {
-            Collection.Add(Note);
-        }
-
-        public override void Undo()
-        {
-            Collection.Remove(Note);
-        }
-    }
-
-    internal class RemoveTapOperation : ManageShortNoteOperation<Tap>
-    {
-        public override string Description { get { return "TAPの削除"; } }
-
-        public RemoveTapOperation(NoteView.NoteCollection collection, Tap note) : base(collection, note)
-        {
-        }
-
-        public override void Redo()
-        {
-            Collection.Remove(Note);
-        }
-
-        public override void Undo()
-        {
-            Collection.Add(Note);
-        }
-    }
-
     internal class ChangeHoldDurationOperation : IOperation
     {
         public string Description { get { return "HOLD長さの変更"; } }
@@ -307,6 +253,61 @@ namespace Ched.UI.Operations
         }
     }
 
+    internal abstract class SlideStepNoteCollectionOperation : IOperation
+    {
+        public abstract string Description { get; }
+
+        protected Slide ParentNote { get; }
+        protected Slide.StepTap StepNote { get; }
+
+        public SlideStepNoteCollectionOperation(Slide parent, Slide.StepTap stepNote)
+        {
+            ParentNote = parent;
+            StepNote = stepNote;
+        }
+
+        public abstract void Redo();
+        public abstract void Undo();
+    }
+
+    internal class InsertSlideStepNoteOperation : SlideStepNoteCollectionOperation
+    {
+        public override string Description { get { return "SLIDE中継点の追加"; } }
+
+        public InsertSlideStepNoteOperation(Slide parent, Slide.StepTap stepNote) : base(parent, stepNote)
+        {
+        }
+
+        public override void Redo()
+        {
+            ParentNote.StepNotes.Add(StepNote);
+        }
+
+        public override void Undo()
+        {
+            ParentNote.StepNotes.Remove(StepNote);
+        }
+    }
+
+    internal class RemoveSlideStepNoteOperation : SlideStepNoteCollectionOperation
+    {
+        public override string Description { get { return "SLIDE中継点の追加"; } }
+
+        public RemoveSlideStepNoteOperation(Slide parent, Slide.StepTap stepNote) : base(parent, stepNote)
+        {
+        }
+
+        public override void Redo()
+        {
+            ParentNote.StepNotes.Remove(StepNote);
+        }
+
+        public override void Undo()
+        {
+            ParentNote.StepNotes.Add(StepNote);
+        }
+    }
+
     internal class ChangeAirActionOffsetOperation : IOperation
     {
         public string Description { get { return "AIR-ACTION位置の変更"; } }
@@ -330,6 +331,61 @@ namespace Ched.UI.Operations
         public void Undo()
         {
             Note.Offset = BeforeOffset;
+        }
+    }
+
+    internal abstract class AirActionNoteOperationBase : IOperation
+    {
+        public abstract string Description { get; }
+
+        protected AirAction ParentNote { get; }
+        protected AirAction.ActionNote ActionNote { get; }
+
+        public AirActionNoteOperationBase(AirAction parent, AirAction.ActionNote actionNote)
+        {
+            ParentNote = parent;
+            ActionNote = actionNote;
+        }
+
+        public abstract void Redo();
+        public abstract void Undo();
+    }
+
+    internal class InsertAirActionNoteOperation : AirActionNoteOperationBase
+    {
+        public override string Description { get { return "AIR-ACTIONの追加"; } }
+
+        public InsertAirActionNoteOperation(AirAction parent, AirAction.ActionNote actionNote) : base(parent, actionNote)
+        {
+        }
+
+        public override void Redo()
+        {
+            ParentNote.ActionNotes.Add(ActionNote);
+        }
+
+        public override void Undo()
+        {
+            ParentNote.ActionNotes.Remove(ActionNote);
+        }
+    }
+
+    internal class RemoveAirActionNoteOperation : AirActionNoteOperationBase
+    {
+        public override string Description { get { return "AIR-ACTIONの追加"; } }
+
+        public RemoveAirActionNoteOperation(AirAction parent, AirAction.ActionNote actionNote) : base(parent, actionNote)
+        {
+        }
+
+        public override void Redo()
+        {
+            ParentNote.ActionNotes.Remove(ActionNote);
+        }
+
+        public override void Undo()
+        {
+            ParentNote.ActionNotes.Add(ActionNote);
         }
     }
 }

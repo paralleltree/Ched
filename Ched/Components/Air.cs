@@ -33,12 +33,9 @@ namespace Ched.Components
 
         internal void Draw(Graphics g, RectangleF targetNoteRect) // 描画対象のノートのrect
         {
-            var targetSize = new SizeF(targetNoteRect.Width * 0.9f, targetNoteRect.Height * 3);
-            var targetLocation = new PointF(targetNoteRect.Left + targetNoteRect.Width * 0.05f, targetNoteRect.Bottom + targetNoteRect.Height);
-            var targetRect = new RectangleF(targetLocation, targetSize);
-
+            RectangleF targetRect = GetDestRectangle(targetNoteRect);
             // ノートを内包するRect(ノートの下部中心が原点)
-            var box = new RectangleF(-targetSize.Width / 2, -targetSize.Height, targetSize.Width, targetSize.Height);
+            var box = new RectangleF(-targetRect.Width / 2, -targetRect.Height, targetRect.Width, targetRect.Height);
             // ノート形状の構成点(上向き)
             var points = new PointF[]
             {
@@ -80,6 +77,12 @@ namespace Ched.Components
             }
         }
 
+        internal RectangleF GetDestRectangle(RectangleF targetNoteRect)
+        {
+            var targetSize = new SizeF(targetNoteRect.Width * 0.9f, targetNoteRect.Height * 3);
+            var targetLocation = new PointF(targetNoteRect.Left + targetNoteRect.Width * 0.05f, targetNoteRect.Bottom + targetNoteRect.Height);
+            return new RectangleF(targetLocation, targetSize);
+        }
     }
 
     public interface IAirable

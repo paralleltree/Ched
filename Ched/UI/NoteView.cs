@@ -146,13 +146,13 @@ namespace Ched.UI
             Notes.Add(tap);
             Notes.Add(airaction);
 
-            var slide = new Slide() { Width = 4, StartTick = 480 * 4, StartLaneIndex = 8 };
-            slide.StepNotes.Add(new Slide.StepTap(slide) { TickOffset = 240, LaneIndexOffset = 4 });
-            slide.StepNotes.Add(new Slide.StepTap(slide) { TickOffset = 240 * 2, LaneIndexOffset = 0 });
-            slide.StepNotes.Add(new Slide.StepTap(slide) { TickOffset = 240 * 3, LaneIndexOffset = 4 });
-            slide.StepNotes.Add(new Slide.StepTap(slide) { TickOffset = 240 * 4, LaneIndexOffset = 0 });
-            slide.StepNotes.Add(new Slide.StepTap(slide) { TickOffset = 240 * 5, LaneIndexOffset = 4 });
-            Notes.Add(slide);
+            var slide1 = new Slide() { Width = 4, StartTick = 480 * 4, StartLaneIndex = 8 };
+            slide1.StepNotes.Add(new Slide.StepTap(slide1) { TickOffset = 240, LaneIndexOffset = 4 });
+            slide1.StepNotes.Add(new Slide.StepTap(slide1) { TickOffset = 240 * 2, LaneIndexOffset = 0 });
+            slide1.StepNotes.Add(new Slide.StepTap(slide1) { TickOffset = 240 * 3, LaneIndexOffset = 4 });
+            slide1.StepNotes.Add(new Slide.StepTap(slide1) { TickOffset = 240 * 4, LaneIndexOffset = 0 });
+            slide1.StepNotes.Add(new Slide.StepTap(slide1) { TickOffset = 240 * 5, LaneIndexOffset = 4 });
+            Notes.Add(slide1);
 
             HeadTick = 240;
 
@@ -531,14 +531,103 @@ namespace Ched.UI
                 {
                     Matrix matrix = GetDrawingMatrix(new Matrix());
                     matrix.Invert();
-                    PointF cursorPos = matrix.TransformPoint(p.Pos);
+                    PointF scorePos = matrix.TransformPoint(p.Pos);
+
+                    foreach (var note in Notes.Airs)
+                    {
+                        RectangleF rect = note.GetDestRectangle(GetRectFromNotePosition(note.ParentNote.Tick, note.ParentNote.LaneIndex, note.ParentNote.Width));
+                        if (rect.Contains(scorePos))
+                        {
+                            Notes.Remove(note);
+                            OperationManager.Push(new RemoveAirOperation(Notes, note));
+                            return;
+                        }
+                    }
+
+                    foreach (var note in Notes.AirActions)
+                    {
+                        foreach (var action in note.ActionNotes)
+                        {
+                            RectangleF rect = GetRectFromNotePosition(note.StartTick + action.Offset, note.ParentNote.LaneIndex, note.ParentNote.Width);
+                            if (rect.Contains(scorePos))
+                            {
+                                if (note.ActionNotes.Count == 1)
+                                {
+                                    Notes.Remove(note);
+                                    OperationManager.Push(new RemoveAirActionOperation(Notes, note));
+                                }
+                                else
+                                {
+                                    note.ActionNotes.Remove(action);
+                                    OperationManager.Push(new RemoveAirActionNoteOperation(note, action));
+                                }
+                                return;
+                            }
+                        }
+                    }
+
+                    foreach (var note in Notes.Flicks)
+                    {
+                        RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                        if (rect.Contains(scorePos))
+                        {
+                            Notes.Remove(note);
+                            OperationManager.Push(new RemoveFlickOperation(Notes, note));
+                            return;
+                        }
+                    }
+
+                    foreach (var note in Notes.Damages)
+                    {
+                        RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                        if (rect.Contains(scorePos))
+                        {
+                            Notes.Remove(note);
+                            OperationManager.Push(new RemoveDamageOperation(Notes, note));
+                            return;
+                        }
+                    }
+
                     foreach (var note in Notes.Taps)
                     {
                         RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
-                        if (rect.Contains(cursorPos))
+                        if (rect.Contains(scorePos))
                         {
                             Notes.Remove(note);
                             OperationManager.Push(new RemoveTapOperation(Notes, note));
+                            return;
+                        }
+                    }
+
+                    foreach (var slide in Notes.Slides)
+                    {
+                        foreach (var step in slide.StepNotes)
+                        {
+                            RectangleF rect = GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
+                            if (rect.Contains(scorePos))
+                            {
+                                slide.StepNotes.Remove(step);
+                                OperationManager.Push(new RemoveSlideStepNoteOperation(slide, step));
+                                return;
+                            }
+                        }
+
+                        RectangleF startRect = GetRectFromNotePosition(slide.StartTick, slide.StartLaneIndex, slide.Width);
+                        if (startRect.Contains(scorePos))
+                        {
+                            Notes.Remove(slide);
+                            OperationManager.Push(new RemoveSlideOperation(Notes, slide));
+                            return;
+                        }
+                    }
+
+                    foreach (var hold in Notes.Holds)
+                    {
+                        RectangleF rect = GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                        if (rect.Contains(scorePos))
+                        {
+                            Notes.Remove(hold);
+                            OperationManager.Push(new RemoveHoldOperation(Notes, hold));
                             return;
                         }
                     }
