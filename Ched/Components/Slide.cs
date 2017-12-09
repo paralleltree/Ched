@@ -69,7 +69,7 @@ namespace Ched.Components
         /// <param name="y2">終了ノートのY座標</param>
         internal void DrawBackground(Graphics g, float width, float x1, float y1, float x2, float y2, float noteHeight)
         {
-            var rect = new RectangleF(Math.Min(x1, x2), Math.Min(y1, y2), Math.Abs(x1 - x2), Math.Abs(y1 - y2));
+            var rect = new RectangleF(Math.Min(x1, x2), Math.Min(y1, y2), Math.Abs(x1 - x2) + width, Math.Abs(y1 - y2));
             using (var brush = new LinearGradientBrush(rect, BackgroundEdgeColor, BackgroundMiddleColor, LinearGradientMode.Vertical))
             {
                 var blend = new ColorBlend(4)
