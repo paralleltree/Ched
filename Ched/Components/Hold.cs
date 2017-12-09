@@ -15,7 +15,7 @@ namespace Ched.Components
 
         private int laneIndex;
         private int width = 1;
-        private int duration;
+        private int duration = 1;
 
         /// <summary>
         /// ノートの配置されるレーン番号を設定します。。
@@ -54,7 +54,7 @@ namespace Ched.Components
             set
             {
                 if (duration == value) return;
-                if (duration < 0) throw new ArgumentOutOfRangeException("value", "value must not be negative.");
+                if (duration <= 0) throw new ArgumentOutOfRangeException("value", "value must be positive.");
                 duration = value;
             }
         }
