@@ -16,7 +16,7 @@ namespace Ched.Components
         protected override void DrawBorder(Graphics g, RectangleF rect)
         {
             float borderWidth = rect.Height * 0.1f;
-            using (var brush = new LinearGradientBrush(rect.Expand(borderWidth), LightBorderColor, DarkBorderColor, LinearGradientMode.Vertical))
+            using (var brush = new LinearGradientBrush(rect.Expand(borderWidth), DarkBorderColor, LightBorderColor, LinearGradientMode.Vertical))
             {
                 using (var pen = new Pen(brush, borderWidth))
                 {
@@ -27,7 +27,7 @@ namespace Ched.Components
 
         protected override void DrawNote(Graphics g, RectangleF rect)
         {
-            using (var brush = new LinearGradientBrush(rect, ForegroundLightColor, ForegroundDarkColor, LinearGradientMode.Vertical))
+            using (var brush = new LinearGradientBrush(rect, ForegroundDarkColor, ForegroundLightColor, LinearGradientMode.Vertical))
             {
                 g.FillRectangle(brush, rect.X, rect.Y, rect.Width, rect.Height);
             }

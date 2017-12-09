@@ -410,6 +410,11 @@ namespace Ched.UI
                 note.Draw(pe.Graphics, GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
             }
 
+            foreach (var note in Notes.Damages.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
+            {
+                note.Draw(pe.Graphics, GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
+            }
+
             // AIR-ACTION(ActionNote)
             foreach (var action in airActions)
             {
