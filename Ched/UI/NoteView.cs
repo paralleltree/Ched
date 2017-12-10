@@ -908,7 +908,7 @@ namespace Ched.UI
             foreach (var note in airActions)
             {
                 note.DrawLine(pe.Graphics,
-                    (UnitLaneWidth + BorderThickness) * note.ParentNote.LaneIndex + BorderThickness + UnitLaneWidth * note.ParentNote.Width / 2,
+                    (UnitLaneWidth + BorderThickness) * (note.ParentNote.LaneIndex + note.ParentNote.Width / 2f),
                     GetYPositionFromTick(note.StartTick),
                     GetYPositionFromTick(note.StartTick + note.GetDuration()),
                     ShortNoteHeight);
