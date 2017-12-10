@@ -637,7 +637,14 @@ namespace Ched.UI
                                             // 同一Tickに追加させない
                                             if (!note.StepNotes.Any(q => q.TickOffset == tickOffset))
                                             {
-                                                var newStep = new Slide.StepTap(note) { TickOffset = tickOffset };
+                                                int laneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - note.Width / 2;
+                                                laneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
+                                                int laneIndexOffset = laneIndex - note.StartLaneIndex;
+                                                var newStep = new Slide.StepTap(note)
+                                                {
+                                                    TickOffset = tickOffset,
+                                                    LaneIndexOffset = laneIndexOffset
+                                                };
                                                 note.StepNotes.Add(newStep);
                                                 Invalidate();
                                                 return slideStepNoteHandler(newStep)
