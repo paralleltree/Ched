@@ -996,7 +996,12 @@ namespace Ched.UI
             // AIR
             foreach (var note in Notes.Airs.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
             {
-                note.Draw(pe.Graphics, GetRectFromNotePosition(note.ParentNote.Tick, note.ParentNote.LaneIndex, note.ParentNote.Width));
+                RectangleF rect = GetRectFromNotePosition(note.ParentNote.Tick, note.ParentNote.LaneIndex, note.ParentNote.Width);
+                note.Draw(pe.Graphics, rect);
+                if (note.ParentNote is LongNoteTapBase)
+                {
+                    (note.ParentNote as LongNoteTapBase).Draw(pe.Graphics, rect, true);
+                }
             }
 
             // Y軸反転させずにTick = 0をY軸原点とする座標系へ

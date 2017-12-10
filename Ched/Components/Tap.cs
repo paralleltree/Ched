@@ -12,8 +12,6 @@ namespace Ched.Components
     {
         private static readonly Color DarkNoteColor = Color.FromArgb(138, 0, 0);
         private static readonly Color LightNoteColor = Color.FromArgb(255, 128, 128);
-        private static readonly Color AirDarkNoteColor = Color.FromArgb(6, 180, 10);
-        private static readonly Color AirLightNoteColor = Color.FromArgb(80, 224, 64);
 
         protected override void DrawNote(Graphics g, RectangleF rect)
         {

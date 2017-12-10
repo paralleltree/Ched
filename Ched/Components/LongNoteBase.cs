@@ -52,6 +52,9 @@ namespace Ched.Components
 
     public abstract class LongNoteTapBase : TapBase, IAirable
     {
+        private static readonly Color AirDarkNoteColor = Color.FromArgb(6, 180, 10);
+        private static readonly Color AirLightNoteColor = Color.FromArgb(80, 224, 64);
+
         public abstract bool IsTap { get; }
         public abstract int LaneIndex { get; }
         public abstract int Tick { get; }
@@ -59,8 +62,21 @@ namespace Ched.Components
 
         internal override void Draw(Graphics g, RectangleF rect)
         {
-            base.Draw(g, rect);
-            if (IsTap) DrawTapSymbol(g, rect);
+            Draw(g, rect, false);
+        }
+
+        internal void Draw(Graphics g, RectangleF rect, bool isAir)
+        {
+            if (isAir)
+            {
+                DrawNote(g, rect, AirDarkNoteColor, AirLightNoteColor);
+                DrawBorder(g, rect);
+            }
+            else
+            {
+                base.Draw(g, rect);
+                if (IsTap) DrawTapSymbol(g, rect);
+            }
         }
     }
 
