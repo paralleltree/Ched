@@ -768,6 +768,22 @@ namespace Ched.UI
                     matrix.Invert();
                     PointF scorePos = matrix.TransformPoint(p.Pos);
 
+                    Func<IAirable, IEnumerable<IOperation>> removeReferencedAirs = airable =>
+                    {
+                        var airs = Notes.GetReferencedAir(airable).ToList().Select(q =>
+                        {
+                            Notes.Remove(q);
+                            return new RemoveAirOperation(Notes, q);
+                        }).ToList();
+                        var airActions = Notes.GetReferencedAirAction(airable).ToList().Select(q =>
+                        {
+                            Notes.Remove(q);
+                            return new RemoveAirActionOperation(Notes, q);
+                        }).ToList();
+
+                        return airs.Cast<IOperation>().Concat(airActions);
+                    };
+
                     foreach (var note in Notes.Airs)
                     {
                         RectangleF rect = note.GetDestRectangle(GetRectFromNotePosition(note.ParentNote.Tick, note.ParentNote.LaneIndex, note.ParentNote.Width));
@@ -806,8 +822,17 @@ namespace Ched.UI
                         RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                         if (rect.Contains(scorePos))
                         {
+                            var airOp = removeReferencedAirs(note).ToList();
+                            var op = new RemoveFlickOperation(Notes, note);
                             Notes.Remove(note);
-                            OperationManager.Push(new RemoveFlickOperation(Notes, note));
+                            if (airOp.Count > 0)
+                            {
+                                OperationManager.Push(new CompositeOperation(op.Description, new IOperation[] { op }.Concat(airOp)));
+                            }
+                            else
+                            {
+                                OperationManager.Push(op);
+                            }
                             return;
                         }
                     }
@@ -817,8 +842,17 @@ namespace Ched.UI
                         RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                         if (rect.Contains(scorePos))
                         {
+                            var airOp = removeReferencedAirs(note).ToList();
+                            var op = new RemoveDamageOperation(Notes, note);
                             Notes.Remove(note);
-                            OperationManager.Push(new RemoveDamageOperation(Notes, note));
+                            if (airOp.Count > 0)
+                            {
+                                OperationManager.Push(new CompositeOperation(op.Description, new IOperation[] { op }.Concat(airOp)));
+                            }
+                            else
+                            {
+                                OperationManager.Push(op);
+                            }
                             return;
                         }
                     }
@@ -828,8 +862,17 @@ namespace Ched.UI
                         RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                         if (rect.Contains(scorePos))
                         {
+                            var airOp = removeReferencedAirs(note).ToList();
+                            var op = new RemoveTapOperation(Notes, note);
                             Notes.Remove(note);
-                            OperationManager.Push(new RemoveTapOperation(Notes, note));
+                            if (airOp.Count > 0)
+                            {
+                                OperationManager.Push(new CompositeOperation(op.Description, new IOperation[] { op }.Concat(airOp)));
+                            }
+                            else
+                            {
+                                OperationManager.Push(op);
+                            }
                             return;
                         }
                     }
@@ -850,8 +893,17 @@ namespace Ched.UI
                         RectangleF startRect = GetRectFromNotePosition(slide.StartTick, slide.StartLaneIndex, slide.Width);
                         if (startRect.Contains(scorePos))
                         {
+                            var airOp = slide.StepNotes.SelectMany(q => removeReferencedAirs(q)).ToList();
+                            var op = new RemoveSlideOperation(Notes, slide);
                             Notes.Remove(slide);
-                            OperationManager.Push(new RemoveSlideOperation(Notes, slide));
+                            if (airOp.Count > 0)
+                            {
+                                OperationManager.Push(new CompositeOperation(op.Description, new IOperation[] { op }.Concat(airOp)));
+                            }
+                            else
+                            {
+                                OperationManager.Push(op);
+                            }
                             return;
                         }
                     }
@@ -861,8 +913,17 @@ namespace Ched.UI
                         RectangleF rect = GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
                         if (rect.Contains(scorePos))
                         {
+                            var airOp = removeReferencedAirs(hold.EndNote).ToList();
+                            var op = new RemoveHoldOperation(Notes, hold);
                             Notes.Remove(hold);
-                            OperationManager.Push(new RemoveHoldOperation(Notes, hold));
+                            if (airOp.Count > 0)
+                            {
+                                OperationManager.Push(new CompositeOperation(op.Description, new IOperation[] { op }.Concat(airOp)));
+                            }
+                            else
+                            {
+                                OperationManager.Push(op);
+                            }
                             return;
                         }
                     }
@@ -1093,6 +1154,9 @@ namespace Ched.UI
             private List<Damage> damages;
             public IReadOnlyCollection<Damage> Damages { get { return damages; } }
 
+            private Dictionary<IAirable, HashSet<Air>> AirDictionary { get; } = new Dictionary<IAirable, HashSet<Air>>();
+            private Dictionary<IAirable, HashSet<AirAction>> AirActionDictionary = new Dictionary<IAirable, HashSet<AirAction>>();
+
             public NoteCollection()
             {
                 taps = new List<Tap>();
@@ -1125,12 +1189,18 @@ namespace Ched.UI
             public void Add(Air note)
             {
                 airs.Add(note);
+                if (!AirDictionary.ContainsKey(note.ParentNote))
+                    AirDictionary.Add(note.ParentNote, new HashSet<Air>());
+                AirDictionary[note.ParentNote].Add(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Add(AirAction note)
             {
                 airActions.Add(note);
+                if (!AirActionDictionary.ContainsKey(note.ParentNote))
+                    AirActionDictionary.Add(note.ParentNote, new HashSet<AirAction>());
+                AirActionDictionary[note.ParentNote].Add(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
@@ -1168,12 +1238,14 @@ namespace Ched.UI
             public void Remove(Air note)
             {
                 airs.Remove(note);
+                AirDictionary[note.ParentNote].Remove(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Remove(AirAction note)
             {
                 airActions.Remove(note);
+                AirActionDictionary[note.ParentNote].Remove(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
@@ -1189,6 +1261,17 @@ namespace Ched.UI
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
+            public IEnumerable<Air> GetReferencedAir(IAirable note)
+            {
+                if (!AirDictionary.ContainsKey(note)) return Enumerable.Empty<Air>();
+                return AirDictionary[note];
+            }
+
+            public IEnumerable<AirAction> GetReferencedAirAction(IAirable note)
+            {
+                if (!AirActionDictionary.ContainsKey(note)) return Enumerable.Empty<AirAction>();
+                return AirActionDictionary[note];
+            }
 
             public void Clear()
             {
