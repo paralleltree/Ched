@@ -394,7 +394,8 @@ namespace Ched.UI
                         foreach (var step in note.StepNotes)
                         {
                             RectangleF stepRect = GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
-                            if (stepRect.Contains(scorePos))
+                            // AIR or AIR-ACTION追加時で最終Stepだったら動かさない
+                            if (stepRect.Contains(scorePos) && (note.StepNotes.Max(q => q.TickOffset) != step.TickOffset || !(NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType)))
                             {
                                 var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset);
                                 return slideStepNoteHandler(step)
@@ -477,7 +478,7 @@ namespace Ched.UI
                     foreach (var note in Notes.Holds.Where(q => q.StartTick <= tailTick && q.StartTick + q.GetDuration() >= HeadTick))
                     {
                         // HOLD長さ変更
-                        if (GetRectFromNotePosition(note.EndNote.Tick, note.LaneIndex, note.Width).Contains(scorePos))
+                        if (GetRectFromNotePosition(note.EndNote.Tick, note.LaneIndex, note.Width).Contains(scorePos) && !(NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType))
                         {
                             int beforeDuration = note.Duration;
                             return holdDurationHandler(note)
@@ -596,10 +597,12 @@ namespace Ched.UI
                     else
                     {
                         int newNoteLaneIndex;
-                        IEnumerable<TappableBase> tappables = Enumerable.Empty<TappableBase>();
-                        tappables = tappables.Concat(Notes.Taps);
-                        tappables = tappables.Concat(Notes.Flicks);
-                        tappables = tappables.Concat(Notes.Damages);
+                        var airables = Enumerable.Empty<IAirable>();
+                        airables = airables.Concat(Notes.Taps);
+                        airables = airables.Concat(Notes.Flicks);
+                        airables = airables.Concat(Notes.Damages);
+                        airables = airables.Concat(Notes.Holds.Select(q => q.EndNote));
+                        airables = airables.Concat(Notes.Slides.Select(q => q.StepNotes.OrderByDescending(r => r.TickOffset).First()));
 
                         switch (NewNoteType)
                         {
@@ -670,7 +673,7 @@ namespace Ched.UI
                                     .Finally(() => OperationManager.Push(new InsertSlideOperation(Notes, slide)));
 
                             case NoteType.Air:
-                                foreach (var note in tappables)
+                                foreach (var note in airables)
                                 {
                                     RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                                     if (rect.Contains(scorePos))
@@ -697,7 +700,7 @@ namespace Ched.UI
                                 break;
 
                             case NoteType.AirAction:
-                                foreach (var note in tappables)
+                                foreach (var note in airables)
                                 {
                                     RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                                     if (rect.Contains(scorePos))
