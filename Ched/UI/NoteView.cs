@@ -618,6 +618,36 @@ namespace Ched.UI
                                     .Finally(() => OperationManager.Push(new InsertHoldOperation(Notes, hold)));
 
                             case NoteType.Slide:
+                                // 中継点
+                                foreach (var note in Notes.Slides)
+                                {
+                                    var bg = new Slide.TapBase[] { note.StartNote }.Concat(note.StepNotes.OrderBy(q => q.Tick)).ToList();
+                                    for (int i = 0; i < bg.Count - 1; i++)
+                                    {
+                                        // 描画時のコードコピペつらい
+                                        var path = note.GetBackgroundPath(
+                                            (UnitLaneWidth + BorderThickness) * note.Width - BorderThickness,
+                                            (UnitLaneWidth + BorderThickness) * bg[i].LaneIndex,
+                                            GetYPositionFromTick(bg[i].Tick),
+                                            (UnitLaneWidth + BorderThickness) * bg[i + 1].LaneIndex,
+                                            GetYPositionFromTick(bg[i + 1].Tick));
+                                        if (path.PathPoints.ContainsPoint(scorePos))
+                                        {
+                                            int tickOffset = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)) - note.StartTick;
+                                            // 同一Tickに追加させない
+                                            if (!note.StepNotes.Any(q => q.TickOffset == tickOffset))
+                                            {
+                                                var newStep = new Slide.StepTap(note) { TickOffset = tickOffset };
+                                                note.StepNotes.Add(newStep);
+                                                Invalidate();
+                                                return slideStepNoteHandler(newStep)
+                                                    .Finally(() => OperationManager.Push(new InsertSlideStepNoteOperation(note, newStep)));
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // 新規SLIDE
                                 var slide = new Slide()
                                 {
                                     StartTick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)),

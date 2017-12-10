@@ -78,15 +78,8 @@ namespace Ched.Components
                     Positions = new float[] { 0.0f, 0.3f, 0.7f, 1.0f }
                 };
                 brush.InterpolationColors = blend;
-                using (var path = new GraphicsPath())
+                using (var path = GetBackgroundPath(width, x1, y1, x2, y2))
                 {
-                    path.AddPolygon(new PointF[]
-                    {
-                        new PointF(x1, y1),
-                        new PointF(x1 + width, y1),
-                        new PointF(x2 + width, y2),
-                        new PointF(x2, y2)
-                    });
                     g.FillPath(brush, path);
                 }
             }
@@ -94,6 +87,19 @@ namespace Ched.Components
             {
                 g.DrawLine(pen, x1 + width / 2, y1, x2 + width / 2, y2);
             }
+        }
+
+        internal GraphicsPath GetBackgroundPath(float width, float x1, float y1, float x2, float y2)
+        {
+            var path = new GraphicsPath();
+            path.AddPolygon(new PointF[]
+            {
+                new PointF(x1, y1),
+                new PointF(x1 + width, y1),
+                new PointF(x2 + width, y2),
+                new PointF(x2, y2)
+            });
+            return path;
         }
 
         public override int GetDuration()
