@@ -39,7 +39,24 @@ namespace Ched.Components
             private readonly Color LightNoteColor = Color.FromArgb(212, 92, 255);
             private readonly Color DarkNoteColor = Color.FromArgb(146, 0, 192);
 
-            public int Offset { get; set; }
+            private int offset;
+
+            public AirAction ParentNote { get; }
+
+            public int Offset
+            {
+                get { return offset; }
+                set
+                {
+                    if (value <= 0) throw new ArgumentOutOfRangeException("value", "value must be positive.");
+                    offset = value;
+                }
+            }
+
+            public ActionNote(AirAction parent)
+            {
+                ParentNote = parent;
+            }
 
             internal void Draw(Graphics g, RectangleF rect)
             {
