@@ -17,6 +17,12 @@ namespace Ched.UI
 {
     public partial class NoteView : Control
     {
+        public event EventHandler NewNoteTypeChanged;
+        public event EventHandler AirDirectionChanged;
+
+        private NoteType newNoteType = NoteType.Tap;
+        private AirDirection airDirection = new AirDirection(VerticalAirDirection.Up, HorizontalAirDirection.Center);
+
         /// <summary>
         /// 小節の区切り線の色を設定します。
         /// </summary>
@@ -83,6 +89,35 @@ namespace Ched.UI
             get { return HeadTick + (int)(ClientSize.Height * UnitBeatTick / UnitBeatHeight); }
         }
 
+        /// <summary>
+        /// 追加するノート種別を設定します。
+        /// </summary>
+        public NoteType NewNoteType
+        {
+            get { return newNoteType; }
+            set
+            {
+                int bits = (int)value;
+                bool isSingle = bits != 0 && (bits & (bits - 1)) == 0;
+                if (!isSingle) throw new ArgumentException("value", "value must be single bit.");
+                newNoteType = value;
+                NewNoteTypeChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// 追加するAIRの方向を設定します。
+        /// </summary>
+        public AirDirection AirDirection
+        {
+            get { return airDirection; }
+            set
+            {
+                airDirection = value;
+                AirDirectionChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
         public NoteCollection Notes { get; } = new NoteCollection();
 
         internal OperationManager OperationManager { get; } = new OperationManager();
@@ -134,17 +169,18 @@ namespace Ched.UI
                 Notes.Add(new Tap() { Tick = 240 * (1 + i) + 480 * 4, LaneIndex = i * 4, Width = 4 });
             }
 
-            var tap = new Tap() { Tick = 480 * 6, LaneIndex = 0, Width = 3 };
-            Notes.Add(new Air(tap));
-            var airaction = new AirAction(tap);
-            airaction.ActionNotes.Add(new AirAction.ActionNote() { Offset = 480 });
+            var tap1 = new Tap() { Tick = 480 * 6, LaneIndex = 0, Width = 3 };
+            Notes.Add(new Air(tap1));
+            var airaction1 = new AirAction(tap1);
+            airaction1.ActionNotes.Add(new AirAction.ActionNote(airaction1) { Offset = 480 });
+            airaction1.ActionNotes.Add(new AirAction.ActionNote(airaction1) { Offset = 480 * 2 });
 
             var tap2 = new Tap() { Tick = 480 * 7, LaneIndex = 0, Width = 3 };
             var air2 = new Air(tap2) { VerticalDirection = VerticalAirDirection.Down };
             Notes.Add(tap2);
             Notes.Add(air2);
-            Notes.Add(tap);
-            Notes.Add(airaction);
+            Notes.Add(tap1);
+            Notes.Add(airaction1);
 
             var slide1 = new Slide() { Width = 4, StartTick = 480 * 4, StartLaneIndex = 8 };
             slide1.StepNotes.Add(new Slide.StepTap(slide1) { TickOffset = 240, LaneIndexOffset = 4 });
@@ -174,6 +210,21 @@ namespace Ched.UI
                     RectangleF scoreRect = new RectangleF(0, GetYPositionFromTick(HeadTick), LaneWidth, GetYPositionFromTick(TailTick) - GetYPositionFromTick(HeadTick));
                     if (!scoreRect.Contains(scorePos)) return Observable.Empty<MouseEventArgs>();
 
+                    Func<AirAction.ActionNote, IObservable<MouseEventArgs>> actionNoteHandler = action =>
+                    {
+                        var offsets = new HashSet<int>(action.ParentNote.ActionNotes.Select(q => q.Offset));
+                        offsets.Remove(action.Offset);
+                        return mouseMove
+                            .TakeUntil(mouseUp)
+                            .Do(q =>
+                            {
+                                var currentScorePos = matrix.TransformPoint(q.Location);
+                                int offset = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - action.ParentNote.ParentNote.Tick;
+                                if (offset <= 0 || offsets.Contains(offset)) return;
+                                action.Offset = offset;
+                            });
+                    };
+
                     // AIR-ACTION
                     foreach (var note in Notes.AirActions)
                     {
@@ -182,18 +233,8 @@ namespace Ched.UI
                             RectangleF noteRect = GetRectFromNotePosition(note.ParentNote.Tick + action.Offset, note.ParentNote.LaneIndex, note.ParentNote.Width);
                             if (noteRect.Contains(scorePos))
                             {
-                                var offsets = new HashSet<int>(note.ActionNotes.Select(q => q.Offset));
-                                offsets.Remove(action.Offset);
                                 int beforeOffset = action.Offset;
-                                return mouseMove
-                                    .TakeUntil(mouseUp)
-                                    .Do(q =>
-                                    {
-                                        var currentScorePos = matrix.TransformPoint(q.Location);
-                                        int offset = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - note.ParentNote.Tick;
-                                        if (offsets.Contains(offset)) return;
-                                        action.Offset = offset;
-                                    })
+                                return actionNoteHandler(action)
                                     .Finally(() =>
                                     {
                                         OperationManager.Push(new ChangeAirActionOffsetOperation(action, beforeOffset, action.Offset));
@@ -313,6 +354,38 @@ namespace Ched.UI
                         if (subscription != null) return subscription;
                     }
 
+                    Func<Hold, IObservable<MouseEventArgs>> holdDurationHandler = hold =>
+                    {
+                        return mouseMove.TakeUntil(mouseUp)
+                            .Do(q =>
+                            {
+                                var currentCursorPos = matrix.TransformPoint(q.Location);
+                                hold.Duration = Math.Max(QuantizeTick, GetQuantizedTick(GetTickFromYPosition(currentCursorPos.Y)) - hold.StartTick);
+                            });
+                    };
+
+                    Func<Slide.StepTap, IObservable<MouseEventArgs>> slideStepNoteHandler = step =>
+                    {
+                        int beforeLaneIndexOffset = step.LaneIndexOffset;
+                        var offsets = new HashSet<int>(step.ParentNote.StepNotes.Select(q => q.TickOffset));
+                        int maxOffset = offsets.Max();
+                        bool isMaxOffsetStep = step.TickOffset == maxOffset;
+                        offsets.Remove(step.TickOffset);
+                        return mouseMove
+                            .TakeUntil(mouseUp)
+                            .Do(q =>
+                            {
+                                var currentScorePos = matrix.TransformPoint(q.Location);
+                                int offset = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - step.ParentNote.StartTick;
+                                int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                int laneIndexOffset = beforeLaneIndexOffset + xdiff;
+                                step.LaneIndexOffset = Math.Min(Constants.LanesCount - step.ParentNote.Width - step.ParentNote.StartLaneIndex, Math.Max(-step.ParentNote.StartLaneIndex, laneIndexOffset));
+                                // 最終Step以降に移動はさせないし同じTickに置かせもしない
+                                if ((!isMaxOffsetStep && offset > maxOffset) || offsets.Contains(offset) || offset <= 0) return;
+                                step.TickOffset = offset;
+                            });
+                    };
+
                     foreach (var note in Notes.Slides.Where(q => q.StartTick <= tailTick && q.StartTick + q.GetDuration() >= HeadTick))
                     {
                         foreach (var step in note.StepNotes)
@@ -321,23 +394,7 @@ namespace Ched.UI
                             if (stepRect.Contains(scorePos))
                             {
                                 var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset);
-                                var offsets = new HashSet<int>(note.StepNotes.Select(q => q.TickOffset));
-                                int maxOffset = offsets.Max();
-                                bool isMaxOffsetStep = step.TickOffset == maxOffset;
-                                offsets.Remove(step.TickOffset);
-                                return mouseMove
-                                    .TakeUntil(mouseUp)
-                                    .Do(q =>
-                                    {
-                                        var currentScorePos = matrix.TransformPoint(q.Location);
-                                        int offset = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - note.StartTick;
-                                        int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
-                                        int laneIndexOffset = beforeStepPos.LaneIndexOffset + xdiff;
-                                        step.LaneIndexOffset = Math.Min(Constants.LanesCount - note.Width - note.StartLaneIndex, Math.Max(-note.StartLaneIndex, laneIndexOffset));
-                                        // 最終Step以降に移動はさせないし同じTickに置かせもしない
-                                        if ((!isMaxOffsetStep && offset > maxOffset) || offsets.Contains(offset) || offset <= 0) return;
-                                        step.TickOffset = offset;
-                                    })
+                                return slideStepNoteHandler(step)
                                     .Finally(() =>
                                     {
                                         var afterPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset);
@@ -420,12 +477,7 @@ namespace Ched.UI
                         if (GetRectFromNotePosition(note.EndNote.Tick, note.LaneIndex, note.Width).Contains(scorePos))
                         {
                             int beforeDuration = note.Duration;
-                            return mouseMove.TakeUntil(mouseUp)
-                                .Do(q =>
-                                {
-                                    var currentCursorPos = matrix.TransformPoint(q.Location);
-                                    note.Duration = Math.Max(QuantizeTick, GetQuantizedTick(GetTickFromYPosition(currentCursorPos.Y)) - note.StartTick);
-                                })
+                            return holdDurationHandler(note)
                                 .Finally(() => OperationManager.Push(new ChangeHoldDurationOperation(note, beforeDuration, note.Duration)));
                         }
 
@@ -495,28 +547,133 @@ namespace Ched.UI
                     }
 
                     // なんもねえなら追加だァ！
-                    var newNote = new Tap()
+                    if ((NoteType.Tap | NoteType.ExTap | NoteType.Flick | NoteType.Damage).HasFlag(NewNoteType))
                     {
-                        Width = 4,
-                        Tick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y))
-                    };
-                    int newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - newNote.Width / 2;
-                    newNoteLaneIndex = Math.Min(Constants.LanesCount - newNote.Width, Math.Max(0, newNoteLaneIndex));
-                    newNote.LaneIndex = newNoteLaneIndex;
-                    Notes.Add(newNote);
-                    Invalidate();
-                    return mouseMove
-                        .TakeUntil(mouseUp)
-                        .Do(q =>
+                        TappableBase newNote = null;
+                        IOperation op = null;
+                        switch (NewNoteType)
                         {
-                            var currentCursorPos = matrix.TransformPoint(q.Location);
-                            int tick = GetQuantizedTick(GetTickFromYPosition(currentCursorPos.Y));
-                            newNote.Tick = tick;
-                            int xdiff = (int)((currentCursorPos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
-                            int laneIndex = newNoteLaneIndex + xdiff;
-                            newNote.LaneIndex = Math.Min(Constants.LanesCount - newNote.Width, Math.Max(0, laneIndex));
-                        })
-                        .Finally(() => OperationManager.Push(new InsertTapOperation(Notes, newNote)));
+                            case NoteType.Tap:
+                                var tap = new Tap();
+                                Notes.Add(tap);
+                                newNote = tap;
+                                op = new InsertTapOperation(Notes, tap);
+                                break;
+
+                            case NoteType.ExTap:
+                                var extap = new ExTap();
+                                Notes.Add(extap);
+                                newNote = extap;
+                                op = new InsertTapOperation(Notes, extap);
+                                break;
+
+                            case NoteType.Flick:
+                                var flick = new Flick();
+                                Notes.Add(flick);
+                                newNote = flick;
+                                op = new InsertFlickOperation(Notes, flick);
+                                break;
+
+                            case NoteType.Damage:
+                                var damage = new Damage();
+                                Notes.Add(damage);
+                                newNote = damage;
+                                op = new InsertDamageOperation(Notes, damage);
+                                break;
+                        }
+                        newNote.Width = 4;
+                        newNote.Tick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y));
+                        int newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - newNote.Width / 2;
+                        newNoteLaneIndex = Math.Min(Constants.LanesCount - newNote.Width, Math.Max(0, newNoteLaneIndex));
+                        newNote.LaneIndex = newNoteLaneIndex;
+                        Invalidate();
+                        return moveTappableNoteHandler(newNote)
+                            .Finally(() => OperationManager.Push(op));
+                    }
+                    else
+                    {
+                        int newNoteLaneIndex;
+                        IEnumerable<TappableBase> tappables = Enumerable.Empty<TappableBase>();
+                        tappables = tappables.Concat(Notes.Taps);
+                        tappables = tappables.Concat(Notes.Flicks);
+                        tappables = tappables.Concat(Notes.Damages);
+
+                        switch (NewNoteType)
+                        {
+                            case NoteType.Hold:
+                                var hold = new Hold
+                                {
+                                    StartTick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)),
+                                    Width = 4,
+                                    Duration = QuantizeTick
+                                };
+                                newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - hold.Width / 2;
+                                hold.LaneIndex = Math.Min(Constants.LanesCount - hold.Width, Math.Max(0, newNoteLaneIndex));
+                                Notes.Add(hold);
+                                Invalidate();
+                                return holdDurationHandler(hold)
+                                    .Finally(() => OperationManager.Push(new InsertHoldOperation(Notes, hold)));
+
+                            case NoteType.Slide:
+                                var slide = new Slide()
+                                {
+                                    StartTick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)),
+                                    Width = 4
+                                };
+                                newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - slide.Width / 2;
+                                slide.StartLaneIndex = Math.Min(Constants.LanesCount - slide.Width, Math.Max(0, newNoteLaneIndex));
+                                var step = new Slide.StepTap(slide) { TickOffset = QuantizeTick };
+                                slide.StepNotes.Add(step);
+                                Notes.Add(slide);
+                                Invalidate();
+                                return slideStepNoteHandler(step)
+                                    .Finally(() => OperationManager.Push(new InsertSlideOperation(Notes, slide)));
+
+                            case NoteType.Air:
+                                foreach (var note in tappables)
+                                {
+                                    RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                                    if (rect.Contains(scorePos))
+                                    {
+                                        return mouseMove
+                                            .TakeUntil(mouseUp)
+                                            .Count()
+                                            .Zip(mouseUp, (q, r) => new { Args = r, Count = q })
+                                            .Where(q => q.Count == 0)
+                                            .Select(q => q.Args)
+                                            .Do(q =>
+                                            {
+                                                var air = new Air(note)
+                                                {
+                                                    VerticalDirection = AirDirection.VerticalDirection,
+                                                    HorizontalDirection = AirDirection.HorizontalDirection
+                                                };
+                                                Notes.Add(air);
+                                                Invalidate();
+                                                OperationManager.Push(new InsertAirOperation(Notes, air));
+                                            });
+                                    }
+                                }
+                                break;
+
+                            case NoteType.AirAction:
+                                foreach (var note in tappables)
+                                {
+                                    RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                                    if (rect.Contains(scorePos))
+                                    {
+                                        var airAction = new AirAction(note);
+                                        var action = new AirAction.ActionNote(airAction) { Offset = QuantizeTick };
+                                        airAction.ActionNotes.Add(action);
+                                        Notes.Add(airAction);
+                                        return actionNoteHandler(action)
+                                            .Finally(() => OperationManager.Push(new InsertAirActionOperation(Notes, airAction)));
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    return Observable.Empty<MouseEventArgs>();
                 }).Subscribe(p => Invalidate());
 
             mouseDown
@@ -961,6 +1118,31 @@ namespace Ched.UI
                 damages.Clear();
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
+        }
+    }
+
+    [Flags]
+    public enum NoteType
+    {
+        Tap = 1,
+        ExTap = 1 << 1,
+        Hold = 1 << 2,
+        Slide = 1 << 3,
+        Air = 1 << 4,
+        AirAction = 1 << 5,
+        Flick = 1 << 6,
+        Damage = 1 << 7
+    }
+
+    public struct AirDirection
+    {
+        public VerticalAirDirection VerticalDirection { get; }
+        public HorizontalAirDirection HorizontalDirection { get; }
+
+        public AirDirection(VerticalAirDirection verticalDirection, HorizontalAirDirection horizontaiDirection)
+        {
+            VerticalDirection = verticalDirection;
+            HorizontalDirection = horizontaiDirection;
         }
     }
 }
