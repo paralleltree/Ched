@@ -821,7 +821,7 @@ namespace Ched.UI
 
                     foreach (var slide in Notes.Slides)
                     {
-                        foreach (var step in slide.StepNotes)
+                        foreach (var step in slide.StepNotes.Take(slide.StepNotes.Count - 1))
                         {
                             RectangleF rect = GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
                             if (rect.Contains(scorePos))
