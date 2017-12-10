@@ -106,13 +106,13 @@ namespace Ched.Components
             private readonly Color DarkNoteColor = Color.FromArgb(0, 16, 138);
             private readonly Color LightNoteColor = Color.FromArgb(86, 106, 255);
 
-            protected Slide parent;
+            public Slide ParentNote { get; }
 
-            public override int Width { get { return parent.Width; } }
+            public override int Width { get { return ParentNote.Width; } }
 
             public TapBase(Slide parent)
             {
-                this.parent = parent;
+                this.ParentNote = parent;
             }
 
             protected override void DrawNote(Graphics g, RectangleF rect)
@@ -125,9 +125,9 @@ namespace Ched.Components
         {
             public override bool IsTap { get { return true; } }
 
-            public override int Tick { get { return parent.StartTick; } }
+            public override int Tick { get { return ParentNote.StartTick; } }
 
-            public override int LaneIndex { get { return parent.StartLaneIndex; } }
+            public override int LaneIndex { get { return ParentNote.StartLaneIndex; } }
 
             public StartTap(Slide parent) : base(parent)
             {
@@ -138,15 +138,15 @@ namespace Ched.Components
         {
             private int laneIndexOffset;
 
-            public int TickOffset { get; set; }
+            public int TickOffset { get; set; } = 1;
 
             public bool IsVisible { get; set; } = true;
 
             public override bool IsTap { get { return false; } }
 
-            public override int Tick { get { return parent.StartTick + TickOffset; } }
+            public override int Tick { get { return ParentNote.StartTick + TickOffset; } }
 
-            public override int LaneIndex { get { return parent.StartLaneIndex + LaneIndexOffset; } }
+            public override int LaneIndex { get { return ParentNote.StartLaneIndex + LaneIndexOffset; } }
 
             public int LaneIndexOffset
             {
@@ -154,7 +154,7 @@ namespace Ched.Components
                 set
                 {
                     if (laneIndexOffset == value) return;
-                    int laneIndex = parent.StartNote.LaneIndex + laneIndexOffset;
+                    int laneIndex = ParentNote.StartNote.LaneIndex + laneIndexOffset;
                     if (laneIndex < 0 || laneIndex + Width > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid lane index offset.");
                     laneIndexOffset = value;
                 }
