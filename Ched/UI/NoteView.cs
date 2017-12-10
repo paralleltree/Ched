@@ -336,22 +336,25 @@ namespace Ched.UI
                         return null;
                     };
 
-                    foreach (var note in Notes.Taps.Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
+                    if (!(NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType))
                     {
-                        var subscription = shortNoteHandler(note);
-                        if (subscription != null) return subscription;
-                    }
+                        foreach (var note in Notes.Taps.Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
+                        {
+                            var subscription = shortNoteHandler(note);
+                            if (subscription != null) return subscription;
+                        }
 
-                    foreach (var note in Notes.Flicks.Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
-                    {
-                        var subscription = shortNoteHandler(note);
-                        if (subscription != null) return subscription;
-                    }
+                        foreach (var note in Notes.Flicks.Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
+                        {
+                            var subscription = shortNoteHandler(note);
+                            if (subscription != null) return subscription;
+                        }
 
-                    foreach (var note in Notes.Damages.Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
-                    {
-                        var subscription = shortNoteHandler(note);
-                        if (subscription != null) return subscription;
+                        foreach (var note in Notes.Damages.Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
+                        {
+                            var subscription = shortNoteHandler(note);
+                            if (subscription != null) return subscription;
+                        }
                     }
 
                     Func<Hold, IObservable<MouseEventArgs>> holdDurationHandler = hold =>
