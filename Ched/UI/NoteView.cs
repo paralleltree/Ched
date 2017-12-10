@@ -700,6 +700,26 @@ namespace Ched.UI
                                 break;
 
                             case NoteType.AirAction:
+                                foreach (var note in Notes.AirActions)
+                                {
+                                    var size = new SizeF(UnitLaneWidth / 2, GetYPositionFromTick(note.ActionNotes.Max(q => q.Offset)));
+                                    var rect = new RectangleF(
+                                        (UnitLaneWidth + BorderThickness) * (note.ParentNote.LaneIndex + note.ParentNote.Width / 2f) - size.Width / 2,
+                                        GetYPositionFromTick(note.ParentNote.Tick),
+                                        size.Width, size.Height);
+                                    if (rect.Contains(scorePos))
+                                    {
+                                        int offset = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)) - note.ParentNote.Tick;
+                                        if (!note.ActionNotes.Any(q => q.Offset == offset))
+                                        {
+                                            var action = new AirAction.ActionNote(note) { Offset = offset };
+                                            note.ActionNotes.Add(action);
+                                            return actionNoteHandler(action)
+                                                .Finally(() => OperationManager.Push(new InsertAirActionNoteOperation(note, action)));
+                                        }
+                                    }
+                                }
+
                                 foreach (var note in airables)
                                 {
                                     RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
