@@ -718,6 +718,8 @@ namespace Ched.UI
                                     RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                                     if (rect.Contains(scorePos))
                                     {
+                                        // 既に配置されていれば追加しない
+                                        if (Notes.GetReferencedAir(note).Count() > 0) break;
                                         return mouseMove
                                             .TakeUntil(mouseUp)
                                             .Count()
@@ -766,6 +768,8 @@ namespace Ched.UI
                                     RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                                     if (rect.Contains(scorePos))
                                     {
+                                        // 既に配置されていれば追加しない
+                                        if (Notes.GetReferencedAirAction(note).Count() > 0) break;
                                         var airAction = new AirAction(note);
                                         var action = new AirAction.ActionNote(airAction) { Offset = QuantizeTick };
                                         airAction.ActionNotes.Add(action);
