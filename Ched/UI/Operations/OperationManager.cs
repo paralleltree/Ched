@@ -9,7 +9,7 @@ namespace Ched.UI.Operations
     /// <summary>
     /// 操作を管理するクラスです。
     /// </summary>
-    internal class OperationManager
+    public class OperationManager
     {
         protected Stack<IOperation> UndoStack { get; } = new Stack<IOperation>();
         protected Stack<IOperation> RedoStack { get; } = new Stack<IOperation>();

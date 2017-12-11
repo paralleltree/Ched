@@ -9,7 +9,7 @@ namespace Ched.UI.Operations
     /// <summary>
     /// 複数の<see cref="IOperation"/>からなる1つの操作を表します。
     /// </summary>
-    internal class CompositeOperation : IOperation
+    public class CompositeOperation : IOperation
     {
         public string Description { get; }
 

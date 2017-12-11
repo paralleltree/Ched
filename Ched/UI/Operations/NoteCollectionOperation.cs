@@ -8,7 +8,7 @@ using Ched.Components;
 
 namespace Ched.UI.Operations
 {
-    internal abstract class NoteCollectionOperation<T> : IOperation
+    public abstract class NoteCollectionOperation<T> : IOperation
     {
         protected T Note { get; }
         protected NoteView.NoteCollection Collection { get; }
@@ -24,7 +24,7 @@ namespace Ched.UI.Operations
         public abstract void Redo();
     }
 
-    internal class InsertTapOperation : NoteCollectionOperation<Tap>
+    public class InsertTapOperation : NoteCollectionOperation<Tap>
     {
         public override string Description { get { return "TAPの追加"; } }
 
@@ -43,7 +43,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class RemoveTapOperation : NoteCollectionOperation<Tap>
+    public class RemoveTapOperation : NoteCollectionOperation<Tap>
     {
         public override string Description { get { return "TAPの削除"; } }
 
@@ -62,7 +62,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class InsertHoldOperation : NoteCollectionOperation<Hold>
+    public class InsertHoldOperation : NoteCollectionOperation<Hold>
     {
         public override string Description { get { return "HOLDの追加"; } }
 
@@ -81,7 +81,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class RemoveHoldOperation : NoteCollectionOperation<Hold>
+    public class RemoveHoldOperation : NoteCollectionOperation<Hold>
     {
         public override string Description { get { return "HOLDの削除"; } }
 
@@ -100,7 +100,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class InsertSlideOperation : NoteCollectionOperation<Slide>
+    public class InsertSlideOperation : NoteCollectionOperation<Slide>
     {
         public override string Description { get { return "SLIDEの追加"; } }
 
@@ -119,7 +119,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class RemoveSlideOperation : NoteCollectionOperation<Slide>
+    public class RemoveSlideOperation : NoteCollectionOperation<Slide>
     {
         public override string Description { get { return "SLIDEの削除"; } }
 
@@ -138,7 +138,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class InsertFlickOperation : NoteCollectionOperation<Flick>
+    public class InsertFlickOperation : NoteCollectionOperation<Flick>
     {
         public override string Description { get { return "FLICKの追加"; } }
 
@@ -157,7 +157,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class RemoveFlickOperation : NoteCollectionOperation<Flick>
+    public class RemoveFlickOperation : NoteCollectionOperation<Flick>
     {
         public override string Description { get { return "FLICKの削除"; } }
 
@@ -176,7 +176,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class InsertAirOperation : NoteCollectionOperation<Air>
+    public class InsertAirOperation : NoteCollectionOperation<Air>
     {
         public override string Description { get { return "AIRの追加"; } }
 
@@ -195,7 +195,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class RemoveAirOperation : NoteCollectionOperation<Air>
+    public class RemoveAirOperation : NoteCollectionOperation<Air>
     {
         public override string Description { get { return "AIRの削除"; } }
 
@@ -214,7 +214,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class InsertAirActionOperation : NoteCollectionOperation<AirAction>
+    public class InsertAirActionOperation : NoteCollectionOperation<AirAction>
     {
         public override string Description { get { return "AIR-ACTIONの追加"; } }
 
@@ -233,7 +233,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class RemoveAirActionOperation : NoteCollectionOperation<AirAction>
+    public class RemoveAirActionOperation : NoteCollectionOperation<AirAction>
     {
         public override string Description { get { return "AIR-ACTIONの削除"; } }
 
@@ -253,7 +253,7 @@ namespace Ched.UI.Operations
     }
 
 
-    internal class InsertDamageOperation : NoteCollectionOperation<Damage>
+    public class InsertDamageOperation : NoteCollectionOperation<Damage>
     {
         public override string Description { get { return "ダメージノーツの追加"; } }
 
@@ -272,7 +272,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class RemoveDamageOperation : NoteCollectionOperation<Damage>
+    public class RemoveDamageOperation : NoteCollectionOperation<Damage>
     {
         public override string Description { get { return "ダメージノーツの削除"; } }
 

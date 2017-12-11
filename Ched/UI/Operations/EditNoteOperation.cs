@@ -9,7 +9,7 @@ using Ched.UI;
 
 namespace Ched.UI.Operations
 {
-    internal abstract class EditShortNoteOperation : IOperation
+    public abstract class EditShortNoteOperation : IOperation
     {
         protected TappableBase Note { get; }
         public abstract string Description { get; }
@@ -23,7 +23,7 @@ namespace Ched.UI.Operations
         public abstract void Undo();
     }
 
-    internal class MoveShortNoteOperation : EditShortNoteOperation
+    public class MoveShortNoteOperation : EditShortNoteOperation
     {
         public override string Description { get { return "ノートを移動"; } }
 
@@ -61,7 +61,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class ChangeShortNoteWidthOperation : EditShortNoteOperation
+    public class ChangeShortNoteWidthOperation : EditShortNoteOperation
     {
         public override string Description { get { return "ノート幅の変更"; } }
 
@@ -99,7 +99,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class ChangeHoldDurationOperation : IOperation
+    public class ChangeHoldDurationOperation : IOperation
     {
         public string Description { get { return "HOLD長さの変更"; } }
 
@@ -125,7 +125,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class ChangeHoldPositionOperation : IOperation
+    public class ChangeHoldPositionOperation : IOperation
     {
         public string Description { get { return "HOLDの移動"; } }
 
@@ -154,7 +154,7 @@ namespace Ched.UI.Operations
             Note.Width = BeforePosition.Width;
         }
 
-        internal class NotePosition
+        public class NotePosition
         {
             public int StartTick { get; }
             public int LaneIndex { get; }
@@ -169,7 +169,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class MoveSlideStepNoteOperation : IOperation
+    public class MoveSlideStepNoteOperation : IOperation
     {
         public string Description { get { return "SLIDE中継点の移動"; } }
 
@@ -196,7 +196,7 @@ namespace Ched.UI.Operations
             StepNote.LaneIndexOffset = BeforePosition.LaneIndexOffset;
         }
 
-        internal class NotePosition
+        public class NotePosition
         {
             public int TickOffset { get; }
             public int LaneIndexOffset { get; }
@@ -209,7 +209,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class MoveSlideOperation : IOperation
+    public class MoveSlideOperation : IOperation
     {
         public string Description { get { return "SLIDEの移動"; } }
 
@@ -238,7 +238,7 @@ namespace Ched.UI.Operations
             Note.Width = BeforePosition.Width;
         }
 
-        internal class NotePosition
+        public class NotePosition
         {
             public int StartTick { get; }
             public int StartLaneIndex { get; }
@@ -253,7 +253,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal abstract class SlideStepNoteCollectionOperation : IOperation
+    public abstract class SlideStepNoteCollectionOperation : IOperation
     {
         public abstract string Description { get; }
 
@@ -270,7 +270,7 @@ namespace Ched.UI.Operations
         public abstract void Undo();
     }
 
-    internal class InsertSlideStepNoteOperation : SlideStepNoteCollectionOperation
+    public class InsertSlideStepNoteOperation : SlideStepNoteCollectionOperation
     {
         public override string Description { get { return "SLIDE中継点の追加"; } }
 
@@ -289,7 +289,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class RemoveSlideStepNoteOperation : SlideStepNoteCollectionOperation
+    public class RemoveSlideStepNoteOperation : SlideStepNoteCollectionOperation
     {
         public override string Description { get { return "SLIDE中継点の追加"; } }
 
@@ -308,7 +308,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class ChangeAirActionOffsetOperation : IOperation
+    public class ChangeAirActionOffsetOperation : IOperation
     {
         public string Description { get { return "AIR-ACTION位置の変更"; } }
 
@@ -334,7 +334,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal abstract class AirActionNoteOperationBase : IOperation
+    public abstract class AirActionNoteOperationBase : IOperation
     {
         public abstract string Description { get; }
 
@@ -351,7 +351,7 @@ namespace Ched.UI.Operations
         public abstract void Undo();
     }
 
-    internal class InsertAirActionNoteOperation : AirActionNoteOperationBase
+    public class InsertAirActionNoteOperation : AirActionNoteOperationBase
     {
         public override string Description { get { return "AIR-ACTIONの追加"; } }
 
@@ -370,7 +370,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    internal class RemoveAirActionNoteOperation : AirActionNoteOperationBase
+    public class RemoveAirActionNoteOperation : AirActionNoteOperationBase
     {
         public override string Description { get { return "AIR-ACTIONの追加"; } }
 

@@ -9,7 +9,7 @@ namespace Ched.UI.Operations
     /// <summary>
     /// ユーザーの操作を表すインタフェースです。
     /// </summary>
-    internal interface IOperation
+    public interface IOperation
     {
         /// <summary>
         /// この操作の説明を取得します。
