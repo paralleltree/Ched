@@ -171,6 +171,18 @@
   <ItemGroup>
     <None Include="Resources\airleftdown.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\arrow-curve-180-left.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\arrow-curve.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pencil.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\eraser.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
