@@ -19,6 +19,7 @@ namespace Ched.UI
     {
         public event EventHandler NewNoteTypeChanged;
         public event EventHandler AirDirectionChanged;
+        public event EventHandler OperationHistoryChanged;
 
         private NoteType newNoteType = NoteType.Tap;
         private AirDirection airDirection = new AirDirection(VerticalAirDirection.Up, HorizontalAirDirection.Center);
@@ -118,9 +119,13 @@ namespace Ched.UI
             }
         }
 
+        public bool CanUndo { get { return OperationManager.CanUndo; } }
+
+        public bool CanRedo { get { return OperationManager.CanRedo; } }
+
         public NoteCollection Notes { get; } = new NoteCollection();
 
-        internal OperationManager OperationManager { get; } = new OperationManager();
+        protected OperationManager OperationManager { get; } = new OperationManager();
 
         public NoteView()
         {
@@ -129,6 +134,11 @@ namespace Ched.UI
             this.BackColor = Color.Black;
             this.SetStyle(ControlStyles.ResizeRedraw, true);
             this.SetStyle(ControlStyles.Opaque, true);
+
+            OperationManager.OperationHistoryChanged += (s, e) =>
+            {
+                OperationHistoryChanged?.Invoke(this, EventArgs.Empty);
+            };
 
             QuantizeTick = UnitBeatTick;
 
@@ -1129,6 +1139,20 @@ namespace Ched.UI
                 (UnitLaneWidth + BorderThickness) * width - BorderThickness,
                 ShortNoteHeight
                 );
+        }
+
+        public void Undo()
+        {
+            if (!OperationManager.CanUndo) return;
+            OperationManager.Undo();
+            Invalidate();
+        }
+
+        public void Redo()
+        {
+            if (!OperationManager.CanRedo) return;
+            OperationManager.Redo();
+            Invalidate();
         }
 
         public class NoteCollection

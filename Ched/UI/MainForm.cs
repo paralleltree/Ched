@@ -27,11 +27,64 @@ namespace Ched.UI
 
             using (var manager = this.WorkWithLayout())
             {
+                this.Menu = CreateMainMenu(NoteView);
                 this.Controls.Add(NoteView);
                 this.Controls.Add(CreateNewNoteTypeToolStrip(NoteView));
+                this.Controls.Add(CreateMainToolStrip(NoteView));
             }
 
             NoteView.NewNoteType = NoteType.Tap;
+        }
+
+        private MainMenu CreateMainMenu(NoteView noteView)
+        {
+            var undoItem = new MenuItem("元に戻す", (s, e) => noteView.Undo())
+            {
+                Shortcut = Shortcut.CtrlZ,
+                Enabled = false
+            };
+            var redoItem = new MenuItem("やり直し", (s, e) => noteView.Redo())
+            {
+                Shortcut = Shortcut.CtrlY,
+                Enabled = false
+            };
+            var editMenuItems = new MenuItem[] { undoItem, redoItem };
+
+            noteView.OperationHistoryChanged += (s, e) =>
+            {
+                redoItem.Enabled = noteView.CanRedo;
+                undoItem.Enabled = noteView.CanUndo;
+            };
+
+            return new MainMenu(new MenuItem[]
+            {
+                new MenuItem("編集(&E)", editMenuItems)
+            });
+        }
+
+        private ToolStrip CreateMainToolStrip(NoteView noteView)
+        {
+            var undoButton = new ToolStripButton("元に戻す", Resources.UndoIcon, (s, e) => noteView.Undo())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                Enabled = false
+            };
+            var redoButton = new ToolStripButton("やり直す", Resources.RedoIcon, (s, e) => noteView.Redo())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image,
+                Enabled = false
+            };
+
+            noteView.OperationHistoryChanged += (s, e) =>
+            {
+                undoButton.Enabled = noteView.CanUndo;
+                redoButton.Enabled = noteView.CanRedo;
+            };
+
+            return new ToolStrip(new ToolStripItem[]
+            {
+                undoButton, redoButton
+            });
         }
 
         private ToolStrip CreateNewNoteTypeToolStrip(NoteView noteView)

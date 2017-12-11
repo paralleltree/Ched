@@ -11,6 +11,8 @@ namespace Ched.UI.Operations
     /// </summary>
     public class OperationManager
     {
+        public event EventHandler OperationHistoryChanged;
+
         protected Stack<IOperation> UndoStack { get; } = new Stack<IOperation>();
         protected Stack<IOperation> RedoStack { get; } = new Stack<IOperation>();
 
@@ -49,6 +51,7 @@ namespace Ched.UI.Operations
         {
             UndoStack.Push(op);
             RedoStack.Clear();
+            OperationHistoryChanged?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -59,6 +62,7 @@ namespace Ched.UI.Operations
             IOperation op = UndoStack.Pop();
             op.Undo();
             RedoStack.Push(op);
+            OperationHistoryChanged?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -69,6 +73,7 @@ namespace Ched.UI.Operations
             IOperation op = RedoStack.Pop();
             op.Redo();
             UndoStack.Push(op);
+            OperationHistoryChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }
