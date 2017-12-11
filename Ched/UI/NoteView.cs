@@ -729,6 +729,7 @@ namespace Ched.UI
                                         {
                                             var action = new AirAction.ActionNote(note) { Offset = offset };
                                             note.ActionNotes.Add(action);
+                                            Invalidate();
                                             return actionNoteHandler(action)
                                                 .Finally(() => OperationManager.Push(new InsertAirActionNoteOperation(note, action)));
                                         }
@@ -744,6 +745,7 @@ namespace Ched.UI
                                         var action = new AirAction.ActionNote(airAction) { Offset = QuantizeTick };
                                         airAction.ActionNotes.Add(action);
                                         Notes.Add(airAction);
+                                        Invalidate();
                                         return actionNoteHandler(action)
                                             .Finally(() => OperationManager.Push(new InsertAirActionOperation(Notes, airAction)));
                                     }
