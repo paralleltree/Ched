@@ -17,10 +17,12 @@ namespace Ched.UI
 {
     public partial class NoteView : Control
     {
+        public event EventHandler EditModeChanged;
         public event EventHandler NewNoteTypeChanged;
         public event EventHandler AirDirectionChanged;
         public event EventHandler OperationHistoryChanged;
 
+        private EditMode editMode = EditMode.Edit;
         private NoteType newNoteType = NoteType.Tap;
         private AirDirection airDirection = new AirDirection(VerticalAirDirection.Up, HorizontalAirDirection.Center);
 
@@ -88,6 +90,19 @@ namespace Ched.UI
         public int TailTick
         {
             get { return HeadTick + (int)(ClientSize.Height * UnitBeatTick / UnitBeatHeight); }
+        }
+
+        /// <summary>
+        /// 編集モードを設定します。
+        /// </summary>
+        public EditMode EditMode
+        {
+            get { return editMode; }
+            set
+            {
+                editMode = value;
+                EditModeChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         /// <summary>
@@ -207,7 +222,7 @@ namespace Ched.UI
             var mouseUp = this.MouseUpAsObservable();
 
             mouseDown
-                .Where(p => p.Button == MouseButtons.Left)
+                .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Edit)
                 .SelectMany(p =>
                 {
                     int tailTick = TailTick;
@@ -767,7 +782,7 @@ namespace Ched.UI
                 }).Subscribe(p => Invalidate());
 
             mouseDown
-                .Where(p => p.Button == MouseButtons.Right)
+                .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Erase)
                 .SelectMany(p => mouseMove
                     .TakeUntil(mouseUp)
                     .Count()
@@ -1311,6 +1326,12 @@ namespace Ched.UI
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
         }
+    }
+
+    public enum EditMode
+    {
+        Edit,
+        Erase
     }
 
     [Flags]

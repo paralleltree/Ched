@@ -34,6 +34,7 @@ namespace Ched.UI
             }
 
             NoteView.NewNoteType = NoteType.Tap;
+            NoteView.EditMode = EditMode.Edit;
         }
 
         private MainMenu CreateMainMenu(NoteView noteView)
@@ -75,15 +76,31 @@ namespace Ched.UI
                 Enabled = false
             };
 
+            var penButton = new ToolStripButton("ペン", Resources.EditIcon, (s, e) => noteView.EditMode = EditMode.Edit)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+            var eraserButton = new ToolStripButton("消しゴム", Resources.EraserIcon, (s, e) => noteView.EditMode = EditMode.Erase)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+
             noteView.OperationHistoryChanged += (s, e) =>
             {
                 undoButton.Enabled = noteView.CanUndo;
                 redoButton.Enabled = noteView.CanRedo;
             };
 
+            noteView.EditModeChanged += (s, e) =>
+            {
+                penButton.Checked = noteView.EditMode == EditMode.Edit;
+                eraserButton.Checked = noteView.EditMode == EditMode.Erase;
+            };
+
             return new ToolStrip(new ToolStripItem[]
             {
-                undoButton, redoButton
+                undoButton, redoButton, new ToolStripSeparator(),
+                penButton, eraserButton
             });
         }
 
