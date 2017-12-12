@@ -25,6 +25,7 @@ namespace Ched.UI
         private EditMode editMode = EditMode.Edit;
         private NoteType newNoteType = NoteType.Tap;
         private AirDirection airDirection = new AirDirection(VerticalAirDirection.Up, HorizontalAirDirection.Center);
+        private bool isNewSlideStepVisible = true;
 
         /// <summary>
         /// 小節の区切り線の色を設定します。
@@ -117,6 +118,19 @@ namespace Ched.UI
                 bool isSingle = bits != 0 && (bits & (bits - 1)) == 0;
                 if (!isSingle) throw new ArgumentException("value", "value must be single bit.");
                 newNoteType = value;
+                NewNoteTypeChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// 新たに追加するSlideのStepノートの可視性を設定します。
+        /// </summary>
+        public bool IsNewSlideStepVisible
+        {
+            get { return isNewSlideStepVisible; }
+            set
+            {
+                isNewSlideStepVisible = value;
                 NewNoteTypeChanged?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -686,7 +700,8 @@ namespace Ched.UI
                                                 var newStep = new Slide.StepTap(note)
                                                 {
                                                     TickOffset = tickOffset,
-                                                    LaneIndexOffset = laneIndexOffset
+                                                    LaneIndexOffset = laneIndexOffset,
+                                                    IsVisible = IsNewSlideStepVisible
                                                 };
                                                 note.StepNotes.Add(newStep);
                                                 Invalidate();
@@ -1018,6 +1033,7 @@ namespace Ched.UI
             foreach (var slide in slides)
             {
                 var bg = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.OrderBy(p => p.Tick)).ToList();
+                var visibleSteps = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.Where(p => p.IsVisible).OrderBy(p => p.Tick)).ToList();
                 for (int i = 0; i < bg.Count - 1; i++)
                 {
                     slide.DrawBackground(pe.Graphics,
@@ -1026,6 +1042,8 @@ namespace Ched.UI
                         GetYPositionFromTick(bg[i].Tick),
                         (UnitLaneWidth + BorderThickness) * bg[i + 1].LaneIndex,
                         GetYPositionFromTick(bg[i + 1].Tick),
+                        GetYPositionFromTick(visibleSteps.Last(p => p.Tick <= bg[i].Tick).Tick),
+                        GetYPositionFromTick(visibleSteps.First(p => p.Tick >= bg[i + 1].Tick).Tick),
                         ShortNoteHeight);
                 }
             }
@@ -1055,7 +1073,6 @@ namespace Ched.UI
                 slide.StartNote.Draw(pe.Graphics, GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.Width));
                 foreach (var step in slide.StepNotes)
                 {
-                    if (!step.IsVisible) continue;
                     step.Draw(pe.Graphics, GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width));
                 }
             }

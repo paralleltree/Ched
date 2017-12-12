@@ -118,7 +118,19 @@ namespace Ched.UI
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
-            var slideButton = new ToolStripButton("SLIDE", Resources.SlideIcon, (s, e) => noteView.NewNoteType = NoteType.Slide)
+            var slideButton = new ToolStripButton("SLIDE", Resources.SlideIcon, (s, e) =>
+            {
+                noteView.NewNoteType = NoteType.Slide;
+                noteView.IsNewSlideStepVisible = false;
+            })
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+            var slideStepButton = new ToolStripButton("SLIDE(中継点)", Resources.SlideStepIcon, (s, e) =>
+            {
+                noteView.NewNoteType = NoteType.Slide;
+                noteView.IsNewSlideStepVisible = true;
+            })
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
@@ -157,7 +169,8 @@ namespace Ched.UI
                 tapButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Tap);
                 exTapButton.Checked = noteView.NewNoteType.HasFlag(NoteType.ExTap);
                 holdButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Hold);
-                slideButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Slide);
+                slideButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Slide) && !noteView.IsNewSlideStepVisible;
+                slideStepButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Slide) && noteView.IsNewSlideStepVisible;
                 airKind.Checked = noteView.NewNoteType.HasFlag(NoteType.Air);
                 airActionButton.Checked = noteView.NewNoteType.HasFlag(NoteType.AirAction);
                 flickButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Flick);
@@ -182,7 +195,7 @@ namespace Ched.UI
                 }
             };
 
-            return new ToolStrip(new ToolStripItem[] { tapButton, exTapButton, holdButton, slideButton, airKind, airActionButton, flickButton, damageButton });
+            return new ToolStrip(new ToolStripItem[] { tapButton, exTapButton, holdButton, slideButton, slideStepButton, airKind, airActionButton, flickButton, damageButton });
         }
     }
 }

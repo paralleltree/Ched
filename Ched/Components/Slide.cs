@@ -67,10 +67,14 @@ namespace Ched.Components
         /// <param name="y1">開始ノートのY座標</param>
         /// <param name="x2">終了ノートの左端位置</param>
         /// <param name="y2">終了ノートのY座標</param>
-        internal void DrawBackground(Graphics g, float width, float x1, float y1, float x2, float y2, float noteHeight)
+        /// <param name="gradStartY">始点Step以前の中継点のY座標(グラデーション描画用)</param>
+        /// <param name="gradEndY">終点Step以後の中継点のY座標(グラデーション描画用)</param>
+        /// <param name="noteHeight">ノートの描画高さ</param>
+        internal void DrawBackground(Graphics g, float width, float x1, float y1, float x2, float y2, float gradStartY, float gradEndY, float noteHeight)
         {
             var rect = new RectangleF(Math.Min(x1, x2), Math.Min(y1, y2), Math.Abs(x1 - x2) + width, Math.Abs(y1 - y2));
-            using (var brush = new LinearGradientBrush(rect, BackgroundEdgeColor, BackgroundMiddleColor, LinearGradientMode.Vertical))
+            var gradientRect = new RectangleF(rect.Left, gradStartY, rect.Width, gradEndY - gradStartY);
+            using (var brush = new LinearGradientBrush(gradientRect, BackgroundEdgeColor, BackgroundMiddleColor, LinearGradientMode.Vertical))
             {
                 var blend = new ColorBlend(4)
                 {
@@ -168,6 +172,12 @@ namespace Ched.Components
 
             public StepTap(Slide parent) : base(parent)
             {
+            }
+
+            protected override void DrawNote(Graphics g, RectangleF rect)
+            {
+                if (!IsVisible) return;
+                base.DrawNote(g, rect);
             }
         }
     }
