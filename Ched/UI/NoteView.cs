@@ -261,7 +261,8 @@ namespace Ched.UI
                                 int offset = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - action.ParentNote.ParentNote.Tick;
                                 if (offset <= 0 || offsets.Contains(offset)) return;
                                 action.Offset = offset;
-                            });
+                                Cursor.Current = Cursors.SizeNS;
+                            }).Finally(() => Cursor.Current = Cursors.Default);
                     };
 
                     // AIR-ACTION
@@ -294,7 +295,9 @@ namespace Ched.UI
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int laneIndex = beforeLaneIndex + xdiff;
                                 note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
-                            });
+                                Cursor.Current = Cursors.SizeAll;
+                            })
+                            .Finally(() => Cursor.Current = Cursors.Default);
                     };
 
                     Func<TappableBase, IObservable<MouseEventArgs>> tappableNoteLeftThumbHandler = note =>
@@ -313,7 +316,9 @@ namespace Ched.UI
                                 //System.Diagnostics.Debug.WriteLine("xdiff: {0}, width: {1}, laneIndex: {2}", xdiff, width, laneIndex);
                                 note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
                                 note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
-                            });
+                                Cursor.Current = Cursors.SizeWE;
+                            })
+                            .Finally(() => Cursor.Current = Cursors.Default);
                     };
 
                     Func<TappableBase, IObservable<MouseEventArgs>> tappableNoteRightThumbHandler = note =>
@@ -382,7 +387,9 @@ namespace Ched.UI
                             {
                                 var currentCursorPos = matrix.TransformPoint(q.Location);
                                 hold.Duration = Math.Max(QuantizeTick, GetQuantizedTick(GetTickFromYPosition(currentCursorPos.Y)) - hold.StartTick);
-                            });
+                                Cursor.Current = Cursors.SizeNS;
+                            })
+                            .Finally(() => Cursor.Current = Cursors.Default);
                     };
 
                     Func<Slide.StepTap, IObservable<MouseEventArgs>> slideStepNoteHandler = step =>
@@ -404,7 +411,9 @@ namespace Ched.UI
                                 // 最終Step以降に移動はさせないし同じTickに置かせもしない
                                 if ((!isMaxOffsetStep && offset > maxOffset) || offsets.Contains(offset) || offset <= 0) return;
                                 step.TickOffset = offset;
-                            });
+                                Cursor.Current = Cursors.SizeAll;
+                            })
+                            .Finally(() => Cursor.Current = Cursors.Default);
                     };
 
                     Func<Slide, IObservable<MouseEventArgs>> slideHandler = slide =>
@@ -446,11 +455,13 @@ namespace Ched.UI
                                     int laneIndex = beforePos.StartLaneIndex + xdiff;
                                     slide.StartLaneIndex = Math.Min(Constants.LanesCount - slide.Width - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset, laneIndex));
                                     slide.Width = Math.Min(Constants.LanesCount - slide.StartLaneIndex - rightStepLaneIndexOffset, Math.Max(1, width));
+                                    Cursor.Current = Cursors.SizeWE;
                                 })
                                 .Finally(() =>
                                 {
                                     var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.Width);
                                     OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
+                                    Cursor.Current = Cursors.Default;
                                 });
                         }
 
@@ -464,11 +475,13 @@ namespace Ched.UI
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int width = beforePos.Width + xdiff;
                                     slide.Width = Math.Min(Constants.LanesCount - slide.StartLaneIndex - rightStepLaneIndexOffset, Math.Max(1, width));
+                                    Cursor.Current = Cursors.SizeWE;
                                 })
                                 .Finally(() =>
                                 {
                                     var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.Width);
                                     OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
+                                    Cursor.Current = Cursors.Default;
                                 });
                         }
 
@@ -484,11 +497,13 @@ namespace Ched.UI
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int laneIndex = beforeLaneIndex + xdiff;
                                     slide.StartLaneIndex = Math.Min(Constants.LanesCount - slide.Width - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset, laneIndex));
+                                    Cursor.Current = Cursors.SizeAll;
                                 })
                                 .Finally(() =>
                                 {
                                     var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.Width);
                                     OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
+                                    Cursor.Current = Cursors.Default;
                                 });
                         }
 
@@ -523,11 +538,13 @@ namespace Ched.UI
                                     int laneIndex = beforePos.LaneIndex + xdiff;
                                     hold.Width = Math.Min(Constants.LanesCount - hold.LaneIndex, Math.Max(1, width));
                                     hold.LaneIndex = Math.Min(Constants.LanesCount - hold.Width, Math.Max(0, laneIndex));
+                                    Cursor.Current = Cursors.SizeWE;
                                 })
                                 .Finally(() =>
                                 {
                                     var afterPos = new ChangeHoldPositionOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
                                     OperationManager.Push(new ChangeHoldPositionOperation(hold, beforePos, afterPos));
+                                    Cursor.Current = Cursors.Default;
                                 });
                         }
 
@@ -541,11 +558,13 @@ namespace Ched.UI
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int width = beforePos.Width + xdiff;
                                     hold.Width = Math.Min(Constants.LanesCount - hold.LaneIndex, Math.Max(1, width));
+                                    Cursor.Current = Cursors.SizeWE;
                                 })
                                 .Finally(() =>
                                 {
                                     var afterPos = new ChangeHoldPositionOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
                                     OperationManager.Push(new ChangeHoldPositionOperation(hold, beforePos, afterPos));
+                                    Cursor.Current = Cursors.Default;
                                 });
                         }
 
@@ -560,11 +579,13 @@ namespace Ched.UI
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int laneIndex = beforePos.LaneIndex + xdiff;
                                     hold.LaneIndex = Math.Min(Constants.LanesCount - hold.Width, Math.Max(0, laneIndex));
+                                    Cursor.Current = Cursors.SizeAll;
                                 })
                                 .Finally(() =>
                                 {
                                     var afterPos = new ChangeHoldPositionOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
                                     OperationManager.Push(new ChangeHoldPositionOperation(hold, beforePos, afterPos));
+                                    Cursor.Current = Cursors.Default;
                                 });
                         }
 
