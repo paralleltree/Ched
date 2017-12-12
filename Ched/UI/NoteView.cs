@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Reactive.Linq;
+using System.Reactive.Disposables;
 
 using Ched.Components;
 using Ched.UI.Operations;
@@ -156,6 +157,8 @@ namespace Ched.UI
 
         protected OperationManager OperationManager { get; } = new OperationManager();
 
+        protected CompositeDisposable Subscriptions { get; } = new CompositeDisposable();
+
         public NoteView()
         {
             InitializeComponent();
@@ -235,7 +238,7 @@ namespace Ched.UI
             var mouseMove = this.MouseMoveAsObservable();
             var mouseUp = this.MouseUpAsObservable();
 
-            mouseDown
+            var editSubscription = mouseDown
                 .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Edit)
                 .SelectMany(p =>
                 {
@@ -821,7 +824,7 @@ namespace Ched.UI
                     return Observable.Empty<MouseEventArgs>();
                 }).Subscribe(p => Invalidate());
 
-            mouseDown
+            var eraseSubscription = mouseDown
                 .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Erase)
                 .SelectMany(p => mouseMove
                     .TakeUntil(mouseUp)
@@ -996,6 +999,9 @@ namespace Ched.UI
                     }
                 })
                 .Subscribe(p => Invalidate());
+
+            Subscriptions.Add(editSubscription);
+            Subscriptions.Add(eraseSubscription);
         }
 
         protected override void OnPaint(PaintEventArgs pe)
