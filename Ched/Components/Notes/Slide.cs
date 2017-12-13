@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-namespace Ched.Components
+namespace Ched.Components.Notes
 {
     public class Slide : MovableLongNoteBase
     {

@@ -68,20 +68,20 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\Air.cs" />
-    <Compile Include="Components\AirAction.cs" />
+    <Compile Include="Components\Notes\Air.cs" />
+    <Compile Include="Components\Notes\AirAction.cs" />
     <Compile Include="Components\Constants.cs" />
-    <Compile Include="Components\Damage.cs" />
-    <Compile Include="Components\ExTap.cs" />
-    <Compile Include="Components\Flick.cs" />
-    <Compile Include="Components\GraphicsExtensions.cs" />
-    <Compile Include="Components\Hold.cs" />
-    <Compile Include="Components\LongNoteBase.cs" />
-    <Compile Include="Components\NoteBase.cs" />
-    <Compile Include="Components\ShortNoteBase.cs" />
-    <Compile Include="Components\Slide.cs" />
-    <Compile Include="Components\Tap.cs" />
-    <Compile Include="Components\TappableBase.cs" />
+    <Compile Include="Components\Notes\Damage.cs" />
+    <Compile Include="Components\Notes\ExTap.cs" />
+    <Compile Include="Components\Notes\Flick.cs" />
+    <Compile Include="Components\Notes\GraphicsExtensions.cs" />
+    <Compile Include="Components\Notes\Hold.cs" />
+    <Compile Include="Components\Notes\LongNoteBase.cs" />
+    <Compile Include="Components\Notes\NoteBase.cs" />
+    <Compile Include="Components\Notes\ShortNoteBase.cs" />
+    <Compile Include="Components\Notes\Slide.cs" />
+    <Compile Include="Components\Notes\Tap.cs" />
+    <Compile Include="Components\Notes\TappableBase.cs" />
     <Compile Include="UI\CheckableToolStripSplitButton.cs">
       <SubType>Component</SubType>
     </Compile>

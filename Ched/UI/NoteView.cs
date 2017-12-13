@@ -12,6 +12,7 @@ using System.Reactive.Linq;
 using System.Reactive.Disposables;
 
 using Ched.Components;
+using Ched.Components.Notes;
 using Ched.UI.Operations;
 
 namespace Ched.UI

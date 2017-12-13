@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ched.Components
+namespace Ched.Components.Notes
 {
     public abstract class NoteBase
     {
