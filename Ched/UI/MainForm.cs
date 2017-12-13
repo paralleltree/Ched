@@ -164,6 +164,20 @@ namespace Ched.UI
             });
             airKind.Image = Resources.AirUpIcon;
 
+            var quantizeTicks = new int[]
+            {
+                4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192
+            };
+            var quantizeComboBox = new ToolStripComboBox("クォンタイズ")
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                AutoSize = false,
+                Width = 80
+            };
+            quantizeComboBox.Items.AddRange(quantizeTicks.Select(p => p + "分").ToArray());
+            quantizeComboBox.SelectedIndexChanged += (s, e) => noteView.QuantizeTick = noteView.UnitBeatTick * 4 / quantizeTicks[quantizeComboBox.SelectedIndex];
+            quantizeComboBox.SelectedIndex = 0;
+
             noteView.NewNoteTypeChanged += (s, e) =>
             {
                 tapButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Tap);
@@ -195,7 +209,11 @@ namespace Ched.UI
                 }
             };
 
-            return new ToolStrip(new ToolStripItem[] { tapButton, exTapButton, holdButton, slideButton, slideStepButton, airKind, airActionButton, flickButton, damageButton });
+            return new ToolStrip(new ToolStripItem[]
+            {
+                tapButton, exTapButton, holdButton, slideButton, slideStepButton, airKind, airActionButton, flickButton, damageButton,
+                quantizeComboBox
+            });
         }
     }
 }
