@@ -717,7 +717,7 @@ namespace Ched.UI
                                         {
                                             int tickOffset = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)) - note.StartTick;
                                             // 同一Tickに追加させない
-                                            if (!note.StepNotes.Any(q => q.TickOffset == tickOffset))
+                                            if (tickOffset != 0 && !note.StepNotes.Any(q => q.TickOffset == tickOffset))
                                             {
                                                 int laneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - note.Width / 2;
                                                 laneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
