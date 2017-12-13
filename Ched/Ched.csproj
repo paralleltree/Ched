@@ -68,8 +68,10 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\EventCollection.cs" />
     <Compile Include="Components\Events\BPMChangeEvent.cs" />
     <Compile Include="Components\Events\EventBase.cs" />
+    <Compile Include="Components\NoteCollection.cs" />
     <Compile Include="Components\Notes\Air.cs" />
     <Compile Include="Components\Notes\AirAction.cs" />
     <Compile Include="Components\Constants.cs" />
@@ -84,6 +86,8 @@
     <Compile Include="Components\Notes\Slide.cs" />
     <Compile Include="Components\Notes\Tap.cs" />
     <Compile Include="Components\Notes\TappableBase.cs" />
+    <Compile Include="Components\Score.cs" />
+    <Compile Include="Components\ScoreBook.cs" />
     <Compile Include="UI\CheckableToolStripSplitButton.cs">
       <SubType>Component</SubType>
     </Compile>
