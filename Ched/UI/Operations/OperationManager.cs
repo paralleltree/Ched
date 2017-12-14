@@ -75,5 +75,15 @@ namespace Ched.UI.Operations
             UndoStack.Push(op);
             OperationHistoryChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        /// <summary>
+        /// 記録されている操作をクリアします。
+        /// </summary>
+        public void Clear()
+        {
+            UndoStack.Clear();
+            RedoStack.Clear();
+            OperationHistoryChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 }

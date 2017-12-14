@@ -227,11 +227,47 @@ namespace Ched.Properties
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap NewFileIcon
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("NewFileIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap OpenFileIcon
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("OpenFileIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap RedoIcon
         {
             get
             {
                 object obj = ResourceManager.GetObject("RedoIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SaveFileIcon
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("SaveFileIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -1219,33 +1219,36 @@ namespace Ched.UI
             Invalidate();
         }
 
+
+        public void Load(Components.NoteCollection collection)
+        {
+            Notes.Load(collection);
+            OperationManager.Clear();
+            Invalidate();
+        }
+
         public class NoteCollection
         {
             public event EventHandler NoteChanged;
 
             private List<Tap> taps;
-            public IReadOnlyCollection<Tap> Taps { get { return taps; } }
-
             private List<Hold> holds;
-            public IReadOnlyCollection<Hold> Holds { get { return holds; } }
-
             private List<Slide> slides;
-            public IReadOnlyCollection<Slide> Slides { get { return slides; } }
-
             private List<Air> airs;
-            public IReadOnlyCollection<Air> Airs { get { return airs; } }
-
             private List<AirAction> airActions;
-            public IReadOnlyCollection<AirAction> AirActions { get { return airActions; } }
-
             private List<Flick> flicks;
-            public IReadOnlyCollection<Flick> Flicks { get { return flicks; } }
-
             private List<Damage> damages;
-            public IReadOnlyCollection<Damage> Damages { get { return damages; } }
 
             private Dictionary<IAirable, HashSet<Air>> AirDictionary { get; } = new Dictionary<IAirable, HashSet<Air>>();
-            private Dictionary<IAirable, HashSet<AirAction>> AirActionDictionary = new Dictionary<IAirable, HashSet<AirAction>>();
+            private Dictionary<IAirable, HashSet<AirAction>> AirActionDictionary { get; } = new Dictionary<IAirable, HashSet<AirAction>>();
+
+            public IReadOnlyCollection<Tap> Taps { get { return taps; } }
+            public IReadOnlyCollection<Hold> Holds { get { return holds; } }
+            public IReadOnlyCollection<Slide> Slides { get { return slides; } }
+            public IReadOnlyCollection<Air> Airs { get { return airs; } }
+            public IReadOnlyCollection<AirAction> AirActions { get { return airActions; } }
+            public IReadOnlyCollection<Flick> Flicks { get { return flicks; } }
+            public IReadOnlyCollection<Damage> Damages { get { return damages; } }
 
             public NoteCollection()
             {
@@ -1363,6 +1366,19 @@ namespace Ched.UI
                 return AirActionDictionary[note];
             }
 
+            public void Load(Components.NoteCollection collection)
+            {
+                Clear();
+
+                foreach (var note in collection.Taps) Add(note);
+                foreach (var note in collection.Holds) Add(note);
+                foreach (var note in collection.Slides) Add(note);
+                foreach (var note in collection.Airs) Add(note);
+                foreach (var note in collection.AirActions) Add(note);
+                foreach (var note in collection.Flicks) Add(note);
+                foreach (var note in collection.Damages) Add(note);
+            }
+
             public void Clear()
             {
                 taps.Clear();
@@ -1372,6 +1388,10 @@ namespace Ched.UI
                 airActions.Clear();
                 flicks.Clear();
                 damages.Clear();
+
+                AirDictionary.Clear();
+                AirActionDictionary.Clear();
+
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
         }

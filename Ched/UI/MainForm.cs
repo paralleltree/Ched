@@ -4,10 +4,12 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Ched.Components;
 using Ched.Components.Notes;
 using Ched.Properties;
 
@@ -15,11 +17,16 @@ namespace Ched.UI
 {
     public partial class MainForm : Form
     {
+        private readonly string FileTypeFilter = "Ched専用形式(*.chs)|*.chs";
+
+        private ScoreBook ScoreBook { get; set; } = new ScoreBook();
+
         private NoteView NoteView { get; }
 
         public MainForm()
         {
             InitializeComponent();
+            SetText();
 
             ToolStripManager.RenderMode = ToolStripManagerRenderMode.System;
 
@@ -37,8 +44,89 @@ namespace Ched.UI
             NoteView.EditMode = EditMode.Edit;
         }
 
+        protected void LoadBook(ScoreBook book)
+        {
+            ScoreBook = book;
+            NoteView.Load(book.Score.Notes);
+            SetText(book.Path);
+        }
+
+        protected void LoadFile()
+        {
+            var dialog = new OpenFileDialog()
+            {
+                Filter = FileTypeFilter
+            };
+
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                try
+                {
+                    LoadBook(ScoreBook.LoadFile(dialog.FileName));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("ファイルの読み込み中にエラーが発生しました。");
+                    LoadBook(new ScoreBook());
+                }
+            }
+        }
+
+        protected void SaveAs()
+        {
+            var dialog = new SaveFileDialog()
+            {
+                Filter = FileTypeFilter
+            };
+
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                ScoreBook.Path = dialog.FileName;
+                SaveFile();
+                SetText(ScoreBook.Path);
+            }
+        }
+
+        protected void SaveFile()
+        {
+            if (string.IsNullOrEmpty(ScoreBook.Path))
+            {
+                SaveAs();
+                return;
+            }
+            ScoreBook.Score.Notes = new NoteCollection(NoteView.Notes);
+            ScoreBook.Save();
+        }
+
+        protected void ClearFile()
+        {
+            if (MessageBox.Show(this, "編集中のデータは破棄されますがよろしいですか？", "確認", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                LoadBook(new ScoreBook());
+            }
+        }
+
+        protected void SetText()
+        {
+            SetText(null);
+        }
+
+        protected void SetText(string filePath)
+        {
+            Text = (string.IsNullOrEmpty(filePath) ? "" : Path.GetFileName(filePath) + " - ") + "Ched";
+        }
+
         private MainMenu CreateMainMenu(NoteView noteView)
         {
+            var fileMenuItems = new MenuItem[]
+            {
+                new MenuItem("新規作成(&N)", (s, e) => ClearFile()) { Shortcut = Shortcut.CtrlN },
+                new MenuItem("開く(&O)", (s, e) => LoadFile()) { Shortcut = Shortcut.CtrlO },
+                new MenuItem("上書き保存(&S)", (s, e) => SaveFile()) { Shortcut = Shortcut.CtrlS },
+                new MenuItem("名前を付けて保存(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
+                new MenuItem("終了(&X)", (s, e) => this.Close())
+            };
+
             var undoItem = new MenuItem("元に戻す", (s, e) => noteView.Undo())
             {
                 Shortcut = Shortcut.CtrlZ,
@@ -59,12 +147,26 @@ namespace Ched.UI
 
             return new MainMenu(new MenuItem[]
             {
+                new MenuItem("ファイル(&F)", fileMenuItems),
                 new MenuItem("編集(&E)", editMenuItems)
             });
         }
 
         private ToolStrip CreateMainToolStrip(NoteView noteView)
         {
+            var newFileButton = new ToolStripButton("新規作成", Resources.NewFileIcon, (s, e) => ClearFile())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+            var openFileButton = new ToolStripButton("開く", Resources.OpenFileIcon, (s, e) => LoadFile())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+            var saveFileButton = new ToolStripButton("上書き保存", Resources.SaveFileIcon, (s, e) => SaveFile())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+
             var undoButton = new ToolStripButton("元に戻す", Resources.UndoIcon, (s, e) => noteView.Undo())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
@@ -99,6 +201,7 @@ namespace Ched.UI
 
             return new ToolStrip(new ToolStripItem[]
             {
+                newFileButton, openFileButton, saveFileButton, new ToolStripSeparator(),
                 undoButton, redoButton, new ToolStripSeparator(),
                 penButton, eraserButton
             });
