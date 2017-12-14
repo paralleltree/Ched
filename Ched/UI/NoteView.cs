@@ -75,7 +75,7 @@ namespace Ched.UI
         /// <summary>
         /// 1拍あたりの表示高さを設定します。
         /// </summary>
-        public float UnitBeatHeight { get; set; } = 80;
+        public float UnitBeatHeight { get; set; } = 120; // 6の倍数でいい感じに描画してくれる
 
         /// <summary>
         /// クォンタイズを行うTick数を指定します。
