@@ -177,66 +177,6 @@ namespace Ched.UI
 
             QuantizeTick = UnitBeatTick;
 
-            var taps = new Tap[]
-            {
-                new Tap() { Tick = 240, LaneIndex = 0, Width = 4 },
-                new ExTap() { Tick = 240, LaneIndex = 4, Width = 3 },
-                new Tap() { Tick = 240, LaneIndex = 7, Width = 4 },
-                new Tap() { Tick = 480, LaneIndex = 0, Width = 4 },
-                new ExTap() { Tick = 480, LaneIndex = 4, Width = 3 },
-                new Tap() { Tick = 480, LaneIndex = 7, Width = 4 }
-            };
-            foreach (var note in taps)
-            {
-                Notes.Add(note);
-            }
-            foreach (var note in taps.Skip(3))
-                Notes.Add(new Air(note) { HorizontalDirection = HorizontalAirDirection.Right, VerticalDirection = VerticalAirDirection.Up });
-
-
-            taps = new Tap[]
-            {
-                new Tap() { Tick = 960, LaneIndex = 5, Width = 4 },
-                new ExTap() { Tick = 960, LaneIndex = 9, Width = 3 },
-                new Tap() { Tick = 960, LaneIndex = 12, Width = 4 }
-            };
-            foreach (var note in taps)
-            {
-                Notes.Add(note);
-                Notes.Add(new Air(note) { HorizontalDirection = HorizontalAirDirection.Right, VerticalDirection = VerticalAirDirection.Down });
-            }
-
-            Notes.Add(new Flick() { Tick = 480 * 4, LaneIndex = 0, Width = 8 });
-            Notes.Add(new Hold() { StartTick = 480 * 4, Duration = 480 * 4, Width = 8, LaneIndex = 8 });
-
-            for (int i = 0; i < 4; i++)
-            {
-                Notes.Add(new Tap() { Tick = 240 * (1 + i) + 480 * 4, LaneIndex = i * 4, Width = 4 });
-            }
-
-            var tap1 = new Tap() { Tick = 480 * 6, LaneIndex = 0, Width = 3 };
-            Notes.Add(new Air(tap1));
-            var airaction1 = new AirAction(tap1);
-            airaction1.ActionNotes.Add(new AirAction.ActionNote(airaction1) { Offset = 480 });
-            airaction1.ActionNotes.Add(new AirAction.ActionNote(airaction1) { Offset = 480 * 2 });
-
-            var tap2 = new Tap() { Tick = 480 * 7, LaneIndex = 0, Width = 3 };
-            var air2 = new Air(tap2) { VerticalDirection = VerticalAirDirection.Down };
-            Notes.Add(tap2);
-            Notes.Add(air2);
-            Notes.Add(tap1);
-            Notes.Add(airaction1);
-
-            var slide1 = new Slide() { Width = 4, StartTick = 480 * 4, StartLaneIndex = 8 };
-            slide1.StepNotes.Add(new Slide.StepTap(slide1) { TickOffset = 240, LaneIndexOffset = 4 });
-            slide1.StepNotes.Add(new Slide.StepTap(slide1) { TickOffset = 240 * 2, LaneIndexOffset = 0 });
-            slide1.StepNotes.Add(new Slide.StepTap(slide1) { TickOffset = 240 * 3, LaneIndexOffset = 4 });
-            slide1.StepNotes.Add(new Slide.StepTap(slide1) { TickOffset = 240 * 4, LaneIndexOffset = 0 });
-            slide1.StepNotes.Add(new Slide.StepTap(slide1) { TickOffset = 240 * 5, LaneIndexOffset = 4 });
-            Notes.Add(slide1);
-
-            HeadTick = 240;
-
             var mouseDown = this.MouseDownAsObservable();
             var mouseMove = this.MouseMoveAsObservable();
             var mouseUp = this.MouseUpAsObservable();
