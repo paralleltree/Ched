@@ -556,6 +556,12 @@ namespace Ched.UI
 
                     if (!(NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType))
                     {
+                        foreach (var note in Notes.ExTaps.Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
+                        {
+                            var subscription = shortNoteHandler(note);
+                            if (subscription != null) return subscription;
+                        }
+
                         foreach (var note in Notes.Taps.Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
                         {
                             var subscription = shortNoteHandler(note);
@@ -605,7 +611,7 @@ namespace Ched.UI
                                 var extap = new ExTap();
                                 Notes.Add(extap);
                                 newNote = extap;
-                                op = new InsertTapOperation(Notes, extap);
+                                op = new InsertExTapOperation(Notes, extap);
                                 break;
 
                             case NoteType.Flick:
@@ -636,6 +642,7 @@ namespace Ched.UI
                         int newNoteLaneIndex;
                         var airables = Enumerable.Empty<IAirable>();
                         airables = airables.Concat(Notes.Taps);
+                        airables = airables.Concat(Notes.ExTaps);
                         airables = airables.Concat(Notes.Flicks);
                         airables = airables.Concat(Notes.Damages);
                         airables = airables.Concat(Notes.Holds.Select(q => q.EndNote));
@@ -886,6 +893,26 @@ namespace Ched.UI
                         }
                     }
 
+                    foreach (var note in Notes.ExTaps)
+                    {
+                        RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                        if (rect.Contains(scorePos))
+                        {
+                            var airOp = removeReferencedAirs(note).ToList();
+                            var op = new RemoveExTapOperation(Notes, note);
+                            Notes.Remove(note);
+                            if (airOp.Count > 0)
+                            {
+                                OperationManager.Push(new CompositeOperation(op.Description, new IOperation[] { op }.Concat(airOp)));
+                            }
+                            else
+                            {
+                                OperationManager.Push(op);
+                            }
+                            return;
+                        }
+                    }
+
                     foreach (var note in Notes.Taps)
                     {
                         RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
@@ -1069,6 +1096,11 @@ namespace Ched.UI
                 note.Draw(pe.Graphics, GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
             }
 
+            foreach (var note in Notes.ExTaps.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
+            {
+                note.Draw(pe.Graphics, GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
+            }
+
             foreach (var note in Notes.Flicks.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
             {
                 note.Draw(pe.Graphics, GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
@@ -1190,6 +1222,7 @@ namespace Ched.UI
             public event EventHandler NoteChanged;
 
             private List<Tap> taps;
+            private List<ExTap> exTaps;
             private List<Hold> holds;
             private List<Slide> slides;
             private List<Air> airs;
@@ -1201,6 +1234,7 @@ namespace Ched.UI
             private Dictionary<IAirable, HashSet<AirAction>> AirActionDictionary { get; } = new Dictionary<IAirable, HashSet<AirAction>>();
 
             public IReadOnlyCollection<Tap> Taps { get { return taps; } }
+            public IReadOnlyCollection<ExTap> ExTaps { get { return exTaps; } }
             public IReadOnlyCollection<Hold> Holds { get { return holds; } }
             public IReadOnlyCollection<Slide> Slides { get { return slides; } }
             public IReadOnlyCollection<Air> Airs { get { return airs; } }
@@ -1211,6 +1245,7 @@ namespace Ched.UI
             public NoteCollection()
             {
                 taps = new List<Tap>();
+                exTaps = new List<ExTap>();
                 holds = new List<Hold>();
                 slides = new List<Slide>();
                 airs = new List<Air>();
@@ -1222,6 +1257,12 @@ namespace Ched.UI
             public void Add(Tap note)
             {
                 taps.Add(note);
+                NoteChanged?.Invoke(this, EventArgs.Empty);
+            }
+
+            public void Add(ExTap note)
+            {
+                exTaps.Add(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
@@ -1271,6 +1312,12 @@ namespace Ched.UI
             public void Remove(Tap note)
             {
                 taps.Remove(note);
+                NoteChanged?.Invoke(this, EventArgs.Empty);
+            }
+
+            public void Remove(ExTap note)
+            {
+                exTaps.Remove(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
@@ -1339,6 +1386,7 @@ namespace Ched.UI
                 Clear();
 
                 foreach (var note in collection.Taps) Add(note);
+                foreach (var note in collection.ExTaps) Add(note);
                 foreach (var note in collection.Holds) Add(note);
                 foreach (var note in collection.Slides) Add(note);
                 foreach (var note in collection.Airs) Add(note);
@@ -1350,6 +1398,7 @@ namespace Ched.UI
             public void Clear()
             {
                 taps.Clear();
+                exTaps.Clear();
                 holds.Clear();
                 slides.Clear();
                 airs.Clear();

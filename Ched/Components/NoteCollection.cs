@@ -17,6 +17,8 @@ namespace Ched.Components
         [Newtonsoft.Json.JsonProperty]
         private List<Tap> taps;
         [Newtonsoft.Json.JsonProperty]
+        private List<ExTap> exTaps;
+        [Newtonsoft.Json.JsonProperty]
         private List<Hold> holds;
         [Newtonsoft.Json.JsonProperty]
         private List<Slide> slides;
@@ -33,6 +35,12 @@ namespace Ched.Components
         {
             get { return taps; }
             set { taps = value; }
+        }
+
+        public List<ExTap> ExTaps
+        {
+            get { return exTaps; }
+            set { exTaps = value; }
         }
 
         public List<Hold> Holds
@@ -74,6 +82,7 @@ namespace Ched.Components
         public NoteCollection()
         {
             Taps = new List<Tap>();
+            ExTaps = new List<ExTap>();
             Holds = new List<Hold>();
             Slides = new List<Slide>();
             Airs = new List<Air>();
@@ -85,6 +94,7 @@ namespace Ched.Components
         public NoteCollection(UI.NoteView.NoteCollection collection)
         {
             Taps = collection.Taps.ToList();
+            ExTaps = collection.ExTaps.ToList();
             Holds = collection.Holds.ToList();
             Slides = collection.Slides.ToList();
             Airs = collection.Airs.ToList();

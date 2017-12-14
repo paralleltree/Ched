@@ -62,6 +62,44 @@ namespace Ched.UI.Operations
         }
     }
 
+    public class InsertExTapOperation : NoteCollectionOperation<ExTap>
+    {
+        public override string Description { get { return "ExTAPの追加"; } }
+
+        public InsertExTapOperation(NoteView.NoteCollection collection, ExTap note) : base(collection, note)
+        {
+        }
+
+        public override void Redo()
+        {
+            Collection.Add(Note);
+        }
+
+        public override void Undo()
+        {
+            Collection.Remove(Note);
+        }
+    }
+
+    public class RemoveExTapOperation : NoteCollectionOperation<ExTap>
+    {
+        public override string Description { get { return "ExTAPの削除"; } }
+
+        public RemoveExTapOperation(NoteView.NoteCollection collection, ExTap note) : base(collection, note)
+        {
+        }
+
+        public override void Redo()
+        {
+            Collection.Remove(Note);
+        }
+
+        public override void Undo()
+        {
+            Collection.Add(Note);
+        }
+    }
+
     public class InsertHoldOperation : NoteCollectionOperation<Hold>
     {
         public override string Description { get { return "HOLDの追加"; } }
