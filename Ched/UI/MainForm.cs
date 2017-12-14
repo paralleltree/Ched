@@ -65,6 +65,11 @@ namespace Ched.UI
                 }
             };
 
+            FormClosing += (s, e) =>
+            {
+                if (MessageBox.Show(this, "終了してよろしいですか？", "確認", MessageBoxButtons.YesNo) != DialogResult.Yes) e.Cancel = true;
+            };
+
             using (var manager = this.WorkWithLayout())
             {
                 this.Menu = CreateMainMenu(NoteView);
