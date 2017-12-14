@@ -336,7 +336,9 @@ namespace Ched.UI
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int width = beforeWidth + xdiff;
                                 note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
-                            });
+                                Cursor.Current = Cursors.SizeWE;
+                            })
+                            .Finally(() => Cursor.Current = Cursors.Default);
                     };
 
 
