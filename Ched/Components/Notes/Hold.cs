@@ -11,8 +11,8 @@ namespace Ched.Components.Notes
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class Hold : MovableLongNoteBase
     {
-        private static readonly Color BackgroundMiddleColor = Color.FromArgb(216, 216, 216, 0);
-        private static readonly Color BackgroundEdgeColor = Color.FromArgb(216, 166, 44, 168);
+        private static readonly Color BackgroundMiddleColor = Color.FromArgb(196, 216, 216, 0);
+        private static readonly Color BackgroundEdgeColor = Color.FromArgb(196, 166, 44, 168);
 
         [Newtonsoft.Json.JsonProperty]
         private int laneIndex;

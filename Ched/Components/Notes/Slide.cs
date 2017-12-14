@@ -11,9 +11,9 @@ namespace Ched.Components.Notes
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class Slide : MovableLongNoteBase
     {
-        private static readonly Color BackgroundMiddleColor = Color.FromArgb(216, 0, 164, 146);
-        private static readonly Color BackgroundEdgeColor = Color.FromArgb(216, 166, 44, 168);
-        private static readonly Color BackgroundLineColor = Color.FromArgb(216, 0, 214, 192);
+        private static readonly Color BackgroundMiddleColor = Color.FromArgb(196, 0, 164, 146);
+        private static readonly Color BackgroundEdgeColor = Color.FromArgb(196, 166, 44, 168);
+        private static readonly Color BackgroundLineColor = Color.FromArgb(196, 0, 214, 192);
 
 
         [Newtonsoft.Json.JsonProperty]
