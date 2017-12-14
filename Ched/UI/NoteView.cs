@@ -150,6 +150,8 @@ namespace Ched.UI
             }
         }
 
+        protected int LastWidth { get; set; } = 4;
+
         public bool CanUndo { get { return OperationManager.CanUndo; } }
 
         public bool CanRedo { get { return OperationManager.CanRedo; } }
@@ -322,7 +324,11 @@ namespace Ched.UI
                                 note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
                                 Cursor.Current = Cursors.SizeWE;
                             })
-                            .Finally(() => Cursor.Current = Cursors.Default);
+                            .Finally(() =>
+                            {
+                                Cursor.Current = Cursors.Default;
+                                LastWidth = note.Width;
+                            });
                     };
 
                     Func<TappableBase, IObservable<MouseEventArgs>> tappableNoteRightThumbHandler = note =>
@@ -338,7 +344,11 @@ namespace Ched.UI
                                 note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
                                 Cursor.Current = Cursors.SizeWE;
                             })
-                            .Finally(() => Cursor.Current = Cursors.Default);
+                            .Finally(() =>
+                            {
+                                Cursor.Current = Cursors.Default;
+                                LastWidth = note.Width;
+                            });
                     };
 
 
@@ -468,6 +478,7 @@ namespace Ched.UI
                                     var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.Width);
                                     OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
+                                    LastWidth = slide.Width;
                                 });
                         }
 
@@ -488,6 +499,7 @@ namespace Ched.UI
                                     var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.Width);
                                     OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
+                                    LastWidth = slide.Width;
                                 });
                         }
 
@@ -510,6 +522,7 @@ namespace Ched.UI
                                     var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.Width);
                                     OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
+                                    LastWidth = slide.Width;
                                 });
                         }
 
@@ -551,6 +564,7 @@ namespace Ched.UI
                                     var afterPos = new ChangeHoldPositionOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
                                     OperationManager.Push(new ChangeHoldPositionOperation(hold, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
+                                    LastWidth = hold.Width;
                                 });
                         }
 
@@ -571,6 +585,7 @@ namespace Ched.UI
                                     var afterPos = new ChangeHoldPositionOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
                                     OperationManager.Push(new ChangeHoldPositionOperation(hold, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
+                                    LastWidth = hold.Width;
                                 });
                         }
 
@@ -592,6 +607,7 @@ namespace Ched.UI
                                     var afterPos = new ChangeHoldPositionOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
                                     OperationManager.Push(new ChangeHoldPositionOperation(hold, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
+                                    LastWidth = hold.Width;
                                 });
                         }
 
@@ -666,7 +682,7 @@ namespace Ched.UI
                                 op = new InsertDamageOperation(Notes, damage);
                                 break;
                         }
-                        newNote.Width = 4;
+                        newNote.Width = LastWidth;
                         newNote.Tick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y));
                         int newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - newNote.Width / 2;
                         newNoteLaneIndex = Math.Min(Constants.LanesCount - newNote.Width, Math.Max(0, newNoteLaneIndex));
@@ -691,7 +707,7 @@ namespace Ched.UI
                                 var hold = new Hold
                                 {
                                     StartTick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)),
-                                    Width = 4,
+                                    Width = LastWidth,
                                     Duration = QuantizeTick
                                 };
                                 newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - hold.Width / 2;
@@ -743,7 +759,7 @@ namespace Ched.UI
                                 var slide = new Slide()
                                 {
                                     StartTick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)),
-                                    Width = 4
+                                    Width = LastWidth
                                 };
                                 newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - slide.Width / 2;
                                 slide.StartLaneIndex = Math.Min(Constants.LanesCount - slide.Width, Math.Max(0, newNoteLaneIndex));
