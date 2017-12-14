@@ -8,17 +8,23 @@ using System.Drawing.Drawing2D;
 
 namespace Ched.Components.Notes
 {
+    [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class AirAction : LongNoteBase
     {
         private static readonly Color LineColor = Color.FromArgb(216, 0, 196, 0);
 
-        public List<ActionNote> ActionNotes { get; } = new List<ActionNote>();
-        public IAirable ParentNote { get; }
+        [Newtonsoft.Json.JsonProperty]
+        private IAirable parentNote;
+        [Newtonsoft.Json.JsonProperty]
+        private List<ActionNote> actionNotes = new List<ActionNote>();
+
+        public List<ActionNote> ActionNotes { get { return actionNotes; } }
+        public IAirable ParentNote { get { return parentNote; } }
         public override int StartTick { get { return ParentNote.Tick; } }
 
         public AirAction(IAirable parent)
         {
-            ParentNote = parent;
+            parentNote = parent;
         }
 
         public override int GetDuration()
@@ -34,14 +40,18 @@ namespace Ched.Components.Notes
             }
         }
 
+        [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
         public class ActionNote : ShortNoteBase
         {
             private readonly Color LightNoteColor = Color.FromArgb(212, 92, 255);
             private readonly Color DarkNoteColor = Color.FromArgb(146, 0, 192);
 
+            [Newtonsoft.Json.JsonProperty]
             private int offset;
+            [Newtonsoft.Json.JsonProperty]
+            private AirAction parentNote;
 
-            public AirAction ParentNote { get; }
+            public AirAction ParentNote { get { return parentNote; } }
 
             public int Offset
             {
@@ -55,7 +65,7 @@ namespace Ched.Components.Notes
 
             public ActionNote(AirAction parent)
             {
-                ParentNote = parent;
+                parentNote = parent;
             }
 
             internal void Draw(Graphics g, RectangleF rect)

@@ -54,10 +54,14 @@ namespace Ched.Components.Notes
         }
     }
 
+    [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public abstract class TappableBase : TapBase, IAirable
     {
+        [Newtonsoft.Json.JsonProperty]
         private int tick;
+        [Newtonsoft.Json.JsonProperty]
         private int laneIndex;
+        [Newtonsoft.Json.JsonProperty]
         private int width = 1;
 
         /// <summary>

@@ -8,16 +8,33 @@ using System.Drawing.Drawing2D;
 
 namespace Ched.Components.Notes
 {
+    [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class Air : ShortNoteBase, IAirable
     {
         private static readonly Color ForegroundUpColor = Color.FromArgb(28, 206, 22);
         private static readonly Color ForegroundDownColor = Color.FromArgb(192, 21, 216);
         private static readonly Color BorderColor = Color.FromArgb(208, 208, 208);
 
-        public IAirable ParentNote { get; }
+        [Newtonsoft.Json.JsonProperty]
+        private IAirable parentNote;
+        [Newtonsoft.Json.JsonProperty]
+        private VerticalAirDirection verticalDirection;
+        [Newtonsoft.Json.JsonProperty]
+        private HorizontalAirDirection horizontalDirection;
 
-        public VerticalAirDirection VerticalDirection { get; set; }
-        public HorizontalAirDirection HorizontalDirection { get; set; }
+        public IAirable ParentNote { get { return parentNote; } }
+
+        public VerticalAirDirection VerticalDirection
+        {
+            get { return verticalDirection; }
+            set { verticalDirection = value; }
+        }
+
+        public HorizontalAirDirection HorizontalDirection
+        {
+            get { return horizontalDirection; }
+            set { horizontalDirection = value; }
+        }
 
         public int Tick { get { return ParentNote.Tick; } }
 
@@ -27,8 +44,7 @@ namespace Ched.Components.Notes
 
         public Air(IAirable parent)
         {
-            if (parent == null) throw new ArgumentNullException("parent");
-            ParentNote = parent;
+            parentNote = parent;
         }
 
         internal void Draw(Graphics g, RectangleF targetNoteRect) // 描画対象のノートのrect

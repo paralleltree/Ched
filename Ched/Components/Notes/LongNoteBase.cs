@@ -26,8 +26,10 @@ namespace Ched.Components.Notes
         public abstract int GetDuration();
     }
 
+    [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public abstract class MovableLongNoteBase : NoteBase, ILongNote
     {
+        [Newtonsoft.Json.JsonProperty]
         private int startTick;
 
         /// <summary>

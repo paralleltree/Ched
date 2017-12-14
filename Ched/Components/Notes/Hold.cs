@@ -8,14 +8,23 @@ using System.Drawing.Drawing2D;
 
 namespace Ched.Components.Notes
 {
+    [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class Hold : MovableLongNoteBase
     {
         private static readonly Color BackgroundMiddleColor = Color.FromArgb(216, 216, 216, 0);
         private static readonly Color BackgroundEdgeColor = Color.FromArgb(216, 166, 44, 168);
 
+        [Newtonsoft.Json.JsonProperty]
         private int laneIndex;
+        [Newtonsoft.Json.JsonProperty]
         private int width = 1;
+        [Newtonsoft.Json.JsonProperty]
         private int duration = 1;
+
+        [Newtonsoft.Json.JsonProperty]
+        private StartTap startNote;
+        [Newtonsoft.Json.JsonProperty]
+        private EndTap endNote;
 
         /// <summary>
         /// ノートの配置されるレーン番号を設定します。。
@@ -59,13 +68,13 @@ namespace Ched.Components.Notes
             }
         }
 
-        public StartTap StartNote { get; }
-        public EndTap EndNote { get; }
+        public StartTap StartNote { get { return startNote; } }
+        public EndTap EndNote { get { return endNote; } }
 
         public Hold()
         {
-            StartNote = new StartTap(this);
-            EndNote = new EndTap(this);
+            startNote = new StartTap(this);
+            endNote = new EndTap(this);
         }
 
         internal void DrawBackground(Graphics g, RectangleF rect)
@@ -87,6 +96,7 @@ namespace Ched.Components.Notes
             return Duration;
         }
 
+        [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
         public abstract class TapBase : LongNoteTapBase
         {
             private static readonly Color DarkNoteColor = Color.FromArgb(196, 86, 0);

@@ -9,21 +9,41 @@ namespace Ched.Components
     /// <summary>
     /// 譜面データを表すクラスです。
     /// </summary>
+    [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class Score
     {
+        [Newtonsoft.Json.JsonProperty]
+        private int ticksPerBeat = 480;
+        [Newtonsoft.Json.JsonProperty]
+        private NoteCollection notes = new NoteCollection();
+        [Newtonsoft.Json.JsonProperty]
+        private EventCollection events = new EventCollection();
+
         /// <summary>
         /// 1拍あたりの分解能を設定します。
         /// </summary>
-        public int TicksPerBeat { get; set; } = 480;
+        public int TicksPerBeat
+        {
+            get { return ticksPerBeat; }
+            set { ticksPerBeat = value; }
+        }
 
         /// <summary>
         /// ノーツを格納するコレクションです。
         /// </summary>
-        public NoteCollection Notes { get; set; } = new NoteCollection();
+        public NoteCollection Notes
+        {
+            get { return notes; }
+            set { notes = value; }
+        }
 
         /// <summary>
         /// イベントを格納するコレクションです。
         /// </summary>
-        public EventCollection Events { get; set; } = new EventCollection();
+        public EventCollection Events
+        {
+            get { return events; }
+            set { events = value; }
+        }
     }
 }

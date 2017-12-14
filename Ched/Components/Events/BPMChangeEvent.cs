@@ -9,8 +9,16 @@ namespace Ched.Components.Events
     /// <summary>
     /// BPMの変更イベントを表すクラスです。
     /// </summary>
+    [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class BPMChangeEvent : EventBase
     {
-        public int BPM { get; set; }
+        [Newtonsoft.Json.JsonProperty]
+        private float bpm;
+
+        public float BPM
+        {
+            get { return bpm; }
+            set { bpm = value; }
+        }
     }
 }

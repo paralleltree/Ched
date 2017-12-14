@@ -9,8 +9,19 @@ namespace Ched.Components
     /// <summary>
     /// 譜面におけるイベントを表すクラスです。
     /// </summary>
+    [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public abstract class EventBase
     {
-        public int Tick { get; set; }
+        [Newtonsoft.Json.JsonProperty]
+        private int tick;
+
+        public int Tick
+        {
+            get { return tick; }
+            set
+            {
+                tick = value;
+            }
+        }
     }
 }

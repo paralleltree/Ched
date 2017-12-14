@@ -8,14 +8,20 @@ using System.Drawing.Drawing2D;
 
 namespace Ched.Components.Notes
 {
+    [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class Slide : MovableLongNoteBase
     {
         private static readonly Color BackgroundMiddleColor = Color.FromArgb(216, 0, 164, 146);
         private static readonly Color BackgroundEdgeColor = Color.FromArgb(216, 166, 44, 168);
         private static readonly Color BackgroundLineColor = Color.FromArgb(216, 0, 214, 192);
 
+
+        [Newtonsoft.Json.JsonProperty]
         private int width = 1;
+        [Newtonsoft.Json.JsonProperty]
         private int startLaneIndex;
+        [Newtonsoft.Json.JsonProperty]
+        private List<StepTap> stepNotes = new List<StepTap>();
 
         /// <summary>
         /// 開始ノートの配置されるレーン番号を設定します。。
@@ -50,7 +56,8 @@ namespace Ched.Components.Notes
         }
 
 
-        public List<StepTap> StepNotes { get; } = new List<StepTap>();
+        //[System.Runtime.Serialization.DataMember]
+        public List<StepTap> StepNotes { get { return stepNotes; } }
         public StartTap StartNote { get; }
 
         public Slide()
@@ -111,18 +118,22 @@ namespace Ched.Components.Notes
             return StepNotes.Max(p => p.TickOffset);
         }
 
+        [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
         public abstract class TapBase : LongNoteTapBase
         {
             private readonly Color DarkNoteColor = Color.FromArgb(0, 16, 138);
             private readonly Color LightNoteColor = Color.FromArgb(86, 106, 255);
 
-            public Slide ParentNote { get; }
+            [Newtonsoft.Json.JsonProperty]
+            private Slide parentNote;
+
+            public Slide ParentNote { get { return parentNote; } }
 
             public override int Width { get { return ParentNote.Width; } }
 
             public TapBase(Slide parent)
             {
-                this.ParentNote = parent;
+                parentNote = parent;
             }
 
             protected override void DrawNote(Graphics g, RectangleF rect)
@@ -144,13 +155,32 @@ namespace Ched.Components.Notes
             }
         }
 
+        [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
         public class StepTap : TapBase
         {
+            [Newtonsoft.Json.JsonProperty]
             private int laneIndexOffset;
+            [Newtonsoft.Json.JsonProperty]
+            private int tickOffset = 1;
+            [Newtonsoft.Json.JsonProperty]
+            private bool isVisible = true;
 
-            public int TickOffset { get; set; } = 1;
+            public int TickOffset
+            {
+                get { return tickOffset; }
+                set
+                {
+                    if (value <= 0) throw new ArgumentOutOfRangeException("value", "value must be positive.");
+                    tickOffset = value;
+                }
+            }
 
-            public bool IsVisible { get; set; } = true;
+
+            public bool IsVisible
+            {
+                get { return isVisible; }
+                set { isVisible = value; }
+            }
 
             public override bool IsTap { get { return false; } }
 
