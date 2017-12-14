@@ -255,8 +255,7 @@ namespace Ched.UI
                             {
                                 var currentScorePos = matrix.TransformPoint(q.Location);
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
-                                int startx = (int)(scorePos.X / (UnitLaneWidth + BorderThickness));
-                                xdiff = Math.Min(beforePos.Width - 1, Math.Max(-startx, xdiff));
+                                xdiff = Math.Min(beforePos.Width - 1, Math.Max(-beforePos.LaneIndex, xdiff));
                                 int width = beforePos.Width - xdiff;
                                 int laneIndex = beforePos.LaneIndex + xdiff;
                                 //System.Diagnostics.Debug.WriteLine("xdiff: {0}, width: {1}, laneIndex: {2}", xdiff, width, laneIndex);
@@ -1024,8 +1023,6 @@ namespace Ched.UI
                     pe.Graphics.DrawLine(i % 4 == 0 ? barPen : beatPen, 0, y, laneWidth, y);
                 }
             }
-
-            pe.Graphics.DrawLine(Pens.Red, 0, 0, laneWidth, 0);
 
             // ノート描画
             var holds = Notes.Holds.Where(p => p.StartTick <= tailTick && p.StartTick + p.GetDuration() >= HeadTick).ToList();

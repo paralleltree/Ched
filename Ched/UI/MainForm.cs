@@ -19,7 +19,7 @@ namespace Ched.UI
     {
         private readonly string FileTypeFilter = "Ched専用形式(*.chs)|*.chs";
 
-        private ScoreBook ScoreBook { get; set; } = new ScoreBook();
+        private ScoreBook ScoreBook { get; set; }
 
         private ScrollBar NoteViewScrollBar { get; }
         private NoteView NoteView { get; }
@@ -27,6 +27,7 @@ namespace Ched.UI
         public MainForm()
         {
             InitializeComponent();
+            Size = new Size(400, 700);
             Icon = Resources.MainIcon;
             SetText();
 
@@ -81,6 +82,8 @@ namespace Ched.UI
 
             NoteView.NewNoteType = NoteType.Tap;
             NoteView.EditMode = EditMode.Edit;
+
+            LoadBook(new ScoreBook());
         }
 
         protected void LoadBook(ScoreBook book)
@@ -166,6 +169,7 @@ namespace Ched.UI
                 new MenuItem("開く(&O)", (s, e) => LoadFile()) { Shortcut = Shortcut.CtrlO },
                 new MenuItem("上書き保存(&S)", (s, e) => SaveFile()) { Shortcut = Shortcut.CtrlS },
                 new MenuItem("名前を付けて保存(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
+                new MenuItem("-"),
                 new MenuItem("終了(&X)", (s, e) => this.Close())
             };
 
