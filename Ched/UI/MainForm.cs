@@ -27,6 +27,7 @@ namespace Ched.UI
         public MainForm()
         {
             InitializeComponent();
+            Icon = Resources.MainIcon;
             SetText();
 
             ToolStripManager.RenderMode = ToolStripManagerRenderMode.System;
@@ -174,6 +175,12 @@ namespace Ched.UI
             };
             var editMenuItems = new MenuItem[] { undoItem, redoItem };
 
+            var helpMenuItems = new MenuItem[]
+            {
+                new MenuItem("公式サイトを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched")),
+                new MenuItem("バージョン情報", (s, e) => new VersionInfoForm().ShowDialog(this))
+            };
+
             noteView.OperationHistoryChanged += (s, e) =>
             {
                 redoItem.Enabled = noteView.CanRedo;
@@ -183,7 +190,8 @@ namespace Ched.UI
             return new MainMenu(new MenuItem[]
             {
                 new MenuItem("ファイル(&F)", fileMenuItems),
-                new MenuItem("編集(&E)", editMenuItems)
+                new MenuItem("編集(&E)", editMenuItems),
+                new MenuItem("ヘルプ(&H)", helpMenuItems)
             });
         }
 
