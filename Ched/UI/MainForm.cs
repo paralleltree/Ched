@@ -21,6 +21,7 @@ namespace Ched.UI
 
         private ScoreBook ScoreBook { get; set; } = new ScoreBook();
 
+        private ScrollBar NoteViewScrollBar { get; }
         private NoteView NoteView { get; }
 
         public MainForm()
@@ -32,10 +33,42 @@ namespace Ched.UI
 
             NoteView = new NoteView() { Dock = DockStyle.Fill };
 
+            NoteViewScrollBar = new VScrollBar()
+            {
+                Dock = DockStyle.Right,
+                Maximum = 0,
+                Minimum = -NoteView.UnitBeatTick * 4 * 20,
+                SmallChange = NoteView.UnitBeatTick
+            };
+
+            NoteView.Resize += (s, e) =>
+            {
+                NoteViewScrollBar.LargeChange = NoteView.TailTick - NoteView.HeadTick;
+                NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange;
+            };
+
+            NoteViewScrollBar.ValueChanged += (s, e) =>
+            {
+                NoteView.HeadTick = -NoteViewScrollBar.Value / 60 * 60; // 60の倍数できれいに表示されるので…
+                NoteView.Invalidate();
+            };
+
+            NoteViewScrollBar.Scroll += (s, e) =>
+            {
+                if (e.Type == ScrollEventType.EndScroll)
+                {
+                    if (NoteViewScrollBar.Value < NoteViewScrollBar.Minimum / 1.2f)
+                    {
+                        NoteViewScrollBar.Minimum = (int)(NoteViewScrollBar.Minimum * 1.5);
+                    }
+                }
+            };
+
             using (var manager = this.WorkWithLayout())
             {
                 this.Menu = CreateMainMenu(NoteView);
                 this.Controls.Add(NoteView);
+                this.Controls.Add(NoteViewScrollBar);
                 this.Controls.Add(CreateNewNoteTypeToolStrip(NoteView));
                 this.Controls.Add(CreateMainToolStrip(NoteView));
             }
@@ -48,6 +81,8 @@ namespace Ched.UI
         {
             ScoreBook = book;
             NoteView.Load(book.Score.Notes);
+            NoteViewScrollBar.Value = 0;
+            NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             SetText(book.Path);
         }
 

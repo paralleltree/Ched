@@ -1368,6 +1368,16 @@ namespace Ched.UI
                 return AirActionDictionary[note];
             }
 
+            public int GetLastTick()
+            {
+                var shortNotes = Taps.Cast<TappableBase>().Concat(exTaps).Concat(Flicks).Concat(Damages).ToList();
+                var longNotes = Holds.Cast<ILongNote>().Concat(Slides).Concat(AirActions).ToList();
+                int lastShortNoteTick = shortNotes.Count == 0 ? 0 : shortNotes.Max(p => p.Tick);
+                int lastLongNoteTick = longNotes.Count == 0 ? 0 : longNotes.Max(p => p.StartTick + p.GetDuration());
+                return Math.Max(lastShortNoteTick, lastLongNoteTick);
+            }
+
+
             public void Load(Components.NoteCollection collection)
             {
                 Clear();
