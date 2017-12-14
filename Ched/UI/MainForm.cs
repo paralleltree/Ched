@@ -108,6 +108,7 @@ namespace Ched.UI
                 catch (Exception ex)
                 {
                     MessageBox.Show("ファイルの読み込み中にエラーが発生しました。");
+                    Program.DumpException(ex);
                     LoadBook(new ScoreBook());
                 }
             }
