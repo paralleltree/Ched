@@ -18,5 +18,7 @@ deploy:
     secure: KkbkUfg5iFaqdqxRAHRvPZv5+nfF99DyufxN6IijxL2TWoV3QTdkAkrnyNvIPt9+
   artifact: Ched
   draft: true
+  on:
+    branch: master
 cache:
 - packages -> **\packages.config
