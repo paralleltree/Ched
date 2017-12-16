@@ -15,6 +15,12 @@ namespace Ched.Components
     public class EventCollection
     {
         [Newtonsoft.Json.JsonProperty]
-        public List<BPMChangeEvent> BPMChangeEvents { get; set; } = new List<BPMChangeEvent>() { new BPMChangeEvent() { Tick = 0, BPM = 120 } };
+        private List<BPMChangeEvent> bpmChangeEvents = new List<BPMChangeEvent>() { new BPMChangeEvent() { Tick = 0, BPM = 120 } };
+
+        public List<BPMChangeEvent> BPMChangeEvents
+        {
+            get { return bpmChangeEvents; }
+            set { bpmChangeEvents = value; }
+        }
     }
 }

@@ -111,7 +111,9 @@ namespace Ched.Components
                 {
                     gz.CopyTo(stream);
                     string data = Encoding.UTF8.GetString(stream.ToArray());
-                    var res = JsonConvert.DeserializeObject<ScoreBook>(data);
+                    var res = JsonConvert.DeserializeObject<ScoreBook>(data, SerializerSettings);
+                    // デシリアライズ時にリストを置き換えるのではなく各要素がAddされてるようなんですが
+                    res.Score.Events.BPMChangeEvents = res.Score.Events.BPMChangeEvents.Skip(1).ToList();
                     res.Path = path;
                     return res;
                 }
