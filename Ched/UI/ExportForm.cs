@@ -52,6 +52,12 @@ namespace Ched.UI
 
             exportButton.Click += (s, e) =>
             {
+                if (string.IsNullOrEmpty(outputBox.Text)) browseButton.PerformClick();
+                if (string.IsNullOrEmpty(outputBox.Text))
+                {
+                    MessageBox.Show(this, "出力先を指定してください。", "Ched");
+                    return;
+                }
                 book.Title = titleBox.Text;
                 book.ArtistName = artistBox.Text;
                 book.NotesDesignerName = notesDesignerBox.Text;
