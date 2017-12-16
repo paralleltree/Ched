@@ -331,8 +331,12 @@ namespace Ched.UI
                 Width = 80
             };
             quantizeComboBox.Items.AddRange(quantizeTicks.Select(p => p + "分").ToArray());
-            quantizeComboBox.SelectedIndexChanged += (s, e) => noteView.QuantizeTick = noteView.UnitBeatTick * 4 / quantizeTicks[quantizeComboBox.SelectedIndex];
-            quantizeComboBox.SelectedIndex = 0;
+            quantizeComboBox.SelectedIndexChanged += (s, e) =>
+            {
+                noteView.QuantizeTick = noteView.UnitBeatTick * 4 / quantizeTicks[quantizeComboBox.SelectedIndex];
+                NoteView.Focus();
+            };
+            quantizeComboBox.SelectedIndex = 1;
 
             noteView.NewNoteTypeChanged += (s, e) =>
             {
