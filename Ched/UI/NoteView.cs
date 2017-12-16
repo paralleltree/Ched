@@ -40,9 +40,14 @@ namespace Ched.UI
         public Color BeatLineColor { get; set; } = Color.FromArgb(80, 80, 80);
 
         /// <summary>
-        /// レーンのガイド線の色を設定します。
+        /// レーンのガイド線のメインカラーを設定します。
         /// </summary>
-        public Color LaneBorderColor { get; set; } = Color.FromArgb(60, 60, 60);
+        public Color LaneBorderLightColor { get; set; } = Color.FromArgb(60, 60, 60);
+
+        /// <summary>
+        /// レーンのガイド線のサブカラーを設定します。
+        /// </summary>
+        public Color LaneBorderDarkColor { get; set; } = Color.FromArgb(30, 30, 30);
 
         /// <summary>
         /// 1レーンあたりの表示幅を設定します。
@@ -1002,12 +1007,13 @@ namespace Ched.UI
             int tailTick = HeadTick + (int)(ClientSize.Height * UnitBeatTick / UnitBeatHeight);
 
             // レーン分割線描画
-            using (var pen = new Pen(LaneBorderColor, BorderThickness))
+            using (var lightPen = new Pen(LaneBorderLightColor, BorderThickness))
+            using (var darkPen = new Pen(LaneBorderDarkColor, BorderThickness))
             {
                 for (int i = 0; i <= Constants.LanesCount; i++)
                 {
                     float x = i * (UnitLaneWidth + BorderThickness);
-                    pe.Graphics.DrawLine(pen, x, GetYPositionFromTick(HeadTick), x, GetYPositionFromTick(tailTick));
+                    pe.Graphics.DrawLine(i % 2 == 0 ? lightPen : darkPen, x, GetYPositionFromTick(HeadTick), x, GetYPositionFromTick(tailTick));
                 }
             }
 
