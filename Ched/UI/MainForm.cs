@@ -139,8 +139,20 @@ namespace Ched.UI
                 SaveAs();
                 return;
             }
-            ScoreBook.Score.Notes = new NoteCollection(NoteView.Notes);
+            CommitChanges();
             ScoreBook.Save();
+        }
+
+        protected void ExportFile()
+        {
+            CommitChanges();
+            var dialog = new ExportForm(ScoreBook);
+            dialog.ShowDialog(this);
+        }
+
+        protected void CommitChanges()
+        {
+            ScoreBook.Score.Notes = new NoteCollection(NoteView.Notes);
         }
 
         protected void ClearFile()
@@ -169,6 +181,7 @@ namespace Ched.UI
                 new MenuItem("開く(&O)", (s, e) => LoadFile()) { Shortcut = Shortcut.CtrlO },
                 new MenuItem("上書き保存(&S)", (s, e) => SaveFile()) { Shortcut = Shortcut.CtrlS },
                 new MenuItem("名前を付けて保存(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
+                new MenuItem("エクスポート", (s, e) => ExportFile()),
                 new MenuItem("-"),
                 new MenuItem("終了(&X)", (s, e) => this.Close())
             };
@@ -216,6 +229,10 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
             var saveFileButton = new ToolStripButton("上書き保存", Resources.SaveFileIcon, (s, e) => SaveFile())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+            var exportButton = new ToolStripButton("エクスポート", Resources.ExportIcon, (s, e) => ExportFile())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
