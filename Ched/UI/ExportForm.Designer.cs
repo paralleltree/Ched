@@ -152,7 +152,7 @@
             this.browseButton.Location = new System.Drawing.Point(305, 287);
             this.browseButton.Name = "browseButton";
             this.browseButton.Size = new System.Drawing.Size(75, 23);
-            this.browseButton.TabIndex = 10;
+            this.browseButton.TabIndex = 25;
             this.browseButton.Text = "参照";
             this.browseButton.UseVisualStyleBackColor = true;
             // 
@@ -186,7 +186,7 @@
             -2147483648});
             this.soundOffsetBox.Name = "soundOffsetBox";
             this.soundOffsetBox.Size = new System.Drawing.Size(67, 19);
-            this.soundOffsetBox.TabIndex = 12;
+            this.soundOffsetBox.TabIndex = 21;
             this.soundOffsetBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // bpmBox
@@ -205,7 +205,7 @@
             0});
             this.bpmBox.Name = "bpmBox";
             this.bpmBox.Size = new System.Drawing.Size(68, 19);
-            this.bpmBox.TabIndex = 13;
+            this.bpmBox.TabIndex = 23;
             this.bpmBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.bpmBox.Value = new decimal(new int[] {
             120,
@@ -270,14 +270,14 @@
             this.jacketFileBox.Location = new System.Drawing.Point(119, 215);
             this.jacketFileBox.Name = "jacketFileBox";
             this.jacketFileBox.Size = new System.Drawing.Size(178, 19);
-            this.jacketFileBox.TabIndex = 21;
+            this.jacketFileBox.TabIndex = 22;
             // 
             // outputBox
             // 
             this.outputBox.Location = new System.Drawing.Point(16, 289);
             this.outputBox.Name = "outputBox";
             this.outputBox.Size = new System.Drawing.Size(281, 19);
-            this.outputBox.TabIndex = 22;
+            this.outputBox.TabIndex = 24;
             // 
             // label12
             // 
@@ -293,7 +293,7 @@
             this.exportButton.Location = new System.Drawing.Point(16, 323);
             this.exportButton.Name = "exportButton";
             this.exportButton.Size = new System.Drawing.Size(364, 23);
-            this.exportButton.TabIndex = 24;
+            this.exportButton.TabIndex = 26;
             this.exportButton.Text = "エクスポート";
             this.exportButton.UseVisualStyleBackColor = true;
             // 
@@ -327,6 +327,9 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "ExportForm";
             this.Text = "エクスポート";
             ((System.ComponentModel.ISupportInitialize)(this.soundOffsetBox)).EndInit();
