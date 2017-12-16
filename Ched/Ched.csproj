@@ -36,6 +36,10 @@
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ConcurrentPriorityQueue, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PriorityQueue.0.1.0\lib\net45\ConcurrentPriorityQueue.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -78,6 +82,8 @@
     <Compile Include="Components\EventCollection.cs" />
     <Compile Include="Components\Events\BPMChangeEvent.cs" />
     <Compile Include="Components\Events\EventBase.cs" />
+    <Compile Include="Components\Exporter\IExporter.cs" />
+    <Compile Include="Components\Exporter\SusExporter.cs" />
     <Compile Include="Components\NoteCollection.cs" />
     <Compile Include="Components\Notes\Air.cs" />
     <Compile Include="Components\Notes\AirAction.cs" />
