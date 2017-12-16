@@ -1,0 +1,22 @@
+version: '{build}'
+os: Visual Studio 2015
+configuration: Release
+platform: Any CPU
+skip_tags: true
+before_build:
+- ps: >-
+    nuget restore
+build:
+  verbosity: minimal
+artifacts:
+- path: Ched\bin\$(configuration)
+  name: Ched
+deploy:
+- provider: GitHub
+  release: Ched
+  auth_token:
+    secure: KkbkUfg5iFaqdqxRAHRvPZv5+nfF99DyufxN6IijxL2TWoV3QTdkAkrnyNvIPt9+
+  artifact: Ched
+  draft: true
+cache:
+- packages -> **\packages.config
