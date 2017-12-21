@@ -271,7 +271,7 @@ namespace Ched.UI
 
             return new ToolStrip(new ToolStripItem[]
             {
-                newFileButton, openFileButton, saveFileButton, new ToolStripSeparator(),
+                newFileButton, openFileButton, saveFileButton, exportButton, new ToolStripSeparator(),
                 undoButton, redoButton, new ToolStripSeparator(),
                 penButton, eraserButton
             });
