@@ -86,6 +86,25 @@ namespace Ched.UI
             LoadBook(new ScoreBook());
         }
 
+        public MainForm(string filePath) : this()
+        {
+            LoadFile(filePath);
+        }
+
+        protected void LoadFile(string filePath)
+        {
+            try
+            {
+                LoadBook(ScoreBook.LoadFile(filePath));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("ファイルの読み込み中にエラーが発生しました。");
+                Program.DumpException(ex);
+                LoadBook(new ScoreBook());
+            }
+        }
+
         protected void LoadBook(ScoreBook book)
         {
             ScoreBook = book;
@@ -95,7 +114,7 @@ namespace Ched.UI
             SetText(book.Path);
         }
 
-        protected void LoadFile()
+        protected void OpenFile()
         {
             var dialog = new OpenFileDialog()
             {
@@ -104,16 +123,7 @@ namespace Ched.UI
 
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
-                try
-                {
-                    LoadBook(ScoreBook.LoadFile(dialog.FileName));
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("ファイルの読み込み中にエラーが発生しました。");
-                    Program.DumpException(ex);
-                    LoadBook(new ScoreBook());
-                }
+                LoadFile(dialog.FileName);
             }
         }
 
@@ -178,7 +188,7 @@ namespace Ched.UI
             var fileMenuItems = new MenuItem[]
             {
                 new MenuItem("新規作成(&N)", (s, e) => ClearFile()) { Shortcut = Shortcut.CtrlN },
-                new MenuItem("開く(&O)", (s, e) => LoadFile()) { Shortcut = Shortcut.CtrlO },
+                new MenuItem("開く(&O)", (s, e) => OpenFile()) { Shortcut = Shortcut.CtrlO },
                 new MenuItem("上書き保存(&S)", (s, e) => SaveFile()) { Shortcut = Shortcut.CtrlS },
                 new MenuItem("名前を付けて保存(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
                 new MenuItem("エクスポート", (s, e) => ExportFile()),
@@ -224,7 +234,7 @@ namespace Ched.UI
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
-            var openFileButton = new ToolStripButton("開く", Resources.OpenFileIcon, (s, e) => LoadFile())
+            var openFileButton = new ToolStripButton("開く", Resources.OpenFileIcon, (s, e) => OpenFile())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };

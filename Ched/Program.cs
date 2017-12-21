@@ -13,7 +13,7 @@ namespace Ched
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
 #if !DEBUG
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
@@ -22,7 +22,7 @@ namespace Ched
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new UI.MainForm());
+            Application.Run(args.Length == 0 ? new UI.MainForm() : new UI.MainForm(args[0]));
         }
 
         public static void DumpException(Exception ex)
