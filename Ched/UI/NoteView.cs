@@ -221,7 +221,7 @@ namespace Ched.UI
                     {
                         foreach (var action in note.ActionNotes)
                         {
-                            RectangleF noteRect = GetRectFromNotePosition(note.ParentNote.Tick + action.Offset, note.ParentNote.LaneIndex, note.ParentNote.Width);
+                            RectangleF noteRect = GetClickableRectFromNotePosition(note.ParentNote.Tick + action.Offset, note.ParentNote.LaneIndex, note.ParentNote.Width);
                             if (noteRect.Contains(scorePos))
                             {
                                 int beforeOffset = action.Offset;
@@ -298,7 +298,7 @@ namespace Ched.UI
 
                     Func<TappableBase, IObservable<MouseEventArgs>> shortNoteHandler = note =>
                     {
-                        RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                        RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                         RectangleF leftThumb = new RectangleF(rect.X, rect.Y, rect.Width * 0.2f, rect.Height);
                         RectangleF rightThumb = new RectangleF(rect.Right - rect.Width * 0.2f, rect.Y, rect.Width * 0.2f, rect.Height);
                         // ノートの左側
@@ -380,7 +380,7 @@ namespace Ched.UI
                     {
                         foreach (var step in slide.StepNotes)
                         {
-                            RectangleF stepRect = GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
+                            RectangleF stepRect = GetClickableRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
                             // AIR or AIR-ACTION追加時で最終Stepだったら動かさない
                             if (stepRect.Contains(scorePos) && (slide.StepNotes.Max(q => q.TickOffset) != step.TickOffset || !(NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType)))
                             {
@@ -394,7 +394,7 @@ namespace Ched.UI
                             }
                         }
 
-                        RectangleF startRect = GetRectFromNotePosition(slide.StartNote.Tick, slide.StartNote.LaneIndex, slide.StartNote.Width);
+                        RectangleF startRect = GetClickableRectFromNotePosition(slide.StartNote.Tick, slide.StartNote.LaneIndex, slide.StartNote.Width);
                         RectangleF leftThumbRect = new RectangleF(startRect.Left, startRect.Top, startRect.Width * 0.2f, startRect.Height);
                         RectangleF rightThumbRect = new RectangleF(startRect.Right - startRect.Width * 0.2f, startRect.Top, startRect.Width * 0.2f, startRect.Height);
 
@@ -476,14 +476,14 @@ namespace Ched.UI
                     Func<Hold, IObservable<MouseEventArgs>> holdHandler = hold =>
                     {
                         // HOLD長さ変更
-                        if (GetRectFromNotePosition(hold.EndNote.Tick, hold.LaneIndex, hold.Width).Contains(scorePos) && !(NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType))
+                        if (GetClickableRectFromNotePosition(hold.EndNote.Tick, hold.LaneIndex, hold.Width).Contains(scorePos) && !(NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType))
                         {
                             int beforeDuration = hold.Duration;
                             return holdDurationHandler(hold)
                                 .Finally(() => OperationManager.Push(new ChangeHoldDurationOperation(hold, beforeDuration, hold.Duration)));
                         }
 
-                        RectangleF startRect = GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                        RectangleF startRect = GetClickableRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
                         RectangleF leftThumbRect = new RectangleF(startRect.Left, startRect.Top, startRect.Width * 0.2f, startRect.Height);
                         RectangleF rightThumbRect = new RectangleF(startRect.Right - startRect.Width * 0.2f, startRect.Top, startRect.Width * 0.2f, startRect.Height);
 
@@ -724,7 +724,7 @@ namespace Ched.UI
                             case NoteType.Air:
                                 foreach (var note in airables)
                                 {
-                                    RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                                    RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                                     if (rect.Contains(scorePos))
                                     {
                                         // 既に配置されていれば追加しない
@@ -774,7 +774,7 @@ namespace Ched.UI
 
                                 foreach (var note in airables)
                                 {
-                                    RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                                    RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                                     if (rect.Contains(scorePos))
                                     {
                                         // 既に配置されていれば追加しない
@@ -839,7 +839,7 @@ namespace Ched.UI
                     {
                         foreach (var action in note.ActionNotes)
                         {
-                            RectangleF rect = GetRectFromNotePosition(note.StartTick + action.Offset, note.ParentNote.LaneIndex, note.ParentNote.Width);
+                            RectangleF rect = GetClickableRectFromNotePosition(note.StartTick + action.Offset, note.ParentNote.LaneIndex, note.ParentNote.Width);
                             if (rect.Contains(scorePos))
                             {
                                 if (note.ActionNotes.Count == 1)
@@ -859,7 +859,7 @@ namespace Ched.UI
 
                     foreach (var note in Notes.Flicks)
                     {
-                        RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                        RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                         if (rect.Contains(scorePos))
                         {
                             var airOp = removeReferencedAirs(note).ToList();
@@ -879,7 +879,7 @@ namespace Ched.UI
 
                     foreach (var note in Notes.Damages)
                     {
-                        RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                        RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                         if (rect.Contains(scorePos))
                         {
                             var airOp = removeReferencedAirs(note).ToList();
@@ -899,7 +899,7 @@ namespace Ched.UI
 
                     foreach (var note in Notes.ExTaps)
                     {
-                        RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                        RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                         if (rect.Contains(scorePos))
                         {
                             var airOp = removeReferencedAirs(note).ToList();
@@ -919,7 +919,7 @@ namespace Ched.UI
 
                     foreach (var note in Notes.Taps)
                     {
-                        RectangleF rect = GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                        RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                         if (rect.Contains(scorePos))
                         {
                             var airOp = removeReferencedAirs(note).ToList();
@@ -941,7 +941,7 @@ namespace Ched.UI
                     {
                         foreach (var step in slide.StepNotes.OrderBy(q => q.TickOffset).Take(slide.StepNotes.Count - 1))
                         {
-                            RectangleF rect = GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
+                            RectangleF rect = GetClickableRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
                             if (rect.Contains(scorePos))
                             {
                                 slide.StepNotes.Remove(step);
@@ -950,7 +950,7 @@ namespace Ched.UI
                             }
                         }
 
-                        RectangleF startRect = GetRectFromNotePosition(slide.StartTick, slide.StartLaneIndex, slide.Width);
+                        RectangleF startRect = GetClickableRectFromNotePosition(slide.StartTick, slide.StartLaneIndex, slide.Width);
                         if (startRect.Contains(scorePos))
                         {
                             var airOp = slide.StepNotes.SelectMany(q => removeReferencedAirs(q)).ToList();
@@ -970,7 +970,7 @@ namespace Ched.UI
 
                     foreach (var hold in Notes.Holds)
                     {
-                        RectangleF rect = GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                        RectangleF rect = GetClickableRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
                         if (rect.Contains(scorePos))
                         {
                             var airOp = removeReferencedAirs(hold.EndNote).ToList();
@@ -1196,6 +1196,11 @@ namespace Ched.UI
                 (UnitLaneWidth + BorderThickness) * width - BorderThickness,
                 ShortNoteHeight
                 );
+        }
+
+        private RectangleF GetClickableRectFromNotePosition(int tick, int laneIndex, int width)
+        {
+            return GetRectFromNotePosition(tick, laneIndex, width).Expand(1);
         }
 
         public void Undo()

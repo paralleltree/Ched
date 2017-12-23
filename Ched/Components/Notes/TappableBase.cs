@@ -10,7 +10,6 @@ namespace Ched.Components.Notes
 {
     public abstract class TapBase : ShortNoteBase
     {
-
         internal virtual void Draw(Graphics g, RectangleF rect)
         {
             DrawNote(g, rect);
