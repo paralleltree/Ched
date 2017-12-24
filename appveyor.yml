@@ -8,8 +8,15 @@ before_build:
     nuget restore
 build:
   verbosity: minimal
+after_build:
+- ps: >-
+    $artifacts = "Binaries\Ched"
+
+    New-Item -Type directory $artifacts
+
+    Get-ChildItem **\bin\$env:CONFIGURATION\* -Recurse -Include *.exe, *.dll, *.config | Copy-Item -Destination $artifacts
 artifacts:
-- path: Ched\bin\$(configuration)
+- path: Binaries\Ched
   name: Ched
 deploy:
 - provider: GitHub
