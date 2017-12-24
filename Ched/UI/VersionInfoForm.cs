@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Reflection;
+using Ched.Properties;
 
 namespace Ched.UI
 {
@@ -23,7 +24,7 @@ namespace Ched.UI
             labelVersion.Text = string.Format("Version {0}", asm.GetName().Version.ToString());
             labelProduct.Text = asm.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright;
 
-            pictureBox1.Image = Bitmap.FromHicon(new Icon(@"C:\Users\paltee\Documents\Visual Studio 2015\Projects\Ched\icon.ico").Handle);
+            pictureBox1.Image = Bitmap.FromHicon(Resources.MainIcon.Handle);
 
             buttonClose.Click += (s, e) => Close();
         }
