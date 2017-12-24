@@ -16,7 +16,7 @@ after_build:
 
     Get-ChildItem **\bin\$env:CONFIGURATION\* -Recurse -Include *.exe, *.dll, *.config | Copy-Item -Destination $artifacts
 artifacts:
-- path: Binaries\Ched
+- path: Binaries
   name: Ched
 deploy:
 - provider: GitHub
