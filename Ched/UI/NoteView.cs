@@ -1315,12 +1315,24 @@ namespace Ched.UI
                         pos += (sigs[j + 1].Tick - pos) / currentBarLength * currentBarLength;
                 }
 
+                float rightBase = (UnitLaneWidth + BorderThickness) * Constants.LanesCount + strSize.Width / 3;
+
+                // BPM描画
+                using (var bpmBrush = new SolidBrush(Color.FromArgb(0, 192, 0)))
+                {
+                    foreach (var item in ScoreEvents.BPMChangeEvents.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
+                    {
+                        var point = new PointF(rightBase, -GetYPositionFromTick(item.Tick) - strSize.Height);
+                        pe.Graphics.DrawString(item.BPM.ToString().PadLeft(3), font, Brushes.Lime, point);
+                    }
+                }
+
                 // 拍子記号描画
                 using (var sigBrush = new SolidBrush(Color.FromArgb(216, 116, 0)))
                 {
                     foreach (var item in sigs.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
                     {
-                        var point = new PointF((UnitLaneWidth + BorderThickness) * Constants.LanesCount + strSize.Width / 3, -GetYPositionFromTick(item.Tick) - strSize.Height);
+                        var point = new PointF(rightBase + strSize.Width, -GetYPositionFromTick(item.Tick) - strSize.Height);
                         pe.Graphics.DrawString(string.Format("{0}/{1}", item.Numerator, item.Denominator), font, sigBrush, point);
                     }
                 }
