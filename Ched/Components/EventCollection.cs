@@ -16,11 +16,19 @@ namespace Ched.Components
     {
         [Newtonsoft.Json.JsonProperty]
         private List<BPMChangeEvent> bpmChangeEvents = new List<BPMChangeEvent>() { new BPMChangeEvent() { Tick = 0, BPM = 120 } };
+        [Newtonsoft.Json.JsonProperty]
+        private List<TimeSignatureChangeEvent> timeSignatureChangeEvents = new List<TimeSignatureChangeEvent>() { new TimeSignatureChangeEvent() { Tick = 0, Numerator = 4, DenominatorExponent = 2 } };
 
         public List<BPMChangeEvent> BPMChangeEvents
         {
             get { return bpmChangeEvents; }
             set { bpmChangeEvents = value; }
+        }
+
+        public List<TimeSignatureChangeEvent> TimeSignatureChangeEvents
+        {
+            get { return timeSignatureChangeEvents; }
+            set { timeSignatureChangeEvents = value; }
         }
     }
 }

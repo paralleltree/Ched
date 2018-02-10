@@ -113,7 +113,10 @@ namespace Ched.Components
                     string data = Encoding.UTF8.GetString(stream.ToArray());
                     var res = JsonConvert.DeserializeObject<ScoreBook>(data, SerializerSettings);
                     // デシリアライズ時にリストを置き換えるのではなく各要素がAddされてるようなんですが
-                    res.Score.Events.BPMChangeEvents = res.Score.Events.BPMChangeEvents.Skip(1).ToList();
+                    if (res.Score.Events.BPMChangeEvents.Count > 1)
+                        res.Score.Events.BPMChangeEvents = res.Score.Events.BPMChangeEvents.Skip(1).ToList();
+                    if (res.Score.Events.TimeSignatureChangeEvents.Count > 1)
+                        res.Score.Events.TimeSignatureChangeEvents = res.Score.Events.TimeSignatureChangeEvents.Skip(1).ToList();
                     // 循環参照は復元できないねん……
                     foreach (var note in res.Score.Notes.AirActions)
                     {
