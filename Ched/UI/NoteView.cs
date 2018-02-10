@@ -163,6 +163,8 @@ namespace Ched.UI
 
         public NoteCollection Notes { get; } = new NoteCollection();
 
+        public EventCollection ScoreEvents { get; set; } = new EventCollection();
+
         protected OperationManager OperationManager { get; } = new OperationManager();
 
         protected CompositeDisposable Subscriptions { get; } = new CompositeDisposable();
@@ -1019,14 +1021,38 @@ namespace Ched.UI
 
 
             // 時間ガイドの描画
+            // そのイベントが含まれる小節(ただし[小節開始Tick, 小節開始Tick + 小節Tick)の範囲)からその拍子を適用
+            var sigs = ScoreEvents.TimeSignatureChangeEvents.OrderBy(p => p.Tick).ToList();
+
             using (var beatPen = new Pen(BeatLineColor, BorderThickness))
             using (var barPen = new Pen(BarLineColor, BorderThickness))
             {
-                for (int i = HeadTick / UnitBeatTick; i * UnitBeatTick < tailTick; i++)
+                // 最初の拍子
+                int firstBarLength = UnitBeatTick * 4 * sigs[0].Numerator / sigs[0].Denominator;
+                int barTick = UnitBeatTick * 4;
+
+                for (int i = HeadTick / (barTick / sigs[0].Denominator); sigs.Count < 2 || i * barTick / sigs[0].Denominator < sigs[1].Tick / firstBarLength * firstBarLength; i++)
                 {
-                    float y = i * UnitBeatHeight;
-                    // 4分の4拍子で1小節ごとに小節区切り
-                    pe.Graphics.DrawLine(i % 4 == 0 ? barPen : beatPen, 0, y, laneWidth, y);
+                    int tick = i * barTick / sigs[0].Denominator;
+                    float y = GetYPositionFromTick(tick);
+                    pe.Graphics.DrawLine(i % sigs[0].Numerator == 0 ? barPen : beatPen, 0, y, laneWidth, y);
+                    if (tick > tailTick) break;
+                }
+
+                // その後の拍子
+                int pos = 0;
+                for (int j = 1; j < sigs.Count; j++)
+                {
+                    int prevBarLength = barTick * sigs[j - 1].Numerator / sigs[j - 1].Denominator;
+                    int currentBarLength = barTick * sigs[j].Numerator / sigs[j].Denominator;
+                    pos += (sigs[j].Tick - pos) / prevBarLength * prevBarLength;
+                    if (pos > tailTick) break;
+                    for (int i = HeadTick - pos < 0 ? 0 : (HeadTick - pos) / (barTick / sigs[j].Denominator); pos + i * (barTick / sigs[j].Denominator) < tailTick; i++)
+                    {
+                        if (j < sigs.Count - 1 && i * barTick / sigs[j].Denominator >= (sigs[j + 1].Tick - pos) / currentBarLength * currentBarLength) break;
+                        float y = GetYPositionFromTick(pos + i * barTick / sigs[j].Denominator);
+                        pe.Graphics.DrawLine(i % sigs[j].Numerator == 0 ? barPen : beatPen, 0, y, laneWidth, y);
+                    }
                 }
             }
 
@@ -1137,14 +1163,33 @@ namespace Ched.UI
             // Y軸反転させずにTick = 0をY軸原点とする座標系へ
             pe.Graphics.Transform = GetDrawingMatrix(prevMatrix, false);
 
-            Font font = new Font("MS Gothic", 8);
-            SizeF strSize = pe.Graphics.MeasureString("000", font);
-
-            // 小節番号描画(4分の4拍子)
-            for (int i = HeadTick / UnitBeatTick / 4; i * UnitBeatTick * 4 <= tailTick; i++)
+            using (var font = new Font("MS Gothic", 8))
             {
-                var point = new PointF(-strSize.Width, -GetYPositionFromTick(i * UnitBeatTick * 4) - strSize.Height);
-                pe.Graphics.DrawString(string.Format("{0:000}", i + 1), font, Brushes.White, point);
+                SizeF strSize = pe.Graphics.MeasureString("000", font);
+
+                // 小節番号描画
+                int barTick = UnitBeatTick * 4;
+                int barCount = 0;
+                int pos = 0;
+
+                for (int j = 0; j < sigs.Count; j++)
+                {
+                    if (pos > tailTick) break;
+                    int currentBarLength = (UnitBeatTick * 4) * sigs[j].Numerator / sigs[j].Denominator;
+                    for (int i = 0; pos + i * currentBarLength < tailTick; i++)
+                    {
+                        if (j < sigs.Count - 1 && i * currentBarLength >= (sigs[j + 1].Tick - pos) / currentBarLength * currentBarLength) break;
+
+                        int tick = pos + i * currentBarLength;
+                        barCount++;
+                        if (tick < HeadTick) continue;
+                        var point = new PointF(-strSize.Width, -GetYPositionFromTick(tick) - strSize.Height);
+                        pe.Graphics.DrawString(string.Format("{0:000}", barCount), font, Brushes.White, point);
+                    }
+
+                    if (j < sigs.Count - 1)
+                        pos += (sigs[j + 1].Tick - pos) / currentBarLength * currentBarLength;
+                }
             }
 
             pe.Graphics.Transform = prevMatrix;
@@ -1218,9 +1263,10 @@ namespace Ched.UI
         }
 
 
-        public void Load(Components.NoteCollection collection)
+        public void LoadScore(Score score)
         {
-            Notes.Load(collection);
+            Notes.Load(score.Notes);
+            ScoreEvents = score.Events;
             OperationManager.Clear();
             Invalidate();
         }

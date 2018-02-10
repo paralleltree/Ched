@@ -108,7 +108,7 @@ namespace Ched.UI
         protected void LoadBook(ScoreBook book)
         {
             ScoreBook = book;
-            NoteView.Load(book.Score.Notes);
+            NoteView.LoadScore(book.Score);
             NoteViewScrollBar.Value = 0;
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             SetText(book.Path);
@@ -163,6 +163,7 @@ namespace Ched.UI
         protected void CommitChanges()
         {
             ScoreBook.Score.Notes = new NoteCollection(NoteView.Notes);
+            // Eventsは参照渡ししてますよん
         }
 
         protected void ClearFile()
