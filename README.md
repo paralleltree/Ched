@@ -2,14 +2,22 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/pq1lght43m7ytlv1?svg=true)](https://ci.appveyor.com/project/paralleltree/ched)
 
-CHUNITHM Notes Editor
-
 ## 概要
-Chedは、CHUNITHM用のスコアエディタです。
+Chedは、CHUNITHM用の譜面エディタです。
+
+既知のバグについては[Issues](https://github.com/paralleltree/Ched/issues)を参照してください。
 
 ## ダウンロード
 
-現在の最新版は[v1.0.0](https://github.com/paralleltree/Ched/releases)です。
+現在の最新版は[v1.0.3](https://github.com/paralleltree/Ched/releases)です。
+
+## 使い方
+
+[Wiki](https://github.com/paralleltree/Ched/wiki)を参照してください。
+
+## 対応フォーマット
+
+  * [Seaurchin Score File(sus形式)](https://seaurchin.kb10uy.org)
 
 ## ライセンス
 ChedはMITライセンスです。

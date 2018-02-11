@@ -114,6 +114,13 @@ namespace Ched.Components
                     var res = JsonConvert.DeserializeObject<ScoreBook>(data, SerializerSettings);
                     // デシリアライズ時にリストを置き換えるのではなく各要素がAddされてるようなんですが
                     res.Score.Events.BPMChangeEvents = res.Score.Events.BPMChangeEvents.Skip(1).ToList();
+                    // 循環参照は復元できないねん……
+                    foreach (var note in res.Score.Notes.AirActions)
+                    {
+                        var restored = new List<Notes.AirAction.ActionNote>(note.ActionNotes.Select(p => new Notes.AirAction.ActionNote(note) { Offset = p.Offset }));
+                        note.ActionNotes.Clear();
+                        note.ActionNotes.AddRange(restored);
+                    }
                     res.Path = path;
                     return res;
                 }
