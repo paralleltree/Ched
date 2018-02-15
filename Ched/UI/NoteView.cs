@@ -32,6 +32,7 @@ namespace Ched.UI
         private int shortNoteHeight = 5;
         private float unitBeatHeight = 120;
 
+        private bool editable = true;
         private EditMode editMode = EditMode.Edit;
         private NoteType newNoteType = NoteType.Tap;
         private AirDirection airDirection = new AirDirection(VerticalAirDirection.Up, HorizontalAirDirection.Center);
@@ -166,6 +167,19 @@ namespace Ched.UI
         }
 
         /// <summary>
+        /// ノーツが編集可能かどうかを示す値を設定します。
+        /// </summary>
+        public bool Editable
+        {
+            get { return editable; }
+            set
+            {
+                editable = value;
+                Cursor = value ? Cursors.Default : Cursors.No;
+            }
+        }
+
+        /// <summary>
         /// 編集モードを設定します。
         /// </summary>
         public EditMode EditMode
@@ -252,6 +266,7 @@ namespace Ched.UI
             var mouseUp = this.MouseUpAsObservable();
 
             var editSubscription = mouseDown
+                .Where(p => Editable)
                 .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Edit)
                 .SelectMany(p =>
                 {
@@ -860,6 +875,7 @@ namespace Ched.UI
                 }).Subscribe(p => Invalidate());
 
             var eraseSubscription = mouseDown
+                .Where(p => Editable)
                 .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Erase)
                 .SelectMany(p => mouseMove
                     .TakeUntil(mouseUp)
@@ -1154,6 +1170,7 @@ namespace Ched.UI
                 slide.StartNote.Draw(pe.Graphics, GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.Width));
                 foreach (var step in slide.StepNotes)
                 {
+                    if (!Editable && !step.IsVisible) continue;
                     step.Draw(pe.Graphics, GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width));
                 }
             }

@@ -211,6 +211,7 @@ namespace Ched.UI
             {
                 var item = (MenuItem)s;
                 item.Checked = !item.Checked;
+                NoteView.Editable = !item.Checked;
                 NoteView.LaneBorderLightColor = item.Checked ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
                 NoteView.LaneBorderDarkColor = item.Checked ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
                 NoteView.UnitLaneWidth = item.Checked ? 4 : 12;
