@@ -38,7 +38,6 @@ namespace Ched.UI
             NoteViewScrollBar = new VScrollBar()
             {
                 Dock = DockStyle.Right,
-                Maximum = 0,
                 Minimum = -NoteView.UnitBeatTick * 4 * 20,
                 SmallChange = NoteView.UnitBeatTick
             };
@@ -46,7 +45,7 @@ namespace Ched.UI
             NoteView.Resize += (s, e) =>
             {
                 NoteViewScrollBar.LargeChange = NoteView.TailTick - NoteView.HeadTick;
-                NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange;
+                NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.UnitBeatTick / 8;
             };
 
             NoteViewScrollBar.ValueChanged += (s, e) =>
@@ -109,7 +108,7 @@ namespace Ched.UI
         {
             ScoreBook = book;
             NoteView.Load(book.Score.Notes);
-            NoteViewScrollBar.Value = 0;
+            NoteViewScrollBar.Value = NoteViewScrollBar.Maximum - NoteViewScrollBar.LargeChange + 1;
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             SetText(book.Path);
         }
