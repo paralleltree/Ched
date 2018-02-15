@@ -160,8 +160,8 @@ namespace Ched.Components.Exporter
                         for (int i = 0; i * gcd < barLength; i++)
                         {
                             int tickOffset = i * gcd;
-                            if (hold.StartTick % barLength == tickOffset) writer.Write("1" + ToLaneWidthString(hold.Width));
-                            else if (hold.EndTick % barLength == tickOffset) writer.Write("2" + ToLaneWidthString(hold.Width));
+                            if (startBarPosition.TickOffset == tickOffset) writer.Write("1" + ToLaneWidthString(hold.Width));
+                            else if (endBarPosition.TickOffset == tickOffset) writer.Write("2" + ToLaneWidthString(hold.Width));
                             else writer.Write("00");
                         }
                         writer.WriteLine();
@@ -175,7 +175,7 @@ namespace Ched.Components.Exporter
                         for (int i = 0; i * gcd < startBarLength; i++)
                         {
                             int tickOffset = i * gcd;
-                            if (hold.StartTick % startBarLength == tickOffset) writer.Write("1" + ToLaneWidthString(hold.Width));
+                            if (startBarPosition.TickOffset == tickOffset) writer.Write("1" + ToLaneWidthString(hold.Width));
                             else writer.Write("00");
                         }
                         writer.WriteLine();
@@ -187,7 +187,7 @@ namespace Ched.Components.Exporter
                         for (int i = 0; i * gcd < endBarLength; i++)
                         {
                             int tickOffset = i * gcd;
-                            if (hold.EndTick % endBarLength == tickOffset) writer.Write("2" + ToLaneWidthString(hold.Width));
+                            if (endBarPosition.TickOffset == tickOffset) writer.Write("2" + ToLaneWidthString(hold.Width));
                             else writer.Write("00");
                         }
                         writer.WriteLine();
