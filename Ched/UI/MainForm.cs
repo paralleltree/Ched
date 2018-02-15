@@ -207,6 +207,19 @@ namespace Ched.UI
             };
             var editMenuItems = new MenuItem[] { undoItem, redoItem };
 
+            var viewModeItem = new MenuItem("譜面プレビュー", (s, e) =>
+            {
+                var item = (MenuItem)s;
+                item.Checked = !item.Checked;
+                NoteView.LaneBorderLightColor = item.Checked ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
+                NoteView.LaneBorderDarkColor = item.Checked ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
+                NoteView.UnitLaneWidth = item.Checked ? 4 : 12;
+                NoteView.ShortNoteHeight = item.Checked ? 4 : 5;
+                NoteView.UnitBeatHeight = item.Checked ? 48 : 120;
+            });
+
+            var viewMenuItems = new MenuItem[] { viewModeItem };
+
             var helpMenuItems = new MenuItem[]
             {
                 new MenuItem("公式サイトを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched")),
@@ -223,6 +236,7 @@ namespace Ched.UI
             {
                 new MenuItem("ファイル(&F)", fileMenuItems),
                 new MenuItem("編集(&E)", editMenuItems),
+                new MenuItem("表示(&V)", viewMenuItems),
                 new MenuItem("ヘルプ(&H)", helpMenuItems)
             });
         }
