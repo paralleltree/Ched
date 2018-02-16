@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Ched")]
-[assembly: AssemblyDescription("CHUNITHM Note Editor")]
+[assembly: AssemblyDescription("CHUNITHM Notes Editor")]
 [assembly: AssemblyCompany("paltee.net")]
 [assembly: AssemblyProduct("Ched")]
 [assembly: AssemblyCopyright("Copyright (C) 2017 Paralleltree")]
