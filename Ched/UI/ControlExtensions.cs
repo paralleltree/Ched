@@ -38,6 +38,11 @@ namespace Ched.UI
                      h => control.MouseUp += h,
                      h => control.MouseUp -= h);
         }
+
+        public static int GetMaximumValue(this ScrollBar scrollbar)
+        {
+            return scrollbar.Maximum - scrollbar.LargeChange + 1;
+        }
     }
 
     internal class LayoutManager : IDisposable

@@ -42,10 +42,25 @@ namespace Ched.UI
                 SmallChange = NoteView.UnitBeatTick
             };
 
+            Action<ScrollBar> processScrollBarRangeExtension = s =>
+            {
+                if (NoteViewScrollBar.Value < NoteViewScrollBar.Minimum * 0.9f)
+                {
+                    NoteViewScrollBar.Minimum = (int)(NoteViewScrollBar.Minimum * 1.2);
+                }
+            };
+
             NoteView.Resize += (s, e) =>
             {
                 NoteViewScrollBar.LargeChange = NoteView.TailTick - NoteView.HeadTick;
                 NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.UnitBeatTick / 8;
+            };
+
+            NoteView.MouseWheel += (s, e) =>
+            {
+                int value = NoteViewScrollBar.Value - e.Delta / 120 * NoteViewScrollBar.SmallChange;
+                NoteViewScrollBar.Value = Math.Min(Math.Max(value, NoteViewScrollBar.Minimum), NoteViewScrollBar.GetMaximumValue());
+                processScrollBarRangeExtension(NoteViewScrollBar);
             };
 
             NoteViewScrollBar.ValueChanged += (s, e) =>
@@ -58,10 +73,7 @@ namespace Ched.UI
             {
                 if (e.Type == ScrollEventType.EndScroll)
                 {
-                    if (NoteViewScrollBar.Value < NoteViewScrollBar.Minimum / 1.2f)
-                    {
-                        NoteViewScrollBar.Minimum = (int)(NoteViewScrollBar.Minimum * 1.5);
-                    }
+                    processScrollBarRangeExtension(NoteViewScrollBar);
                 }
             };
 
@@ -108,7 +120,7 @@ namespace Ched.UI
         {
             ScoreBook = book;
             NoteView.Load(book.Score.Notes);
-            NoteViewScrollBar.Value = NoteViewScrollBar.Maximum - NoteViewScrollBar.LargeChange + 1;
+            NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             SetText(book.Path);
         }
