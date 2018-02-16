@@ -322,7 +322,7 @@ namespace Ched.UI
                             .Do(q =>
                             {
                                 var currentScorePos = matrix.TransformPoint(q.Location);
-                                note.Tick = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y));
+                                note.Tick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int laneIndex = beforeLaneIndex + xdiff;
                                 note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
@@ -535,7 +535,7 @@ namespace Ched.UI
                                 .Do(q =>
                                 {
                                     var currentScorePos = matrix.TransformPoint(q.Location);
-                                    slide.StartTick = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y));
+                                    slide.StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int laneIndex = beforeLaneIndex + xdiff;
                                     slide.StartLaneIndex = Math.Min(Constants.LanesCount - slide.Width - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset, laneIndex));
@@ -620,7 +620,7 @@ namespace Ched.UI
                                 .Do(q =>
                                 {
                                     var currentScorePos = matrix.TransformPoint(q.Location);
-                                    hold.StartTick = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y));
+                                    hold.StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int laneIndex = beforePos.LaneIndex + xdiff;
                                     hold.LaneIndex = Math.Min(Constants.LanesCount - hold.Width, Math.Max(0, laneIndex));
