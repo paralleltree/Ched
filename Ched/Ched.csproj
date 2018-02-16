@@ -121,6 +121,7 @@
       <DependentUpon>ExportForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\FormExtensions.cs" />
+    <Compile Include="UI\GraphicsExtensions.cs" />
     <Compile Include="UI\HighSpeedSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
