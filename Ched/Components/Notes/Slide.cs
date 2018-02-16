@@ -79,6 +79,8 @@ namespace Ched.Components.Notes
         /// <param name="noteHeight">ノートの描画高さ</param>
         internal void DrawBackground(Graphics g, float width, float x1, float y1, float x2, float y2, float gradStartY, float gradEndY, float noteHeight)
         {
+            var prevMode = g.SmoothingMode;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
             var rect = new RectangleF(Math.Min(x1, x2), Math.Min(y1, y2), Math.Abs(x1 - x2) + width, Math.Abs(y1 - y2));
             var gradientRect = new RectangleF(rect.Left, gradStartY, rect.Width, gradEndY - gradStartY);
             using (var brush = new LinearGradientBrush(gradientRect, BackgroundEdgeColor, BackgroundMiddleColor, LinearGradientMode.Vertical))
@@ -98,6 +100,7 @@ namespace Ched.Components.Notes
             {
                 g.DrawLine(pen, x1 + width / 2, y1, x2 + width / 2, y2);
             }
+            g.SmoothingMode = prevMode;
         }
 
         internal GraphicsPath GetBackgroundPath(float width, float x1, float y1, float x2, float y2)
