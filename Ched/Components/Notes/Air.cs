@@ -84,7 +84,8 @@ namespace Ched.Components.Notes
                 {
                     g.FillPath(brush, path);
                 }
-                using (var pen = new Pen(BorderColor, targetRect.Height * 0.12f) { LineJoin = LineJoin.Bevel })
+                // 斜めになると太さが大きく出てしまう
+                using (var pen = new Pen(BorderColor, targetRect.Height * (HorizontalDirection == HorizontalAirDirection.Center ? 0.12f : 0.1f)) { LineJoin = LineJoin.Bevel })
                 {
                     g.DrawPath(pen, path);
                 }
