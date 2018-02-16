@@ -1470,6 +1470,7 @@ namespace Ched.UI
 
     public enum EditMode
     {
+        Select,
         Edit,
         Erase
     }
