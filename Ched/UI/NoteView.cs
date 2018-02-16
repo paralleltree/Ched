@@ -1138,7 +1138,7 @@ namespace Ched.UI
                         (UnitLaneWidth + BorderThickness) * bg[i].LaneIndex,
                         GetYPositionFromTick(bg[i].Tick),
                         (UnitLaneWidth + BorderThickness) * bg[i + 1].LaneIndex,
-                        GetYPositionFromTick(bg[i + 1].Tick),
+                        GetYPositionFromTick(bg[i + 1].Tick) + 0.4f,
                         GetYPositionFromTick(visibleSteps.Last(p => p.Tick <= bg[i].Tick).Tick),
                         GetYPositionFromTick(visibleSteps.First(p => p.Tick >= bg[i + 1].Tick).Tick),
                         ShortNoteHeight);
