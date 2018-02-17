@@ -120,6 +120,12 @@
     <Compile Include="UI\ExportForm.Designer.cs">
       <DependentUpon>ExportForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\HighSpeedSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\HighSpeedSelectionForm.Designer.cs">
+      <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -167,6 +173,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\ExportForm.resx">
       <DependentUpon>ExportForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\HighSpeedSelectionForm.resx">
+      <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
