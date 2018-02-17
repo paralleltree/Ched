@@ -212,6 +212,37 @@ namespace Ched.UI
             };
             var editMenuItems = new MenuItem[] { undoItem, redoItem };
 
+            var insertTimeSignatureItem = new MenuItem("拍子", (s, e) =>
+            {
+                var form = new TimeSignatureSelectionForm();
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var prev = noteView.ScoreEvents.TimeSignatureChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
+                var item = new Components.Events.TimeSignatureChangeEvent()
+                {
+                    Tick = noteView.SelectedRange.StartTick,
+                    Numerator = form.Numerator,
+                    DenominatorExponent = form.DenominatorExponent
+                };
+
+                var insertOp = new InsertEventOperation<Components.Events.TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
+                if (prev != null)
+                {
+                    noteView.ScoreEvents.TimeSignatureChangeEvents.Remove(prev);
+                    var removeOp = new RemoveEventOperation<Components.Events.TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, prev);
+                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
+                }
+                else
+                {
+                    OperationManager.Push(insertOp);
+                }
+
+                noteView.ScoreEvents.TimeSignatureChangeEvents.Add(item);
+                noteView.Invalidate();
+            });
+
+            var insertMenuItems = new MenuItem[] { insertTimeSignatureItem };
+
             var helpMenuItems = new MenuItem[]
             {
                 new MenuItem("公式サイトを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched")),
@@ -228,6 +259,7 @@ namespace Ched.UI
             {
                 new MenuItem("ファイル(&F)", fileMenuItems),
                 new MenuItem("編集(&E)", editMenuItems),
+                new MenuItem("挿入(&I)", insertMenuItems),
                 new MenuItem("ヘルプ(&H)", helpMenuItems)
             });
         }

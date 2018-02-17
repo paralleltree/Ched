@@ -133,6 +133,12 @@
     <Compile Include="UI\Operations\IOperation.cs" />
     <Compile Include="UI\Operations\NoteCollectionOperation.cs" />
     <Compile Include="UI\Operations\OperationManager.cs" />
+    <Compile Include="UI\TimeSignatureSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\TimeSignatureSelectionForm.Designer.cs">
+      <DependentUpon>TimeSignatureSelectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\VersionInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -154,6 +160,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\TimeSignatureSelectionForm.resx">
+      <DependentUpon>TimeSignatureSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\VersionInfoForm.resx">
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
