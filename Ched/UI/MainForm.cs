@@ -11,6 +11,7 @@ using System.Windows.Forms;
 
 using Ched.Components;
 using Ched.Components.Notes;
+using Ched.UI.Operations;
 using Ched.Properties;
 
 namespace Ched.UI
@@ -20,6 +21,7 @@ namespace Ched.UI
         private readonly string FileTypeFilter = "Ched専用形式(*.chs)|*.chs";
 
         private ScoreBook ScoreBook { get; set; }
+        private OperationManager OperationManager { get; }
 
         private ScrollBar NoteViewScrollBar { get; }
         private NoteView NoteView { get; }
@@ -33,7 +35,8 @@ namespace Ched.UI
 
             ToolStripManager.RenderMode = ToolStripManagerRenderMode.System;
 
-            NoteView = new NoteView() { Dock = DockStyle.Fill };
+            OperationManager = new OperationManager();
+            NoteView = new NoteView(OperationManager) { Dock = DockStyle.Fill };
 
             NoteViewScrollBar = new VScrollBar()
             {

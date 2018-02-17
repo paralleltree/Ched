@@ -181,11 +181,11 @@ namespace Ched.UI
 
         public EventCollection ScoreEvents { get; set; } = new EventCollection();
 
-        protected OperationManager OperationManager { get; } = new OperationManager();
+        protected OperationManager OperationManager { get; }
 
         protected CompositeDisposable Subscriptions { get; } = new CompositeDisposable();
 
-        public NoteView()
+        public NoteView(OperationManager manager)
         {
             InitializeComponent();
             this.DoubleBuffered = true;
@@ -193,6 +193,7 @@ namespace Ched.UI
             this.SetStyle(ControlStyles.ResizeRedraw, true);
             this.SetStyle(ControlStyles.Opaque, true);
 
+            OperationManager = manager;
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
                 OperationHistoryChanged?.Invoke(this, EventArgs.Empty);
