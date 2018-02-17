@@ -29,7 +29,7 @@ namespace Ched.UI
         public MainForm()
         {
             InitializeComponent();
-            Size = new Size(400, 700);
+            Size = new Size(420, 700);
             Icon = Resources.MainIcon;
             SetText();
 
