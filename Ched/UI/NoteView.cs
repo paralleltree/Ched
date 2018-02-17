@@ -1093,7 +1093,7 @@ namespace Ched.UI
             var selectSubscription = mouseDown
                 .Where(p => Editable)
                 .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Select)
-                .Do(p =>
+                .SelectMany(p =>
                 {
                     Matrix startMatrix = GetDrawingMatrix(new Matrix());
                     startMatrix.Invert();
@@ -1106,6 +1106,34 @@ namespace Ched.UI
                         StartLaneIndex = 0,
                         SelectedLanesCount = 0
                     };
+
+                    return mouseMove.TakeUntil(mouseUp)
+                        .Select(q => q.Location)
+                        .Aggregate(p.Location, (q, r) =>
+                        {
+                            Matrix currentMatrix = GetDrawingMatrix(new Matrix());
+                            var g = Graphics.FromHwnd(Handle);
+                            g.Transform = GetDrawingMatrix(currentMatrix);
+                            DrawSelectionRange(g);
+
+                            currentMatrix.Invert();
+                            PointF currentScorePos = currentMatrix.TransformPoint(q);
+
+                            int startLaneIndex = Math.Min(Math.Max((int)startScorePos.X / (UnitLaneWidth + BorderThickness), 0), Constants.LanesCount - 1);
+                            int endLaneIndex = Math.Min(Math.Max((int)currentScorePos.X / (UnitLaneWidth + BorderThickness), 0), Constants.LanesCount - 1);
+                            int endTick = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y));
+
+                            SelectedRange = new SelectionRange()
+                            {
+                                StartTick = SelectedRange.StartTick,
+                                Duration = endTick - SelectedRange.StartTick,
+                                StartLaneIndex = Math.Min(startLaneIndex, endLaneIndex),
+                                SelectedLanesCount = Math.Abs(endLaneIndex - startLaneIndex) + 1
+                            };
+
+                            DrawSelectionRange(g);
+                            return r;
+                        });
                 }).Subscribe();
 
             Subscriptions.Add(editSubscription);
@@ -1284,6 +1312,9 @@ namespace Ched.UI
                 }
             }
 
+            // 選択範囲描画
+            if (Editable) DrawSelectionRange(pe.Graphics);
+
             // Y軸反転させずにTick = 0をY軸原点とする座標系へ
             pe.Graphics.Transform = GetDrawingMatrix(prevMatrix, false);
 
@@ -1402,6 +1433,15 @@ namespace Ched.UI
         private RectangleF GetClickableRectFromNotePosition(int tick, int laneIndex, int width)
         {
             return GetRectFromNotePosition(tick, laneIndex, width).Expand(1);
+        }
+
+        protected void DrawSelectionRange(Graphics g)
+        {
+            int minTick = SelectedRange.Duration < 0 ? SelectedRange.StartTick + SelectedRange.Duration : SelectedRange.StartTick;
+            int maxTick = SelectedRange.Duration < 0 ? SelectedRange.StartTick : SelectedRange.StartTick + SelectedRange.Duration;
+            var start = new Point(SelectedRange.StartLaneIndex * (UnitLaneWidth + BorderThickness), (int)GetYPositionFromTick(minTick) - ShortNoteHeight);
+            var end = new Point((SelectedRange.StartLaneIndex + SelectedRange.SelectedLanesCount) * (UnitLaneWidth + BorderThickness), (int)GetYPositionFromTick(maxTick) + ShortNoteHeight);
+            g.DrawXorRectangle(PenStyles.Dot, g.Transform.TransformPoint(start), g.Transform.TransformPoint(end));
         }
 
         public void Undo()
