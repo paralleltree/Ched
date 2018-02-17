@@ -129,6 +129,7 @@
     </Compile>
     <Compile Include="UI\Operations\CompositeOperation.cs" />
     <Compile Include="UI\Operations\EditNoteOperation.cs" />
+    <Compile Include="UI\Operations\EventCollectionOperation.cs" />
     <Compile Include="UI\Operations\IOperation.cs" />
     <Compile Include="UI\Operations\NoteCollectionOperation.cs" />
     <Compile Include="UI\Operations\OperationManager.cs" />
