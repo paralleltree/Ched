@@ -237,6 +237,34 @@ namespace Ched.UI
 
             var viewMenuItems = new MenuItem[] { viewModeItem };
 
+            var insertBPMItem = new MenuItem("BPM", (s, e) =>
+            {
+                var form = new BPMSelectionForm();
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var prev = noteView.ScoreEvents.BPMChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
+                var item = new Components.Events.BPMChangeEvent()
+                {
+                    Tick = noteView.SelectedRange.StartTick,
+                    BPM = form.BPM
+                };
+
+                var insertOp = new InsertEventOperation<Components.Events.BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, item);
+                if (prev == null)
+                {
+                    OperationManager.Push(insertOp);
+                }
+                else
+                {
+                    var removeOp = new RemoveEventOperation<Components.Events.BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, prev);
+                    noteView.ScoreEvents.BPMChangeEvents.Remove(prev);
+                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
+                }
+
+                noteView.ScoreEvents.BPMChangeEvents.Add(item);
+                noteView.Invalidate();
+            });
+
             var insertTimeSignatureItem = new MenuItem("拍子", (s, e) =>
             {
                 var form = new TimeSignatureSelectionForm();
@@ -266,7 +294,7 @@ namespace Ched.UI
                 noteView.Invalidate();
             });
 
-            var insertMenuItems = new MenuItem[] { insertTimeSignatureItem };
+            var insertMenuItems = new MenuItem[] { insertBPMItem, insertTimeSignatureItem };
 
             var helpMenuItems = new MenuItem[]
             {
