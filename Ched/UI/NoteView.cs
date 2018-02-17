@@ -20,10 +20,12 @@ namespace Ched.UI
     public partial class NoteView : Control
     {
         public event EventHandler EditModeChanged;
+        public event EventHandler SelectedRangeChanged;
         public event EventHandler NewNoteTypeChanged;
         public event EventHandler AirDirectionChanged;
         public event EventHandler OperationHistoryChanged;
 
+        private SelectionRange selectedRange = SelectionRange.Empty;
         private EditMode editMode = EditMode.Edit;
         private NoteType newNoteType = NoteType.Tap;
         private AirDirection airDirection = new AirDirection(VerticalAirDirection.Up, HorizontalAirDirection.Center);
@@ -110,6 +112,20 @@ namespace Ched.UI
             {
                 editMode = value;
                 EditModeChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// 現在の選択範囲を設定します。
+        /// </summary>
+        public SelectionRange SelectedRange
+        {
+            get { return selectedRange; }
+            set
+            {
+                selectedRange = value;
+                SelectedRangeChanged?.Invoke(this, EventArgs.Empty);
+                Invalidate();
             }
         }
 
@@ -992,8 +1008,26 @@ namespace Ched.UI
                 })
                 .Subscribe(p => Invalidate());
 
+            var selectSubscription = mouseDown
+                .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Select)
+                .Do(p =>
+                {
+                    Matrix startMatrix = GetDrawingMatrix(new Matrix());
+                    startMatrix.Invert();
+                    PointF startScorePos = startMatrix.TransformPoint(p.Location);
+
+                    SelectedRange = new SelectionRange()
+                    {
+                        StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(startScorePos.Y)), 0),
+                        Duration = 0,
+                        StartLaneIndex = 0,
+                        SelectedLanesCount = 0
+                    };
+                }).Subscribe();
+
             Subscriptions.Add(editSubscription);
             Subscriptions.Add(eraseSubscription);
+            Subscriptions.Add(selectSubscription);
         }
 
         protected override void OnPaint(PaintEventArgs pe)
@@ -1054,6 +1088,12 @@ namespace Ched.UI
                         pe.Graphics.DrawLine(i % sigs[j].Numerator == 0 ? barPen : beatPen, 0, y, laneWidth, y);
                     }
                 }
+            }
+
+            using (var posPen = new Pen(Color.FromArgb(196, 0, 0)))
+            {
+                float y = GetYPositionFromTick(SelectedRange.StartTick);
+                pe.Graphics.DrawLine(posPen, -UnitLaneWidth * 2, y, laneWidth, y);
             }
 
             // ノート描画
@@ -1497,6 +1537,61 @@ namespace Ched.UI
         {
             VerticalDirection = verticalDirection;
             HorizontalDirection = horizontaiDirection;
+        }
+    }
+
+    public struct SelectionRange
+    {
+        public static SelectionRange Empty = new SelectionRange()
+        {
+            StartTick = 0,
+            Duration = 0,
+            StartLaneIndex = 0,
+            SelectedLanesCount = 0
+        };
+
+        private int startTick;
+        private int duration;
+        private int startLaneIndex;
+        private int selectedLanesCount;
+
+        public int StartTick
+        {
+            get { return startTick; }
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException("value must not be negative.");
+                startTick = value;
+            }
+        }
+
+        public int Duration
+        {
+            get { return duration; }
+            set
+            {
+                duration = value;
+            }
+        }
+
+        public int StartLaneIndex
+        {
+            get { return startLaneIndex; }
+            set
+            {
+                if (value < 0 || value > Constants.LanesCount - 1) throw new ArgumentOutOfRangeException();
+                startLaneIndex = value;
+            }
+        }
+
+        public int SelectedLanesCount
+        {
+            get { return selectedLanesCount; }
+            set
+            {
+                if (StartLaneIndex + value < 0 || StartLaneIndex + value > Constants.LanesCount) throw new ArgumentOutOfRangeException();
+                selectedLanesCount = value;
+            }
         }
     }
 }
