@@ -79,6 +79,8 @@ namespace Ched.Components.Notes
 
         internal void DrawBackground(Graphics g, RectangleF rect)
         {
+            var prevMode = g.SmoothingMode;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
             using (var brush = new LinearGradientBrush(rect, BackgroundEdgeColor, BackgroundMiddleColor, LinearGradientMode.Vertical))
             {
                 var blend = new ColorBlend(4)
@@ -89,6 +91,7 @@ namespace Ched.Components.Notes
                 brush.InterpolationColors = blend;
                 g.FillRectangle(brush, rect);
             }
+            g.SmoothingMode = prevMode;
         }
 
         public override int GetDuration()

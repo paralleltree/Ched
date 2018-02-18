@@ -25,8 +25,17 @@ namespace Ched.UI
         public event EventHandler AirDirectionChanged;
         public event EventHandler OperationHistoryChanged;
 
-        private SelectionRange selectedRange = SelectionRange.Empty;
+        private Color barLineColor = Color.FromArgb(160, 160, 160);
+        private Color beatLineColor = Color.FromArgb(80, 80, 80);
+        private Color laneBorderLightColor = Color.FromArgb(60, 60, 60);
+        private Color laneBorderDarkColor = Color.FromArgb(30, 30, 30);
+        private int unitLaneWidth = 12;
+        private int shortNoteHeight = 5;
+        private float unitBeatHeight = 120;
+
+        private bool editable = true;
         private EditMode editMode = EditMode.Edit;
+        private SelectionRange selectedRange = SelectionRange.Empty;
         private NoteType newNoteType = NoteType.Tap;
         private AirDirection airDirection = new AirDirection(VerticalAirDirection.Up, HorizontalAirDirection.Center);
         private bool isNewSlideStepVisible = true;
@@ -34,27 +43,67 @@ namespace Ched.UI
         /// <summary>
         /// 小節の区切り線の色を設定します。
         /// </summary>
-        public Color BarLineColor { get; set; } = Color.FromArgb(160, 160, 160);
+        public Color BarLineColor
+        {
+            get { return barLineColor; }
+            set
+            {
+                barLineColor = value;
+                Invalidate();
+            }
+        }
 
         /// <summary>
         /// 1拍のガイド線の色を設定します。
         /// </summary>
-        public Color BeatLineColor { get; set; } = Color.FromArgb(80, 80, 80);
+        public Color BeatLineColor
+        {
+            get { return beatLineColor; }
+            set
+            {
+                beatLineColor = value;
+                Invalidate();
+            }
+        }
 
         /// <summary>
         /// レーンのガイド線のメインカラーを設定します。
         /// </summary>
-        public Color LaneBorderLightColor { get; set; } = Color.FromArgb(60, 60, 60);
+        public Color LaneBorderLightColor
+        {
+            get { return laneBorderLightColor; }
+            set
+            {
+                laneBorderLightColor = value;
+                Invalidate();
+            }
+        }
 
         /// <summary>
         /// レーンのガイド線のサブカラーを設定します。
         /// </summary>
-        public Color LaneBorderDarkColor { get; set; } = Color.FromArgb(30, 30, 30);
+        public Color LaneBorderDarkColor
+        {
+            get { return laneBorderDarkColor; }
+            set
+            {
+                laneBorderDarkColor = value;
+                Invalidate();
+            }
+        }
 
         /// <summary>
         /// 1レーンあたりの表示幅を設定します。
         /// </summary>
-        public int UnitLaneWidth { get; set; } = 12;
+        public int UnitLaneWidth
+        {
+            get { return unitLaneWidth; }
+            set
+            {
+                unitLaneWidth = value;
+                Invalidate();
+            }
+        }
 
         /// <summary>
         /// レーンの表示幅を取得します。
@@ -72,7 +121,15 @@ namespace Ched.UI
         /// <summary>
         /// ショートノーツの表示高さを設定します。
         /// </summary>
-        public int ShortNoteHeight { get; set; } = 5;
+        public int ShortNoteHeight
+        {
+            get { return shortNoteHeight; }
+            set
+            {
+                shortNoteHeight = value;
+                Invalidate();
+            }
+        }
 
         /// <summary>
         /// 1拍あたりのTick数を取得します。
@@ -82,7 +139,16 @@ namespace Ched.UI
         /// <summary>
         /// 1拍あたりの表示高さを設定します。
         /// </summary>
-        public float UnitBeatHeight { get; set; } = 120; // 6の倍数でいい感じに描画してくれる
+        public float UnitBeatHeight
+        {
+            get { return unitBeatHeight; }
+            set
+            {
+                // 6の倍数でいい感じに描画してくれる
+                unitBeatHeight = value;
+                Invalidate();
+            }
+        }
 
         /// <summary>
         /// クォンタイズを行うTick数を指定します。
@@ -100,6 +166,19 @@ namespace Ched.UI
         public int TailTick
         {
             get { return HeadTick + (int)(ClientSize.Height * UnitBeatTick / UnitBeatHeight); }
+        }
+
+        /// <summary>
+        /// ノーツが編集可能かどうかを示す値を設定します。
+        /// </summary>
+        public bool Editable
+        {
+            get { return editable; }
+            set
+            {
+                editable = value;
+                Cursor = value ? Cursors.Default : Cursors.No;
+            }
         }
 
         /// <summary>
@@ -206,6 +285,7 @@ namespace Ched.UI
             var mouseUp = this.MouseUpAsObservable();
 
             var editSubscription = mouseDown
+                .Where(p => Editable)
                 .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Edit)
                 .SelectMany(p =>
                 {
@@ -261,7 +341,7 @@ namespace Ched.UI
                             .Do(q =>
                             {
                                 var currentScorePos = matrix.TransformPoint(q.Location);
-                                note.Tick = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y));
+                                note.Tick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int laneIndex = beforeLaneIndex + xdiff;
                                 note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
@@ -474,7 +554,7 @@ namespace Ched.UI
                                 .Do(q =>
                                 {
                                     var currentScorePos = matrix.TransformPoint(q.Location);
-                                    slide.StartTick = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y));
+                                    slide.StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int laneIndex = beforeLaneIndex + xdiff;
                                     slide.StartLaneIndex = Math.Min(Constants.LanesCount - slide.Width - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset, laneIndex));
@@ -559,7 +639,7 @@ namespace Ched.UI
                                 .Do(q =>
                                 {
                                     var currentScorePos = matrix.TransformPoint(q.Location);
-                                    hold.StartTick = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y));
+                                    hold.StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int laneIndex = beforePos.LaneIndex + xdiff;
                                     hold.LaneIndex = Math.Min(Constants.LanesCount - hold.Width, Math.Max(0, laneIndex));
@@ -814,6 +894,7 @@ namespace Ched.UI
                 }).Subscribe(p => Invalidate());
 
             var eraseSubscription = mouseDown
+                .Where(p => Editable)
                 .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Erase)
                 .SelectMany(p => mouseMove
                     .TakeUntil(mouseUp)
@@ -1010,6 +1091,7 @@ namespace Ched.UI
                 .Subscribe(p => Invalidate());
 
             var selectSubscription = mouseDown
+                .Where(p => Editable)
                 .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Select)
                 .Do(p =>
                 {
@@ -1094,7 +1176,7 @@ namespace Ched.UI
             using (var posPen = new Pen(Color.FromArgb(196, 0, 0)))
             {
                 float y = GetYPositionFromTick(SelectedRange.StartTick);
-                pe.Graphics.DrawLine(posPen, -UnitLaneWidth * 2, y, laneWidth, y);
+                if (Editable) pe.Graphics.DrawLine(posPen, -UnitLaneWidth * 2, y, laneWidth, y);
             }
 
             // ノート描画
@@ -1124,7 +1206,7 @@ namespace Ched.UI
                         (UnitLaneWidth + BorderThickness) * bg[i].LaneIndex,
                         GetYPositionFromTick(bg[i].Tick),
                         (UnitLaneWidth + BorderThickness) * bg[i + 1].LaneIndex,
-                        GetYPositionFromTick(bg[i + 1].Tick),
+                        GetYPositionFromTick(bg[i + 1].Tick) + 0.4f,
                         GetYPositionFromTick(visibleSteps.Last(p => p.Tick <= bg[i].Tick).Tick),
                         GetYPositionFromTick(visibleSteps.First(p => p.Tick >= bg[i + 1].Tick).Tick),
                         ShortNoteHeight);
@@ -1156,6 +1238,7 @@ namespace Ched.UI
                 slide.StartNote.Draw(pe.Graphics, GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.Width));
                 foreach (var step in slide.StepNotes)
                 {
+                    if (!Editable && !step.IsVisible) continue;
                     step.Draw(pe.Graphics, GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width));
                 }
             }

@@ -41,15 +41,29 @@ namespace Ched.UI
             NoteViewScrollBar = new VScrollBar()
             {
                 Dock = DockStyle.Right,
-                Maximum = 0,
                 Minimum = -NoteView.UnitBeatTick * 4 * 20,
                 SmallChange = NoteView.UnitBeatTick
+            };
+
+            Action<ScrollBar> processScrollBarRangeExtension = s =>
+            {
+                if (NoteViewScrollBar.Value < NoteViewScrollBar.Minimum * 0.9f)
+                {
+                    NoteViewScrollBar.Minimum = (int)(NoteViewScrollBar.Minimum * 1.2);
+                }
             };
 
             NoteView.Resize += (s, e) =>
             {
                 NoteViewScrollBar.LargeChange = NoteView.TailTick - NoteView.HeadTick;
-                NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange;
+                NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.UnitBeatTick / 8;
+            };
+
+            NoteView.MouseWheel += (s, e) =>
+            {
+                int value = NoteViewScrollBar.Value - e.Delta / 120 * NoteViewScrollBar.SmallChange;
+                NoteViewScrollBar.Value = Math.Min(Math.Max(value, NoteViewScrollBar.Minimum), NoteViewScrollBar.GetMaximumValue());
+                processScrollBarRangeExtension(NoteViewScrollBar);
             };
 
             NoteViewScrollBar.ValueChanged += (s, e) =>
@@ -62,10 +76,7 @@ namespace Ched.UI
             {
                 if (e.Type == ScrollEventType.EndScroll)
                 {
-                    if (NoteViewScrollBar.Value < NoteViewScrollBar.Minimum / 1.2f)
-                    {
-                        NoteViewScrollBar.Minimum = (int)(NoteViewScrollBar.Minimum * 1.5);
-                    }
+                    processScrollBarRangeExtension(NoteViewScrollBar);
                 }
             };
 
@@ -112,7 +123,7 @@ namespace Ched.UI
         {
             ScoreBook = book;
             NoteView.LoadScore(book.Score);
-            NoteViewScrollBar.Value = 0;
+            NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             SetText(book.Path);
         }
@@ -212,6 +223,20 @@ namespace Ched.UI
             };
             var editMenuItems = new MenuItem[] { undoItem, redoItem };
 
+            var viewModeItem = new MenuItem("譜面プレビュー", (s, e) =>
+            {
+                var item = (MenuItem)s;
+                item.Checked = !item.Checked;
+                NoteView.Editable = !item.Checked;
+                NoteView.LaneBorderLightColor = item.Checked ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
+                NoteView.LaneBorderDarkColor = item.Checked ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
+                NoteView.UnitLaneWidth = item.Checked ? 4 : 12;
+                NoteView.ShortNoteHeight = item.Checked ? 4 : 5;
+                NoteView.UnitBeatHeight = item.Checked ? 48 : 120;
+            });
+
+            var viewMenuItems = new MenuItem[] { viewModeItem };
+
             var insertTimeSignatureItem = new MenuItem("拍子", (s, e) =>
             {
                 var form = new TimeSignatureSelectionForm();
@@ -259,6 +284,7 @@ namespace Ched.UI
             {
                 new MenuItem("ファイル(&F)", fileMenuItems),
                 new MenuItem("編集(&E)", editMenuItems),
+                new MenuItem("表示(&V)", viewMenuItems),
                 new MenuItem("挿入(&I)", insertMenuItems),
                 new MenuItem("ヘルプ(&H)", helpMenuItems)
             });
