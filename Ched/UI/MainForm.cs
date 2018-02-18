@@ -31,11 +31,13 @@ namespace Ched.UI
             InitializeComponent();
             Size = new Size(420, 700);
             Icon = Resources.MainIcon;
-            SetText();
 
             ToolStripManager.RenderMode = ToolStripManagerRenderMode.System;
 
             OperationManager = new OperationManager();
+            OperationManager.OperationHistoryChanged += (s, e) => SetText(ScoreBook.Path);
+            OperationManager.ChangesCommited += (s, e) => SetText(ScoreBook.Path);
+
             NoteView = new NoteView(OperationManager) { Dock = DockStyle.Fill };
 
             NoteViewScrollBar = new VScrollBar()
@@ -82,7 +84,7 @@ namespace Ched.UI
 
             FormClosing += (s, e) =>
             {
-                if (MessageBox.Show(this, "終了してよろしいですか？", "確認", MessageBoxButtons.YesNo) != DialogResult.Yes) e.Cancel = true;
+                if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) e.Cancel = true;
             };
 
             using (var manager = this.WorkWithLayout())
@@ -98,6 +100,7 @@ namespace Ched.UI
             NoteView.EditMode = EditMode.Edit;
 
             LoadBook(new ScoreBook());
+            SetText();
         }
 
         public MainForm(string filePath) : this()
@@ -130,6 +133,8 @@ namespace Ched.UI
 
         protected void OpenFile()
         {
+            if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) return;
+
             var dialog = new OpenFileDialog()
             {
                 Filter = FileTypeFilter
@@ -165,6 +170,7 @@ namespace Ched.UI
             }
             CommitChanges();
             ScoreBook.Save();
+            OperationManager.CommitChanges();
         }
 
         protected void ExportFile()
@@ -182,7 +188,7 @@ namespace Ched.UI
 
         protected void ClearFile()
         {
-            if (MessageBox.Show(this, "編集中のデータは破棄されますがよろしいですか？", "確認", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (!OperationManager.IsChanged || this.ConfirmDiscardChanges())
             {
                 LoadBook(new ScoreBook());
             }
@@ -195,7 +201,7 @@ namespace Ched.UI
 
         protected void SetText(string filePath)
         {
-            Text = (string.IsNullOrEmpty(filePath) ? "" : Path.GetFileName(filePath) + " - ") + "Ched";
+            Text = "Ched" + (string.IsNullOrEmpty(filePath) ? "" : " - " + Path.GetFileName(filePath)) + (OperationManager.IsChanged ? " *" : "");
         }
 
         private MainMenu CreateMainMenu(NoteView noteView)
