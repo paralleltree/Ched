@@ -43,7 +43,7 @@ namespace Ched.Components.Exporter
                 writer.WriteLine();
 
                 int barTick = book.Score.TicksPerBeat * 4;
-                var barIndexCalculator = new BarIndexCalculator(barTick, book.Score.Events.TimeSignatureChangeEvents);
+                var barIndexCalculator = new BarIndexCalculator(barTick, book.Score.Events.TimeSignatureChangeEvents, args.HasPaddingBar);
 
                 foreach (var item in barIndexCalculator.TimeSignatures)
                 {
@@ -360,6 +360,7 @@ namespace Ched.Components.Exporter
 
         public class BarIndexCalculator
         {
+            private bool hasPaddingBar;
             private int barTick;
             private SortedDictionary<int, TimeSignatureItem> timeSignatures;
 
@@ -371,13 +372,14 @@ namespace Ched.Components.Exporter
                 get { return timeSignatures.Select(p => p.Value).Reverse(); }
             }
 
-            public BarIndexCalculator(int barTick, IEnumerable<TimeSignatureChangeEvent> events)
+            public BarIndexCalculator(int barTick, IEnumerable<TimeSignatureChangeEvent> events, bool hasPaddingBar)
             {
+                this.hasPaddingBar = hasPaddingBar;
                 this.barTick = barTick;
                 var ordered = events.OrderBy(p => p.Tick).ToList();
                 var dic = new SortedDictionary<int, TimeSignatureItem>();
                 int pos = 0;
-                int barIndex = 1;
+                int barIndex = hasPaddingBar ? 1 : 0;
                 for (int i = 0; i < ordered.Count; i++)
                 {
                     var item = new TimeSignatureItem()
@@ -474,5 +476,7 @@ namespace Ched.Components.Exporter
             Master,
             WorldsEnd
         }
+
+        public bool HasPaddingBar { get; set; }
     }
 }

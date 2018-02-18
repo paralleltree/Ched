@@ -51,6 +51,7 @@
             this.outputBox = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.exportButton = new System.Windows.Forms.Button();
+            this.hasPaddingBarBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.soundOffsetBox)).BeginInit();
             this.SuspendLayout();
             // 
@@ -137,7 +138,7 @@
             // 
             // browseButton
             // 
-            this.browseButton.Location = new System.Drawing.Point(305, 266);
+            this.browseButton.Location = new System.Drawing.Point(305, 287);
             this.browseButton.Name = "browseButton";
             this.browseButton.Size = new System.Drawing.Size(75, 23);
             this.browseButton.TabIndex = 25;
@@ -147,7 +148,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(14, 247);
+            this.label11.Location = new System.Drawing.Point(14, 268);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(41, 12);
             this.label11.TabIndex = 11;
@@ -238,7 +239,7 @@
             // 
             // outputBox
             // 
-            this.outputBox.Location = new System.Drawing.Point(16, 268);
+            this.outputBox.Location = new System.Drawing.Point(16, 289);
             this.outputBox.Name = "outputBox";
             this.outputBox.Size = new System.Drawing.Size(281, 19);
             this.outputBox.TabIndex = 24;
@@ -255,18 +256,29 @@
             // exportButton
             // 
             this.exportButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.exportButton.Location = new System.Drawing.Point(16, 305);
+            this.exportButton.Location = new System.Drawing.Point(16, 321);
             this.exportButton.Name = "exportButton";
             this.exportButton.Size = new System.Drawing.Size(364, 23);
             this.exportButton.TabIndex = 26;
             this.exportButton.Text = "エクスポート";
             this.exportButton.UseVisualStyleBackColor = true;
             // 
+            // hasPaddingBarBox
+            // 
+            this.hasPaddingBarBox.AutoSize = true;
+            this.hasPaddingBarBox.Location = new System.Drawing.Point(124, 243);
+            this.hasPaddingBarBox.Name = "hasPaddingBarBox";
+            this.hasPaddingBarBox.Size = new System.Drawing.Size(173, 16);
+            this.hasPaddingBarBox.TabIndex = 27;
+            this.hasPaddingBarBox.Text = "先頭に1小節の空白を挿入する";
+            this.hasPaddingBarBox.UseVisualStyleBackColor = true;
+            // 
             // ExportForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(398, 340);
+            this.ClientSize = new System.Drawing.Size(398, 356);
+            this.Controls.Add(this.hasPaddingBarBox);
             this.Controls.Add(this.exportButton);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.outputBox);
@@ -326,5 +338,6 @@
         private System.Windows.Forms.TextBox outputBox;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Button exportButton;
+        private System.Windows.Forms.CheckBox hasPaddingBarBox;
     }
 }
