@@ -11,6 +11,7 @@ using System.Windows.Forms;
 
 using Ched.Components;
 using Ched.Components.Notes;
+using Ched.UI.Operations;
 using Ched.Properties;
 
 namespace Ched.UI
@@ -20,6 +21,7 @@ namespace Ched.UI
         private readonly string FileTypeFilter = "Ched専用形式(*.chs)|*.chs";
 
         private ScoreBook ScoreBook { get; set; }
+        private OperationManager OperationManager { get; }
 
         private ScrollBar NoteViewScrollBar { get; }
         private NoteView NoteView { get; }
@@ -27,13 +29,16 @@ namespace Ched.UI
         public MainForm()
         {
             InitializeComponent();
-            Size = new Size(400, 700);
+            Size = new Size(420, 700);
             Icon = Resources.MainIcon;
-            SetText();
 
             ToolStripManager.RenderMode = ToolStripManagerRenderMode.System;
 
-            NoteView = new NoteView() { Dock = DockStyle.Fill };
+            OperationManager = new OperationManager();
+            OperationManager.OperationHistoryChanged += (s, e) => SetText(ScoreBook.Path);
+            OperationManager.ChangesCommited += (s, e) => SetText(ScoreBook.Path);
+
+            NoteView = new NoteView(OperationManager) { Dock = DockStyle.Fill };
 
             NoteViewScrollBar = new VScrollBar()
             {
@@ -79,7 +84,7 @@ namespace Ched.UI
 
             FormClosing += (s, e) =>
             {
-                if (MessageBox.Show(this, "終了してよろしいですか？", "確認", MessageBoxButtons.YesNo) != DialogResult.Yes) e.Cancel = true;
+                if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) e.Cancel = true;
             };
 
             using (var manager = this.WorkWithLayout())
@@ -95,6 +100,7 @@ namespace Ched.UI
             NoteView.EditMode = EditMode.Edit;
 
             LoadBook(new ScoreBook());
+            SetText();
         }
 
         public MainForm(string filePath) : this()
@@ -119,7 +125,7 @@ namespace Ched.UI
         protected void LoadBook(ScoreBook book)
         {
             ScoreBook = book;
-            NoteView.Load(book.Score.Notes);
+            NoteView.LoadScore(book.Score);
             NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             SetText(book.Path);
@@ -127,6 +133,8 @@ namespace Ched.UI
 
         protected void OpenFile()
         {
+            if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) return;
+
             var dialog = new OpenFileDialog()
             {
                 Filter = FileTypeFilter
@@ -162,6 +170,7 @@ namespace Ched.UI
             }
             CommitChanges();
             ScoreBook.Save();
+            OperationManager.CommitChanges();
         }
 
         protected void ExportFile()
@@ -174,11 +183,12 @@ namespace Ched.UI
         protected void CommitChanges()
         {
             ScoreBook.Score.Notes = new NoteCollection(NoteView.Notes);
+            // Eventsは参照渡ししてますよん
         }
 
         protected void ClearFile()
         {
-            if (MessageBox.Show(this, "編集中のデータは破棄されますがよろしいですか？", "確認", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (!OperationManager.IsChanged || this.ConfirmDiscardChanges())
             {
                 LoadBook(new ScoreBook());
             }
@@ -191,7 +201,7 @@ namespace Ched.UI
 
         protected void SetText(string filePath)
         {
-            Text = (string.IsNullOrEmpty(filePath) ? "" : Path.GetFileName(filePath) + " - ") + "Ched";
+            Text = "Ched" + (string.IsNullOrEmpty(filePath) ? "" : " - " + Path.GetFileName(filePath)) + (OperationManager.IsChanged ? " *" : "");
         }
 
         private MainMenu CreateMainMenu(NoteView noteView)
@@ -233,6 +243,93 @@ namespace Ched.UI
 
             var viewMenuItems = new MenuItem[] { viewModeItem };
 
+            var insertBPMItem = new MenuItem("BPM", (s, e) =>
+            {
+                var form = new BPMSelectionForm();
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var prev = noteView.ScoreEvents.BPMChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
+                var item = new Components.Events.BPMChangeEvent()
+                {
+                    Tick = noteView.SelectedRange.StartTick,
+                    BPM = form.BPM
+                };
+
+                var insertOp = new InsertEventOperation<Components.Events.BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, item);
+                if (prev == null)
+                {
+                    OperationManager.Push(insertOp);
+                }
+                else
+                {
+                    var removeOp = new RemoveEventOperation<Components.Events.BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, prev);
+                    noteView.ScoreEvents.BPMChangeEvents.Remove(prev);
+                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
+                }
+
+                noteView.ScoreEvents.BPMChangeEvents.Add(item);
+                noteView.Invalidate();
+            });
+
+            var insertHighSpeedItem = new MenuItem("ハイスピード", (s, e) =>
+            {
+                var form = new HighSpeedSelectionForm();
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var prev = noteView.ScoreEvents.HighSpeedChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
+                var item = new Components.Events.HighSpeedChangeEvent()
+                {
+                    Tick = noteView.SelectedRange.StartTick,
+                    SpeedRatio = form.SpeedRatio
+                };
+
+                var insertOp = new InsertEventOperation<Components.Events.HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, item);
+                if (prev == null)
+                {
+                    OperationManager.Push(insertOp);
+                }
+                else
+                {
+                    var removeOp = new RemoveEventOperation<Components.Events.HighSpeedChangeEvent>(NoteView.ScoreEvents.HighSpeedChangeEvents, prev);
+                    noteView.ScoreEvents.HighSpeedChangeEvents.Remove(prev);
+                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
+                }
+
+                noteView.ScoreEvents.HighSpeedChangeEvents.Add(item);
+                noteView.Invalidate();
+            });
+
+            var insertTimeSignatureItem = new MenuItem("拍子", (s, e) =>
+            {
+                var form = new TimeSignatureSelectionForm();
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var prev = noteView.ScoreEvents.TimeSignatureChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
+                var item = new Components.Events.TimeSignatureChangeEvent()
+                {
+                    Tick = noteView.SelectedRange.StartTick,
+                    Numerator = form.Numerator,
+                    DenominatorExponent = form.DenominatorExponent
+                };
+
+                var insertOp = new InsertEventOperation<Components.Events.TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
+                if (prev != null)
+                {
+                    noteView.ScoreEvents.TimeSignatureChangeEvents.Remove(prev);
+                    var removeOp = new RemoveEventOperation<Components.Events.TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, prev);
+                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
+                }
+                else
+                {
+                    OperationManager.Push(insertOp);
+                }
+
+                noteView.ScoreEvents.TimeSignatureChangeEvents.Add(item);
+                noteView.Invalidate();
+            });
+
+            var insertMenuItems = new MenuItem[] { insertBPMItem, insertHighSpeedItem, insertTimeSignatureItem };
+
             var helpMenuItems = new MenuItem[]
             {
                 new MenuItem("公式サイトを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched")),
@@ -250,6 +347,7 @@ namespace Ched.UI
                 new MenuItem("ファイル(&F)", fileMenuItems),
                 new MenuItem("編集(&E)", editMenuItems),
                 new MenuItem("表示(&V)", viewMenuItems),
+                new MenuItem("挿入(&I)", insertMenuItems),
                 new MenuItem("ヘルプ(&H)", helpMenuItems)
             });
         }
@@ -288,6 +386,10 @@ namespace Ched.UI
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
+            var selectionButton = new ToolStripButton("選択", Resources.SelectionIcon, (s, e) => noteView.EditMode = EditMode.Select)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
             var eraserButton = new ToolStripButton("消しゴム", Resources.EraserIcon, (s, e) => noteView.EditMode = EditMode.Erase)
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
@@ -301,6 +403,7 @@ namespace Ched.UI
 
             noteView.EditModeChanged += (s, e) =>
             {
+                selectionButton.Checked = noteView.EditMode == EditMode.Select;
                 penButton.Checked = noteView.EditMode == EditMode.Edit;
                 eraserButton.Checked = noteView.EditMode == EditMode.Erase;
             };
@@ -309,7 +412,7 @@ namespace Ched.UI
             {
                 newFileButton, openFileButton, saveFileButton, exportButton, new ToolStripSeparator(),
                 undoButton, redoButton, new ToolStripSeparator(),
-                penButton, eraserButton
+                penButton, selectionButton, eraserButton
             });
         }
 

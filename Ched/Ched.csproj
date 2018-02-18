@@ -83,6 +83,8 @@
     <Compile Include="Components\EventCollection.cs" />
     <Compile Include="Components\Events\BPMChangeEvent.cs" />
     <Compile Include="Components\Events\EventBase.cs" />
+    <Compile Include="Components\Events\HighSpeedChangeEvent.cs" />
+    <Compile Include="Components\Events\TimeSignatureChangeEvent.cs" />
     <Compile Include="Components\Exporter\IExporter.cs" />
     <Compile Include="Components\Exporter\SusExporter.cs" />
     <Compile Include="Components\NoteCollection.cs" />
@@ -102,6 +104,12 @@
     <Compile Include="Components\Notes\TappableBase.cs" />
     <Compile Include="Components\Score.cs" />
     <Compile Include="Components\ScoreBook.cs" />
+    <Compile Include="UI\BPMSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\BPMSelectionForm.Designer.cs">
+      <DependentUpon>BPMSelectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\CheckableToolStripSplitButton.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -111,6 +119,13 @@
     </Compile>
     <Compile Include="UI\ExportForm.Designer.cs">
       <DependentUpon>ExportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\FormExtensions.cs" />
+    <Compile Include="UI\HighSpeedSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\HighSpeedSelectionForm.Designer.cs">
+      <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\MainForm.cs">
       <SubType>Form</SubType>
@@ -128,9 +143,16 @@
     </Compile>
     <Compile Include="UI\Operations\CompositeOperation.cs" />
     <Compile Include="UI\Operations\EditNoteOperation.cs" />
+    <Compile Include="UI\Operations\EventCollectionOperation.cs" />
     <Compile Include="UI\Operations\IOperation.cs" />
     <Compile Include="UI\Operations\NoteCollectionOperation.cs" />
     <Compile Include="UI\Operations\OperationManager.cs" />
+    <Compile Include="UI\TimeSignatureSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\TimeSignatureSelectionForm.Designer.cs">
+      <DependentUpon>TimeSignatureSelectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\VersionInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -147,11 +169,20 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\BPMSelectionForm.resx">
+      <DependentUpon>BPMSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\ExportForm.resx">
       <DependentUpon>ExportForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\HighSpeedSelectionForm.resx">
+      <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\TimeSignatureSelectionForm.resx">
+      <DependentUpon>TimeSignatureSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\VersionInfoForm.resx">
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
@@ -238,6 +269,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\blue-document-export.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\selection.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

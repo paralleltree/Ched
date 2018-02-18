@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ched.Components
+namespace Ched.Components.Events
 {
     /// <summary>
     /// 譜面におけるイベントを表すクラスです。

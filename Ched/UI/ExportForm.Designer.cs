@@ -37,11 +37,9 @@
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
             this.browseButton = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
             this.soundOffsetBox = new System.Windows.Forms.NumericUpDown();
-            this.bpmBox = new System.Windows.Forms.NumericUpDown();
             this.titleBox = new System.Windows.Forms.TextBox();
             this.artistBox = new System.Windows.Forms.TextBox();
             this.notesDesignerBox = new System.Windows.Forms.TextBox();
@@ -53,8 +51,8 @@
             this.outputBox = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.exportButton = new System.Windows.Forms.Button();
+            this.hasPaddingBarBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.soundOffsetBox)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.bpmBox)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -138,15 +136,6 @@
             this.label9.TabIndex = 8;
             this.label9.Text = "ジャケットファイル名";
             // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(14, 242);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(29, 12);
-            this.label10.TabIndex = 9;
-            this.label10.Text = "BPM";
-            // 
             // browseButton
             // 
             this.browseButton.Location = new System.Drawing.Point(305, 287);
@@ -188,30 +177,6 @@
             this.soundOffsetBox.Size = new System.Drawing.Size(67, 19);
             this.soundOffsetBox.TabIndex = 21;
             this.soundOffsetBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // bpmBox
-            // 
-            this.bpmBox.DecimalPlaces = 1;
-            this.bpmBox.Location = new System.Drawing.Point(229, 240);
-            this.bpmBox.Maximum = new decimal(new int[] {
-            600,
-            0,
-            0,
-            0});
-            this.bpmBox.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.bpmBox.Name = "bpmBox";
-            this.bpmBox.Size = new System.Drawing.Size(68, 19);
-            this.bpmBox.TabIndex = 23;
-            this.bpmBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.bpmBox.Value = new decimal(new int[] {
-            120,
-            0,
-            0,
-            0});
             // 
             // titleBox
             // 
@@ -290,18 +255,30 @@
             // 
             // exportButton
             // 
-            this.exportButton.Location = new System.Drawing.Point(16, 323);
+            this.exportButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.exportButton.Location = new System.Drawing.Point(16, 321);
             this.exportButton.Name = "exportButton";
             this.exportButton.Size = new System.Drawing.Size(364, 23);
             this.exportButton.TabIndex = 26;
             this.exportButton.Text = "エクスポート";
             this.exportButton.UseVisualStyleBackColor = true;
             // 
+            // hasPaddingBarBox
+            // 
+            this.hasPaddingBarBox.AutoSize = true;
+            this.hasPaddingBarBox.Location = new System.Drawing.Point(124, 243);
+            this.hasPaddingBarBox.Name = "hasPaddingBarBox";
+            this.hasPaddingBarBox.Size = new System.Drawing.Size(173, 16);
+            this.hasPaddingBarBox.TabIndex = 27;
+            this.hasPaddingBarBox.Text = "先頭に1小節の空白を挿入する";
+            this.hasPaddingBarBox.UseVisualStyleBackColor = true;
+            // 
             // ExportForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(398, 358);
+            this.ClientSize = new System.Drawing.Size(398, 356);
+            this.Controls.Add(this.hasPaddingBarBox);
             this.Controls.Add(this.exportButton);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.outputBox);
@@ -313,11 +290,9 @@
             this.Controls.Add(this.notesDesignerBox);
             this.Controls.Add(this.artistBox);
             this.Controls.Add(this.titleBox);
-            this.Controls.Add(this.bpmBox);
             this.Controls.Add(this.soundOffsetBox);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.browseButton);
-            this.Controls.Add(this.label10);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
@@ -333,7 +308,6 @@
             this.Name = "ExportForm";
             this.Text = "エクスポート";
             ((System.ComponentModel.ISupportInitialize)(this.soundOffsetBox)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.bpmBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -350,11 +324,9 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button browseButton;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.NumericUpDown soundOffsetBox;
-        private System.Windows.Forms.NumericUpDown bpmBox;
         private System.Windows.Forms.TextBox titleBox;
         private System.Windows.Forms.TextBox artistBox;
         private System.Windows.Forms.TextBox notesDesignerBox;
@@ -366,5 +338,6 @@
         private System.Windows.Forms.TextBox outputBox;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Button exportButton;
+        private System.Windows.Forms.CheckBox hasPaddingBarBox;
     }
 }

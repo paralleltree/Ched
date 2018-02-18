@@ -20,6 +20,7 @@ namespace Ched.UI
     public partial class NoteView : Control
     {
         public event EventHandler EditModeChanged;
+        public event EventHandler SelectedRangeChanged;
         public event EventHandler NewNoteTypeChanged;
         public event EventHandler AirDirectionChanged;
         public event EventHandler OperationHistoryChanged;
@@ -34,6 +35,7 @@ namespace Ched.UI
 
         private bool editable = true;
         private EditMode editMode = EditMode.Edit;
+        private SelectionRange selectedRange = SelectionRange.Empty;
         private NoteType newNoteType = NoteType.Tap;
         private AirDirection airDirection = new AirDirection(VerticalAirDirection.Up, HorizontalAirDirection.Center);
         private bool isNewSlideStepVisible = true;
@@ -193,6 +195,20 @@ namespace Ched.UI
         }
 
         /// <summary>
+        /// 現在の選択範囲を設定します。
+        /// </summary>
+        public SelectionRange SelectedRange
+        {
+            get { return selectedRange; }
+            set
+            {
+                selectedRange = value;
+                SelectedRangeChanged?.Invoke(this, EventArgs.Empty);
+                Invalidate();
+            }
+        }
+
+        /// <summary>
         /// 追加するノート種別を設定します。
         /// </summary>
         public NoteType NewNoteType
@@ -242,11 +258,13 @@ namespace Ched.UI
 
         public NoteCollection Notes { get; } = new NoteCollection();
 
-        protected OperationManager OperationManager { get; } = new OperationManager();
+        public EventCollection ScoreEvents { get; set; } = new EventCollection();
+
+        protected OperationManager OperationManager { get; }
 
         protected CompositeDisposable Subscriptions { get; } = new CompositeDisposable();
 
-        public NoteView()
+        public NoteView(OperationManager manager)
         {
             InitializeComponent();
             this.DoubleBuffered = true;
@@ -254,6 +272,7 @@ namespace Ched.UI
             this.SetStyle(ControlStyles.ResizeRedraw, true);
             this.SetStyle(ControlStyles.Opaque, true);
 
+            OperationManager = manager;
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
                 OperationHistoryChanged?.Invoke(this, EventArgs.Empty);
@@ -1071,8 +1090,27 @@ namespace Ched.UI
                 })
                 .Subscribe(p => Invalidate());
 
+            var selectSubscription = mouseDown
+                .Where(p => Editable)
+                .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Select)
+                .Do(p =>
+                {
+                    Matrix startMatrix = GetDrawingMatrix(new Matrix());
+                    startMatrix.Invert();
+                    PointF startScorePos = startMatrix.TransformPoint(p.Location);
+
+                    SelectedRange = new SelectionRange()
+                    {
+                        StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(startScorePos.Y)), 0),
+                        Duration = 0,
+                        StartLaneIndex = 0,
+                        SelectedLanesCount = 0
+                    };
+                }).Subscribe();
+
             Subscriptions.Add(editSubscription);
             Subscriptions.Add(eraseSubscription);
+            Subscriptions.Add(selectSubscription);
         }
 
         protected override void OnPaint(PaintEventArgs pe)
@@ -1100,15 +1138,45 @@ namespace Ched.UI
 
 
             // 時間ガイドの描画
+            // そのイベントが含まれる小節(ただし[小節開始Tick, 小節開始Tick + 小節Tick)の範囲)からその拍子を適用
+            var sigs = ScoreEvents.TimeSignatureChangeEvents.OrderBy(p => p.Tick).ToList();
+
             using (var beatPen = new Pen(BeatLineColor, BorderThickness))
             using (var barPen = new Pen(BarLineColor, BorderThickness))
             {
-                for (int i = HeadTick / UnitBeatTick; i * UnitBeatTick < tailTick; i++)
+                // 最初の拍子
+                int firstBarLength = UnitBeatTick * 4 * sigs[0].Numerator / sigs[0].Denominator;
+                int barTick = UnitBeatTick * 4;
+
+                for (int i = HeadTick / (barTick / sigs[0].Denominator); sigs.Count < 2 || i * barTick / sigs[0].Denominator < sigs[1].Tick / firstBarLength * firstBarLength; i++)
                 {
-                    float y = i * UnitBeatHeight;
-                    // 4分の4拍子で1小節ごとに小節区切り
-                    pe.Graphics.DrawLine(i % 4 == 0 ? barPen : beatPen, 0, y, laneWidth, y);
+                    int tick = i * barTick / sigs[0].Denominator;
+                    float y = GetYPositionFromTick(tick);
+                    pe.Graphics.DrawLine(i % sigs[0].Numerator == 0 ? barPen : beatPen, 0, y, laneWidth, y);
+                    if (tick > tailTick) break;
                 }
+
+                // その後の拍子
+                int pos = 0;
+                for (int j = 1; j < sigs.Count; j++)
+                {
+                    int prevBarLength = barTick * sigs[j - 1].Numerator / sigs[j - 1].Denominator;
+                    int currentBarLength = barTick * sigs[j].Numerator / sigs[j].Denominator;
+                    pos += (sigs[j].Tick - pos) / prevBarLength * prevBarLength;
+                    if (pos > tailTick) break;
+                    for (int i = HeadTick - pos < 0 ? 0 : (HeadTick - pos) / (barTick / sigs[j].Denominator); pos + i * (barTick / sigs[j].Denominator) < tailTick; i++)
+                    {
+                        if (j < sigs.Count - 1 && i * barTick / sigs[j].Denominator >= (sigs[j + 1].Tick - pos) / currentBarLength * currentBarLength) break;
+                        float y = GetYPositionFromTick(pos + i * barTick / sigs[j].Denominator);
+                        pe.Graphics.DrawLine(i % sigs[j].Numerator == 0 ? barPen : beatPen, 0, y, laneWidth, y);
+                    }
+                }
+            }
+
+            using (var posPen = new Pen(Color.FromArgb(196, 0, 0)))
+            {
+                float y = GetYPositionFromTick(SelectedRange.StartTick);
+                if (Editable) pe.Graphics.DrawLine(posPen, -UnitLaneWidth * 2, y, laneWidth, y);
             }
 
             // ノート描画
@@ -1219,14 +1287,65 @@ namespace Ched.UI
             // Y軸反転させずにTick = 0をY軸原点とする座標系へ
             pe.Graphics.Transform = GetDrawingMatrix(prevMatrix, false);
 
-            Font font = new Font("MS Gothic", 8);
-            SizeF strSize = pe.Graphics.MeasureString("000", font);
-
-            // 小節番号描画(4分の4拍子)
-            for (int i = HeadTick / UnitBeatTick / 4; i * UnitBeatTick * 4 <= tailTick; i++)
+            using (var font = new Font("MS Gothic", 8))
             {
-                var point = new PointF(-strSize.Width, -GetYPositionFromTick(i * UnitBeatTick * 4) - strSize.Height);
-                pe.Graphics.DrawString(string.Format("{0:000}", i + 1), font, Brushes.White, point);
+                SizeF strSize = pe.Graphics.MeasureString("000", font);
+
+                // 小節番号描画
+                int barTick = UnitBeatTick * 4;
+                int barCount = 0;
+                int pos = 0;
+
+                for (int j = 0; j < sigs.Count; j++)
+                {
+                    if (pos > tailTick) break;
+                    int currentBarLength = (UnitBeatTick * 4) * sigs[j].Numerator / sigs[j].Denominator;
+                    for (int i = 0; pos + i * currentBarLength < tailTick; i++)
+                    {
+                        if (j < sigs.Count - 1 && i * currentBarLength >= (sigs[j + 1].Tick - pos) / currentBarLength * currentBarLength) break;
+
+                        int tick = pos + i * currentBarLength;
+                        barCount++;
+                        if (tick < HeadTick) continue;
+                        var point = new PointF(-strSize.Width, -GetYPositionFromTick(tick) - strSize.Height);
+                        pe.Graphics.DrawString(string.Format("{0:000}", barCount), font, Brushes.White, point);
+                    }
+
+                    if (j < sigs.Count - 1)
+                        pos += (sigs[j + 1].Tick - pos) / currentBarLength * currentBarLength;
+                }
+
+                float rightBase = (UnitLaneWidth + BorderThickness) * Constants.LanesCount + strSize.Width / 3;
+
+                // BPM描画
+                using (var bpmBrush = new SolidBrush(Color.FromArgb(0, 192, 0)))
+                {
+                    foreach (var item in ScoreEvents.BPMChangeEvents.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
+                    {
+                        var point = new PointF(rightBase, -GetYPositionFromTick(item.Tick) - strSize.Height);
+                        pe.Graphics.DrawString(item.BPM.ToString().PadLeft(3), font, Brushes.Lime, point);
+                    }
+                }
+
+                // 拍子記号描画
+                using (var sigBrush = new SolidBrush(Color.FromArgb(216, 116, 0)))
+                {
+                    foreach (var item in sigs.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
+                    {
+                        var point = new PointF(rightBase + strSize.Width, -GetYPositionFromTick(item.Tick) - strSize.Height);
+                        pe.Graphics.DrawString(string.Format("{0}/{1}", item.Numerator, item.Denominator), font, sigBrush, point);
+                    }
+                }
+
+                // ハイスピ描画
+                using (var highSpeedBrush = new SolidBrush(Color.FromArgb(216, 0, 64)))
+                {
+                    foreach (var item in ScoreEvents.HighSpeedChangeEvents.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
+                    {
+                        var point = new PointF(rightBase + strSize.Width * 2, -GetYPositionFromTick(item.Tick) - strSize.Height);
+                        pe.Graphics.DrawString(string.Format("x{0: 0.00;-0.00}", item.SpeedRatio), font, highSpeedBrush, point);
+                    }
+                }
             }
 
             pe.Graphics.Transform = prevMatrix;
@@ -1300,9 +1419,10 @@ namespace Ched.UI
         }
 
 
-        public void Load(Components.NoteCollection collection)
+        public void LoadScore(Score score)
         {
-            Notes.Load(collection);
+            Notes.Load(score.Notes);
+            ScoreEvents = score.Events;
             OperationManager.Clear();
             Invalidate();
         }
@@ -1506,6 +1626,7 @@ namespace Ched.UI
 
     public enum EditMode
     {
+        Select,
         Edit,
         Erase
     }
@@ -1532,6 +1653,61 @@ namespace Ched.UI
         {
             VerticalDirection = verticalDirection;
             HorizontalDirection = horizontaiDirection;
+        }
+    }
+
+    public struct SelectionRange
+    {
+        public static SelectionRange Empty = new SelectionRange()
+        {
+            StartTick = 0,
+            Duration = 0,
+            StartLaneIndex = 0,
+            SelectedLanesCount = 0
+        };
+
+        private int startTick;
+        private int duration;
+        private int startLaneIndex;
+        private int selectedLanesCount;
+
+        public int StartTick
+        {
+            get { return startTick; }
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException("value must not be negative.");
+                startTick = value;
+            }
+        }
+
+        public int Duration
+        {
+            get { return duration; }
+            set
+            {
+                duration = value;
+            }
+        }
+
+        public int StartLaneIndex
+        {
+            get { return startLaneIndex; }
+            set
+            {
+                if (value < 0 || value > Constants.LanesCount - 1) throw new ArgumentOutOfRangeException();
+                startLaneIndex = value;
+            }
+        }
+
+        public int SelectedLanesCount
+        {
+            get { return selectedLanesCount; }
+            set
+            {
+                if (StartLaneIndex + value < 0 || StartLaneIndex + value > Constants.LanesCount) throw new ArgumentOutOfRangeException();
+                selectedLanesCount = value;
+            }
         }
     }
 }
