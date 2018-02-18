@@ -38,8 +38,12 @@ namespace Ched.Components.Exporter
 
                 writer.WriteLine();
 
+                writer.WriteLine("#REQUEST \"ticks_per_beat {0}\"", book.Score.TicksPerBeat);
+
+                writer.WriteLine();
+
                 int barTick = book.Score.TicksPerBeat * 4;
-                var barIndexCalculator = new BarIndexCalculator(barTick, book.Score.Events.TimeSignatureChangeEvents);
+                var barIndexCalculator = new BarIndexCalculator(barTick, book.Score.Events.TimeSignatureChangeEvents, args.HasPaddingBar);
 
                 foreach (var item in barIndexCalculator.TimeSignatures)
                 {
@@ -56,6 +60,16 @@ namespace Ched.Components.Exporter
                     writer.WriteLine("#BPM{0:00}:{1}", i + 1, item.BPM);
                     writer.WriteLine("#{0:000}08:{1:00}", barPos.BarIndex, i + 1);
                 }
+
+                writer.WriteLine();
+
+                var speeds = book.Score.Events.HighSpeedChangeEvents.Select(p =>
+                {
+                    var barPos = barIndexCalculator.GetBarPositionFromTick(p.Tick);
+                    return string.Format("{0}'{1}:{2}", barPos.BarIndex, barPos.TickOffset, p.SpeedRatio);
+                });
+                writer.WriteLine("#TIL00: \"{0}\"", string.Join(", ", speeds));
+                writer.WriteLine("#HISPEED 00");
 
                 writer.WriteLine();
 
@@ -346,6 +360,7 @@ namespace Ched.Components.Exporter
 
         public class BarIndexCalculator
         {
+            private bool hasPaddingBar;
             private int barTick;
             private SortedDictionary<int, TimeSignatureItem> timeSignatures;
 
@@ -357,13 +372,14 @@ namespace Ched.Components.Exporter
                 get { return timeSignatures.Select(p => p.Value).Reverse(); }
             }
 
-            public BarIndexCalculator(int barTick, IEnumerable<TimeSignatureChangeEvent> events)
+            public BarIndexCalculator(int barTick, IEnumerable<TimeSignatureChangeEvent> events, bool hasPaddingBar)
             {
+                this.hasPaddingBar = hasPaddingBar;
                 this.barTick = barTick;
                 var ordered = events.OrderBy(p => p.Tick).ToList();
                 var dic = new SortedDictionary<int, TimeSignatureItem>();
                 int pos = 0;
-                int barIndex = 1;
+                int barIndex = hasPaddingBar ? 1 : 0;
                 for (int i = 0; i < ordered.Count; i++)
                 {
                     var item = new TimeSignatureItem()
@@ -460,5 +476,7 @@ namespace Ched.Components.Exporter
             Master,
             WorldsEnd
         }
+
+        public bool HasPaddingBar { get; set; }
     }
 }

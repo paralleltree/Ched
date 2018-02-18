@@ -1336,6 +1336,16 @@ namespace Ched.UI
                         pe.Graphics.DrawString(string.Format("{0}/{1}", item.Numerator, item.Denominator), font, sigBrush, point);
                     }
                 }
+
+                // ハイスピ描画
+                using (var highSpeedBrush = new SolidBrush(Color.FromArgb(216, 0, 64)))
+                {
+                    foreach (var item in ScoreEvents.HighSpeedChangeEvents.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
+                    {
+                        var point = new PointF(rightBase + strSize.Width * 2, -GetYPositionFromTick(item.Tick) - strSize.Height);
+                        pe.Graphics.DrawString(string.Format("x{0: 0.00;-0.00}", item.SpeedRatio), font, highSpeedBrush, point);
+                    }
+                }
             }
 
             pe.Graphics.Transform = prevMatrix;

@@ -18,6 +18,8 @@ namespace Ched.Components
         private List<BPMChangeEvent> bpmChangeEvents = new List<BPMChangeEvent>() { new BPMChangeEvent() { Tick = 0, BPM = 120 } };
         [Newtonsoft.Json.JsonProperty]
         private List<TimeSignatureChangeEvent> timeSignatureChangeEvents = new List<TimeSignatureChangeEvent>() { new TimeSignatureChangeEvent() { Tick = 0, Numerator = 4, DenominatorExponent = 2 } };
+        [Newtonsoft.Json.JsonProperty]
+        private List<HighSpeedChangeEvent> highSpeedChangeEvents = new List<HighSpeedChangeEvent>();
 
         public List<BPMChangeEvent> BPMChangeEvents
         {
@@ -29,6 +31,12 @@ namespace Ched.Components
         {
             get { return timeSignatureChangeEvents; }
             set { timeSignatureChangeEvents = value; }
+        }
+
+        public List<HighSpeedChangeEvent> HighSpeedChangeEvents
+        {
+            get { return highSpeedChangeEvents; }
+            set { highSpeedChangeEvents = value; }
         }
     }
 }

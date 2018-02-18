@@ -29,7 +29,7 @@ namespace Ched.UI
         public MainForm()
         {
             InitializeComponent();
-            Size = new Size(400, 700);
+            Size = new Size(420, 700);
             Icon = Resources.MainIcon;
             SetText();
 
@@ -265,6 +265,34 @@ namespace Ched.UI
                 noteView.Invalidate();
             });
 
+            var insertHighSpeedItem = new MenuItem("ハイスピード", (s, e) =>
+            {
+                var form = new HighSpeedSelectionForm();
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var prev = noteView.ScoreEvents.HighSpeedChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
+                var item = new Components.Events.HighSpeedChangeEvent()
+                {
+                    Tick = noteView.SelectedRange.StartTick,
+                    SpeedRatio = form.SpeedRatio
+                };
+
+                var insertOp = new InsertEventOperation<Components.Events.HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, item);
+                if (prev == null)
+                {
+                    OperationManager.Push(insertOp);
+                }
+                else
+                {
+                    var removeOp = new RemoveEventOperation<Components.Events.HighSpeedChangeEvent>(NoteView.ScoreEvents.HighSpeedChangeEvents, prev);
+                    noteView.ScoreEvents.HighSpeedChangeEvents.Remove(prev);
+                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
+                }
+
+                noteView.ScoreEvents.HighSpeedChangeEvents.Add(item);
+                noteView.Invalidate();
+            });
+
             var insertTimeSignatureItem = new MenuItem("拍子", (s, e) =>
             {
                 var form = new TimeSignatureSelectionForm();
@@ -294,7 +322,7 @@ namespace Ched.UI
                 noteView.Invalidate();
             });
 
-            var insertMenuItems = new MenuItem[] { insertBPMItem, insertTimeSignatureItem };
+            var insertMenuItems = new MenuItem[] { insertBPMItem, insertHighSpeedItem, insertTimeSignatureItem };
 
             var helpMenuItems = new MenuItem[]
             {

@@ -115,6 +115,8 @@ namespace Ched.Components
                     // デシリアライズ時にリストを置き換えるのではなく各要素がAddされてるようなんですが
                     if (res.Score.Events.BPMChangeEvents.Count > 1)
                         res.Score.Events.BPMChangeEvents = res.Score.Events.BPMChangeEvents.Skip(1).ToList();
+                    if (res.score.Events.HighSpeedChangeEvents.Count > 1)
+                        res.score.Events.HighSpeedChangeEvents = res.Score.Events.HighSpeedChangeEvents.Skip(1).ToList();
                     if (res.Score.Events.TimeSignatureChangeEvents.Count > 1)
                         res.Score.Events.TimeSignatureChangeEvents = res.Score.Events.TimeSignatureChangeEvents.Skip(1).ToList();
                     // 循環参照は復元できないねん……

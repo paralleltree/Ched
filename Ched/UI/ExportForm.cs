@@ -36,6 +36,7 @@ namespace Ched.UI
             soundFileBox.Text = args.SoundFileName;
             soundOffsetBox.Value = args.SoundOffset;
             jacketFileBox.Text = args.JacketFilePath;
+            hasPaddingBarBox.Checked = args.HasPaddingBar;
 
             browseButton.Click += (s, e) =>
             {
@@ -66,6 +67,7 @@ namespace Ched.UI
                 args.SoundFileName = soundFileBox.Text;
                 args.SoundOffset = soundOffsetBox.Value;
                 args.JacketFilePath = jacketFileBox.Text;
+                args.HasPaddingBar = hasPaddingBarBox.Checked;
 
                 try
                 {
