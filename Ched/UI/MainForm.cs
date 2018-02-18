@@ -11,6 +11,7 @@ using System.Windows.Forms;
 
 using Ched.Components;
 using Ched.Components.Notes;
+using Ched.UI.Operations;
 using Ched.Properties;
 
 namespace Ched.UI
@@ -20,6 +21,7 @@ namespace Ched.UI
         private readonly string FileTypeFilter = "Ched専用形式(*.chs)|*.chs";
 
         private ScoreBook ScoreBook { get; set; }
+        private OperationManager OperationManager { get; }
 
         private ScrollBar NoteViewScrollBar { get; }
         private NoteView NoteView { get; }
@@ -33,7 +35,8 @@ namespace Ched.UI
 
             ToolStripManager.RenderMode = ToolStripManagerRenderMode.System;
 
-            NoteView = new NoteView() { Dock = DockStyle.Fill };
+            OperationManager = new OperationManager();
+            NoteView = new NoteView(OperationManager) { Dock = DockStyle.Fill };
 
             NoteViewScrollBar = new VScrollBar()
             {
@@ -119,7 +122,7 @@ namespace Ched.UI
         protected void LoadBook(ScoreBook book)
         {
             ScoreBook = book;
-            NoteView.Load(book.Score.Notes);
+            NoteView.LoadScore(book.Score);
             NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             SetText(book.Path);
@@ -174,6 +177,7 @@ namespace Ched.UI
         protected void CommitChanges()
         {
             ScoreBook.Score.Notes = new NoteCollection(NoteView.Notes);
+            // Eventsは参照渡ししてますよん
         }
 
         protected void ClearFile()
@@ -233,6 +237,37 @@ namespace Ched.UI
 
             var viewMenuItems = new MenuItem[] { viewModeItem };
 
+            var insertTimeSignatureItem = new MenuItem("拍子", (s, e) =>
+            {
+                var form = new TimeSignatureSelectionForm();
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var prev = noteView.ScoreEvents.TimeSignatureChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
+                var item = new Components.Events.TimeSignatureChangeEvent()
+                {
+                    Tick = noteView.SelectedRange.StartTick,
+                    Numerator = form.Numerator,
+                    DenominatorExponent = form.DenominatorExponent
+                };
+
+                var insertOp = new InsertEventOperation<Components.Events.TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
+                if (prev != null)
+                {
+                    noteView.ScoreEvents.TimeSignatureChangeEvents.Remove(prev);
+                    var removeOp = new RemoveEventOperation<Components.Events.TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, prev);
+                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
+                }
+                else
+                {
+                    OperationManager.Push(insertOp);
+                }
+
+                noteView.ScoreEvents.TimeSignatureChangeEvents.Add(item);
+                noteView.Invalidate();
+            });
+
+            var insertMenuItems = new MenuItem[] { insertTimeSignatureItem };
+
             var helpMenuItems = new MenuItem[]
             {
                 new MenuItem("公式サイトを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched")),
@@ -250,6 +285,7 @@ namespace Ched.UI
                 new MenuItem("ファイル(&F)", fileMenuItems),
                 new MenuItem("編集(&E)", editMenuItems),
                 new MenuItem("表示(&V)", viewMenuItems),
+                new MenuItem("挿入(&I)", insertMenuItems),
                 new MenuItem("ヘルプ(&H)", helpMenuItems)
             });
         }
@@ -288,6 +324,10 @@ namespace Ched.UI
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
+            var selectionButton = new ToolStripButton("選択", Resources.SelectionIcon, (s, e) => noteView.EditMode = EditMode.Select)
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
             var eraserButton = new ToolStripButton("消しゴム", Resources.EraserIcon, (s, e) => noteView.EditMode = EditMode.Erase)
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
@@ -301,6 +341,7 @@ namespace Ched.UI
 
             noteView.EditModeChanged += (s, e) =>
             {
+                selectionButton.Checked = noteView.EditMode == EditMode.Select;
                 penButton.Checked = noteView.EditMode == EditMode.Edit;
                 eraserButton.Checked = noteView.EditMode == EditMode.Erase;
             };
@@ -309,7 +350,7 @@ namespace Ched.UI
             {
                 newFileButton, openFileButton, saveFileButton, exportButton, new ToolStripSeparator(),
                 undoButton, redoButton, new ToolStripSeparator(),
-                penButton, eraserButton
+                penButton, selectionButton, eraserButton
             });
         }
 
