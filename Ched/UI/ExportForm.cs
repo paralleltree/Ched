@@ -36,7 +36,6 @@ namespace Ched.UI
             soundFileBox.Text = args.SoundFileName;
             soundOffsetBox.Value = args.SoundOffset;
             jacketFileBox.Text = args.JacketFilePath;
-            bpmBox.Value = book.Score.Events.BPMChangeEvents.Single().BPM;
 
             browseButton.Click += (s, e) =>
             {
@@ -67,7 +66,6 @@ namespace Ched.UI
                 args.SoundFileName = soundFileBox.Text;
                 args.SoundOffset = soundOffsetBox.Value;
                 args.JacketFilePath = jacketFileBox.Text;
-                book.Score.Events.BPMChangeEvents.Single().BPM = bpmBox.Value;
 
                 try
                 {

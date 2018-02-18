@@ -103,6 +103,12 @@
     <Compile Include="Components\Notes\TappableBase.cs" />
     <Compile Include="Components\Score.cs" />
     <Compile Include="Components\ScoreBook.cs" />
+    <Compile Include="UI\BPMSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\BPMSelectionForm.Designer.cs">
+      <DependentUpon>BPMSelectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\CheckableToolStripSplitButton.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -155,6 +161,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\BPMSelectionForm.resx">
+      <DependentUpon>BPMSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\ExportForm.resx">
       <DependentUpon>ExportForm.cs</DependentUpon>
     </EmbeddedResource>
