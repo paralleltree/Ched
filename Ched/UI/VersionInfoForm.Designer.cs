@@ -91,7 +91,9 @@
             this.Controls.Add(this.labelVersion);
             this.Controls.Add(this.labelTitle);
             this.Controls.Add(this.pictureBox1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "VersionInfoForm";
             this.Text = "バージョン情報";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

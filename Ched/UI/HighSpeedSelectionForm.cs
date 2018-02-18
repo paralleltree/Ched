@@ -17,6 +17,8 @@ namespace Ched.UI
         public HighSpeedSelectionForm()
         {
             InitializeComponent();
+            AcceptButton = buttonOK;
+            CancelButton = buttonCancel;
             buttonOK.DialogResult = DialogResult.OK;
             buttonCancel.DialogResult = DialogResult.Cancel;
 

@@ -26,6 +26,8 @@ namespace Ched.UI
         {
             InitializeComponent();
             Text = "拍子の挿入";
+            AcceptButton = buttonOK;
+            CancelButton = buttonCancel;
             buttonOK.DialogResult = DialogResult.OK;
             buttonCancel.DialogResult = DialogResult.Cancel;
 

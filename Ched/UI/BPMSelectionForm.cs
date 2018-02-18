@@ -18,6 +18,8 @@ namespace Ched.UI
         {
             InitializeComponent();
             Text = "BPMの変更";
+            AcceptButton = buttonOK;
+            CancelButton = buttonCancel;
             buttonOK.DialogResult = DialogResult.OK;
             buttonCancel.DialogResult = DialogResult.Cancel;
 

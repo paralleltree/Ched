@@ -12,9 +12,12 @@ namespace Ched.UI.Operations
     public class OperationManager
     {
         public event EventHandler OperationHistoryChanged;
+        public event EventHandler ChangesCommited;
 
         protected Stack<IOperation> UndoStack { get; } = new Stack<IOperation>();
         protected Stack<IOperation> RedoStack { get; } = new Stack<IOperation>();
+
+        private IOperation LastCommittedOperation { get; set; } = null;
 
         /// <summary>
         /// 元に戻す操作の概要のコレクションを取得します。
@@ -42,6 +45,10 @@ namespace Ched.UI.Operations
         /// </summary>
         public bool CanRedo { get { return RedoStack.Count > 0; } }
 
+        /// <summary>
+        /// 前回の<see cref="CommitChanges"/>の呼び出しから変更が加えられているかどうかを取得します。
+        /// </summary>
+        public bool IsChanged { get { return LastCommittedOperation != (UndoStack.Count > 0 ? UndoStack.Peek() : null); } }
 
         /// <summary>
         /// 新たな操作を記録します。
@@ -83,7 +90,17 @@ namespace Ched.UI.Operations
         {
             UndoStack.Clear();
             RedoStack.Clear();
+            LastCommittedOperation = null;
             OperationHistoryChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// 現在の<see cref="OperationManager"/>の状態に対して、保存処理が行われたことを通知します。
+        /// </summary>
+        public void CommitChanges()
+        {
+            LastCommittedOperation = UndoStack.Count > 0 ? UndoStack.Peek() : null;
+            ChangesCommited?.Invoke(this, EventArgs.Empty);
         }
     }
 }
