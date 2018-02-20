@@ -1122,30 +1122,50 @@ namespace Ched.UI
                     startMatrix.Invert();
                     PointF startScorePos = startMatrix.TransformPoint(p.Location);
 
-                    CurrentTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(startScorePos.Y)), 0);
-                    SelectedRange = new SelectionRange()
-                    {
-                        StartTick = CurrentTick,
-                        Duration = 0,
-                        StartLaneIndex = 0,
-                        SelectedLanesCount = 0
-                    };
-
-                    return mouseMove.TakeUntil(mouseUp)
-                        .Select(q => q.Location)
-                        .Aggregate(p.Location, (q, r) =>
+                    var drag = mouseMove.TakeUntil(mouseUp)
+                        .Select(q =>
                         {
                             Matrix currentMatrix = GetDrawingMatrix(new Matrix());
-                            var g = Graphics.FromHwnd(Handle);
-                            g.Transform = GetDrawingMatrix(currentMatrix);
-                            DrawSelectionRange(g);
-
                             currentMatrix.Invert();
-                            PointF currentScorePos = currentMatrix.TransformPoint(q);
+                            return currentMatrix.TransformPoint(q.Location);
+                        });
 
+                    if (GetSelectionRect().Contains(Point.Ceiling(startScorePos)))
+                    {
+                        int startTick = SelectedRange.StartTick;
+                        int startLaneIndex = SelectedRange.StartLaneIndex;
+                        // 選択範囲移動
+                        return drag.Do(q =>
+                        {
+                            int xdiff = (int)((q.X - startScorePos.X) / (UnitLaneWidth + BorderThickness));
+                            int laneIndex = startLaneIndex + xdiff;
+
+                            SelectedRange = new SelectionRange()
+                            {
+                                StartTick = startTick + Math.Max(GetQuantizedTick(GetTickFromYPosition(q.Y) - GetTickFromYPosition(startScorePos.Y)), -startTick - (SelectedRange.Duration < 0 ? SelectedRange.Duration : 0)),
+                                Duration = SelectedRange.Duration,
+                                StartLaneIndex = Math.Min(Math.Max(laneIndex, 0), Constants.LanesCount - SelectedRange.SelectedLanesCount),
+                                SelectedLanesCount = SelectedRange.SelectedLanesCount
+                            };
+                        });
+                    }
+                    else
+                    {
+                        // 範囲選択
+                        CurrentTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(startScorePos.Y)), 0);
+                        SelectedRange = new SelectionRange()
+                        {
+                            StartTick = CurrentTick,
+                            Duration = 0,
+                            StartLaneIndex = 0,
+                            SelectedLanesCount = 0
+                        };
+
+                        return drag.Do(q =>
+                        {
                             int startLaneIndex = Math.Min(Math.Max((int)startScorePos.X / (UnitLaneWidth + BorderThickness), 0), Constants.LanesCount - 1);
-                            int endLaneIndex = Math.Min(Math.Max((int)currentScorePos.X / (UnitLaneWidth + BorderThickness), 0), Constants.LanesCount - 1);
-                            int endTick = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y));
+                            int endLaneIndex = Math.Min(Math.Max((int)q.X / (UnitLaneWidth + BorderThickness), 0), Constants.LanesCount - 1);
+                            int endTick = GetQuantizedTick(GetTickFromYPosition(q.Y));
 
                             SelectedRange = new SelectionRange()
                             {
@@ -1154,15 +1174,27 @@ namespace Ched.UI
                                 StartLaneIndex = Math.Min(startLaneIndex, endLaneIndex),
                                 SelectedLanesCount = Math.Abs(endLaneIndex - startLaneIndex) + 1
                             };
-
-                            DrawSelectionRange(g);
-                            return r;
                         });
+                    }
                 }).Subscribe();
 
             Subscriptions.Add(editSubscription);
             Subscriptions.Add(eraseSubscription);
             Subscriptions.Add(selectSubscription);
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            Matrix matrix = GetDrawingMatrix(new Matrix());
+            matrix.Invert();
+
+            if (EditMode == EditMode.Select)
+            {
+                var scorePos = matrix.TransformPoint(e.Location);
+                Cursor = GetSelectionRect().Contains(scorePos) ? Cursors.SizeAll : Cursors.Default;
+            }
         }
 
         protected override void OnPaint(PaintEventArgs pe)
@@ -1459,13 +1491,19 @@ namespace Ched.UI
             return GetRectFromNotePosition(tick, laneIndex, width).Expand(1);
         }
 
-        protected void DrawSelectionRange(Graphics g)
+        private Rectangle GetSelectionRect()
         {
             int minTick = SelectedRange.Duration < 0 ? SelectedRange.StartTick + SelectedRange.Duration : SelectedRange.StartTick;
             int maxTick = SelectedRange.Duration < 0 ? SelectedRange.StartTick : SelectedRange.StartTick + SelectedRange.Duration;
             var start = new Point(SelectedRange.StartLaneIndex * (UnitLaneWidth + BorderThickness), (int)GetYPositionFromTick(minTick) - ShortNoteHeight);
             var end = new Point((SelectedRange.StartLaneIndex + SelectedRange.SelectedLanesCount) * (UnitLaneWidth + BorderThickness), (int)GetYPositionFromTick(maxTick) + ShortNoteHeight);
-            g.DrawXorRectangle(PenStyles.Dot, g.Transform.TransformPoint(start), g.Transform.TransformPoint(end));
+            return new Rectangle(start.X, start.Y, end.X - start.X, end.Y - start.Y);
+        }
+
+        protected void DrawSelectionRange(Graphics g)
+        {
+            Rectangle selectedRect = GetSelectionRect();
+            g.DrawXorRectangle(PenStyles.Dot, g.Transform.TransformPoint(selectedRect.Location), g.Transform.TransformPoint(selectedRect.Location + selectedRect.Size));
         }
 
         public void Undo()
