@@ -1485,6 +1485,8 @@ namespace Ched.UI
 
         public void LoadScore(Score score)
         {
+            SelectedRange = SelectionRange.Empty;
+            CurrentTick = SelectedRange.StartTick;
             Notes.Load(score.Notes);
             ScoreEvents = score.Events;
             OperationManager.Clear();
