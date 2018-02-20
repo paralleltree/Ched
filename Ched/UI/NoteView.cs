@@ -33,8 +33,10 @@ namespace Ched.UI
         private int shortNoteHeight = 5;
         private float unitBeatHeight = 120;
 
+        private int headTick = 0;
         private bool editable = true;
         private EditMode editMode = EditMode.Edit;
+        private int currentTick = 0;
         private SelectionRange selectedRange = SelectionRange.Empty;
         private NoteType newNoteType = NoteType.Tap;
         private AirDirection airDirection = new AirDirection(VerticalAirDirection.Up, HorizontalAirDirection.Center);
@@ -158,7 +160,15 @@ namespace Ched.UI
         /// <summary>
         /// 表示始端のTickを設定します。
         /// </summary>
-        public int HeadTick { get; set; }
+        public int HeadTick
+        {
+            get { return headTick; }
+            set
+            {
+                headTick = value;
+                Invalidate();
+            }
+        }
 
         /// <summary>
         /// 表示終端のTickを取得します。
@@ -191,6 +201,19 @@ namespace Ched.UI
             {
                 editMode = value;
                 EditModeChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// 現在のTickを設定します。
+        /// </summary>
+        public int CurrentTick
+        {
+            get { return currentTick; }
+            set
+            {
+                currentTick = value;
+                Invalidate();
             }
         }
 
@@ -1099,9 +1122,10 @@ namespace Ched.UI
                     startMatrix.Invert();
                     PointF startScorePos = startMatrix.TransformPoint(p.Location);
 
+                    CurrentTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(startScorePos.Y)), 0);
                     SelectedRange = new SelectionRange()
                     {
-                        StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(startScorePos.Y)), 0),
+                        StartTick = CurrentTick,
                         Duration = 0,
                         StartLaneIndex = 0,
                         SelectedLanesCount = 0
@@ -1203,7 +1227,7 @@ namespace Ched.UI
 
             using (var posPen = new Pen(Color.FromArgb(196, 0, 0)))
             {
-                float y = GetYPositionFromTick(SelectedRange.StartTick);
+                float y = GetYPositionFromTick(CurrentTick);
                 if (Editable) pe.Graphics.DrawLine(posPen, -UnitLaneWidth * 2, y, laneWidth, y);
             }
 
