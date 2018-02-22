@@ -125,7 +125,7 @@ namespace Ched.UI.Operations
         }
     }
 
-    public class ChangeHoldPositionOperation : IOperation
+    public class MoveHoldOperation : IOperation
     {
         public string Description { get { return "HOLDの移動"; } }
 
@@ -133,7 +133,7 @@ namespace Ched.UI.Operations
         protected NotePosition BeforePosition { get; }
         protected NotePosition AfterPosition { get; }
 
-        public ChangeHoldPositionOperation(Hold note, NotePosition before, NotePosition after)
+        public MoveHoldOperation(Hold note, NotePosition before, NotePosition after)
         {
             Note = note;
             BeforePosition = before;

@@ -609,7 +609,7 @@ namespace Ched.UI
                         RectangleF leftThumbRect = new RectangleF(startRect.Left, startRect.Top, startRect.Width * 0.2f, startRect.Height);
                         RectangleF rightThumbRect = new RectangleF(startRect.Right - startRect.Width * 0.2f, startRect.Top, startRect.Width * 0.2f, startRect.Height);
 
-                        var beforePos = new ChangeHoldPositionOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                        var beforePos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
                         if (leftThumbRect.Contains(scorePos))
                         {
                             return mouseMove
@@ -627,8 +627,8 @@ namespace Ched.UI
                                 })
                                 .Finally(() =>
                                 {
-                                    var afterPos = new ChangeHoldPositionOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
-                                    OperationManager.Push(new ChangeHoldPositionOperation(hold, beforePos, afterPos));
+                                    var afterPos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                                    OperationManager.Push(new MoveHoldOperation(hold, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
                                     LastWidth = hold.Width;
                                 });
@@ -648,8 +648,8 @@ namespace Ched.UI
                                 })
                                 .Finally(() =>
                                 {
-                                    var afterPos = new ChangeHoldPositionOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
-                                    OperationManager.Push(new ChangeHoldPositionOperation(hold, beforePos, afterPos));
+                                    var afterPos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                                    OperationManager.Push(new MoveHoldOperation(hold, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
                                     LastWidth = hold.Width;
                                 });
@@ -670,8 +670,8 @@ namespace Ched.UI
                                 })
                                 .Finally(() =>
                                 {
-                                    var afterPos = new ChangeHoldPositionOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
-                                    OperationManager.Push(new ChangeHoldPositionOperation(hold, beforePos, afterPos));
+                                    var afterPos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                                    OperationManager.Push(new MoveHoldOperation(hold, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
                                     LastWidth = hold.Width;
                                 });
