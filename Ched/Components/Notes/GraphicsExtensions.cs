@@ -42,6 +42,13 @@ namespace Ched.Components.Notes
             return new RectangleF(rect.Left - dx, rect.Top - dy, rect.Width + dx * 2, rect.Height + dy * 2);
         }
 
+        public static Matrix GetInvertedMatrix(this Matrix src)
+        {
+            var dest = src.Clone();
+            dest.Invert();
+            return dest;
+        }
+
         public static Point TransformPoint(this Matrix matrix, Point point)
         {
             var arr = new Point[] { point };

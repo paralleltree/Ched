@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Reactive.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 
 using Ched.Components;
@@ -310,6 +311,23 @@ namespace Ched.UI
             var mouseMove = this.MouseMoveAsObservable();
             var mouseUp = this.MouseUpAsObservable();
 
+            var dragSubscription = mouseDown
+                .SelectMany(p => mouseMove.TakeUntil(mouseUp).TakeUntil(mouseUp)
+                    .CombineLatest(Observable.Interval(TimeSpan.FromMilliseconds(200)).TakeUntil(mouseUp), (q, r) => q)
+                    .Sample(TimeSpan.FromMilliseconds(200), new ControlScheduler(this))
+                    .Do(q =>
+                    {
+                        // コントロール端にドラッグされたらスクロールする
+                        if (q.Y <= ClientSize.Height * 0.1)
+                        {
+                            HeadTick += UnitBeatTick;
+                        }
+                        else if (q.Y >= ClientSize.Height * 0.9)
+                        {
+                            HeadTick -= HeadTick < UnitBeatTick ? HeadTick : UnitBeatTick;
+                        }
+                    })).Subscribe();
+
             var editSubscription = mouseDown
                 .Where(p => Editable)
                 .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Edit)
@@ -333,7 +351,7 @@ namespace Ched.UI
                             .TakeUntil(mouseUp)
                             .Do(q =>
                             {
-                                var currentScorePos = matrix.TransformPoint(q.Location);
+                                var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                 int offset = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - action.ParentNote.ParentNote.Tick;
                                 if (offset <= 0 || offsets.Contains(offset)) return;
                                 action.Offset = offset;
@@ -366,7 +384,7 @@ namespace Ched.UI
                             .TakeUntil(mouseUp)
                             .Do(q =>
                             {
-                                var currentScorePos = matrix.TransformPoint(q.Location);
+                                var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                 note.Tick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int laneIndex = beforeLaneIndex + xdiff;
@@ -383,7 +401,7 @@ namespace Ched.UI
                             .TakeUntil(mouseUp)
                             .Do(q =>
                             {
-                                var currentScorePos = matrix.TransformPoint(q.Location);
+                                var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 xdiff = Math.Min(beforePos.Width - 1, Math.Max(-beforePos.LaneIndex, xdiff));
                                 int width = beforePos.Width - xdiff;
@@ -407,7 +425,7 @@ namespace Ched.UI
                             .TakeUntil(mouseUp)
                             .Do(q =>
                             {
-                                var currentScorePos = matrix.TransformPoint(q.Location);
+                                var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int width = beforeWidth + xdiff;
                                 note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
@@ -470,8 +488,8 @@ namespace Ched.UI
                         return mouseMove.TakeUntil(mouseUp)
                             .Do(q =>
                             {
-                                var currentCursorPos = matrix.TransformPoint(q.Location);
-                                hold.Duration = Math.Max(QuantizeTick, GetQuantizedTick(GetTickFromYPosition(currentCursorPos.Y)) - hold.StartTick);
+                                var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
+                                hold.Duration = Math.Max(QuantizeTick, GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - hold.StartTick);
                                 Cursor.Current = Cursors.SizeNS;
                             })
                             .Finally(() => Cursor.Current = Cursors.Default);
@@ -488,7 +506,7 @@ namespace Ched.UI
                             .TakeUntil(mouseUp)
                             .Do(q =>
                             {
-                                var currentScorePos = matrix.TransformPoint(q.Location);
+                                var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                 int offset = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - step.ParentNote.StartTick;
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int laneIndexOffset = beforeLaneIndexOffset + xdiff;
@@ -533,7 +551,7 @@ namespace Ched.UI
                                 .TakeUntil(mouseUp)
                                 .Do(q =>
                                 {
-                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     xdiff = Math.Min(beforePos.Width - 1, Math.Max(-beforePos.StartLaneIndex - leftStepLaneIndexOffset, xdiff));
                                     int width = beforePos.Width - xdiff;
@@ -557,7 +575,7 @@ namespace Ched.UI
                                 .TakeUntil(mouseUp)
                                 .Do(q =>
                                 {
-                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int width = beforePos.Width + xdiff;
                                     slide.Width = Math.Min(Constants.LanesCount - slide.StartLaneIndex - rightStepLaneIndexOffset, Math.Max(1, width));
@@ -579,7 +597,7 @@ namespace Ched.UI
                                 .TakeUntil(mouseUp)
                                 .Do(q =>
                                 {
-                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                     slide.StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int laneIndex = beforeLaneIndex + xdiff;
@@ -619,7 +637,7 @@ namespace Ched.UI
                                 .TakeUntil(mouseUp)
                                 .Do(q =>
                                 {
-                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     xdiff = Math.Min(beforePos.Width - 1, Math.Max(-beforePos.LaneIndex, xdiff));
                                     int width = beforePos.Width - xdiff;
@@ -643,7 +661,7 @@ namespace Ched.UI
                                 .TakeUntil(mouseUp)
                                 .Do(q =>
                                 {
-                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int width = beforePos.Width + xdiff;
                                     hold.Width = Math.Min(Constants.LanesCount - hold.LaneIndex, Math.Max(1, width));
@@ -664,7 +682,7 @@ namespace Ched.UI
                                 .TakeUntil(mouseUp)
                                 .Do(q =>
                                 {
-                                    var currentScorePos = matrix.TransformPoint(q.Location);
+                                    var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                     hold.StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int laneIndex = beforePos.LaneIndex + xdiff;
@@ -1242,6 +1260,7 @@ namespace Ched.UI
                     }
                 }).Subscribe();
 
+            Subscriptions.Add(dragSubscription);
             Subscriptions.Add(editSubscription);
             Subscriptions.Add(eraseSubscription);
             Subscriptions.Add(selectSubscription);
