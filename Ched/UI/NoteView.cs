@@ -183,6 +183,14 @@ namespace Ched.UI
         }
 
         /// <summary>
+        /// 譜面始端の表示余白に充てるTickを取得します。
+        /// </summary>
+        public int PaddingHeadTick
+        {
+            get { return UnitBeatTick / 8; }
+        }
+
+        /// <summary>
         /// ノーツが編集可能かどうかを示す値を設定します。
         /// </summary>
         public bool Editable
@@ -324,7 +332,7 @@ namespace Ched.UI
                         }
                         else if (q.Y >= ClientSize.Height * 0.9)
                         {
-                            HeadTick -= HeadTick < UnitBeatTick ? HeadTick : UnitBeatTick;
+                            HeadTick -= HeadTick + PaddingHeadTick < UnitBeatTick ? HeadTick + PaddingHeadTick : UnitBeatTick;
                         }
                     })).Subscribe();
 

@@ -58,7 +58,7 @@ namespace Ched.UI
             NoteView.Resize += (s, e) =>
             {
                 NoteViewScrollBar.LargeChange = NoteView.TailTick - NoteView.HeadTick;
-                NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.UnitBeatTick / 8;
+                NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.PaddingHeadTick;
             };
 
             NoteView.MouseWheel += (s, e) =>
