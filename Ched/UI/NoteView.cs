@@ -25,7 +25,6 @@ namespace Ched.UI
         public event EventHandler SelectedRangeChanged;
         public event EventHandler NewNoteTypeChanged;
         public event EventHandler AirDirectionChanged;
-        public event EventHandler OperationHistoryChanged;
 
         private Color barLineColor = Color.FromArgb(160, 160, 160);
         private Color beatLineColor = Color.FromArgb(80, 80, 80);
@@ -308,10 +307,6 @@ namespace Ched.UI
             this.SetStyle(ControlStyles.Opaque, true);
 
             OperationManager = manager;
-            OperationManager.OperationHistoryChanged += (s, e) =>
-            {
-                OperationHistoryChanged?.Invoke(this, EventArgs.Empty);
-            };
 
             QuantizeTick = UnitBeatTick;
 
