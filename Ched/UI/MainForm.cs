@@ -68,6 +68,12 @@ namespace Ched.UI
                 processScrollBarRangeExtension(NoteViewScrollBar);
             };
 
+            NoteView.HeadTickChanged += (s, e) =>
+            {
+                NoteViewScrollBar.Value = Math.Max(-NoteView.HeadTick, NoteViewScrollBar.Minimum);
+                processScrollBarRangeExtension(NoteViewScrollBar);
+            };
+
             NoteViewScrollBar.ValueChanged += (s, e) =>
             {
                 NoteView.HeadTick = -NoteViewScrollBar.Value / 60 * 60; // 60の倍数できれいに表示されるので…

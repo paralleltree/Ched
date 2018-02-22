@@ -19,6 +19,7 @@ namespace Ched.UI
 {
     public partial class NoteView : Control
     {
+        public event EventHandler HeadTickChanged;
         public event EventHandler EditModeChanged;
         public event EventHandler SelectedRangeChanged;
         public event EventHandler NewNoteTypeChanged;
@@ -165,7 +166,9 @@ namespace Ched.UI
             get { return headTick; }
             set
             {
+                if (headTick == value) return;
                 headTick = value;
+                HeadTickChanged?.Invoke(this, EventArgs.Empty);
                 Invalidate();
             }
         }
