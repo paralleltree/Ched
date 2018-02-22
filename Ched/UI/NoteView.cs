@@ -1132,8 +1132,24 @@ namespace Ched.UI
 
                     if (GetSelectionRect().Contains(Point.Ceiling(startScorePos)))
                     {
+                        int minTick = SelectedRange.StartTick + (SelectedRange.Duration < 0 ? SelectedRange.Duration : 0);
+                        int maxTick = SelectedRange.StartTick + (SelectedRange.Duration < 0 ? 0 : SelectedRange.Duration);
                         int startTick = SelectedRange.StartTick;
                         int startLaneIndex = SelectedRange.StartLaneIndex;
+                        int endLaneIndex = SelectedRange.StartLaneIndex + SelectedRange.SelectedLanesCount;
+
+                        var dicShortNotes = Notes.Taps.Cast<TappableBase>().Concat(Notes.ExTaps).Concat(Notes.Flicks).Concat(Notes.Damages)
+                            .Where(q => q.Tick >= minTick && q.Tick <= maxTick && q.LaneIndex >= startLaneIndex && q.LaneIndex + q.Width <= endLaneIndex)
+                            .ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
+
+                        var dicHolds = Notes.Holds
+                            .Where(q => q.StartTick >= minTick && q.StartTick + q.Duration <= maxTick && q.LaneIndex >= startLaneIndex && q.LaneIndex + q.Width <= endLaneIndex)
+                            .ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
+
+                        var dicSlides = Notes.Slides
+                            .Where(q => q.StartTick >= minTick && q.StartTick + q.GetDuration() <= maxTick && q.StartLaneIndex >= startLaneIndex && q.StartLaneIndex + q.Width <= endLaneIndex && q.StepNotes.All(r => r.LaneIndex >= startLaneIndex && r.LaneIndex + q.Width <= endLaneIndex))
+                            .ToDictionary(q => q, q => new MoveSlideOperation.NotePosition(q.StartTick, q.StartLaneIndex, q.Width));
+
                         // 選択範囲移動
                         return drag.Do(q =>
                         {
@@ -1147,6 +1163,51 @@ namespace Ched.UI
                                 StartLaneIndex = Math.Min(Math.Max(laneIndex, 0), Constants.LanesCount - SelectedRange.SelectedLanesCount),
                                 SelectedLanesCount = SelectedRange.SelectedLanesCount
                             };
+
+                            foreach (var item in dicShortNotes)
+                            {
+                                item.Key.Tick = item.Value.Tick + (SelectedRange.StartTick - startTick);
+                                item.Key.LaneIndex = item.Value.LaneIndex + (SelectedRange.StartLaneIndex - startLaneIndex);
+                            }
+
+                            // ロングノーツは全体が範囲内に含まれているもののみを対象にするので範囲外移動は考えてない
+                            foreach (var item in dicHolds)
+                            {
+                                item.Key.StartTick = item.Value.StartTick + (SelectedRange.StartTick - startTick);
+                                item.Key.LaneIndex = item.Value.LaneIndex + (SelectedRange.StartLaneIndex - startLaneIndex);
+                            }
+
+                            foreach (var item in dicSlides)
+                            {
+                                item.Key.StartTick = item.Value.StartTick + (SelectedRange.StartTick - startTick);
+                                item.Key.StartLaneIndex = item.Value.StartLaneIndex + (SelectedRange.StartLaneIndex - startLaneIndex);
+                            }
+
+                            // AIR-ACTIONはOffsetの管理面倒で実装できませんでした。許せ
+
+                            Invalidate();
+                        })
+                        .Finally(() =>
+                        {
+                            var opShortNotes = dicShortNotes.Select(q =>
+                            {
+                                var after = new MoveShortNoteOperation.NotePosition(q.Key.Tick, q.Key.LaneIndex);
+                                return new MoveShortNoteOperation(q.Key, q.Value, after);
+                            });
+
+                            var opHolds = dicHolds.Select(q =>
+                            {
+                                var after = new MoveHoldOperation.NotePosition(q.Key.StartTick, q.Key.LaneIndex, q.Key.Width);
+                                return new MoveHoldOperation(q.Key, q.Value, after);
+                            });
+
+                            var opSlides = dicSlides.Select(q =>
+                            {
+                                var after = new MoveSlideOperation.NotePosition(q.Key.StartTick, q.Key.StartLaneIndex, q.Key.Width);
+                                return new MoveSlideOperation(q.Key, q.Value, after);
+                            });
+
+                            OperationManager.Push(new CompositeOperation("ノーツの移動", opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).ToList()));
                         });
                     }
                     else
