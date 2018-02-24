@@ -452,21 +452,73 @@ namespace Ched.Components.Exporter
         }
     }
 
+    [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class SusArgs
     {
-        public string PlayLevel { get; set; }
+        [Newtonsoft.Json.JsonProperty]
+        private string playLevel;
+        [Newtonsoft.Json.JsonProperty]
+        private Difficulty playDificulty;
+        [Newtonsoft.Json.JsonProperty]
+        private string extendedDifficulty;
+        [Newtonsoft.Json.JsonProperty]
+        private string songId;
+        [Newtonsoft.Json.JsonProperty]
+        private string soundFileName;
+        [Newtonsoft.Json.JsonProperty]
+        private decimal soundOffset;
+        [Newtonsoft.Json.JsonProperty]
+        private string jacketFilePath;
+        [Newtonsoft.Json.JsonProperty]
+        private bool hasPaddingBar;
 
-        public Difficulty PlayDifficulty { get; set; }
+        public string PlayLevel
+        {
+            get { return playLevel; }
+            set { playLevel = value; }
+        }
 
-        public string ExtendedDifficulty { get; set; }
+        public Difficulty PlayDifficulty
+        {
+            get { return playDificulty; }
+            set { playDificulty = value; }
+        }
 
-        public string SongId { get; set; }
+        public string ExtendedDifficulty
+        {
+            get { return extendedDifficulty; }
+            set { extendedDifficulty = value; }
+        }
 
-        public string SoundFileName { get; set; }
+        public string SongId
+        {
+            get { return songId; }
+            set { songId = value; }
+        }
 
-        public decimal SoundOffset { get; set; }
+        public string SoundFileName
+        {
+            get { return soundFileName; }
+            set { soundFileName = value; }
+        }
 
-        public string JacketFilePath { get; set; }
+        public decimal SoundOffset
+        {
+            get { return soundOffset; }
+            set { soundOffset = value; }
+        }
+
+        public string JacketFilePath
+        {
+            get { return jacketFilePath; }
+            set { jacketFilePath = value; }
+        }
+
+        public bool HasPaddingBar
+        {
+            get { return hasPaddingBar; }
+            set { hasPaddingBar = value; }
+        }
 
         public enum Difficulty
         {
@@ -476,7 +528,5 @@ namespace Ched.Components.Exporter
             Master,
             WorldsEnd
         }
-
-        public bool HasPaddingBar { get; set; }
     }
 }

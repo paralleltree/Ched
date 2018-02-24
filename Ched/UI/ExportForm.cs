@@ -15,8 +15,8 @@ namespace Ched.UI
 {
     public partial class ExportForm : Form
     {
+        private readonly string ArgsKey = "sus";
         private readonly string Filter = "Seaurchin Score File(*.sus)|*.sus";
-        private SusArgs args = new SusArgs();
 
         public ExportForm(ScoreBook book)
         {
@@ -27,11 +27,18 @@ namespace Ched.UI
             levelDropDown.Items.AddRange(Enumerable.Range(1, 14).SelectMany(p => new string[] { p.ToString(), p + "+" }).ToArray());
             difficultyDropDown.Items.AddRange(new string[] { "BASIC", "ADVANCED", "EXPERT", "MASTER", "WORLD'S END" });
 
+            if (!book.ExporterArgs.ContainsKey(ArgsKey) || !(book.ExporterArgs[ArgsKey] is SusArgs))
+            {
+                book.ExporterArgs[ArgsKey] = new SusArgs();
+            }
+
+            var args = book.ExporterArgs[ArgsKey] as SusArgs;
+
             titleBox.Text = book.Title;
             artistBox.Text = book.ArtistName;
             notesDesignerBox.Text = book.NotesDesignerName;
-            difficultyDropDown.SelectedIndex = 3;
-            levelDropDown.SelectedIndex = 20;
+            difficultyDropDown.SelectedIndex = (int)args.PlayDifficulty;
+            levelDropDown.Text = args.PlayLevel;
             songIdBox.Text = args.SongId;
             soundFileBox.Text = args.SoundFileName;
             soundOffsetBox.Value = args.SoundOffset;
@@ -62,7 +69,7 @@ namespace Ched.UI
                 book.ArtistName = artistBox.Text;
                 book.NotesDesignerName = notesDesignerBox.Text;
                 args.PlayDifficulty = (SusArgs.Difficulty)difficultyDropDown.SelectedIndex;
-                args.PlayLevel = levelDropDown.SelectedText;
+                args.PlayLevel = levelDropDown.Text;
                 args.SongId = songIdBox.Text;
                 args.SoundFileName = soundFileBox.Text;
                 args.SoundOffset = soundOffsetBox.Value;
