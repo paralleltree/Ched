@@ -69,7 +69,7 @@ namespace Ched.UI
                 processScrollBarRangeExtension(NoteViewScrollBar);
             };
 
-            NoteView.HeadTickChanged += (s, e) =>
+            NoteView.DragScroll += (s, e) =>
             {
                 NoteViewScrollBar.Value = Math.Max(-NoteView.HeadTick, NoteViewScrollBar.Minimum);
                 processScrollBarRangeExtension(NoteViewScrollBar);

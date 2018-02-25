@@ -25,6 +25,7 @@ namespace Ched.UI
         public event EventHandler SelectedRangeChanged;
         public event EventHandler NewNoteTypeChanged;
         public event EventHandler AirDirectionChanged;
+        public event EventHandler DragScroll;
 
         private Color barLineColor = Color.FromArgb(160, 160, 160);
         private Color beatLineColor = Color.FromArgb(80, 80, 80);
@@ -324,10 +325,12 @@ namespace Ched.UI
                         if (q.Y <= ClientSize.Height * 0.1)
                         {
                             HeadTick += UnitBeatTick;
+                            DragScroll?.Invoke(this, EventArgs.Empty);
                         }
                         else if (q.Y >= ClientSize.Height * 0.9)
                         {
                             HeadTick -= HeadTick + PaddingHeadTick < UnitBeatTick ? HeadTick + PaddingHeadTick : UnitBeatTick;
+                            DragScroll?.Invoke(this, EventArgs.Empty);
                         }
                     })).Subscribe();
 
