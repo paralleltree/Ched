@@ -9,7 +9,7 @@ Chedは、CHUNITHM用の譜面エディタです。
 
 ## ダウンロード
 
-現在の最新版は[v1.1.0 Beta](https://github.com/paralleltree/Ched/releases)です。
+現在の最新版は[v1.2.0](https://github.com/paralleltree/Ched/releases)です。
 
 ## 使い方
 

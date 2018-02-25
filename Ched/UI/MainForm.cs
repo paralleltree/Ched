@@ -69,7 +69,7 @@ namespace Ched.UI
                 processScrollBarRangeExtension(NoteViewScrollBar);
             };
 
-            NoteView.HeadTickChanged += (s, e) =>
+            NoteView.DragScroll += (s, e) =>
             {
                 NoteViewScrollBar.Value = Math.Max(-NoteView.HeadTick, NoteViewScrollBar.Minimum);
                 processScrollBarRangeExtension(NoteViewScrollBar);
@@ -377,7 +377,7 @@ namespace Ched.UI
                 new MenuItem("バージョン情報", (s, e) => new VersionInfoForm().ShowDialog(this))
             };
 
-            noteView.OperationHistoryChanged += (s, e) =>
+            OperationManager.OperationHistoryChanged += (s, e) =>
             {
                 redoItem.Enabled = noteView.CanRedo;
                 undoItem.Enabled = noteView.CanUndo;
@@ -436,7 +436,7 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
-            noteView.OperationHistoryChanged += (s, e) =>
+            OperationManager.OperationHistoryChanged += (s, e) =>
             {
                 undoButton.Enabled = noteView.CanUndo;
                 redoButton.Enabled = noteView.CanRedo;
