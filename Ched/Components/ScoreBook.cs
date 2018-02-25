@@ -34,6 +34,8 @@ namespace Ched.Components
         private string notesDesignerName = "";
         [Newtonsoft.Json.JsonProperty]
         private Score score = new Score();
+        [Newtonsoft.Json.JsonProperty]
+        private Dictionary<string, object> exporterArgs = new Dictionary<string, object>();
 
         public string Path { get; set; }
 
@@ -80,6 +82,15 @@ namespace Ched.Components
         {
             get { return score; }
             set { score = value; }
+        }
+
+        /// <summary>
+        /// エクスポート用の設定を格納します。
+        /// </summary>
+        public Dictionary<string, object> ExporterArgs
+        {
+            get { return exporterArgs; }
+            set { exporterArgs = value; }
         }
 
         public void Save(string path)

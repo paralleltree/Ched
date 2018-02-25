@@ -11,6 +11,7 @@ using System.Windows.Forms;
 
 using Ched.Components;
 using Ched.Components.Notes;
+using Ched.Components.Events;
 using Ched.UI.Operations;
 using Ched.Properties;
 
@@ -58,13 +59,19 @@ namespace Ched.UI
             NoteView.Resize += (s, e) =>
             {
                 NoteViewScrollBar.LargeChange = NoteView.TailTick - NoteView.HeadTick;
-                NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.UnitBeatTick / 8;
+                NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.PaddingHeadTick;
             };
 
             NoteView.MouseWheel += (s, e) =>
             {
                 int value = NoteViewScrollBar.Value - e.Delta / 120 * NoteViewScrollBar.SmallChange;
                 NoteViewScrollBar.Value = Math.Min(Math.Max(value, NoteViewScrollBar.Minimum), NoteViewScrollBar.GetMaximumValue());
+                processScrollBarRangeExtension(NoteViewScrollBar);
+            };
+
+            NoteView.DragScroll += (s, e) =>
+            {
+                NoteViewScrollBar.Value = Math.Max(-NoteView.HeadTick, NoteViewScrollBar.Minimum);
                 processScrollBarRangeExtension(NoteViewScrollBar);
             };
 
@@ -227,7 +234,41 @@ namespace Ched.UI
                 Shortcut = Shortcut.CtrlY,
                 Enabled = false
             };
-            var editMenuItems = new MenuItem[] { undoItem, redoItem };
+
+            var removeEventsItem = new MenuItem("選択範囲内のイベントを削除", (s, e) =>
+            {
+                int minTick = noteView.SelectedRange.StartTick + (noteView.SelectedRange.Duration < 0 ? noteView.SelectedRange.Duration : 0);
+                int maxTick = noteView.SelectedRange.StartTick + (noteView.SelectedRange.Duration < 0 ? 0 : noteView.SelectedRange.Duration);
+                Func<EventBase, bool> isContained = p => p.Tick != 0 && minTick <= p.Tick && maxTick >= p.Tick;
+                var events = ScoreBook.Score.Events;
+
+                var bpmOp = events.BPMChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
+                {
+                    ScoreBook.Score.Events.BPMChangeEvents.Remove(p);
+                    return new RemoveEventOperation<BPMChangeEvent>(events.BPMChangeEvents, p);
+                }).ToList();
+
+                var speedOp = events.HighSpeedChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
+                {
+                    ScoreBook.Score.Events.HighSpeedChangeEvents.Remove(p);
+                    return new RemoveEventOperation<HighSpeedChangeEvent>(events.HighSpeedChangeEvents, p);
+                }).ToList();
+
+                var signatureOp = events.TimeSignatureChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
+                {
+                    ScoreBook.Score.Events.TimeSignatureChangeEvents.Remove(p);
+                    return new RemoveEventOperation<TimeSignatureChangeEvent>(events.TimeSignatureChangeEvents, p);
+                }).ToList();
+
+                OperationManager.Push(new CompositeOperation("イベント削除", bpmOp.Cast<IOperation>().Concat(speedOp).Concat(signatureOp)));
+                noteView.Invalidate();
+            });
+
+            var editMenuItems = new MenuItem[]
+            {
+                undoItem, redoItem, new MenuItem("-"),
+                removeEventsItem
+            };
 
             var viewModeItem = new MenuItem("譜面プレビュー", (s, e) =>
             {
@@ -336,7 +377,7 @@ namespace Ched.UI
                 new MenuItem("バージョン情報", (s, e) => new VersionInfoForm().ShowDialog(this))
             };
 
-            noteView.OperationHistoryChanged += (s, e) =>
+            OperationManager.OperationHistoryChanged += (s, e) =>
             {
                 redoItem.Enabled = noteView.CanRedo;
                 undoItem.Enabled = noteView.CanUndo;
@@ -395,7 +436,7 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
-            noteView.OperationHistoryChanged += (s, e) =>
+            OperationManager.OperationHistoryChanged += (s, e) =>
             {
                 undoButton.Enabled = noteView.CanUndo;
                 redoButton.Enabled = noteView.CanRedo;
