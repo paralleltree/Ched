@@ -47,7 +47,7 @@ namespace Ched.Components.Exporter
 
                 foreach (var item in barIndexCalculator.TimeSignatures)
                 {
-                    writer.WriteLine("#{0:000}02: {1}", item.StartBarIndex, 4f * item.TimeSignature.Numerator / item.TimeSignature.Denominator);
+                    writer.WriteLine("#{0:000}02: {1}", item.StartBarIndex + (args.HasPaddingBar && item.StartBarIndex == 1 ? -1 : 0), 4f * item.TimeSignature.Numerator / item.TimeSignature.Denominator);
                 }
 
                 writer.WriteLine();
@@ -58,7 +58,7 @@ namespace Ched.Components.Exporter
                     var barPos = barIndexCalculator.GetBarPositionFromTick(item.Tick);
                     // if (barData.OffsetTick != 0) // warn
                     writer.WriteLine("#BPM{0:00}:{1}", i + 1, item.BPM);
-                    writer.WriteLine("#{0:000}08:{1:00}", barPos.BarIndex, i + 1);
+                    writer.WriteLine("#{0:000}08:{1:00}", barPos.BarIndex + (args.HasPaddingBar && barPos.BarIndex == 1 ? -1 : 0), i + 1);
                 }
 
                 writer.WriteLine();
