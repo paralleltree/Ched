@@ -55,8 +55,6 @@ namespace Ched.Components.Notes
             }
         }
 
-
-        //[System.Runtime.Serialization.DataMember]
         public List<StepTap> StepNotes { get { return stepNotes; } }
         public StartTap StartNote { get; }
 
@@ -69,7 +67,7 @@ namespace Ched.Components.Notes
         /// SLIDEの背景を描画します。
         /// </summary>
         /// <param name="g">描画先Graphics</param>
-        /// <param name="width">ノートの描画幅</param>
+        /// <param name="width1">ノートの描画幅</param>
         /// <param name="x1">開始ノートの左端位置</param>
         /// <param name="y1">開始ノートのY座標</param>
         /// <param name="x2">終了ノートの左端位置</param>
@@ -77,11 +75,11 @@ namespace Ched.Components.Notes
         /// <param name="gradStartY">始点Step以前の中継点のY座標(グラデーション描画用)</param>
         /// <param name="gradEndY">終点Step以後の中継点のY座標(グラデーション描画用)</param>
         /// <param name="noteHeight">ノートの描画高さ</param>
-        internal void DrawBackground(Graphics g, float width, float x1, float y1, float x2, float y2, float gradStartY, float gradEndY, float noteHeight)
+        internal void DrawBackground(Graphics g, float width1, float width2, float x1, float y1, float x2, float y2, float gradStartY, float gradEndY, float noteHeight)
         {
             var prevMode = g.SmoothingMode;
             g.SmoothingMode = SmoothingMode.AntiAlias;
-            var rect = new RectangleF(Math.Min(x1, x2), Math.Min(y1, y2), Math.Abs(x1 - x2) + width, Math.Abs(y1 - y2));
+            var rect = new RectangleF(Math.Min(x1, x2), Math.Min(y1, y2), Math.Abs(x1 - x2) + width1, Math.Abs(y1 - y2));
             var gradientRect = new RectangleF(rect.Left, gradStartY, rect.Width, gradEndY - gradStartY);
             using (var brush = new LinearGradientBrush(gradientRect, BackgroundEdgeColor, BackgroundMiddleColor, LinearGradientMode.Vertical))
             {
@@ -91,26 +89,26 @@ namespace Ched.Components.Notes
                     Positions = new float[] { 0.0f, 0.3f, 0.7f, 1.0f }
                 };
                 brush.InterpolationColors = blend;
-                using (var path = GetBackgroundPath(width, x1, y1, x2, y2))
+                using (var path = GetBackgroundPath(width1, width2, x1, y1, x2, y2))
                 {
                     g.FillPath(brush, path);
                 }
             }
             using (var pen = new Pen(BackgroundLineColor, noteHeight * 0.4f))
             {
-                g.DrawLine(pen, x1 + width / 2, y1, x2 + width / 2, y2);
+                g.DrawLine(pen, x1 + width1 / 2, y1, x2 + width2 / 2, y2);
             }
             g.SmoothingMode = prevMode;
         }
 
-        internal GraphicsPath GetBackgroundPath(float width, float x1, float y1, float x2, float y2)
+        internal GraphicsPath GetBackgroundPath(float width1, float width2, float x1, float y1, float x2, float y2)
         {
             var path = new GraphicsPath();
             path.AddPolygon(new PointF[]
             {
                 new PointF(x1, y1),
-                new PointF(x1 + width, y1),
-                new PointF(x2 + width, y2),
+                new PointF(x1 + width1, y1),
+                new PointF(x2 + width2, y2),
                 new PointF(x2, y2)
             });
             return path;
