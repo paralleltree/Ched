@@ -108,6 +108,7 @@
     <Compile Include="Components\Notes\TappableBase.cs" />
     <Compile Include="Components\Score.cs" />
     <Compile Include="Components\ScoreBook.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="UI\BPMSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
