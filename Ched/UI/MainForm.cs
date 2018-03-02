@@ -39,7 +39,11 @@ namespace Ched.UI
             OperationManager.OperationHistoryChanged += (s, e) => SetText(ScoreBook.Path);
             OperationManager.ChangesCommited += (s, e) => SetText(ScoreBook.Path);
 
-            NoteView = new NoteView(OperationManager) { Dock = DockStyle.Fill };
+            NoteView = new NoteView(OperationManager)
+            {
+                Dock = DockStyle.Fill,
+                UnitBeatHeight = Settings.Default.UnitBeatHeight
+            };
 
             NoteViewScrollBar = new VScrollBar()
             {
@@ -87,7 +91,14 @@ namespace Ched.UI
 
             FormClosing += (s, e) =>
             {
-                if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) e.Cancel = true;
+                if (OperationManager.IsChanged && !this.ConfirmDiscardChanges())
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
+                Settings.Default.UnitBeatHeight = (int)NoteView.UnitBeatHeight;
+                Settings.Default.Save();
             };
 
             using (var manager = this.WorkWithLayout())
@@ -282,7 +293,7 @@ namespace Ched.UI
                 NoteView.LaneBorderDarkColor = item.Checked ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
                 NoteView.UnitLaneWidth = item.Checked ? 4 : 12;
                 NoteView.ShortNoteHeight = item.Checked ? 4 : 5;
-                NoteView.UnitBeatHeight = item.Checked ? 48 : 120;
+                NoteView.UnitBeatHeight = item.Checked ? 48 : Settings.Default.UnitBeatHeight;
                 UpdateThumbHeight();
             });
 
@@ -440,6 +451,33 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
+            var zoomInButton = new ToolStripButton("拡大", Resources.ZoomInIcon)
+            {
+                Enabled = noteView.UnitBeatHeight < 960,
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+            var zoomOutButton = new ToolStripButton("縮小", Resources.ZoomOutIcon)
+            {
+                Enabled = noteView.UnitBeatHeight > 30,
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+
+            zoomInButton.Click += (s, e) =>
+            {
+                noteView.UnitBeatHeight *= 2;
+                zoomOutButton.Enabled = true;
+                if (noteView.UnitBeatHeight >= 960) zoomInButton.Enabled = false;
+                UpdateThumbHeight();
+            };
+
+            zoomOutButton.Click += (s, e) =>
+            {
+                noteView.UnitBeatHeight /= 2;
+                zoomInButton.Enabled = true;
+                if (noteView.UnitBeatHeight <= 30) zoomOutButton.Enabled = false;
+                UpdateThumbHeight();
+            };
+
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
                 undoButton.Enabled = noteView.CanUndo;
@@ -457,7 +495,8 @@ namespace Ched.UI
             {
                 newFileButton, openFileButton, saveFileButton, exportButton, new ToolStripSeparator(),
                 undoButton, redoButton, new ToolStripSeparator(),
-                penButton, selectionButton, eraserButton
+                penButton, selectionButton, eraserButton, new ToolStripSeparator(),
+                zoomInButton, zoomOutButton
             });
         }
 
