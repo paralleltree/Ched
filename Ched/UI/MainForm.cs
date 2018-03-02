@@ -21,11 +21,37 @@ namespace Ched.UI
     {
         private readonly string FileTypeFilter = "Ched専用形式(*.chs)|*.chs";
 
+        private bool isPreviewMode;
+
         private ScoreBook ScoreBook { get; set; }
         private OperationManager OperationManager { get; }
 
         private ScrollBar NoteViewScrollBar { get; }
         private NoteView NoteView { get; }
+
+        private ToolStripButton ZoomInButton;
+        private ToolStripButton ZoomOutButton;
+
+        private bool IsPreviewMode
+        {
+            get { return isPreviewMode; }
+            set
+            {
+                isPreviewMode = value;
+                NoteView.Editable = !isPreviewMode;
+                NoteView.LaneBorderLightColor = isPreviewMode ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
+                NoteView.LaneBorderDarkColor = isPreviewMode ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
+                NoteView.UnitLaneWidth = isPreviewMode ? 4 : 12;
+                NoteView.ShortNoteHeight = isPreviewMode ? 4 : 5;
+                NoteView.UnitBeatHeight = isPreviewMode ? 48 : Settings.Default.UnitBeatHeight;
+                UpdateThumbHeight();
+                ZoomInButton.Enabled = CanZoomIn;
+                ZoomOutButton.Enabled = CanZoomOut;
+            }
+        }
+
+        private bool CanZoomIn { get { return !IsPreviewMode && NoteView.UnitBeatHeight < 960; } }
+        private bool CanZoomOut { get { return !IsPreviewMode && NoteView.UnitBeatHeight > 30; } }
 
         public MainForm()
         {
@@ -97,7 +123,6 @@ namespace Ched.UI
                     return;
                 }
 
-                Settings.Default.UnitBeatHeight = (int)NoteView.UnitBeatHeight;
                 Settings.Default.Save();
             };
 
@@ -286,15 +311,8 @@ namespace Ched.UI
 
             var viewModeItem = new MenuItem("譜面プレビュー", (s, e) =>
             {
-                var item = (MenuItem)s;
-                item.Checked = !item.Checked;
-                NoteView.Editable = !item.Checked;
-                NoteView.LaneBorderLightColor = item.Checked ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
-                NoteView.LaneBorderDarkColor = item.Checked ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
-                NoteView.UnitLaneWidth = item.Checked ? 4 : 12;
-                NoteView.ShortNoteHeight = item.Checked ? 4 : 5;
-                NoteView.UnitBeatHeight = item.Checked ? 48 : Settings.Default.UnitBeatHeight;
-                UpdateThumbHeight();
+                IsPreviewMode = !IsPreviewMode;
+                ((MenuItem)s).Checked = IsPreviewMode;
             });
 
             var viewMenuItems = new MenuItem[] { viewModeItem };
@@ -465,18 +483,23 @@ namespace Ched.UI
             zoomInButton.Click += (s, e) =>
             {
                 noteView.UnitBeatHeight *= 2;
-                zoomOutButton.Enabled = true;
-                if (noteView.UnitBeatHeight >= 960) zoomInButton.Enabled = false;
+                Settings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
+                zoomOutButton.Enabled = CanZoomOut;
+                zoomInButton.Enabled = CanZoomIn;
                 UpdateThumbHeight();
             };
 
             zoomOutButton.Click += (s, e) =>
             {
                 noteView.UnitBeatHeight /= 2;
-                zoomInButton.Enabled = true;
-                if (noteView.UnitBeatHeight <= 30) zoomOutButton.Enabled = false;
+                Settings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
+                zoomInButton.Enabled = CanZoomIn;
+                zoomOutButton.Enabled = CanZoomOut;
                 UpdateThumbHeight();
             };
+
+            ZoomInButton = zoomInButton;
+            ZoomOutButton = zoomOutButton;
 
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
