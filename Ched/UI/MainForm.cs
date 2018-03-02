@@ -56,11 +56,7 @@ namespace Ched.UI
                 }
             };
 
-            NoteView.Resize += (s, e) =>
-            {
-                NoteViewScrollBar.LargeChange = NoteView.TailTick - NoteView.HeadTick;
-                NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.PaddingHeadTick;
-            };
+            NoteView.Resize += (s, e) => UpdateThumbHeight();
 
             NoteView.MouseWheel += (s, e) =>
             {
@@ -135,6 +131,7 @@ namespace Ched.UI
             NoteView.LoadScore(book.Score);
             NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
+            UpdateThumbHeight();
             SetText(book.Path);
         }
 
@@ -211,6 +208,12 @@ namespace Ched.UI
             Text = "Ched" + (string.IsNullOrEmpty(filePath) ? "" : " - " + Path.GetFileName(filePath)) + (OperationManager.IsChanged ? " *" : "");
         }
 
+        private void UpdateThumbHeight()
+        {
+            NoteViewScrollBar.LargeChange = NoteView.TailTick - NoteView.HeadTick;
+            NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.PaddingHeadTick;
+        }
+
         private MainMenu CreateMainMenu(NoteView noteView)
         {
             var fileMenuItems = new MenuItem[]
@@ -280,6 +283,7 @@ namespace Ched.UI
                 NoteView.UnitLaneWidth = item.Checked ? 4 : 12;
                 NoteView.ShortNoteHeight = item.Checked ? 4 : 5;
                 NoteView.UnitBeatHeight = item.Checked ? 48 : 120;
+                UpdateThumbHeight();
             });
 
             var viewMenuItems = new MenuItem[] { viewModeItem };
