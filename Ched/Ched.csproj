@@ -119,6 +119,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="UI\ControlExtensions.cs" />
+    <Compile Include="UI\CustomQuantizeSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\CustomQuantizeSelectionForm.Designer.cs">
+      <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\ExportForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -177,6 +183,9 @@
     </Compile>
     <EmbeddedResource Include="UI\BPMSelectionForm.resx">
       <DependentUpon>BPMSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\CustomQuantizeSelectionForm.resx">
+      <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\ExportForm.resx">
       <DependentUpon>ExportForm.cs</DependentUpon>

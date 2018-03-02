@@ -594,9 +594,22 @@ namespace Ched.UI
                 Width = 80
             };
             quantizeComboBox.Items.AddRange(quantizeTicks.Select(p => p + "分").ToArray());
+            quantizeComboBox.Items.Add("カスタム");
             quantizeComboBox.SelectedIndexChanged += (s, e) =>
             {
-                noteView.QuantizeTick = noteView.UnitBeatTick * 4 / quantizeTicks[quantizeComboBox.SelectedIndex];
+                if (quantizeComboBox.SelectedIndex == quantizeComboBox.Items.Count - 1)
+                {
+                    // ユーザー定義
+                    var form = new CustomQuantizeSelectionForm(ScoreBook.Score.TicksPerBeat * 4);
+                    if (form.ShowDialog(this) == DialogResult.OK)
+                    {
+                        noteView.QuantizeTick = form.QuantizeTick;
+                    }
+                }
+                else
+                {
+                    noteView.QuantizeTick = noteView.UnitBeatTick * 4 / quantizeTicks[quantizeComboBox.SelectedIndex];
+                }
                 NoteView.Focus();
             };
             quantizeComboBox.SelectedIndex = 1;
