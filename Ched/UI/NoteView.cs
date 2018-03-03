@@ -1642,11 +1642,19 @@ namespace Ched.UI
                 p.Key.StartLaneIndex = Constants.LanesCount - p.Key.StartLaneIndex - p.Key.Width;
                 var opMove = new MoveSlideOperation(p.Key, beforepos, new MoveSlideOperation.NotePosition(p.Key.StartTick, p.Key.StartLaneIndex, p.Key.Width));
 
-                return p.Key.StepNotes.Select(q =>
+                var dummy = p.Key.StepNotes.Select(q =>
+                {
+                    return new MoveSlideStepNoteOperation(q, dicBefore[q], new MoveSlideStepNoteOperation.NotePosition(q.TickOffset, 0));
+                });
+
+                var move = p.Key.StepNotes.Select(q =>
                 {
                     q.LaneIndexOffset = -dicBefore[q].LaneIndexOffset;
-                    return new MoveSlideStepNoteOperation(q, dicBefore[q], new MoveSlideStepNoteOperation.NotePosition(q.TickOffset, q.LaneIndexOffset));
-                }).Concat(new IOperation[] { opMove });
+                    var after = new MoveSlideStepNoteOperation.NotePosition(q.TickOffset, q.LaneIndexOffset);
+                    return new MoveSlideStepNoteOperation(q, new MoveSlideStepNoteOperation.NotePosition(q.TickOffset, 0), after);
+                });
+
+                return dummy.Cast<IOperation>().Concat(new IOperation[] { opMove }).Concat(move);
             });
 
             OperationManager.Push(new CompositeOperation("ノーツの反転", opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).ToList()));
