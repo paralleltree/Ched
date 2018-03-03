@@ -20,6 +20,13 @@ namespace Ched
             AppDomain.CurrentDomain.UnhandledException += (s, e) => DumpException((Exception)e.ExceptionObject, true);
 #endif
 
+            if (!Properties.Settings.Default.HasUpgraded)
+            {
+                Properties.Settings.Default.Upgrade();
+                Properties.Settings.Default.HasUpgraded = true;
+                Properties.Settings.Default.Save();
+            }
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(args.Length == 0 ? new UI.MainForm() : new UI.MainForm(args[0]));

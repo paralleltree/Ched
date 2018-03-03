@@ -108,6 +108,7 @@
     <Compile Include="Components\Notes\TappableBase.cs" />
     <Compile Include="Components\Score.cs" />
     <Compile Include="Components\ScoreBook.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="UI\BPMSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -277,6 +278,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\selection.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\magnifier-zoom-in.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\magnifier-zoom-out.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
