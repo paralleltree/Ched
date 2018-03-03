@@ -274,6 +274,8 @@ namespace Ched.UI
                 Enabled = false
             };
 
+            var flipSelectedNotesItem = new MenuItem("選択範囲内ノーツを反転", (s, e) => NoteView.FlipSelectedNotes());
+
             var removeEventsItem = new MenuItem("選択範囲内のイベントを削除", (s, e) =>
             {
                 int minTick = noteView.SelectedRange.StartTick + (noteView.SelectedRange.Duration < 0 ? noteView.SelectedRange.Duration : 0);
@@ -306,7 +308,7 @@ namespace Ched.UI
             var editMenuItems = new MenuItem[]
             {
                 undoItem, redoItem, new MenuItem("-"),
-                removeEventsItem
+                flipSelectedNotesItem, removeEventsItem
             };
 
             var viewModeItem = new MenuItem("譜面プレビュー", (s, e) =>
