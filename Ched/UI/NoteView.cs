@@ -1609,6 +1609,50 @@ namespace Ched.UI
             return c;
         }
 
+        public void FlipSelectedNotes()
+        {
+            var selectedNotes = GetSelectedNotes();
+            var dicShortNotes = selectedNotes.GetShortNotes().ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
+            var dicHolds = selectedNotes.Holds.ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
+            var dicSlides = selectedNotes.Slides.ToDictionary(q => q, q => new MoveSlideOperation.NotePosition(q.StartTick, q.StartLaneIndex, q.Width));
+
+            var opShortNotes = dicShortNotes.Select(p =>
+            {
+                p.Key.LaneIndex = Constants.LanesCount - p.Key.LaneIndex - p.Key.Width;
+                var after = new MoveShortNoteOperation.NotePosition(p.Key.Tick, p.Key.LaneIndex);
+                return new MoveShortNoteOperation(p.Key, p.Value, after);
+            });
+
+            var opHolds = dicHolds.Select(p =>
+            {
+                p.Key.LaneIndex = Constants.LanesCount - p.Key.LaneIndex - p.Key.Width;
+                var after = new MoveHoldOperation.NotePosition(p.Key.StartTick, p.Key.LaneIndex, p.Key.Width);
+                return new MoveHoldOperation(p.Key, p.Value, after);
+            });
+
+            var opSlides = dicSlides.SelectMany(p =>
+            {
+                var dicBefore = p.Key.StepNotes.ToDictionary(q => q, q =>
+                {
+                    var pos = new MoveSlideStepNoteOperation.NotePosition(q.TickOffset, q.LaneIndexOffset);
+                    q.LaneIndexOffset = 0; // 反転した際にはみ出ないようにする
+                    return pos;
+                });
+                var beforepos = new MoveSlideOperation.NotePosition(p.Key.StartTick, p.Key.StartLaneIndex, p.Key.Width);
+                p.Key.StartLaneIndex = Constants.LanesCount - p.Key.StartLaneIndex - p.Key.Width;
+                var opMove = new MoveSlideOperation(p.Key, beforepos, new MoveSlideOperation.NotePosition(p.Key.StartTick, p.Key.StartLaneIndex, p.Key.Width));
+
+                return p.Key.StepNotes.Select(q =>
+                {
+                    q.LaneIndexOffset = -dicBefore[q].LaneIndexOffset;
+                    return new MoveSlideStepNoteOperation(q, dicBefore[q], new MoveSlideStepNoteOperation.NotePosition(q.TickOffset, q.LaneIndexOffset));
+                }).Concat(new IOperation[] { opMove });
+            });
+
+            OperationManager.Push(new CompositeOperation("ノーツの反転", opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).ToList()));
+            Invalidate();
+        }
+
         public void Undo()
         {
             if (!OperationManager.CanUndo) return;
