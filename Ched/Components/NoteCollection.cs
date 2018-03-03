@@ -102,5 +102,10 @@ namespace Ched.Components
             Flicks = collection.Flicks.ToList();
             Damages = collection.Damages.ToList();
         }
+
+        public IEnumerable<TappableBase> GetShortNotes()
+        {
+            return Taps.Cast<TappableBase>().Concat(ExTaps).Concat(Flicks).Concat(Damages);
+        }
     }
 }

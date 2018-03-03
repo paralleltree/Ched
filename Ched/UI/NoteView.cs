@@ -1165,17 +1165,10 @@ namespace Ched.UI
                         int startLaneIndex = SelectedRange.StartLaneIndex;
                         int endLaneIndex = SelectedRange.StartLaneIndex + SelectedRange.SelectedLanesCount;
 
-                        var dicShortNotes = Notes.Taps.Cast<TappableBase>().Concat(Notes.ExTaps).Concat(Notes.Flicks).Concat(Notes.Damages)
-                            .Where(q => q.Tick >= minTick && q.Tick <= maxTick && q.LaneIndex >= startLaneIndex && q.LaneIndex + q.Width <= endLaneIndex)
-                            .ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
-
-                        var dicHolds = Notes.Holds
-                            .Where(q => q.StartTick >= minTick && q.StartTick + q.Duration <= maxTick && q.LaneIndex >= startLaneIndex && q.LaneIndex + q.Width <= endLaneIndex)
-                            .ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
-
-                        var dicSlides = Notes.Slides
-                            .Where(q => q.StartTick >= minTick && q.StartTick + q.GetDuration() <= maxTick && q.StartLaneIndex >= startLaneIndex && q.StartLaneIndex + q.Width <= endLaneIndex && q.StepNotes.All(r => r.LaneIndex >= startLaneIndex && r.LaneIndex + q.Width <= endLaneIndex))
-                            .ToDictionary(q => q, q => new MoveSlideOperation.NotePosition(q.StartTick, q.StartLaneIndex, q.Width));
+                        var selectedNotes = GetSelectedNotes();
+                        var dicShortNotes = selectedNotes.GetShortNotes().ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
+                        var dicHolds = selectedNotes.Holds.ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
+                        var dicSlides = selectedNotes.Slides.ToDictionary(q => q, q => new MoveSlideOperation.NotePosition(q.StartTick, q.StartLaneIndex, q.Width));
 
                         // 選択範囲移動
                         return drag.Do(q =>
@@ -1593,6 +1586,27 @@ namespace Ched.UI
         {
             Rectangle selectedRect = GetSelectionRect();
             g.DrawXorRectangle(PenStyles.Dot, g.Transform.TransformPoint(selectedRect.Location), g.Transform.TransformPoint(selectedRect.Location + selectedRect.Size));
+        }
+
+        public Components.NoteCollection GetSelectedNotes()
+        {
+            int minTick = SelectedRange.StartTick + (SelectedRange.Duration < 0 ? SelectedRange.Duration : 0);
+            int maxTick = SelectedRange.StartTick + (SelectedRange.Duration < 0 ? 0 : SelectedRange.Duration);
+            int startLaneIndex = SelectedRange.StartLaneIndex;
+            int endLaneIndex = SelectedRange.StartLaneIndex + SelectedRange.SelectedLanesCount;
+
+            var c = new Components.NoteCollection();
+
+            Func<IAirable, bool> contained = p => p.Tick >= minTick && p.Tick <= maxTick & p.LaneIndex >= startLaneIndex && p.LaneIndex + p.Width <= endLaneIndex;
+            c.Taps.AddRange(Notes.Taps.Where(p => contained(p)));
+            c.ExTaps.AddRange(Notes.ExTaps.Where(p => contained(p)));
+            c.Flicks.AddRange(Notes.Flicks.Where(p => contained(p)));
+            c.Damages.AddRange(Notes.Damages.Where(p => contained(p)));
+            c.Holds.AddRange(Notes.Holds.Where(p => p.StartTick >= minTick && p.StartTick + p.Duration <= maxTick && p.LaneIndex >= startLaneIndex && p.LaneIndex + p.Width <= endLaneIndex));
+            c.Slides.AddRange(Notes.Slides.Where(p => p.StartTick >= minTick && p.StartTick + p.GetDuration() <= maxTick && p.StartLaneIndex >= startLaneIndex && p.StartLaneIndex + p.Width <= endLaneIndex && p.StepNotes.All(r => r.LaneIndex >= startLaneIndex && r.LaneIndex + p.Width <= endLaneIndex)));
+            c.Airs.AddRange(Notes.Airs.Where(p => contained(p.ParentNote)));
+            // TODO: ロングノーツが親のAIR-ACTIONの扱いに困っている
+            return c;
         }
 
         public void Undo()
