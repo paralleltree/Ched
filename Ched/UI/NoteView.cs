@@ -1609,6 +1609,48 @@ namespace Ched.UI
             return c;
         }
 
+        public void CopySelectedNotes()
+        {
+            var data = new SelectionData(SelectedRange.StartTick + Math.Min(SelectedRange.Duration, 0), GetSelectedNotes());
+            Clipboard.SetDataObject(data, true);
+        }
+
+        public void PasteNotes()
+        {
+            var obj = Clipboard.GetDataObject();
+            if (obj == null || !obj.GetDataPresent(typeof(SelectionData))) return;
+
+            var data = obj.GetData(typeof(SelectionData)) as SelectionData;
+            if (data.IsEmpty) return;
+
+            foreach (var note in data.SelectedNotes.GetShortNotes())
+            {
+                note.Tick = note.Tick - data.StartTick + CurrentTick;
+            }
+
+            foreach (var hold in data.SelectedNotes.Holds)
+            {
+                hold.StartTick = hold.StartTick - data.StartTick + CurrentTick;
+            }
+
+            foreach (var slide in data.SelectedNotes.Slides)
+            {
+                slide.StartTick = slide.StartTick - data.StartTick + CurrentTick;
+            }
+
+            var op = data.SelectedNotes.Taps.Select(p => new InsertTapOperation(Notes, p)).Cast<IOperation>()
+                .Concat(data.SelectedNotes.ExTaps.Select(p => new InsertExTapOperation(Notes, p)))
+                .Concat(data.SelectedNotes.Flicks.Select(p => new InsertFlickOperation(Notes, p)))
+                .Concat(data.SelectedNotes.Damages.Select(p => new InsertDamageOperation(Notes, p)))
+                .Concat(data.SelectedNotes.Holds.Select(p => new InsertHoldOperation(Notes, p)))
+                .Concat(data.SelectedNotes.Slides.Select(p => new InsertSlideOperation(Notes, p)))
+                .Concat(data.SelectedNotes.Airs.Select(p => new InsertAirOperation(Notes, p)));
+            var composite = new CompositeOperation("クリップボードからペースト", op.ToList());
+            composite.Redo(); // 追加書くの面倒になったので許せ
+            OperationManager.Push(composite);
+            Invalidate();
+        }
+
         public void FlipSelectedNotes()
         {
             var selectedNotes = GetSelectedNotes();
@@ -1966,6 +2008,84 @@ namespace Ched.UI
             {
                 if (StartLaneIndex + value < 0 || StartLaneIndex + value > Constants.LanesCount) throw new ArgumentOutOfRangeException();
                 selectedLanesCount = value;
+            }
+        }
+    }
+
+    [Serializable]
+    public class SelectionData
+    {
+        private string serializedText = null;
+
+        [NonSerialized]
+        private InnerData Data;
+
+        public int StartTick
+        {
+            get
+            {
+                if (Data == null) Restore();
+                return Data.StartTick;
+            }
+        }
+
+        public Components.NoteCollection SelectedNotes
+        {
+            get
+            {
+                if (Data == null) Restore();
+                return Data.SelectedNotes;
+            }
+        }
+
+        public bool IsEmpty
+        {
+            get
+            {
+                if (Data == null) Restore();
+                return SelectedNotes.GetShortNotes().Count() == 0 && SelectedNotes.Holds.Count == 0 && SelectedNotes.Slides.Count == 0 && SelectedNotes.Airs.Count == 0 && SelectedNotes.AirActions.Count == 0;
+            }
+        }
+
+        public SelectionData()
+        {
+        }
+
+        public SelectionData(int startTick, Components.NoteCollection notes)
+        {
+            Data = new InnerData(startTick, notes);
+            serializedText = Newtonsoft.Json.JsonConvert.SerializeObject(Data, SerializerSettings);
+        }
+
+        protected void Restore()
+        {
+            Data = Newtonsoft.Json.JsonConvert.DeserializeObject<InnerData>(serializedText, SerializerSettings);
+        }
+
+        protected static Newtonsoft.Json.JsonSerializerSettings SerializerSettings = new Newtonsoft.Json.JsonSerializerSettings()
+        {
+            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Serialize,
+            PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+            TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto,
+            ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver() { IgnoreSerializableAttribute = true }
+        };
+
+        [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
+        protected class InnerData
+        {
+            [Newtonsoft.Json.JsonProperty]
+            private int startTick;
+
+            [Newtonsoft.Json.JsonProperty]
+            private NoteCollection selectedNotes;
+
+            public int StartTick { get { return startTick; } }
+            public NoteCollection SelectedNotes { get { return selectedNotes; } }
+
+            public InnerData(int startTick, NoteCollection notes)
+            {
+                this.startTick = startTick;
+                selectedNotes = notes;
             }
         }
     }
