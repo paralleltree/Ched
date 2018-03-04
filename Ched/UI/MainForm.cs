@@ -274,6 +274,9 @@ namespace Ched.UI
                 Enabled = false
             };
 
+            var copyItem = new MenuItem("コピー", (s, e) => noteView.CopySelectedNotes(), Shortcut.CtrlC);
+            var pasteItem = new MenuItem("貼り付け", (s, e) => noteView.PasteNotes(), Shortcut.CtrlV);
+
             var flipSelectedNotesItem = new MenuItem("選択範囲内ノーツを反転", (s, e) => NoteView.FlipSelectedNotes());
 
             var removeEventsItem = new MenuItem("選択範囲内のイベントを削除", (s, e) =>
@@ -308,6 +311,7 @@ namespace Ched.UI
             var editMenuItems = new MenuItem[]
             {
                 undoItem, redoItem, new MenuItem("-"),
+                copyItem, pasteItem, new MenuItem("-"),
                 flipSelectedNotesItem, removeEventsItem
             };
 
@@ -447,6 +451,15 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
+            var copyButton = new ToolStripButton("コピー", Resources.CopyIcon, (s, e) => noteView.CopySelectedNotes())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+            var pasteButton = new ToolStripButton("貼り付け", Resources.PasteIcon, (s, e) => noteView.PasteNotes())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+
             var undoButton = new ToolStripButton("元に戻す", Resources.UndoIcon, (s, e) => noteView.Undo())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
@@ -519,6 +532,7 @@ namespace Ched.UI
             return new ToolStrip(new ToolStripItem[]
             {
                 newFileButton, openFileButton, saveFileButton, exportButton, new ToolStripSeparator(),
+                copyButton, pasteButton, new ToolStripSeparator(),
                 undoButton, redoButton, new ToolStripSeparator(),
                 penButton, selectionButton, eraserButton, new ToolStripSeparator(),
                 zoomInButton, zoomOutButton
