@@ -23,7 +23,7 @@ namespace Ched.UI
         private static extern IntPtr SelectObject(IntPtr hdc, IntPtr hObject);
 
         [DllImport("gdi32.dll")]
-        private static extern void Rectangle(IntPtr hdc, int x1, int y1, int x2, int y2);
+        private static extern bool Rectangle(IntPtr hdc, int x1, int y1, int x2, int y2);
 
         [DllImport("gdi32.dll")]
         private static extern IntPtr GetStockObject(int brStyle);
