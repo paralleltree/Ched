@@ -155,6 +155,18 @@ namespace Ched.Properties
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap CopyIcon
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("CopyIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap DamgeIcon
         {
             get
@@ -275,6 +287,18 @@ namespace Ched.Properties
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap PasteIcon
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("PasteIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap RedoIcon
         {
             get
@@ -352,6 +376,30 @@ namespace Ched.Properties
             get
             {
                 object obj = ResourceManager.GetObject("UndoIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ZoomInIcon
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("ZoomInIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ZoomOutIcon
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("ZoomOutIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

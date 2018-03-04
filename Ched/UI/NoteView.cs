@@ -1165,17 +1165,10 @@ namespace Ched.UI
                         int startLaneIndex = SelectedRange.StartLaneIndex;
                         int endLaneIndex = SelectedRange.StartLaneIndex + SelectedRange.SelectedLanesCount;
 
-                        var dicShortNotes = Notes.Taps.Cast<TappableBase>().Concat(Notes.ExTaps).Concat(Notes.Flicks).Concat(Notes.Damages)
-                            .Where(q => q.Tick >= minTick && q.Tick <= maxTick && q.LaneIndex >= startLaneIndex && q.LaneIndex + q.Width <= endLaneIndex)
-                            .ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
-
-                        var dicHolds = Notes.Holds
-                            .Where(q => q.StartTick >= minTick && q.StartTick + q.Duration <= maxTick && q.LaneIndex >= startLaneIndex && q.LaneIndex + q.Width <= endLaneIndex)
-                            .ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
-
-                        var dicSlides = Notes.Slides
-                            .Where(q => q.StartTick >= minTick && q.StartTick + q.GetDuration() <= maxTick && q.StartLaneIndex >= startLaneIndex && q.StartLaneIndex + q.Width <= endLaneIndex && q.StepNotes.All(r => r.LaneIndex >= startLaneIndex && r.LaneIndex + q.Width <= endLaneIndex))
-                            .ToDictionary(q => q, q => new MoveSlideOperation.NotePosition(q.StartTick, q.StartLaneIndex, q.Width));
+                        var selectedNotes = GetSelectedNotes();
+                        var dicShortNotes = selectedNotes.GetShortNotes().ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
+                        var dicHolds = selectedNotes.Holds.ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
+                        var dicSlides = selectedNotes.Slides.ToDictionary(q => q, q => new MoveSlideOperation.NotePosition(q.StartTick, q.StartLaneIndex, q.Width));
 
                         // 選択範囲移動
                         return drag.Do(q =>
@@ -1595,6 +1588,121 @@ namespace Ched.UI
             g.DrawXorRectangle(PenStyles.Dot, g.Transform.TransformPoint(selectedRect.Location), g.Transform.TransformPoint(selectedRect.Location + selectedRect.Size));
         }
 
+        public Components.NoteCollection GetSelectedNotes()
+        {
+            int minTick = SelectedRange.StartTick + (SelectedRange.Duration < 0 ? SelectedRange.Duration : 0);
+            int maxTick = SelectedRange.StartTick + (SelectedRange.Duration < 0 ? 0 : SelectedRange.Duration);
+            int startLaneIndex = SelectedRange.StartLaneIndex;
+            int endLaneIndex = SelectedRange.StartLaneIndex + SelectedRange.SelectedLanesCount;
+
+            var c = new Components.NoteCollection();
+
+            Func<IAirable, bool> contained = p => p.Tick >= minTick && p.Tick <= maxTick & p.LaneIndex >= startLaneIndex && p.LaneIndex + p.Width <= endLaneIndex;
+            c.Taps.AddRange(Notes.Taps.Where(p => contained(p)));
+            c.ExTaps.AddRange(Notes.ExTaps.Where(p => contained(p)));
+            c.Flicks.AddRange(Notes.Flicks.Where(p => contained(p)));
+            c.Damages.AddRange(Notes.Damages.Where(p => contained(p)));
+            c.Holds.AddRange(Notes.Holds.Where(p => p.StartTick >= minTick && p.StartTick + p.Duration <= maxTick && p.LaneIndex >= startLaneIndex && p.LaneIndex + p.Width <= endLaneIndex));
+            c.Slides.AddRange(Notes.Slides.Where(p => p.StartTick >= minTick && p.StartTick + p.GetDuration() <= maxTick && p.StartLaneIndex >= startLaneIndex && p.StartLaneIndex + p.Width <= endLaneIndex && p.StepNotes.All(r => r.LaneIndex >= startLaneIndex && r.LaneIndex + p.Width <= endLaneIndex)));
+            c.Airs.AddRange(Notes.Airs.Where(p => contained(p.ParentNote)));
+            // TODO: ロングノーツが親のAIR-ACTIONの扱いに困っている
+            return c;
+        }
+
+        public void CopySelectedNotes()
+        {
+            var data = new SelectionData(SelectedRange.StartTick + Math.Min(SelectedRange.Duration, 0), GetSelectedNotes());
+            Clipboard.SetDataObject(data, true);
+        }
+
+        public void PasteNotes()
+        {
+            var obj = Clipboard.GetDataObject();
+            if (obj == null || !obj.GetDataPresent(typeof(SelectionData))) return;
+
+            var data = obj.GetData(typeof(SelectionData)) as SelectionData;
+            if (data.IsEmpty) return;
+
+            foreach (var note in data.SelectedNotes.GetShortNotes())
+            {
+                note.Tick = note.Tick - data.StartTick + CurrentTick;
+            }
+
+            foreach (var hold in data.SelectedNotes.Holds)
+            {
+                hold.StartTick = hold.StartTick - data.StartTick + CurrentTick;
+            }
+
+            foreach (var slide in data.SelectedNotes.Slides)
+            {
+                slide.StartTick = slide.StartTick - data.StartTick + CurrentTick;
+            }
+
+            var op = data.SelectedNotes.Taps.Select(p => new InsertTapOperation(Notes, p)).Cast<IOperation>()
+                .Concat(data.SelectedNotes.ExTaps.Select(p => new InsertExTapOperation(Notes, p)))
+                .Concat(data.SelectedNotes.Flicks.Select(p => new InsertFlickOperation(Notes, p)))
+                .Concat(data.SelectedNotes.Damages.Select(p => new InsertDamageOperation(Notes, p)))
+                .Concat(data.SelectedNotes.Holds.Select(p => new InsertHoldOperation(Notes, p)))
+                .Concat(data.SelectedNotes.Slides.Select(p => new InsertSlideOperation(Notes, p)))
+                .Concat(data.SelectedNotes.Airs.Select(p => new InsertAirOperation(Notes, p)));
+            var composite = new CompositeOperation("クリップボードからペースト", op.ToList());
+            composite.Redo(); // 追加書くの面倒になったので許せ
+            OperationManager.Push(composite);
+            Invalidate();
+        }
+
+        public void FlipSelectedNotes()
+        {
+            var selectedNotes = GetSelectedNotes();
+            var dicShortNotes = selectedNotes.GetShortNotes().ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
+            var dicHolds = selectedNotes.Holds.ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
+            var dicSlides = selectedNotes.Slides.ToDictionary(q => q, q => new MoveSlideOperation.NotePosition(q.StartTick, q.StartLaneIndex, q.Width));
+
+            var opShortNotes = dicShortNotes.Select(p =>
+            {
+                p.Key.LaneIndex = Constants.LanesCount - p.Key.LaneIndex - p.Key.Width;
+                var after = new MoveShortNoteOperation.NotePosition(p.Key.Tick, p.Key.LaneIndex);
+                return new MoveShortNoteOperation(p.Key, p.Value, after);
+            });
+
+            var opHolds = dicHolds.Select(p =>
+            {
+                p.Key.LaneIndex = Constants.LanesCount - p.Key.LaneIndex - p.Key.Width;
+                var after = new MoveHoldOperation.NotePosition(p.Key.StartTick, p.Key.LaneIndex, p.Key.Width);
+                return new MoveHoldOperation(p.Key, p.Value, after);
+            });
+
+            var opSlides = dicSlides.SelectMany(p =>
+            {
+                var dicBefore = p.Key.StepNotes.ToDictionary(q => q, q =>
+                {
+                    var pos = new MoveSlideStepNoteOperation.NotePosition(q.TickOffset, q.LaneIndexOffset);
+                    q.LaneIndexOffset = 0; // 反転した際にはみ出ないようにする
+                    return pos;
+                });
+                var beforepos = new MoveSlideOperation.NotePosition(p.Key.StartTick, p.Key.StartLaneIndex, p.Key.Width);
+                p.Key.StartLaneIndex = Constants.LanesCount - p.Key.StartLaneIndex - p.Key.Width;
+                var opMove = new MoveSlideOperation(p.Key, beforepos, new MoveSlideOperation.NotePosition(p.Key.StartTick, p.Key.StartLaneIndex, p.Key.Width));
+
+                var dummy = p.Key.StepNotes.Select(q =>
+                {
+                    return new MoveSlideStepNoteOperation(q, dicBefore[q], new MoveSlideStepNoteOperation.NotePosition(q.TickOffset, 0));
+                });
+
+                var move = p.Key.StepNotes.Select(q =>
+                {
+                    q.LaneIndexOffset = -dicBefore[q].LaneIndexOffset;
+                    var after = new MoveSlideStepNoteOperation.NotePosition(q.TickOffset, q.LaneIndexOffset);
+                    return new MoveSlideStepNoteOperation(q, new MoveSlideStepNoteOperation.NotePosition(q.TickOffset, 0), after);
+                });
+
+                return dummy.Cast<IOperation>().Concat(new IOperation[] { opMove }).Concat(move);
+            });
+
+            OperationManager.Push(new CompositeOperation("ノーツの反転", opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).ToList()));
+            Invalidate();
+        }
+
         public void Undo()
         {
             if (!OperationManager.CanUndo) return;
@@ -1900,6 +2008,84 @@ namespace Ched.UI
             {
                 if (StartLaneIndex + value < 0 || StartLaneIndex + value > Constants.LanesCount) throw new ArgumentOutOfRangeException();
                 selectedLanesCount = value;
+            }
+        }
+    }
+
+    [Serializable]
+    public class SelectionData
+    {
+        private string serializedText = null;
+
+        [NonSerialized]
+        private InnerData Data;
+
+        public int StartTick
+        {
+            get
+            {
+                if (Data == null) Restore();
+                return Data.StartTick;
+            }
+        }
+
+        public Components.NoteCollection SelectedNotes
+        {
+            get
+            {
+                if (Data == null) Restore();
+                return Data.SelectedNotes;
+            }
+        }
+
+        public bool IsEmpty
+        {
+            get
+            {
+                if (Data == null) Restore();
+                return SelectedNotes.GetShortNotes().Count() == 0 && SelectedNotes.Holds.Count == 0 && SelectedNotes.Slides.Count == 0 && SelectedNotes.Airs.Count == 0 && SelectedNotes.AirActions.Count == 0;
+            }
+        }
+
+        public SelectionData()
+        {
+        }
+
+        public SelectionData(int startTick, Components.NoteCollection notes)
+        {
+            Data = new InnerData(startTick, notes);
+            serializedText = Newtonsoft.Json.JsonConvert.SerializeObject(Data, SerializerSettings);
+        }
+
+        protected void Restore()
+        {
+            Data = Newtonsoft.Json.JsonConvert.DeserializeObject<InnerData>(serializedText, SerializerSettings);
+        }
+
+        protected static Newtonsoft.Json.JsonSerializerSettings SerializerSettings = new Newtonsoft.Json.JsonSerializerSettings()
+        {
+            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Serialize,
+            PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+            TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto,
+            ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver() { IgnoreSerializableAttribute = true }
+        };
+
+        [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
+        protected class InnerData
+        {
+            [Newtonsoft.Json.JsonProperty]
+            private int startTick;
+
+            [Newtonsoft.Json.JsonProperty]
+            private NoteCollection selectedNotes;
+
+            public int StartTick { get { return startTick; } }
+            public NoteCollection SelectedNotes { get { return selectedNotes; } }
+
+            public InnerData(int startTick, NoteCollection notes)
+            {
+                this.startTick = startTick;
+                selectedNotes = notes;
             }
         }
     }
