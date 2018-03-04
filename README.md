@@ -19,6 +19,10 @@ Chedは、CHUNITHM用の譜面エディタです。
 
   * [Seaurchin Score File(sus形式)](https://seaurchin.kb10uy.org)
 
+## スクリーンショット
+
+![preview](https://user-images.githubusercontent.com/7324519/36943885-93922e32-1fd4-11e8-9042-688d36288a03.png)
+
 ## ライセンス
 ChedはMITライセンスです。
 
