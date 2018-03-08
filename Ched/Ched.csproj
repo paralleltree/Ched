@@ -183,6 +183,7 @@
     <Compile Include="UI\Operations\IOperation.cs" />
     <Compile Include="UI\Operations\NoteCollectionOperation.cs" />
     <Compile Include="UI\Operations\OperationManager.cs" />
+    <Compile Include="UI\SoundManager.cs" />
     <Compile Include="UI\TimeSignatureSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
