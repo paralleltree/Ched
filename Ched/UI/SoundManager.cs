@@ -19,6 +19,7 @@ namespace Ched.UI
 
         public void Dispose()
         {
+            foreach (var item in voices) item.Key.Dispose();
             xAudio.Dispose();
         }
 
