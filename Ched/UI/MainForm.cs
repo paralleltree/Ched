@@ -32,6 +32,7 @@ namespace Ched.UI
         private ToolStripButton ZoomInButton;
         private ToolStripButton ZoomOutButton;
 
+        private SoundPreviewManager PreviewManager { get; }
         private SoundSource CurrentMusicSource;
 
         private bool IsPreviewMode
@@ -72,6 +73,8 @@ namespace Ched.UI
                 Dock = DockStyle.Fill,
                 UnitBeatHeight = Settings.Default.UnitBeatHeight
             };
+
+            PreviewManager = new SoundPreviewManager(NoteView);
 
             NoteViewScrollBar = new VScrollBar()
             {
@@ -446,6 +449,21 @@ namespace Ched.UI
 
             var insertMenuItems = new MenuItem[] { insertBPMItem, insertHighSpeedItem, insertTimeSignatureItem };
 
+            var playItem = new MenuItem("再生", (s, e) =>
+            {
+                PreviewManager.Start(CurrentMusicSource);
+            });
+
+            var stopItem = new MenuItem("停止", (s, e) =>
+            {
+                PreviewManager.Stop();
+            });
+
+            var playMenuItems = new MenuItem[]
+            {
+                playItem, stopItem
+            };
+
             var helpMenuItems = new MenuItem[]
             {
                 new MenuItem("プロジェクトサイトを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched")),
@@ -464,6 +482,7 @@ namespace Ched.UI
                 new MenuItem("編集(&E)", editMenuItems),
                 new MenuItem("表示(&V)", viewMenuItems),
                 new MenuItem("挿入(&I)", insertMenuItems),
+                new MenuItem("再生(&P)", playMenuItems),
                 new MenuItem("ヘルプ(&H)", helpMenuItems)
             });
         }

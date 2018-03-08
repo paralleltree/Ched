@@ -191,6 +191,7 @@
     <Compile Include="UI\Operations\OperationManager.cs" />
     <Compile Include="UI\SoundConfiguration.cs" />
     <Compile Include="UI\SoundManager.cs" />
+    <Compile Include="UI\SoundPreviewManager.cs" />
     <Compile Include="UI\SoundSourceSelector.cs">
       <SubType>UserControl</SubType>
     </Compile>
