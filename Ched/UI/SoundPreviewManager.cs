@@ -12,6 +12,18 @@ namespace Ched.UI
 {
     public class SoundPreviewManager : IDisposable
     {
+        private int currentTick;
+        private int CurrentTick
+        {
+            get { return currentTick; }
+            set
+            {
+                currentTick = value;
+                if (value < 0) return;
+                NoteView.Invoke((MethodInvoker)(() => NoteView.CurrentTick = value));
+            }
+        }
+
         private SoundSource ClapSource { get; set; }
         private SoundManager SoundManager { get; } = new SoundManager();
         private NoteView NoteView { get; set; }
@@ -62,19 +74,25 @@ namespace Ched.UI
             while (TickElement.Value < StartTick && TickElement.Next != null) TickElement = TickElement.Next;
             while (BPMElement.Value.Tick < StartTick && BPMElement.Next != null) BPMElement = BPMElement.Next;
 
-            // BGM再生開始
-            SoundManager.Play(music.FilePath);
+            // TODO: 任意の再生位置からに対する再生開始秒数の算出
+            int firstTick = TickElement.Value.Value;
+            int bgmLatencyTick = GetLatencyTick(music.Latency, (double)BPMElement.Value.BPM);
+            int clapLatencyTick = GetLatencyTick(ClapSource.Latency, (double)BPMElement.Value.BPM);
 
-            // BGMの遅延時間だけ待機してから時間を進めていく
-            Task.Delay(TimeSpan.FromSeconds(Math.Max(music.Latency, ClapSource.Latency))).ContinueWith(p =>
-            {
-                NoteView.Invoke((MethodInvoker)(() =>
+            int clapDelayTick = Math.Max(clapLatencyTick - firstTick, 0);
+            CurrentTick = StartTick - clapDelayTick;
+            StartTick = CurrentTick;
+
+            Task.Delay(TimeSpan.FromSeconds(GetLatencyTime(Math.Max(clapDelayTick - bgmLatencyTick, 0), (double)BPMElement.Value.BPM)))
+                .ContinueWith(p => SoundManager.Play(music.FilePath));
+
+            Task.Delay(TimeSpan.FromSeconds(GetLatencyTime(Math.Max(bgmLatencyTick - clapDelayTick, 0), (double)BPMElement.Value.BPM)))
+                .ContinueWith(p => NoteView.Invoke((MethodInvoker)(() =>
                 {
                     LastSystemTick = Environment.TickCount;
                     elapsedTick = 0;
                     Timer.Start();
-                }));
-            });
+                })));
             NoteView.Editable = false;
             return true;
         }
@@ -93,7 +111,7 @@ namespace Ched.UI
             LastSystemTick = now;
 
             elapsedTick += NoteView.UnitBeatTick * (double)BPMElement.Value.BPM * elapsed / 60 / 1000;
-            NoteView.CurrentTick = (int)(StartTick + elapsedTick);
+            CurrentTick = (int)(StartTick + elapsedTick);
 
             while (BPMElement.Next != null && BPMElement.Value.Tick <= NoteView.CurrentTick) BPMElement = BPMElement.Next;
 
@@ -115,6 +133,11 @@ namespace Ched.UI
         private int GetLatencyTick(double latency, double bpm)
         {
             return (int)(NoteView.UnitBeatTick * latency * bpm / 60);
+        }
+
+        private double GetLatencyTime(int tick, double bpm)
+        {
+            return (double)tick * 60 / NoteView.UnitBeatTick / bpm;
         }
 
 
