@@ -115,6 +115,7 @@ namespace Ched.UI
     /// <summary>
     /// 音源を表すクラスです。
     /// </summary>
+    [Serializable]
     public class SoundSource
     {
         /// <summary>
