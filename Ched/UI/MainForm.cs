@@ -76,6 +76,8 @@ namespace Ched.UI
             };
 
             PreviewManager = new SoundPreviewManager(NoteView);
+            PreviewManager.Finished += (s, e) => NoteView.Editable = CanEdit;
+            PreviewManager.TickUpdated += (s, e) => NoteView.CurrentTick = e.Tick;
 
             NoteViewScrollBar = new VScrollBar()
             {
@@ -452,7 +454,20 @@ namespace Ched.UI
 
             var playItem = new MenuItem("再生", (s, e) =>
             {
-                PreviewManager.Start(CurrentMusicSource);
+                if (CurrentMusicSource == null)
+                {
+                    MessageBox.Show(this, "譜面プロパティから音源ファイルを指定してください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (!File.Exists(CurrentMusicSource.FilePath))
+                {
+                    MessageBox.Show(this, "音源ファイルが見つかりません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                PreviewManager.Stop();
+                if (PreviewManager.Start(CurrentMusicSource))
+                    NoteView.Editable = CanEdit;
             });
 
             var stopItem = new MenuItem("停止", (s, e) =>
