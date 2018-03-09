@@ -32,6 +32,8 @@ namespace Ched.UI
         private ToolStripButton ZoomInButton;
         private ToolStripButton ZoomOutButton;
 
+        private SoundSource CurrentMusicSource;
+
         private bool IsPreviewMode
         {
             get { return isPreviewMode; }
@@ -179,6 +181,14 @@ namespace Ched.UI
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             UpdateThumbHeight();
             SetText(book.Path);
+            if (!string.IsNullOrEmpty(book.Path))
+            {
+                SoundConfiguration.Default.ScoreSound.TryGetValue(book.Path, out CurrentMusicSource);
+            }
+            else
+            {
+                CurrentMusicSource = null;
+            }
         }
 
         protected void OpenFile()
@@ -220,6 +230,11 @@ namespace Ched.UI
             }
             CommitChanges();
             ScoreBook.Save();
+            if (CurrentMusicSource != null)
+            {
+                SoundConfiguration.Default.ScoreSound[ScoreBook.Path] = CurrentMusicSource;
+                SoundConfiguration.Default.Save();
+            }
             OperationManager.CommitChanges();
         }
 
@@ -262,6 +277,15 @@ namespace Ched.UI
 
         private MainMenu CreateMainMenu(NoteView noteView)
         {
+            var bookPropertiesMenuItem = new MenuItem("譜面プロパティ", (s, e) =>
+            {
+                var form = new BookPropertiesForm(ScoreBook, CurrentMusicSource);
+                if (form.ShowDialog(this) == DialogResult.OK)
+                {
+                    CurrentMusicSource = form.MusicSource;
+                }
+            });
+
             var fileMenuItems = new MenuItem[]
             {
                 new MenuItem("新規作成(&N)", (s, e) => ClearFile()) { Shortcut = Shortcut.CtrlN },
@@ -269,6 +293,8 @@ namespace Ched.UI
                 new MenuItem("上書き保存(&S)", (s, e) => SaveFile()) { Shortcut = Shortcut.CtrlS },
                 new MenuItem("名前を付けて保存(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
                 new MenuItem("エクスポート", (s, e) => ExportFile()),
+                new MenuItem("-"),
+                bookPropertiesMenuItem,
                 new MenuItem("-"),
                 new MenuItem("終了(&X)", (s, e) => this.Close())
             };
