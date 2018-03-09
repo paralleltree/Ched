@@ -185,6 +185,12 @@
     <Compile Include="UI\Operations\OperationManager.cs" />
     <Compile Include="UI\SoundConfiguration.cs" />
     <Compile Include="UI\SoundManager.cs" />
+    <Compile Include="UI\SoundSourceSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\SoundSourceSelector.Designer.cs">
+      <DependentUpon>SoundSourceSelector.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\TimeSignatureSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -221,6 +227,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\SoundSourceSelector.resx">
+      <DependentUpon>SoundSourceSelector.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\TimeSignatureSelectionForm.resx">
       <DependentUpon>TimeSignatureSelectionForm.cs</DependentUpon>
