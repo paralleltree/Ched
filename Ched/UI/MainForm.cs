@@ -41,7 +41,7 @@ namespace Ched.UI
             set
             {
                 isPreviewMode = value;
-                NoteView.Editable = !isPreviewMode;
+                NoteView.Editable = CanEdit;
                 NoteView.LaneBorderLightColor = isPreviewMode ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
                 NoteView.LaneBorderDarkColor = isPreviewMode ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
                 NoteView.UnitLaneWidth = isPreviewMode ? 4 : 12;
@@ -55,6 +55,7 @@ namespace Ched.UI
 
         private bool CanZoomIn { get { return !IsPreviewMode && NoteView.UnitBeatHeight < 960; } }
         private bool CanZoomOut { get { return !IsPreviewMode && NoteView.UnitBeatHeight > 30; } }
+        private bool CanEdit { get { return !IsPreviewMode && !PreviewManager.Playing; } }
 
         public MainForm()
         {
