@@ -133,6 +133,12 @@
     <Compile Include="Components\Score.cs" />
     <Compile Include="Components\ScoreBook.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="UI\BookPropertiesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\BookPropertiesForm.Designer.cs">
+      <DependentUpon>BookPropertiesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\BPMSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -213,6 +219,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\BookPropertiesForm.resx">
+      <DependentUpon>BookPropertiesForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\BPMSelectionForm.resx">
       <DependentUpon>BPMSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
