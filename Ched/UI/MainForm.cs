@@ -133,7 +133,7 @@ namespace Ched.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("ファイルの読み込み中にエラーが発生しました。");
+                MessageBox.Show(this, "ファイルの読み込み中にエラーが発生しました。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Program.DumpException(ex);
                 LoadBook(new ScoreBook());
             }

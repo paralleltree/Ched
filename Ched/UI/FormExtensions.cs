@@ -11,7 +11,7 @@ namespace Ched.UI
     {
         public static bool ConfirmDiscardChanges(this Form owner)
         {
-            return MessageBox.Show(owner, "編集中のデータは破棄されますがよろしいですか？", "確認", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.OK;
+            return MessageBox.Show(owner, "編集中のデータは破棄されますがよろしいですか？", Program.ApplicationName, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.OK;
         }
     }
 }
