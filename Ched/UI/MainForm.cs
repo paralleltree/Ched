@@ -21,11 +21,37 @@ namespace Ched.UI
     {
         private readonly string FileTypeFilter = "Ched専用形式(*.chs)|*.chs";
 
+        private bool isPreviewMode;
+
         private ScoreBook ScoreBook { get; set; }
         private OperationManager OperationManager { get; }
 
         private ScrollBar NoteViewScrollBar { get; }
         private NoteView NoteView { get; }
+
+        private ToolStripButton ZoomInButton;
+        private ToolStripButton ZoomOutButton;
+
+        private bool IsPreviewMode
+        {
+            get { return isPreviewMode; }
+            set
+            {
+                isPreviewMode = value;
+                NoteView.Editable = !isPreviewMode;
+                NoteView.LaneBorderLightColor = isPreviewMode ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
+                NoteView.LaneBorderDarkColor = isPreviewMode ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
+                NoteView.UnitLaneWidth = isPreviewMode ? 4 : 12;
+                NoteView.ShortNoteHeight = isPreviewMode ? 4 : 5;
+                NoteView.UnitBeatHeight = isPreviewMode ? 48 : Settings.Default.UnitBeatHeight;
+                UpdateThumbHeight();
+                ZoomInButton.Enabled = CanZoomIn;
+                ZoomOutButton.Enabled = CanZoomOut;
+            }
+        }
+
+        private bool CanZoomIn { get { return !IsPreviewMode && NoteView.UnitBeatHeight < 960; } }
+        private bool CanZoomOut { get { return !IsPreviewMode && NoteView.UnitBeatHeight > 30; } }
 
         public MainForm()
         {
@@ -39,7 +65,11 @@ namespace Ched.UI
             OperationManager.OperationHistoryChanged += (s, e) => SetText(ScoreBook.Path);
             OperationManager.ChangesCommited += (s, e) => SetText(ScoreBook.Path);
 
-            NoteView = new NoteView(OperationManager) { Dock = DockStyle.Fill };
+            NoteView = new NoteView(OperationManager)
+            {
+                Dock = DockStyle.Fill,
+                UnitBeatHeight = Settings.Default.UnitBeatHeight
+            };
 
             NoteViewScrollBar = new VScrollBar()
             {
@@ -56,11 +86,7 @@ namespace Ched.UI
                 }
             };
 
-            NoteView.Resize += (s, e) =>
-            {
-                NoteViewScrollBar.LargeChange = NoteView.TailTick - NoteView.HeadTick;
-                NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.PaddingHeadTick;
-            };
+            NoteView.Resize += (s, e) => UpdateThumbHeight();
 
             NoteView.MouseWheel += (s, e) =>
             {
@@ -91,7 +117,13 @@ namespace Ched.UI
 
             FormClosing += (s, e) =>
             {
-                if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) e.Cancel = true;
+                if (OperationManager.IsChanged && !this.ConfirmDiscardChanges())
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
+                Settings.Default.Save();
             };
 
             using (var manager = this.WorkWithLayout())
@@ -145,6 +177,7 @@ namespace Ched.UI
             NoteView.LoadScore(book.Score);
             NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
+            UpdateThumbHeight();
             SetText(book.Path);
         }
 
@@ -221,6 +254,12 @@ namespace Ched.UI
             Text = "Ched" + (string.IsNullOrEmpty(filePath) ? "" : " - " + Path.GetFileName(filePath)) + (OperationManager.IsChanged ? " *" : "");
         }
 
+        private void UpdateThumbHeight()
+        {
+            NoteViewScrollBar.LargeChange = NoteView.TailTick - NoteView.HeadTick;
+            NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.PaddingHeadTick;
+        }
+
         private MainMenu CreateMainMenu(NoteView noteView)
         {
             var fileMenuItems = new MenuItem[]
@@ -244,6 +283,11 @@ namespace Ched.UI
                 Shortcut = Shortcut.CtrlY,
                 Enabled = false
             };
+
+            var copyItem = new MenuItem("コピー", (s, e) => noteView.CopySelectedNotes(), Shortcut.CtrlC);
+            var pasteItem = new MenuItem("貼り付け", (s, e) => noteView.PasteNotes(), Shortcut.CtrlV);
+
+            var flipSelectedNotesItem = new MenuItem("選択範囲内ノーツを反転", (s, e) => NoteView.FlipSelectedNotes());
 
             var removeEventsItem = new MenuItem("選択範囲内のイベントを削除", (s, e) =>
             {
@@ -277,19 +321,14 @@ namespace Ched.UI
             var editMenuItems = new MenuItem[]
             {
                 undoItem, redoItem, new MenuItem("-"),
-                removeEventsItem
+                copyItem, pasteItem, new MenuItem("-"),
+                flipSelectedNotesItem, removeEventsItem
             };
 
             var viewModeItem = new MenuItem("譜面プレビュー", (s, e) =>
             {
-                var item = (MenuItem)s;
-                item.Checked = !item.Checked;
-                NoteView.Editable = !item.Checked;
-                NoteView.LaneBorderLightColor = item.Checked ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
-                NoteView.LaneBorderDarkColor = item.Checked ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
-                NoteView.UnitLaneWidth = item.Checked ? 4 : 12;
-                NoteView.ShortNoteHeight = item.Checked ? 4 : 5;
-                NoteView.UnitBeatHeight = item.Checked ? 48 : 120;
+                IsPreviewMode = !IsPreviewMode;
+                ((MenuItem)s).Checked = IsPreviewMode;
             });
 
             var viewMenuItems = new MenuItem[] { viewModeItem };
@@ -383,7 +422,7 @@ namespace Ched.UI
 
             var helpMenuItems = new MenuItem[]
             {
-                new MenuItem("公式サイトを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched")),
+                new MenuItem("プロジェクトサイトを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched")),
                 new MenuItem("バージョン情報", (s, e) => new VersionInfoForm().ShowDialog(this))
             };
 
@@ -422,6 +461,15 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
+            var copyButton = new ToolStripButton("コピー", Resources.CopyIcon, (s, e) => noteView.CopySelectedNotes())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+            var pasteButton = new ToolStripButton("貼り付け", Resources.PasteIcon, (s, e) => noteView.PasteNotes())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+
             var undoButton = new ToolStripButton("元に戻す", Resources.UndoIcon, (s, e) => noteView.Undo())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
@@ -446,6 +494,38 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
+            var zoomInButton = new ToolStripButton("拡大", Resources.ZoomInIcon)
+            {
+                Enabled = noteView.UnitBeatHeight < 960,
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+            var zoomOutButton = new ToolStripButton("縮小", Resources.ZoomOutIcon)
+            {
+                Enabled = noteView.UnitBeatHeight > 30,
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+
+            zoomInButton.Click += (s, e) =>
+            {
+                noteView.UnitBeatHeight *= 2;
+                Settings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
+                zoomOutButton.Enabled = CanZoomOut;
+                zoomInButton.Enabled = CanZoomIn;
+                UpdateThumbHeight();
+            };
+
+            zoomOutButton.Click += (s, e) =>
+            {
+                noteView.UnitBeatHeight /= 2;
+                Settings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
+                zoomInButton.Enabled = CanZoomIn;
+                zoomOutButton.Enabled = CanZoomOut;
+                UpdateThumbHeight();
+            };
+
+            ZoomInButton = zoomInButton;
+            ZoomOutButton = zoomOutButton;
+
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
                 undoButton.Enabled = noteView.CanUndo;
@@ -462,8 +542,10 @@ namespace Ched.UI
             return new ToolStrip(new ToolStripItem[]
             {
                 newFileButton, openFileButton, saveFileButton, exportButton, new ToolStripSeparator(),
+                copyButton, pasteButton, new ToolStripSeparator(),
                 undoButton, redoButton, new ToolStripSeparator(),
-                penButton, selectionButton, eraserButton
+                penButton, selectionButton, eraserButton, new ToolStripSeparator(),
+                zoomInButton, zoomOutButton
             });
         }
 
@@ -538,9 +620,22 @@ namespace Ched.UI
                 Width = 80
             };
             quantizeComboBox.Items.AddRange(quantizeTicks.Select(p => p + "分").ToArray());
+            quantizeComboBox.Items.Add("カスタム");
             quantizeComboBox.SelectedIndexChanged += (s, e) =>
             {
-                noteView.QuantizeTick = noteView.UnitBeatTick * 4 / quantizeTicks[quantizeComboBox.SelectedIndex];
+                if (quantizeComboBox.SelectedIndex == quantizeComboBox.Items.Count - 1)
+                {
+                    // ユーザー定義
+                    var form = new CustomQuantizeSelectionForm(ScoreBook.Score.TicksPerBeat * 4);
+                    if (form.ShowDialog(this) == DialogResult.OK)
+                    {
+                        noteView.QuantizeTick = form.QuantizeTick;
+                    }
+                }
+                else
+                {
+                    noteView.QuantizeTick = noteView.UnitBeatTick * 4 / quantizeTicks[quantizeComboBox.SelectedIndex];
+                }
                 NoteView.Focus();
             };
             quantizeComboBox.SelectedIndex = 1;

@@ -66,6 +66,18 @@ namespace Ched.Components.Notes
         }
 
         /// <summary>
+        /// このスライドを反転します。
+        /// </summary>
+        public void Flip()
+        {
+            startLaneIndex = Constants.LanesCount - startLaneIndex - startWidth;
+            foreach (var step in StepNotes)
+            {
+                step.LaneIndexOffset = -step.LaneIndexOffset - step.WidthChange;
+            }
+        }
+
+        /// <summary>
         /// SLIDEの背景を描画します。
         /// </summary>
         /// <param name="g">描画先Graphics</param>

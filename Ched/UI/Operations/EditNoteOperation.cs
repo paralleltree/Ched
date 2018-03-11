@@ -257,6 +257,28 @@ namespace Ched.UI.Operations
         }
     }
 
+    public class FlipSlideOperation : IOperation
+    {
+        public string Description { get { return "SLIDEの反転"; } }
+
+        protected Slide Note;
+
+        public FlipSlideOperation(Slide note)
+        {
+            Note = note;
+        }
+
+        public void Redo()
+        {
+            Note.Flip();
+        }
+
+        public void Undo()
+        {
+            Note.Flip();
+        }
+    }
+
     public abstract class SlideStepNoteCollectionOperation : IOperation
     {
         public abstract string Description { get; }
