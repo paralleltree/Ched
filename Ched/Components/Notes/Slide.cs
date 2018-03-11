@@ -17,7 +17,7 @@ namespace Ched.Components.Notes
 
 
         [Newtonsoft.Json.JsonProperty]
-        private int width = 1;
+        private int startWidth = 1;
         [Newtonsoft.Json.JsonProperty]
         private int startLaneIndex;
         [Newtonsoft.Json.JsonProperty]
@@ -34,24 +34,26 @@ namespace Ched.Components.Notes
                 if (StepNotes.Any(p =>
                 {
                     int laneIndex = value + p.LaneIndexOffset;
-                    return laneIndex < 0 || laneIndex + Width > Constants.LanesCount;
+                    return laneIndex < 0 || laneIndex + p.Width > Constants.LanesCount;
                 })) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
-                if (startLaneIndex < 0 || startLaneIndex + Width > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
+                if (value < 0 || value + StartWidth > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
                 startLaneIndex = value;
             }
         }
 
         /// <summary>
-        /// ノートのレーン幅を設定します。
+        /// 開始ノートのレーン幅を設定します。
         /// </summary>
-        public int Width
+        public int StartWidth
         {
-            get { return width; }
+            get { return startWidth; }
             set
             {
-                if (width == value) return;
-                if (value < 1 || StartLaneIndex + (StepNotes.Count > 0 ? StepNotes.Max(p => p.LaneIndexOffset) : 0) + value > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid note width.");
-                width = value;
+                if (startWidth == value) return;
+                var maxRightNote = StepNotes.OrderBy(p => p.LaneIndex + p.Width).FirstOrDefault();
+                int maxRightPos = maxRightNote == null ? StartLaneIndex : maxRightNote.LaneIndex + maxRightNote.WidthChange;
+                if (value < Math.Abs(Math.Min(0, StepNotes.Count == 0 ? 0 : StepNotes.Min(p => p.WidthChange))) + 1 || maxRightPos + value > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid note width.");
+                startWidth = value;
             }
         }
 
@@ -130,8 +132,6 @@ namespace Ched.Components.Notes
 
             public Slide ParentNote { get { return parentNote; } }
 
-            public override int Width { get { return ParentNote.Width; } }
-
             public TapBase(Slide parent)
             {
                 parentNote = parent;
@@ -151,6 +151,8 @@ namespace Ched.Components.Notes
 
             public override int LaneIndex { get { return ParentNote.StartLaneIndex; } }
 
+            public override int Width { get { return ParentNote.StartWidth; } }
+
             public StartTap(Slide parent) : base(parent)
             {
             }
@@ -161,6 +163,8 @@ namespace Ched.Components.Notes
         {
             [Newtonsoft.Json.JsonProperty]
             private int laneIndexOffset;
+            [Newtonsoft.Json.JsonProperty]
+            private int widthChange;
             [Newtonsoft.Json.JsonProperty]
             private int tickOffset = 1;
             [Newtonsoft.Json.JsonProperty]
@@ -200,6 +204,19 @@ namespace Ched.Components.Notes
                     laneIndexOffset = value;
                 }
             }
+
+            public int WidthChange
+            {
+                get { return widthChange; }
+                set
+                {
+                    int actualWidth = value + ParentNote.StartWidth;
+                    if (actualWidth < 1 || LaneIndex + actualWidth > Constants.LanesCount) throw new ArgumentOutOfRangeException();
+                    widthChange = value;
+                }
+            }
+
+            public override int Width { get { return ParentNote.StartWidth + WidthChange; } }
 
             public StepTap(Slide parent) : base(parent)
             {

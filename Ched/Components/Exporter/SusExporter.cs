@@ -266,7 +266,7 @@ namespace Ched.Components.Exporter
                             for (int i = 0; i * gcd < barLength; i++)
                             {
                                 int tickOffset = i * gcd;
-                                writer.Write(dic.ContainsKey(tickOffset) ? dic[tickOffset].Type + ToLaneWidthString(slide.Note.Width) : "00");
+                                writer.Write(dic.ContainsKey(tickOffset) ? dic[tickOffset].Type + ToLaneWidthString(slide.Note.StartWidth) : "00");
                             }
                             writer.WriteLine();
                         }
