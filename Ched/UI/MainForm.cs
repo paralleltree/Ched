@@ -119,6 +119,16 @@ namespace Ched.UI
         {
             try
             {
+                if (!ScoreBook.IsCompatible(filePath))
+                {
+                    MessageBox.Show(this, "現在のバージョンでは開けないファイルです。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                if (!ScoreBook.IsUpgradeNeeded(filePath))
+                {
+                    if (MessageBox.Show(this, "古いバージョンで作成されたファイルです。\nバージョンアップしてよろしいですか？\n(以前のバージョンでは開けなくなります。)", Program.ApplicationName, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+                        return;
+                }
                 LoadBook(ScoreBook.LoadFile(filePath));
             }
             catch (Exception ex)

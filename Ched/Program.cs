@@ -9,6 +9,8 @@ namespace Ched
 {
     static class Program
     {
+        internal static readonly string ApplicationName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
