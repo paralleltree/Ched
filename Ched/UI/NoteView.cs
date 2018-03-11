@@ -513,8 +513,9 @@ namespace Ched.UI
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int laneIndexOffset = beforeStepPos.LaneIndexOffset + xdiff;
                                 int widthChange = beforeStepPos.WidthChange - xdiff;
-                                step.LaneIndexOffset = Math.Min(beforeStepPos.LaneIndexOffset + step.ParentNote.StartWidth + beforeStepPos.WidthChange - 1, Math.Max(-step.ParentNote.StartLaneIndex, laneIndexOffset));
-                                step.WidthChange = Math.Min(step.ParentNote.StartLaneIndex + beforeStepPos.LaneIndexOffset + step.ParentNote.StartWidth + beforeStepPos.WidthChange - step.ParentNote.StartWidth, Math.Max(-step.ParentNote.StartWidth + 1, widthChange));
+                                laneIndexOffset = Math.Min(beforeStepPos.LaneIndexOffset + step.ParentNote.StartWidth + beforeStepPos.WidthChange - 1, Math.Max(-step.ParentNote.StartLaneIndex, laneIndexOffset));
+                                widthChange = Math.Min(step.ParentNote.StartLaneIndex + beforeStepPos.LaneIndexOffset + step.ParentNote.StartWidth + beforeStepPos.WidthChange - step.ParentNote.StartWidth, Math.Max(-step.ParentNote.StartWidth + 1, widthChange));
+                                step.SetPosition(laneIndexOffset, widthChange);
                                 Cursor.Current = Cursors.SizeWE;
                             })
                             .Finally(() =>
@@ -625,8 +626,10 @@ namespace Ched.UI
                                     xdiff = Math.Min(beforePos.StartWidth + minWidthChange - 1, Math.Max(-beforePos.StartLaneIndex - leftStepLaneIndexOffset, xdiff));
                                     int width = beforePos.StartWidth - xdiff;
                                     int laneIndex = beforePos.StartLaneIndex + xdiff;
-                                    slide.StartLaneIndex = Math.Min(Constants.LanesCount - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset, laneIndex));
-                                    slide.StartWidth = Math.Min(Constants.LanesCount - slide.StartLaneIndex - leftStepLaneIndexOffset, Math.Max(-minWidthChange + 1, width));
+                                    // clamp
+                                    width = Math.Min(Constants.LanesCount - slide.StartLaneIndex - leftStepLaneIndexOffset, Math.Max(-minWidthChange + 1, width));
+                                    laneIndex = Math.Min(Constants.LanesCount - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset - beforePos.StartLaneIndex, laneIndex));
+                                    slide.SetPosition(laneIndex, width);
                                     Cursor.Current = Cursors.SizeWE;
                                 })
                                 .Finally(() =>

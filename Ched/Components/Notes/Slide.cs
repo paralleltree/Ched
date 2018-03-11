@@ -31,12 +31,7 @@ namespace Ched.Components.Notes
             get { return startLaneIndex; }
             set
             {
-                if (StepNotes.Any(p =>
-                {
-                    int laneIndex = value + p.LaneIndexOffset;
-                    return laneIndex < 0 || laneIndex + p.Width > Constants.LanesCount;
-                })) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
-                if (value < 0 || value + StartWidth > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
+                CheckPosition(value, startWidth);
                 startLaneIndex = value;
             }
         }
@@ -49,10 +44,7 @@ namespace Ched.Components.Notes
             get { return startWidth; }
             set
             {
-                if (startWidth == value) return;
-                var maxRightNote = StepNotes.OrderBy(p => p.LaneIndex + p.Width).FirstOrDefault();
-                int maxRightPos = maxRightNote == null ? StartLaneIndex : maxRightNote.LaneIndex + maxRightNote.WidthChange;
-                if (value < Math.Abs(Math.Min(0, StepNotes.Count == 0 ? 0 : StepNotes.Min(p => p.WidthChange))) + 1 || maxRightPos + value > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid note width.");
+                CheckPosition(startLaneIndex, value);
                 startWidth = value;
             }
         }
@@ -63,6 +55,28 @@ namespace Ched.Components.Notes
         public Slide()
         {
             StartNote = new StartTap(this);
+        }
+
+        protected void CheckPosition(int startLaneIndex, int startWidth)
+        {
+            int maxRightOffset = Math.Max(0, StepNotes.Count == 0 ? 0 : StepNotes.Max(p => p.LaneIndexOffset + p.WidthChange));
+            if (startWidth < Math.Abs(Math.Min(0, StepNotes.Count == 0 ? 0 : StepNotes.Min(p => p.WidthChange))) + 1 || startLaneIndex + startWidth + maxRightOffset > Constants.LanesCount)
+                throw new ArgumentOutOfRangeException("startWidth", "Invalid note width.");
+
+            if (StepNotes.Any(p =>
+            {
+                int laneIndex = startLaneIndex + p.LaneIndexOffset;
+                return laneIndex < 0 || laneIndex + (startWidth + p.WidthChange) > Constants.LanesCount;
+            })) throw new ArgumentOutOfRangeException("startLaneIndex", "Invalid lane index.");
+            if (startLaneIndex < 0 || startLaneIndex + startWidth > Constants.LanesCount)
+                throw new ArgumentOutOfRangeException("startLaneIndex", "Invalid lane index.");
+        }
+
+        public void SetPosition(int startLaneIndex, int startWidth)
+        {
+            CheckPosition(startLaneIndex, startWidth);
+            this.startLaneIndex = startLaneIndex;
+            this.startWidth = startWidth;
         }
 
         /// <summary>
@@ -210,9 +224,7 @@ namespace Ched.Components.Notes
                 get { return laneIndexOffset; }
                 set
                 {
-                    if (laneIndexOffset == value) return;
-                    int laneIndex = ParentNote.StartNote.LaneIndex + laneIndexOffset;
-                    if (laneIndex < 0 || laneIndex + Width > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid lane index offset.");
+                    CheckPosition(value, widthChange);
                     laneIndexOffset = value;
                 }
             }
@@ -222,8 +234,7 @@ namespace Ched.Components.Notes
                 get { return widthChange; }
                 set
                 {
-                    int actualWidth = value + ParentNote.StartWidth;
-                    if (actualWidth < 1 || LaneIndex + actualWidth > Constants.LanesCount) throw new ArgumentOutOfRangeException();
+                    CheckPosition(laneIndexOffset, value);
                     widthChange = value;
                 }
             }
@@ -232,6 +243,24 @@ namespace Ched.Components.Notes
 
             public StepTap(Slide parent) : base(parent)
             {
+            }
+
+            public void SetPosition(int laneIndexOffset, int widthChange)
+            {
+                CheckPosition(laneIndexOffset, widthChange);
+                this.laneIndexOffset = laneIndexOffset;
+                this.widthChange = widthChange;
+            }
+
+            protected void CheckPosition(int laneIndexOffset, int widthChange)
+            {
+                int laneIndex = ParentNote.StartNote.LaneIndex + laneIndexOffset;
+                if (laneIndex < 0 || laneIndex + (ParentNote.StartWidth + widthChange) > Constants.LanesCount)
+                    throw new ArgumentOutOfRangeException("laneIndexOffset", "Invalid lane index offset.");
+
+                int actualWidth = widthChange + ParentNote.StartWidth;
+                if (actualWidth < 1 || laneIndex + actualWidth > Constants.LanesCount)
+                    throw new ArgumentOutOfRangeException("widthChange", "Invalid width change value.");
             }
 
             protected override void DrawNote(Graphics g, RectangleF rect)

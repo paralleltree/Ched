@@ -187,15 +187,13 @@ namespace Ched.UI.Operations
         public void Redo()
         {
             StepNote.TickOffset = AfterPosition.TickOffset;
-            StepNote.LaneIndexOffset = AfterPosition.LaneIndexOffset;
-            StepNote.WidthChange = AfterPosition.WidthChange;
+            StepNote.SetPosition(AfterPosition.LaneIndexOffset, AfterPosition.WidthChange);
         }
 
         public void Undo()
         {
             StepNote.TickOffset = BeforePosition.TickOffset;
-            StepNote.LaneIndexOffset = BeforePosition.LaneIndexOffset;
-            StepNote.WidthChange = BeforePosition.WidthChange;
+            StepNote.SetPosition(BeforePosition.LaneIndexOffset, BeforePosition.WidthChange);
         }
 
         public class NotePosition
@@ -231,15 +229,13 @@ namespace Ched.UI.Operations
         public void Redo()
         {
             Note.StartTick = AfterPosition.StartTick;
-            Note.StartLaneIndex = AfterPosition.StartLaneIndex;
-            Note.StartWidth = AfterPosition.StartWidth;
+            Note.SetPosition(AfterPosition.StartLaneIndex, AfterPosition.StartWidth);
         }
 
         public void Undo()
         {
             Note.StartTick = BeforePosition.StartTick;
-            Note.StartLaneIndex = BeforePosition.StartLaneIndex;
-            Note.StartWidth = BeforePosition.StartWidth;
+            Note.SetPosition(BeforePosition.StartLaneIndex, BeforePosition.StartWidth);
         }
 
         public class NotePosition
