@@ -236,6 +236,7 @@ namespace Ched.Components.Exporter
                         TickOffset = 0,
                         BarPosition = barIndexCalculator.GetBarPositionFromTick(slide.Note.StartTick),
                         LaneIndex = slide.Note.StartLaneIndex,
+                        Width = slide.Note.StartWidth,
                         Type = "1"
                     } };
                     var steps = slide.Note.StepNotes.OrderBy(p => p.TickOffset).Select(p => new
@@ -243,6 +244,7 @@ namespace Ched.Components.Exporter
                         TickOffset = p.TickOffset,
                         BarPosition = barIndexCalculator.GetBarPositionFromTick(p.Tick),
                         LaneIndex = p.LaneIndex,
+                        Width = p.Width,
                         Type = p.IsVisible ? "3" : "5"
                     }).Take(slide.Note.StepNotes.Count - 1);
                     var endNote = slide.Note.StepNotes.OrderBy(p => p.TickOffset).Last();
@@ -251,6 +253,7 @@ namespace Ched.Components.Exporter
                         TickOffset = endNote.TickOffset,
                         BarPosition= barIndexCalculator.GetBarPositionFromTick(endNote.Tick),
                         LaneIndex = endNote.LaneIndex,
+                        Width = endNote.Width,
                         Type = "2"
                     } };
                     var slideNotes = start.Concat(steps).Concat(end);
@@ -266,7 +269,7 @@ namespace Ched.Components.Exporter
                             for (int i = 0; i * gcd < barLength; i++)
                             {
                                 int tickOffset = i * gcd;
-                                writer.Write(dic.ContainsKey(tickOffset) ? dic[tickOffset].Type + ToLaneWidthString(slide.Note.StartWidth) : "00");
+                                writer.Write(dic.ContainsKey(tickOffset) ? dic[tickOffset].Type + ToLaneWidthString(dic[tickOffset].Width) : "00");
                             }
                             writer.WriteLine();
                         }
