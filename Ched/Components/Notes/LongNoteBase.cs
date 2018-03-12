@@ -81,9 +81,4 @@ namespace Ched.Components.Notes
             }
         }
     }
-
-    public interface ITapSelectable
-    {
-        bool IsTap { get; set; }
-    }
 }

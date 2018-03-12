@@ -151,11 +151,21 @@ namespace Ched.UI
         {
             try
             {
+                if (!ScoreBook.IsCompatible(filePath))
+                {
+                    MessageBox.Show(this, "現在のバージョンでは開けないファイルです。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                if (!ScoreBook.IsUpgradeNeeded(filePath))
+                {
+                    if (MessageBox.Show(this, "古いバージョンで作成されたファイルです。\nバージョンアップしてよろしいですか？\n(以前のバージョンでは開けなくなります。)", Program.ApplicationName, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+                        return;
+                }
                 LoadBook(ScoreBook.LoadFile(filePath));
             }
             catch (Exception ex)
             {
-                MessageBox.Show("ファイルの読み込み中にエラーが発生しました。");
+                MessageBox.Show(this, "ファイルの読み込み中にエラーが発生しました。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Program.DumpException(ex);
                 LoadBook(new ScoreBook());
             }

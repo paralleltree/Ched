@@ -9,6 +9,8 @@ namespace Ched
 {
     static class Program
     {
+        internal static readonly string ApplicationName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -43,7 +45,7 @@ namespace Ched
             if (!forceClose) return;
             try
             {
-                MessageBox.Show("エラーが発生しました。\nアプリケーションを終了します。", "エラー");
+                MessageBox.Show("エラーが発生しました。\nアプリケーションを終了します。", ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
