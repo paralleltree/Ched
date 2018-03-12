@@ -187,24 +187,26 @@ namespace Ched.UI.Operations
         public void Redo()
         {
             StepNote.TickOffset = AfterPosition.TickOffset;
-            StepNote.LaneIndexOffset = AfterPosition.LaneIndexOffset;
+            StepNote.SetPosition(AfterPosition.LaneIndexOffset, AfterPosition.WidthChange);
         }
 
         public void Undo()
         {
             StepNote.TickOffset = BeforePosition.TickOffset;
-            StepNote.LaneIndexOffset = BeforePosition.LaneIndexOffset;
+            StepNote.SetPosition(BeforePosition.LaneIndexOffset, BeforePosition.WidthChange);
         }
 
         public class NotePosition
         {
             public int TickOffset { get; }
             public int LaneIndexOffset { get; }
+            public int WidthChange { get; }
 
-            public NotePosition(int tickOffset, int laneIndexOffset)
+            public NotePosition(int tickOffset, int laneIndexOffset, int widthChange)
             {
                 TickOffset = tickOffset;
                 LaneIndexOffset = laneIndexOffset;
+                WidthChange = widthChange;
             }
         }
     }
@@ -227,29 +229,49 @@ namespace Ched.UI.Operations
         public void Redo()
         {
             Note.StartTick = AfterPosition.StartTick;
-            Note.StartLaneIndex = AfterPosition.StartLaneIndex;
-            Note.Width = AfterPosition.Width;
+            Note.SetPosition(AfterPosition.StartLaneIndex, AfterPosition.StartWidth);
         }
 
         public void Undo()
         {
             Note.StartTick = BeforePosition.StartTick;
-            Note.StartLaneIndex = BeforePosition.StartLaneIndex;
-            Note.Width = BeforePosition.Width;
+            Note.SetPosition(BeforePosition.StartLaneIndex, BeforePosition.StartWidth);
         }
 
         public class NotePosition
         {
             public int StartTick { get; }
             public int StartLaneIndex { get; }
-            public int Width { get; }
+            public int StartWidth { get; }
 
-            public NotePosition(int startTick, int startLaneIndex, int width)
+            public NotePosition(int startTick, int startLaneIndex, int startWidth)
             {
                 StartTick = startTick;
                 StartLaneIndex = startLaneIndex;
-                Width = width;
+                StartWidth = startWidth;
             }
+        }
+    }
+
+    public class FlipSlideOperation : IOperation
+    {
+        public string Description { get { return "SLIDEの反転"; } }
+
+        protected Slide Note;
+
+        public FlipSlideOperation(Slide note)
+        {
+            Note = note;
+        }
+
+        public void Redo()
+        {
+            Note.Flip();
+        }
+
+        public void Undo()
+        {
+            Note.Flip();
         }
     }
 

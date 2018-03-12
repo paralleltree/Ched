@@ -62,7 +62,7 @@ namespace Ched.UI
                 if (string.IsNullOrEmpty(outputBox.Text)) browseButton.PerformClick();
                 if (string.IsNullOrEmpty(outputBox.Text))
                 {
-                    MessageBox.Show(this, "出力先を指定してください。", "Ched");
+                    MessageBox.Show(this, "出力先を指定してください。", Program.ApplicationName);
                     return;
                 }
                 book.Title = titleBox.Text;
@@ -83,7 +83,7 @@ namespace Ched.UI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, "エクスポートに失敗しました。", "エラー");
+                    MessageBox.Show(this, "エクスポートに失敗しました。", Program.ApplicationName);
                     Program.DumpException(ex);
                 }
             };
