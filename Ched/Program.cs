@@ -45,7 +45,7 @@ namespace Ched
             if (!forceClose) return;
             try
             {
-                MessageBox.Show("エラーが発生しました。\nアプリケーションを終了します。", "エラー");
+                MessageBox.Show("エラーが発生しました。\nアプリケーションを終了します。", ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
