@@ -52,13 +52,34 @@ namespace Ched.Components.Exporter
 
                 writer.WriteLine();
 
-                for (int i = 0; i < book.Score.Events.BPMChangeEvents.Count; i++)
+                var bpmlist = book.Score.Events.BPMChangeEvents
+                    .GroupBy(p => p.BPM)
+                    .SelectMany((p, i) => p.Select(q => new { Index = i + 1, Value = q, BarPosition = barIndexCalculator.GetBarPositionFromTick(q.Tick) }))
+                    .ToList();
+
+                if (bpmlist.Count > 99) throw new ArgumentException("BPM定義が100個以上存在します。");
+
+                foreach (var item in bpmlist)
                 {
-                    var item = book.Score.Events.BPMChangeEvents[i];
-                    var barPos = barIndexCalculator.GetBarPositionFromTick(item.Tick);
-                    // if (barData.OffsetTick != 0) // warn
-                    writer.WriteLine("#BPM{0:00}:{1}", i + 1, item.BPM);
-                    writer.WriteLine("#{0:000}08:{1:00}", barPos.BarIndex + (args.HasPaddingBar && barPos.BarIndex == 1 ? -1 : 0), i + 1);
+                    writer.WriteLine("#BPM{0:00}: {1}", item.Index, item.Value.BPM);
+                }
+
+                if (args.HasPaddingBar)
+                    writer.WriteLine("#{0:000}08: {1:00}", 0, bpmlist.OrderBy(p => p.Value.Tick).First().Index);
+
+                foreach (var eventInBar in bpmlist.GroupBy(p => p.BarPosition.BarIndex))
+                {
+                    var sig = barIndexCalculator.GetTimeSignatureFromBarIndex(eventInBar.Key);
+                    int barLength = barTick * sig.Numerator / sig.Denominator;
+                    var dic = eventInBar.ToDictionary(p => p.BarPosition.TickOffset, p => p);
+                    int gcd = eventInBar.Select(p => p.BarPosition.TickOffset).Aggregate(barLength, (p, q) => GetGcd(p, q));
+                    writer.Write("#{0:000}08: ", eventInBar.Key);
+                    for (int i = 0; i * gcd < barLength; i++)
+                    {
+                        int tickOffset = i * gcd;
+                        writer.Write(dic.ContainsKey(tickOffset) ? dic[tickOffset].Index.ToString("00") : "00");
+                    }
+                    writer.WriteLine();
                 }
 
                 writer.WriteLine();
