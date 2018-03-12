@@ -83,11 +83,10 @@ namespace Ched.Components.Exporter
                 }
 
                 writer.WriteLine();
-
                 var speeds = book.Score.Events.HighSpeedChangeEvents.Select(p =>
                 {
                     var barPos = barIndexCalculator.GetBarPositionFromTick(p.Tick);
-                    return string.Format("{0}'{1}:{2}", barPos.BarIndex, barPos.TickOffset, p.SpeedRatio);
+                    return string.Format("{0}'{1}:{2}", args.HasPaddingBar && barPos.BarIndex == 1 && barPos.TickOffset == 0 ? 0 : barPos.BarIndex, barPos.TickOffset, p.SpeedRatio);
                 });
                 writer.WriteLine("#TIL00: \"{0}\"", string.Join(", ", speeds));
                 writer.WriteLine("#HISPEED 00");
