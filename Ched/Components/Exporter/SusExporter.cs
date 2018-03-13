@@ -338,7 +338,7 @@ namespace Ched.Components.Exporter
                         for (int i = 0; i * gcd < barLength; i++)
                         {
                             int tickOffset = i * gcd;
-                            if (dic.ContainsKey(tickOffset)) writer.Write("{0}{1}", dic[tickOffset].Type, airAction.Note.ParentNote.Width);
+                            if (dic.ContainsKey(tickOffset)) writer.Write("{0}{1}", dic[tickOffset].Type, ToLaneWidthString(airAction.Note.ParentNote.Width));
                             else writer.Write("00");
                         }
                         writer.WriteLine();
