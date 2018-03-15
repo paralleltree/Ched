@@ -344,6 +344,12 @@
   <ItemGroup>
     <None Include="Resources\clipboard-paste.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ContentWithTargetPath Include="Resources\guide.mp3">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>guide.mp3</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
