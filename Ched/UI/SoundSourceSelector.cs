@@ -14,12 +14,16 @@ namespace Ched.UI
     {
         public SoundSource Value
         {
-            get { return new SoundSource(filePathBox.Text, (double)latencyBox.Value); }
+            get
+            {
+                if (string.IsNullOrEmpty(filePathBox.Text)) return null;
+                return new SoundSource(filePathBox.Text, (double)latencyBox.Value);
+            }
             set
             {
                 if (value == null) throw new ArgumentNullException();
-                filePathBox.Text = value.FilePath;
-                latencyBox.Value = (decimal)value.Latency;
+                filePathBox.Text = value?.FilePath ?? "";
+                latencyBox.Value = (decimal)(value?.Latency ?? 0);
             }
         }
         public SoundSourceSelector()
