@@ -35,7 +35,7 @@ namespace Ched.UI
         {
             var dialog = new OpenFileDialog()
             {
-                Filter = "音声ファイル(*.wav, *.mp3, *.m4a)|*.wav;*.mp3;*.m4a"
+                Filter = "音声ファイル(*.wav, *.mp3)|*.wav;*.mp3"
             };
             if (dialog.ShowDialog(this) == DialogResult.OK) filePathBox.Text = dialog.FileName;
         }

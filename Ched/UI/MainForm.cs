@@ -452,7 +452,7 @@ namespace Ched.UI
 
             var insertMenuItems = new MenuItem[] { insertBPMItem, insertHighSpeedItem, insertTimeSignatureItem };
 
-            var playItem = new MenuItem("再生", (s, e) =>
+            var playItem = new MenuItem("再生/停止", (s, e) =>
             {
                 if (CurrentMusicSource == null)
                 {
@@ -465,9 +465,25 @@ namespace Ched.UI
                     return;
                 }
 
-                PreviewManager.Stop();
-                if (PreviewManager.Start(CurrentMusicSource))
+                if (PreviewManager.Playing)
+                {
+                    PreviewManager.Stop();
+                    return;
+                }
+
+                int startTick = noteView.CurrentTick;
+                EventHandler lambda = null;
+                lambda = (p, q) =>
+                {
+                    PreviewManager.Finished -= lambda;
+                    noteView.CurrentTick = startTick;
+                };
+
+                if (PreviewManager.Start(CurrentMusicSource, startTick))
+                {
+                    PreviewManager.Finished += lambda;
                     NoteView.Editable = CanEdit;
+                }
             });
 
             var stopItem = new MenuItem("停止", (s, e) =>

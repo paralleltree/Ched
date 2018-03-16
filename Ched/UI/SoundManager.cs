@@ -77,6 +77,8 @@ namespace Ched.UI
                 }
             }
 
+            // .m4aがシークできない！！！！
+            // .mp3のビットレートによって再生位置が正しくなくなる？
             var it = decoder.GetSamples(offset).GetEnumerator();
 
             Action<IntPtr> lambda = null;
