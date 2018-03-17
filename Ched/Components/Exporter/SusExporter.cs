@@ -57,15 +57,15 @@ namespace Ched.Components.Exporter
                     .SelectMany((p, i) => p.Select(q => new { Index = i + 1, Value = q, BarPosition = barIndexCalculator.GetBarPositionFromTick(q.Tick) }))
                     .ToList();
 
-                if (bpmlist.Count > 99) throw new ArgumentException("BPM定義が100個以上存在します。");
+                if (bpmlist.Count >= 16 * 16) throw new ArgumentException("BPM定義が256個以上存在します。");
 
                 foreach (var item in bpmlist)
                 {
-                    writer.WriteLine("#BPM{0:00}: {1}", item.Index, item.Value.BPM);
+                    writer.WriteLine("#BPM{0:x2}: {1}", item.Index, item.Value.BPM);
                 }
 
                 if (args.HasPaddingBar)
-                    writer.WriteLine("#{0:000}08: {1:00}", 0, bpmlist.OrderBy(p => p.Value.Tick).First().Index);
+                    writer.WriteLine("#{0:000}08: {1:x2}", 0, bpmlist.OrderBy(p => p.Value.Tick).First().Index);
 
                 foreach (var eventInBar in bpmlist.GroupBy(p => p.BarPosition.BarIndex))
                 {
@@ -77,7 +77,7 @@ namespace Ched.Components.Exporter
                     for (int i = 0; i * gcd < barLength; i++)
                     {
                         int tickOffset = i * gcd;
-                        writer.Write(dic.ContainsKey(tickOffset) ? dic[tickOffset].Index.ToString("00") : "00");
+                        writer.Write(dic.ContainsKey(tickOffset) ? dic[tickOffset].Index.ToString("x2") : "00");
                     }
                     writer.WriteLine();
                 }
