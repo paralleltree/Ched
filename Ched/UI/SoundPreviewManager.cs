@@ -68,7 +68,7 @@ namespace Ched.UI
 
             // スタート時まで進める
             while (TickElement.Value < startTick && TickElement.Next != null) TickElement = TickElement.Next;
-            while (BPMElement.Value.Tick < startTick && BPMElement.Next != null) BPMElement = BPMElement.Next;
+            while (BPMElement.Next != null && BPMElement.Next.Value.Tick <= startTick && BPMElement.Next != null) BPMElement = BPMElement.Next;
 
             int clapLatencyTick = GetLatencyTick(ClapSource.Latency, (double)BPMElement.Value.BPM);
             InitialTick = startTick - clapLatencyTick;
@@ -109,7 +109,7 @@ namespace Ched.UI
             if (CurrentTick >= StartTick)
                 TickUpdated?.Invoke(this, new TickUpdatedEventArgs(Math.Max(CurrentTick, 0)));
 
-            while (BPMElement.Next != null && BPMElement.Value.Tick <= NoteView.CurrentTick) BPMElement = BPMElement.Next;
+            while (BPMElement.Next != null && BPMElement.Next.Value.Tick <= CurrentTick) BPMElement = BPMElement.Next;
 
             if (NoteView.CurrentTick >= EndTick + NoteView.UnitBeatTick)
             {
