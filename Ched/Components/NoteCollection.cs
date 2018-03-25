@@ -23,13 +23,13 @@ namespace Ched.Components
         [Newtonsoft.Json.JsonProperty]
         private List<Slide> slides;
         [Newtonsoft.Json.JsonProperty]
-        private List<Air> airs;
-        [Newtonsoft.Json.JsonProperty]
-        private List<AirAction> airActions;
-        [Newtonsoft.Json.JsonProperty]
         private List<Flick> flicks;
         [Newtonsoft.Json.JsonProperty]
         private List<Damage> damages;
+        [Newtonsoft.Json.JsonProperty]
+        private List<Air> airs;
+        [Newtonsoft.Json.JsonProperty]
+        private List<AirAction> airActions;
 
         public List<Tap> Taps
         {
