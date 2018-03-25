@@ -15,6 +15,14 @@ after_build:
     New-Item -Type directory $artifacts
 
     Get-ChildItem **\bin\$env:CONFIGURATION\* -Recurse -Include *.exe, *.dll, *.config, *.mp3 | Copy-Item -Destination $artifacts
+
+    $shell = New-Object -ComObject("WScript.Shell")
+
+    $wiki = $shell.CreateShortcut("$env:APPVEYOR_BUILD_FOLDER\$artifacts\Ched Wiki.url")
+
+    $wiki.TargetPath = "https://github.com/paralleltree/Ched/wiki"
+
+    $wiki.Save()
 artifacts:
 - path: Binaries
   name: Ched

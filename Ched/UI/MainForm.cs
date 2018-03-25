@@ -19,6 +19,7 @@ namespace Ched.UI
 {
     public partial class MainForm : Form
     {
+        private readonly string FileExtension = ".chs";
         private readonly string FileTypeFilter = "Ched専用形式(*.chs)|*.chs";
 
         private bool isPreviewMode;
@@ -121,6 +122,24 @@ namespace Ched.UI
                 {
                     processScrollBarRangeExtension(NoteViewScrollBar);
                 }
+            };
+
+            AllowDrop = true;
+            DragEnter += (s, e) =>
+            {
+                e.Effect = DragDropEffects.None;
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    var items = (string[])e.Data.GetData(DataFormats.FileDrop);
+                    if (items.Length == 1 && items.All(p => Path.GetExtension(p) == FileExtension && File.Exists(p)))
+                        e.Effect = DragDropEffects.Copy;
+                }
+            };
+            DragDrop += (s, e) =>
+            {
+                string path = ((string[])e.Data.GetData(DataFormats.FileDrop)).Single();
+                if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) return;
+                LoadFile(path);
             };
 
             FormClosing += (s, e) =>
