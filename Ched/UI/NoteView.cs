@@ -225,6 +225,11 @@ namespace Ched.UI
             set
             {
                 currentTick = value;
+                if (currentTick < HeadTick || currentTick > TailTick)
+                {
+                    HeadTick = currentTick;
+                    DragScroll?.Invoke(this, EventArgs.Empty);
+                }
                 Invalidate();
             }
         }
@@ -1335,11 +1340,10 @@ namespace Ched.UI
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-
             Matrix matrix = GetDrawingMatrix(new Matrix());
             matrix.Invert();
 
-            if (EditMode == EditMode.Select)
+            if (EditMode == EditMode.Select && Editable)
             {
                 var scorePos = matrix.TransformPoint(e.Location);
                 Cursor = GetSelectionRect().Contains(scorePos) ? Cursors.SizeAll : Cursors.Default;
@@ -1409,7 +1413,7 @@ namespace Ched.UI
             using (var posPen = new Pen(Color.FromArgb(196, 0, 0)))
             {
                 float y = GetYPositionFromTick(CurrentTick);
-                if (Editable) pe.Graphics.DrawLine(posPen, -UnitLaneWidth * 2, y, laneWidth, y);
+                pe.Graphics.DrawLine(posPen, -UnitLaneWidth * 2, y, laneWidth, y);
             }
 
             // ノート描画

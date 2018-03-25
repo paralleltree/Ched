@@ -33,13 +33,16 @@ namespace Ched.UI
         private ToolStripButton ZoomInButton;
         private ToolStripButton ZoomOutButton;
 
+        private SoundPreviewManager PreviewManager { get; }
+        private SoundSource CurrentMusicSource;
+
         private bool IsPreviewMode
         {
             get { return isPreviewMode; }
             set
             {
                 isPreviewMode = value;
-                NoteView.Editable = !isPreviewMode;
+                NoteView.Editable = CanEdit;
                 NoteView.LaneBorderLightColor = isPreviewMode ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
                 NoteView.LaneBorderDarkColor = isPreviewMode ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
                 NoteView.UnitLaneWidth = isPreviewMode ? 4 : 12;
@@ -53,6 +56,7 @@ namespace Ched.UI
 
         private bool CanZoomIn { get { return !IsPreviewMode && NoteView.UnitBeatHeight < 960; } }
         private bool CanZoomOut { get { return !IsPreviewMode && NoteView.UnitBeatHeight > 30; } }
+        private bool CanEdit { get { return !IsPreviewMode && !PreviewManager.Playing; } }
 
         public MainForm()
         {
@@ -71,6 +75,10 @@ namespace Ched.UI
                 Dock = DockStyle.Fill,
                 UnitBeatHeight = Settings.Default.UnitBeatHeight
             };
+
+            PreviewManager = new SoundPreviewManager(NoteView);
+            PreviewManager.Finished += (s, e) => NoteView.Editable = CanEdit;
+            PreviewManager.TickUpdated += (s, e) => NoteView.CurrentTick = e.Tick;
 
             NoteViewScrollBar = new VScrollBar()
             {
@@ -198,6 +206,14 @@ namespace Ched.UI
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             UpdateThumbHeight();
             SetText(book.Path);
+            if (!string.IsNullOrEmpty(book.Path))
+            {
+                SoundConfiguration.Default.ScoreSound.TryGetValue(book.Path, out CurrentMusicSource);
+            }
+            else
+            {
+                CurrentMusicSource = null;
+            }
         }
 
         protected void OpenFile()
@@ -281,6 +297,17 @@ namespace Ched.UI
 
         private MainMenu CreateMainMenu(NoteView noteView)
         {
+            var bookPropertiesMenuItem = new MenuItem("譜面プロパティ", (s, e) =>
+            {
+                var form = new BookPropertiesForm(ScoreBook, CurrentMusicSource);
+                if (form.ShowDialog(this) == DialogResult.OK)
+                {
+                    CurrentMusicSource = form.MusicSource;
+                    SoundConfiguration.Default.ScoreSound[ScoreBook.Path] = CurrentMusicSource;
+                    SoundConfiguration.Default.Save();
+                }
+            });
+
             var fileMenuItems = new MenuItem[]
             {
                 new MenuItem("新規作成(&N)", (s, e) => ClearFile()) { Shortcut = Shortcut.CtrlN },
@@ -288,6 +315,8 @@ namespace Ched.UI
                 new MenuItem("上書き保存(&S)", (s, e) => SaveFile()) { Shortcut = Shortcut.CtrlS },
                 new MenuItem("名前を付けて保存(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
                 new MenuItem("エクスポート", (s, e) => ExportFile()),
+                new MenuItem("-"),
+                bookPropertiesMenuItem,
                 new MenuItem("-"),
                 new MenuItem("終了(&X)", (s, e) => this.Close())
             };
@@ -439,6 +468,50 @@ namespace Ched.UI
 
             var insertMenuItems = new MenuItem[] { insertBPMItem, insertHighSpeedItem, insertTimeSignatureItem };
 
+            var playItem = new MenuItem("再生/停止", (s, e) =>
+            {
+                if (CurrentMusicSource == null)
+                {
+                    MessageBox.Show(this, "譜面プロパティから音源ファイルを指定してください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (!File.Exists(CurrentMusicSource.FilePath))
+                {
+                    MessageBox.Show(this, "音源ファイルが見つかりません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (PreviewManager.Playing)
+                {
+                    PreviewManager.Stop();
+                    return;
+                }
+
+                int startTick = noteView.CurrentTick;
+                EventHandler lambda = null;
+                lambda = (p, q) =>
+                {
+                    PreviewManager.Finished -= lambda;
+                    noteView.CurrentTick = startTick;
+                };
+
+                if (PreviewManager.Start(CurrentMusicSource, startTick))
+                {
+                    PreviewManager.Finished += lambda;
+                    NoteView.Editable = CanEdit;
+                }
+            });
+
+            var stopItem = new MenuItem("停止", (s, e) =>
+            {
+                PreviewManager.Stop();
+            });
+
+            var playMenuItems = new MenuItem[]
+            {
+                playItem, stopItem
+            };
+
             var helpMenuItems = new MenuItem[]
             {
                 new MenuItem("プロジェクトサイトを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched")),
@@ -457,6 +530,7 @@ namespace Ched.UI
                 new MenuItem("編集(&E)", editMenuItems),
                 new MenuItem("表示(&V)", viewMenuItems),
                 new MenuItem("挿入(&I)", insertMenuItems),
+                new MenuItem("再生(&P)", playMenuItems),
                 new MenuItem("ヘルプ(&H)", helpMenuItems)
             });
         }
