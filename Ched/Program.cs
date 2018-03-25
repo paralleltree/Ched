@@ -28,6 +28,12 @@ namespace Ched
                 Properties.Settings.Default.HasUpgraded = true;
                 Properties.Settings.Default.Save();
             }
+            if (!Properties.SoundConfiguration.Default.HasUpgraded)
+            {
+                Properties.SoundConfiguration.Default.Upgrade();
+                Properties.SoundConfiguration.Default.HasUpgraded = true;
+                Properties.SoundConfiguration.Default.Save();
+            }
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
