@@ -54,18 +54,19 @@ namespace Ched.Components.Exporter
 
                 var bpmlist = book.Score.Events.BPMChangeEvents
                     .GroupBy(p => p.BPM)
-                    .SelectMany((p, i) => p.Select(q => new { Index = i + 1, Value = q, BarPosition = barIndexCalculator.GetBarPositionFromTick(q.Tick) }))
+                    .SelectMany((p, i) => p.Select(q => new { Index = i, Value = q, BarPosition = barIndexCalculator.GetBarPositionFromTick(q.Tick) }))
                     .ToList();
 
-                if (bpmlist.Count > 99) throw new ArgumentException("BPM定義が100個以上存在します。");
+                if (bpmlist.Count >= 36 * 36) throw new ArgumentException("BPM定義数が上限を超えました。");
 
+                var bpmIdentifiers = EnumerateIdentifiers(2).Skip(1).Take(bpmlist.Count).ToList();
                 foreach (var item in bpmlist)
                 {
-                    writer.WriteLine("#BPM{0:00}: {1}", item.Index, item.Value.BPM);
+                    writer.WriteLine("#BPM{0}: {1}", bpmIdentifiers[item.Index], item.Value.BPM);
                 }
 
                 if (args.HasPaddingBar)
-                    writer.WriteLine("#{0:000}08: {1:00}", 0, bpmlist.OrderBy(p => p.Value.Tick).First().Index);
+                    writer.WriteLine("#{0:000}08: {1:x2}", 0, bpmIdentifiers[bpmlist.OrderBy(p => p.Value.Tick).First().Index]);
 
                 foreach (var eventInBar in bpmlist.GroupBy(p => p.BarPosition.BarIndex))
                 {
@@ -77,7 +78,7 @@ namespace Ched.Components.Exporter
                     for (int i = 0; i * gcd < barLength; i++)
                     {
                         int tickOffset = i * gcd;
-                        writer.Write(dic.ContainsKey(tickOffset) ? dic[tickOffset].Index.ToString("00") : "00");
+                        writer.Write(dic.ContainsKey(tickOffset) ? bpmIdentifiers[dic[tickOffset].Index] : "00");
                     }
                     writer.WriteLine();
                 }
@@ -357,6 +358,22 @@ namespace Ched.Components.Exporter
         public static string ToLaneWidthString(int width)
         {
             return width == 16 ? "g" : width.ToString("x");
+        }
+
+        public static IEnumerable<string> EnumerateIdentifiers(int digits)
+        {
+            var num = Enumerable.Range(0, 10).Select(p => (char)('0' + p));
+            var alpha = Enumerable.Range(0, 26).Select(p => (char)('A' + p));
+            var seq = num.Concat(alpha).Select(p => p.ToString()).ToList();
+
+            return EnumerateIdentifiers(digits, seq);
+        }
+
+        private static IEnumerable<string> EnumerateIdentifiers(int digits, List<string> seq)
+        {
+            if (digits < 1) throw new ArgumentOutOfRangeException("digits");
+            if (digits == 1) return seq;
+            return EnumerateIdentifiers(digits - 1, seq).SelectMany(p => seq.Select(q => p + q));
         }
 
         public class IdentifierAllocationManager
