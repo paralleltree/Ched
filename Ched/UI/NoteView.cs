@@ -982,7 +982,7 @@ namespace Ched.UI
                                     if (rect.Contains(scorePos))
                                     {
                                         int offset = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)) - note.ParentNote.Tick;
-                                        if (!note.ActionNotes.Any(q => q.Offset == offset))
+                                        if (offset > 0 && !note.ActionNotes.Any(q => q.Offset == offset))
                                         {
                                             var action = new AirAction.ActionNote(note) { Offset = offset };
                                             note.ActionNotes.Add(action);
