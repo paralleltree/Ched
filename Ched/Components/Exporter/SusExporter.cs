@@ -362,14 +362,18 @@ namespace Ched.Components.Exporter
 
         public static IEnumerable<string> EnumerateIdentifiers(int digits)
         {
-            if (digits < 1) throw new ArgumentOutOfRangeException("digits");
-
             var num = Enumerable.Range(0, 10).Select(p => (char)('0' + p));
             var alpha = Enumerable.Range(0, 26).Select(p => (char)('A' + p));
             var seq = num.Concat(alpha).Select(p => p.ToString()).ToList();
 
+            return EnumerateIdentifiers(digits, seq);
+        }
+
+        private static IEnumerable<string> EnumerateIdentifiers(int digits, List<string> seq)
+        {
+            if (digits < 1) throw new ArgumentOutOfRangeException("digits");
             if (digits == 1) return seq;
-            return EnumerateIdentifiers(digits - 1).SelectMany(p => seq.Select(q => p + q));
+            return EnumerateIdentifiers(digits - 1, seq).SelectMany(p => seq.Select(q => p + q));
         }
 
         public class IdentifierAllocationManager
