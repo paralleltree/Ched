@@ -255,6 +255,11 @@ namespace Ched.UI
             }
             CommitChanges();
             ScoreBook.Save();
+            if (CurrentMusicSource != null)
+            {
+                SoundConfiguration.Default.ScoreSound[ScoreBook.Path] = CurrentMusicSource;
+                SoundConfiguration.Default.Save();
+            }
             OperationManager.CommitChanges();
         }
 
@@ -303,8 +308,6 @@ namespace Ched.UI
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
                     CurrentMusicSource = form.MusicSource;
-                    SoundConfiguration.Default.ScoreSound[ScoreBook.Path] = CurrentMusicSource;
-                    SoundConfiguration.Default.Save();
                 }
             });
 
