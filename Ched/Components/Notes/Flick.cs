@@ -26,7 +26,7 @@ namespace Ched.Components.Notes
             }
 
             var foregroundRect = new RectangleF(rect.Left + rect.Width / 4, rect.Top, rect.Width / 2, rect.Height);
-            using (var path = foregroundRect.ToRoundedPath(rect.Height * 0.3f))
+            using (var path = foregroundRect.ToRoundedPath(Math.Min(rect.Height * 0.3f, foregroundRect.Width / 2)))
             {
                 using (var foregroundBrush = new LinearGradientBrush(foregroundRect, DarkForegroundColor, LightForegroundColor, LinearGradientMode.Vertical))
                 {
