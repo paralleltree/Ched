@@ -76,14 +76,12 @@ namespace Ched.UI.Operations
 
         public override void Redo()
         {
-            Note.LaneIndex = AfterPosition.LaneIndex;
-            Note.Width = AfterPosition.Width;
+            Note.SetPosition(AfterPosition.LaneIndex, AfterPosition.Width);
         }
 
         public override void Undo()
         {
-            Note.LaneIndex = BeforePosition.LaneIndex;
-            Note.Width = BeforePosition.Width;
+            Note.SetPosition(BeforePosition.LaneIndex, BeforePosition.Width);
         }
 
         public class NotePosition
@@ -143,15 +141,13 @@ namespace Ched.UI.Operations
         public void Redo()
         {
             Note.StartTick = AfterPosition.StartTick;
-            Note.LaneIndex = AfterPosition.LaneIndex;
-            Note.Width = AfterPosition.Width;
+            Note.SetPosition(AfterPosition.LaneIndex, AfterPosition.Width);
         }
 
         public void Undo()
         {
             Note.StartTick = BeforePosition.StartTick;
-            Note.LaneIndex = BeforePosition.LaneIndex;
-            Note.Width = BeforePosition.Width;
+            Note.SetPosition(BeforePosition.LaneIndex, BeforePosition.Width);
         }
 
         public class NotePosition
