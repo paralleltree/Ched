@@ -417,9 +417,9 @@ namespace Ched.UI
                                 xdiff = Math.Min(beforePos.Width - 1, Math.Max(-beforePos.LaneIndex, xdiff));
                                 int width = beforePos.Width - xdiff;
                                 int laneIndex = beforePos.LaneIndex + xdiff;
-                                //System.Diagnostics.Debug.WriteLine("xdiff: {0}, width: {1}, laneIndex: {2}", xdiff, width, laneIndex);
-                                note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
-                                note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
+                                width = Math.Min(Constants.LanesCount - laneIndex, Math.Max(1, width));
+                                laneIndex = Math.Min(Constants.LanesCount - width, Math.Max(0, laneIndex));
+                                note.SetPosition(laneIndex, width);
                                 Cursor.Current = Cursors.SizeWE;
                             })
                             .Finally(() =>
@@ -719,8 +719,9 @@ namespace Ched.UI
                                     xdiff = Math.Min(beforePos.Width - 1, Math.Max(-beforePos.LaneIndex, xdiff));
                                     int width = beforePos.Width - xdiff;
                                     int laneIndex = beforePos.LaneIndex + xdiff;
-                                    hold.Width = Math.Min(Constants.LanesCount - hold.LaneIndex, Math.Max(1, width));
-                                    hold.LaneIndex = Math.Min(Constants.LanesCount - hold.Width, Math.Max(0, laneIndex));
+                                    width = Math.Min(Constants.LanesCount - laneIndex, Math.Max(1, width));
+                                    laneIndex = Math.Min(Constants.LanesCount - width, Math.Max(0, laneIndex));
+                                    hold.SetPosition(laneIndex, width);
                                     Cursor.Current = Cursors.SizeWE;
                                 })
                                 .Finally(() =>

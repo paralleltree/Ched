@@ -85,8 +85,7 @@ namespace Ched.Components.Notes
             get { return laneIndex; }
             set
             {
-                if (laneIndex == value) return;
-                if (value < 0 || value + Width > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid lane index.");
+                CheckPosition(value, Width);
                 laneIndex = value;
             }
         }
@@ -99,10 +98,24 @@ namespace Ched.Components.Notes
             get { return width; }
             set
             {
-                if (width == value) return;
-                if (value < 1 || value + LaneIndex > Constants.LanesCount) throw new ArgumentOutOfRangeException("value", "Invalid note width.");
+                CheckPosition(LaneIndex, value);
                 width = value;
             }
+        }
+
+        protected void CheckPosition(int laneIndex, int width)
+        {
+            if (width < 1 || width > Constants.LanesCount)
+                throw new ArgumentOutOfRangeException("width", "Invalid width.");
+            if (laneIndex < 0 || laneIndex + width > Constants.LanesCount)
+                throw new ArgumentOutOfRangeException("laneIndex", "Invalid lane index.");
+        }
+
+        public void SetPosition(int laneIndex, int width)
+        {
+            CheckPosition(laneIndex, width);
+            this.laneIndex = laneIndex;
+            this.width = width;
         }
     }
 }
