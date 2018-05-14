@@ -18,7 +18,9 @@ namespace Ched.UI
         private readonly string ArgsKey = "sus";
         private readonly string Filter = "Seaurchin Score File(*.sus)|*.sus";
 
-        public ExportForm(ScoreBook book)
+        public string OutputPath { get; private set; }
+
+        public ExportForm(ScoreBook book, string path)
         {
             InitializeComponent();
             Icon = Properties.Resources.MainIcon;
@@ -57,6 +59,11 @@ namespace Ched.UI
                 }
             };
 
+            outputBox.TextChanged += (s, e) =>
+            {
+                OutputPath = outputBox.Text;
+            };
+
             exportButton.Click += (s, e) =>
             {
                 if (string.IsNullOrEmpty(outputBox.Text)) browseButton.PerformClick();
@@ -78,7 +85,7 @@ namespace Ched.UI
 
                 try
                 {
-                    new SusExporter().Export(outputBox.Text, book, args);
+                    new SusExporter().Export(OutputPath, book, args);
                     Close();
                 }
                 catch (Exception ex)
@@ -87,6 +94,8 @@ namespace Ched.UI
                     Program.DumpException(ex);
                 }
             };
+            OutputPath = outputBox.Text = path;
+            
         }
     }
 }
