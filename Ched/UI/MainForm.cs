@@ -23,6 +23,7 @@ namespace Ched.UI
         private readonly string FileTypeFilter = "Ched専用形式(*.chs)|*.chs";
 
         private bool isPreviewMode;
+        private string outputPath = "";
 
         private ScoreBook ScoreBook { get; set; }
         private OperationManager OperationManager { get; }
@@ -266,8 +267,9 @@ namespace Ched.UI
         protected void ExportFile()
         {
             CommitChanges();
-            var dialog = new ExportForm(ScoreBook);
+            var dialog = new ExportForm(ScoreBook, outputPath);
             dialog.ShowDialog(this);
+            outputPath = dialog.OutputPath;
         }
 
         protected void CommitChanges()
