@@ -78,7 +78,7 @@ namespace Ched.UI
 
                 try
                 {
-                    new SusExporter().Export(outputBox.Text, book, args);
+                    new SusExporter() { CustomArgs = args }.Export(outputBox.Text, book);
                     Close();
                 }
                 catch (Exception ex)
