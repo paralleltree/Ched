@@ -18,6 +18,16 @@ namespace Ched.UI
         private readonly string ArgsKey = "sus";
         private readonly string Filter = "Seaurchin Score File(*.sus)|*.sus";
 
+        private SusExporter exporter = new SusExporter();
+
+        public string OutputPath
+        {
+            get { return outputBox.Text; }
+            set { outputBox.Text = value; }
+        }
+
+        public IExporter Exporter { get { return exporter; } }
+
         public ExportForm(ScoreBook book)
         {
             InitializeComponent();
@@ -59,8 +69,8 @@ namespace Ched.UI
 
             exportButton.Click += (s, e) =>
             {
-                if (string.IsNullOrEmpty(outputBox.Text)) browseButton.PerformClick();
-                if (string.IsNullOrEmpty(outputBox.Text))
+                if (string.IsNullOrEmpty(OutputPath)) browseButton.PerformClick();
+                if (string.IsNullOrEmpty(OutputPath))
                 {
                     MessageBox.Show(this, "出力先を指定してください。", Program.ApplicationName);
                     return;
@@ -78,12 +88,14 @@ namespace Ched.UI
 
                 try
                 {
-                    new SusExporter() { CustomArgs = args }.Export(outputBox.Text, book);
+                    exporter.CustomArgs = args;
+                    exporter.Export(OutputPath, book);
+                    DialogResult = DialogResult.OK;
                     Close();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, "エクスポートに失敗しました。", Program.ApplicationName);
+                    MessageBox.Show(this, "エクスポートに失敗しました。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Program.DumpException(ex);
                 }
             };
