@@ -11,8 +11,7 @@ namespace Ched.Components.Exporter
     /// <summary>
     /// エクスポート可能な形式を表すインターフェースです。
     /// </summary>
-    /// <typeparam name="TArgs"></typeparam>
-    public interface IExporter<TArgs>
+    public interface IExporter
     {
         /// <summary>
         /// フォーマット名を取得します。
@@ -20,11 +19,19 @@ namespace Ched.Components.Exporter
         string FormatName { get; }
 
         /// <summary>
-        /// 
+        /// 指定のファイルへデータをエクスポートします。
         /// </summary>
         /// <param name="path">エクスポート先のパス</param>
         /// <param name="book">譜面データ</param>
-        /// <param name="args">エクスポート用の拡張情報</param>
-        void Export(string path, ScoreBook book, TArgs args);
+        void Export(string path, ScoreBook book);
+    }
+
+    /// <summary>
+    /// 独自の拡張情報を持つエクスポート可能な形式を表すインターフェースです。
+    /// </summary>
+    /// <typeparam name="TArgs">拡張情報用クラス</typeparam>
+    public interface IExtendedExpoerter<TArgs> : IExporter
+    {
+        TArgs CustomArgs { get; set; }
     }
 }
