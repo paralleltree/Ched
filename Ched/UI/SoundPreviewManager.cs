@@ -27,7 +27,9 @@ namespace Ched.UI
         private int EndTick { get; set; }
         private double elapsedTick;
         private Timer Timer { get; } = new Timer() { Interval = 4 };
+
         public bool Playing { get; private set; }
+        public bool IsSupported { get { return SoundManager.IsSupported; } }
 
         public SoundPreviewManager(NoteView noteView)
         {
