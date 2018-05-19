@@ -12,15 +12,18 @@ using Ched.Components.Events;
 
 namespace Ched.Components.Exporter
 {
-    public class SusExporter : IExporter<SusArgs>
+    public class SusExporter : IExtendedExpoerter<SusArgs>
     {
         public string FormatName
         {
             get { return "Seaurchin Score File(sus形式)"; }
         }
 
-        public void Export(string path, ScoreBook book, SusArgs args)
+        public SusArgs CustomArgs { get; set; }
+
+        public void Export(string path, ScoreBook book)
         {
+            SusArgs args = CustomArgs;
             var notes = book.Score.Notes;
             using (var writer = new StreamWriter(path))
             {

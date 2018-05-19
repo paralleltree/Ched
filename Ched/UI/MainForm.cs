@@ -33,6 +33,8 @@ namespace Ched.UI
         private ToolStripButton ZoomInButton;
         private ToolStripButton ZoomOutButton;
 
+        private ExportData LastExportData { get; set; }
+
         private SoundPreviewManager PreviewManager { get; }
         private SoundSource CurrentMusicSource;
 
@@ -206,6 +208,7 @@ namespace Ched.UI
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             UpdateThumbHeight();
             SetText(book.Path);
+            LastExportData = null;
             if (!string.IsNullOrEmpty(book.Path))
             {
                 SoundConfiguration.Default.ScoreSound.TryGetValue(book.Path, out CurrentMusicSource);
@@ -267,7 +270,10 @@ namespace Ched.UI
         {
             CommitChanges();
             var dialog = new ExportForm(ScoreBook);
-            dialog.ShowDialog(this);
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                LastExportData = new ExportData() { OutputPath = dialog.OutputPath, Exporter = dialog.Exporter };
+            }
         }
 
         protected void CommitChanges()
@@ -555,7 +561,26 @@ namespace Ched.UI
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
-            var exportButton = new ToolStripButton("エクスポート", Resources.ExportIcon, (s, e) => ExportFile())
+            var exportButton = new ToolStripButton("再エクスポート", Resources.ExportIcon, (s, e) =>
+            {
+                if (LastExportData == null)
+                {
+                    ExportFile();
+                    return;
+                }
+
+                CommitChanges();
+                try
+                {
+                    LastExportData.Exporter.Export(LastExportData.OutputPath, ScoreBook);
+                    MessageBox.Show(this, "再エクスポートが完了しました。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "エクスポートに失敗しました。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Program.DumpException(ex);
+                }
+            })
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
@@ -776,5 +801,11 @@ namespace Ched.UI
                 quantizeComboBox
             });
         }
+    }
+
+    internal class ExportData
+    {
+        public string OutputPath { get; set; }
+        public Components.Exporter.IExporter Exporter { get; set; }
     }
 }
