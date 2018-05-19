@@ -40,6 +40,11 @@ namespace Ched
             Application.Run(args.Length == 0 ? new UI.MainForm() : new UI.MainForm(args[0]));
         }
 
+        public static void DumpExceptionTo(Exception ex, string filename)
+        {
+            File.WriteAllText(filename, Newtonsoft.Json.JsonConvert.SerializeObject(ex));
+        }
+
         public static void DumpException(Exception ex)
         {
             DumpException(ex, false);
@@ -47,7 +52,7 @@ namespace Ched
 
         public static void DumpException(Exception ex, bool forceClose)
         {
-            File.WriteAllText("exception.json", Newtonsoft.Json.JsonConvert.SerializeObject(ex));
+            DumpExceptionTo(ex, "exception.json");
             if (!forceClose) return;
             try
             {
