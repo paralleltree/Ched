@@ -1690,6 +1690,12 @@ namespace Ched.UI
             return c;
         }
 
+        public void CutSelectedNotes()
+        {
+            CopySelectedNotes();
+            RemoveSelectedNotes();
+        }
+
         public void CopySelectedNotes()
         {
             var data = new SelectionData(SelectedRange.StartTick + Math.Min(SelectedRange.Duration, 0), GetSelectedNotes());
