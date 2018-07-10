@@ -12,25 +12,37 @@ namespace Ched.UI
 {
     public class SoundManager : IDisposable
     {
-        private readonly XAudio2 xAudio = new XAudio2();
+        private readonly XAudio2 xAudio;
         readonly HashSet<SourceVoice> playing = new HashSet<SourceVoice>();
         readonly Dictionary<string, AudioDecoder> sounds = new Dictionary<string, AudioDecoder>();
         readonly Dictionary<AudioDecoder, Queue<SourceVoice>> voices = new Dictionary<AudioDecoder, Queue<SourceVoice>>();
 
+        public bool IsSupported { get; private set; } = true;
+
         public void Dispose()
         {
             foreach (var item in voices) item.Key.Dispose();
-            xAudio.Dispose();
+            xAudio?.Dispose();
         }
 
         public SoundManager()
         {
-            xAudio.StartEngine();
-            new MasteringVoice(xAudio).SetVolume(1);
+            try
+            {
+                xAudio = new XAudio2();
+                xAudio.StartEngine();
+                new MasteringVoice(xAudio).SetVolume(1);
+            }
+            catch (Exception ex)
+            {
+                Program.DumpExceptionTo(ex, "sound_exception.json");
+                IsSupported = false;
+            }
         }
 
         public void Register(string filepath)
         {
+            CheckSupported();
             if (sounds.ContainsKey(filepath)) return;
             var nfs = new NativeFileStream(filepath, NativeFileMode.Open, NativeFileAccess.Read);
             var decoder = new AudioDecoder(nfs);
@@ -47,6 +59,7 @@ namespace Ched.UI
 
         public void Play(string path, TimeSpan offset)
         {
+            CheckSupported();
             Task.Run(() => PlayInternal(path, offset));
         }
 
@@ -104,6 +117,7 @@ namespace Ched.UI
 
         public void StopAll()
         {
+            CheckSupported();
             lock (playing)
             {
                 foreach (var voice in playing)
@@ -112,6 +126,12 @@ namespace Ched.UI
                 }
                 playing.Clear();
             }
+        }
+
+        protected void CheckSupported()
+        {
+            if (IsSupported) return;
+            throw new NotSupportedException("The sound engine is not supported.");
         }
     }
 

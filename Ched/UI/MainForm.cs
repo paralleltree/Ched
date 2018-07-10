@@ -169,6 +169,9 @@ namespace Ched.UI
 
             LoadBook(new ScoreBook());
             SetText();
+
+            if (!PreviewManager.IsSupported)
+                MessageBox.Show(this, "簡易プレビューが利用できない環境です。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public MainForm(string filePath) : this()
@@ -484,12 +487,12 @@ namespace Ched.UI
             {
                 if (CurrentMusicSource == null)
                 {
-                    MessageBox.Show(this, "譜面プロパティから音源ファイルを指定してください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(this, "譜面プロパティから音源ファイルを指定してください。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
                 if (!File.Exists(CurrentMusicSource.FilePath))
                 {
-                    MessageBox.Show(this, "音源ファイルが見つかりません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(this, "音源ファイルが見つかりません。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
@@ -542,7 +545,8 @@ namespace Ched.UI
                 new MenuItem("編集(&E)", editMenuItems),
                 new MenuItem("表示(&V)", viewMenuItems),
                 new MenuItem("挿入(&I)", insertMenuItems),
-                new MenuItem("再生(&P)", playMenuItems),
+                // PreviewManager初期化後じゃないといけないのダメ設計でしょ
+                new MenuItem("再生(&P)", playMenuItems) { Enabled = PreviewManager.IsSupported },
                 new MenuItem("ヘルプ(&H)", helpMenuItems)
             });
         }
