@@ -169,6 +169,9 @@ namespace Ched.UI
 
             LoadBook(new ScoreBook());
             SetText();
+
+            if (!PreviewManager.IsSupported)
+                MessageBox.Show(this, "簡易プレビューが利用できない環境です。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public MainForm(string filePath) : this()
@@ -542,7 +545,8 @@ namespace Ched.UI
                 new MenuItem("編集(&E)", editMenuItems),
                 new MenuItem("表示(&V)", viewMenuItems),
                 new MenuItem("挿入(&I)", insertMenuItems),
-                new MenuItem("再生(&P)", playMenuItems),
+                // PreviewManager初期化後じゃないといけないのダメ設計でしょ
+                new MenuItem("再生(&P)", playMenuItems) { Enabled = PreviewManager.IsSupported },
                 new MenuItem("ヘルプ(&H)", helpMenuItems)
             });
         }
