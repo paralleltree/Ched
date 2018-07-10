@@ -2,22 +2,26 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/pq1lght43m7ytlv1?svg=true)](https://ci.appveyor.com/project/paralleltree/ched)
 
-## 概要
-Chedは、CHUNITHM用の譜面エディタです。
+某スライドしてヘドバンする音ゲーの譜面エディタ
 
 既知のバグについては[Issues](https://github.com/paralleltree/Ched/issues)を参照してください。
 
+## 機能とか
+
+  * 時間軸ズーム
+  * カスタム音符指定(1920分音符まで)
+  * 再生プレビュー
+  * 譜面保管所風プレビュー
+  * BPM, ハイスピード, 拍子変更
+  * [Seaurchin Score File(sus形式)](https://seaurchin.kb10uy.org)へのエクスポート
+
 ## ダウンロード
 
-現在の最新版は[v2.1.3](https://github.com/paralleltree/Ched/releases)です。
+現在の最新版は[v2.1.4](https://github.com/paralleltree/Ched/releases)です。
 
 ## 使い方
 
 [Wiki](https://github.com/paralleltree/Ched/wiki)を参照してください。
-
-## 対応フォーマット
-
-  * [Seaurchin Score File(sus形式)](https://seaurchin.kb10uy.org)
 
 ## スクリーンショット
 

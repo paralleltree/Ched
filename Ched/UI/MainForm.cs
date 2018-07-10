@@ -487,12 +487,12 @@ namespace Ched.UI
             {
                 if (CurrentMusicSource == null)
                 {
-                    MessageBox.Show(this, "譜面プロパティから音源ファイルを指定してください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(this, "譜面プロパティから音源ファイルを指定してください。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
                 if (!File.Exists(CurrentMusicSource.FilePath))
                 {
-                    MessageBox.Show(this, "音源ファイルが見つかりません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(this, "音源ファイルが見つかりません。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
