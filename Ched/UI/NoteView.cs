@@ -557,9 +557,9 @@ namespace Ched.UI
                     {
                         var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
                         var offsets = new HashSet<int>(step.ParentNote.StepNotes.Select(q => q.TickOffset));
-                        int maxOffset = offsets.Max();
-                        bool isMaxOffsetStep = step.TickOffset == maxOffset;
+                        bool isMaxOffsetStep = step.TickOffset == offsets.Max();
                         offsets.Remove(step.TickOffset);
+                        int maxOffset = offsets.OrderByDescending(q => q).FirstOrDefault();
                         return mouseMove
                             .TakeUntil(mouseUp)
                             .Do(q =>
@@ -571,6 +571,8 @@ namespace Ched.UI
                                 step.LaneIndexOffset = Math.Min(Constants.LanesCount - step.Width - step.ParentNote.StartLaneIndex, Math.Max(-step.ParentNote.StartLaneIndex, laneIndexOffset));
                                 // 最終Step以降に移動はさせないし同じTickに置かせもしない
                                 if ((!isMaxOffsetStep && offset > maxOffset) || offsets.Contains(offset) || offset <= 0) return;
+                                // 最終Stepは手前のStepより前に動かさない……
+                                if (isMaxOffsetStep && offset <= maxOffset) return;
                                 step.TickOffset = offset;
                                 Cursor.Current = Cursors.SizeAll;
                             });
