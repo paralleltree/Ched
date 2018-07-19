@@ -132,6 +132,7 @@
     <Compile Include="Components\Notes\TappableBase.cs" />
     <Compile Include="Components\Score.cs" />
     <Compile Include="Components\ScoreBook.cs" />
+    <Compile Include="MathExtensions.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="UI\BookPropertiesForm.cs">
       <SubType>Form</SubType>

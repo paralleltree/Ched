@@ -754,7 +754,7 @@ namespace Ched.UI
                 if (quantizeComboBox.SelectedIndex == quantizeComboBox.Items.Count - 1)
                 {
                     // ユーザー定義
-                    var form = new CustomQuantizeSelectionForm(ScoreBook.Score.TicksPerBeat * 4);
+                    var form = new CustomQuantizeSelectionForm(ScoreBook.Score.TicksPerBeat);
                     if (form.ShowDialog(this) == DialogResult.OK)
                     {
                         noteView.QuantizeTick = form.QuantizeTick;
