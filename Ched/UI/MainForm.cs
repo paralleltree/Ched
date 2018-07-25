@@ -79,6 +79,7 @@ namespace Ched.UI
             };
 
             PreviewManager = new SoundPreviewManager(NoteView);
+            PreviewManager.IsStopAtLastNote = Settings.Default.IsPreviewAbortAtLastNote;
             PreviewManager.Finished += (s, e) => NoteView.Editable = CanEdit;
             PreviewManager.TickUpdated += (s, e) => NoteView.CurrentTick = e.Tick;
 
@@ -483,6 +484,17 @@ namespace Ched.UI
 
             var insertMenuItems = new MenuItem[] { insertBPMItem, insertHighSpeedItem, insertTimeSignatureItem };
 
+            var isAbortAtLastNoteItem = new MenuItem("最後のノート発声時に停止する", (s, e) =>
+            {
+                var item = s as MenuItem;
+                item.Checked = !item.Checked;
+                PreviewManager.IsStopAtLastNote = item.Checked;
+                Settings.Default.IsPreviewAbortAtLastNote = item.Checked;
+            })
+            {
+                Checked = Settings.Default.IsPreviewAbortAtLastNote
+            };
+
             var playItem = new MenuItem("再生/停止", (s, e) =>
             {
                 if (CurrentMusicSource == null)
@@ -506,12 +518,14 @@ namespace Ched.UI
                 EventHandler lambda = null;
                 lambda = (p, q) =>
                 {
+                    isAbortAtLastNoteItem.Enabled = true;
                     PreviewManager.Finished -= lambda;
                     noteView.CurrentTick = startTick;
                 };
 
                 if (PreviewManager.Start(CurrentMusicSource, startTick))
                 {
+                    isAbortAtLastNoteItem.Enabled = false;
                     PreviewManager.Finished += lambda;
                     NoteView.Editable = CanEdit;
                 }
@@ -524,7 +538,8 @@ namespace Ched.UI
 
             var playMenuItems = new MenuItem[]
             {
-                playItem, stopItem
+                playItem, stopItem, new MenuItem("-"),
+                isAbortAtLastNoteItem
             };
 
             var helpMenuItems = new MenuItem[]

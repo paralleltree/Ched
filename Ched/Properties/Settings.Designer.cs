@@ -56,5 +56,20 @@ namespace Ched.Properties
                 this["UnitBeatHeight"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsPreviewAbortAtLastNote
+        {
+            get
+            {
+                return ((bool)(this["IsPreviewAbortAtLastNote"]));
+            }
+            set
+            {
+                this["IsPreviewAbortAtLastNote"] = value;
+            }
+        }
     }
 }
