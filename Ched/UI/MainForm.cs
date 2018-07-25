@@ -282,7 +282,7 @@ namespace Ched.UI
 
         protected void CommitChanges()
         {
-            ScoreBook.Score.Notes = new NoteCollection(NoteView.Notes);
+            ScoreBook.Score.Notes = NoteView.Notes.Reposit();
             // Eventsは参照渡ししてますよん
         }
 

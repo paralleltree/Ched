@@ -91,7 +91,7 @@ namespace Ched.Components
             Damages = new List<Damage>();
         }
 
-        public NoteCollection(UI.NoteView.NoteCollection collection)
+        public NoteCollection(NoteCollection collection)
         {
             Taps = collection.Taps.ToList();
             ExTaps = collection.ExTaps.ToList();
