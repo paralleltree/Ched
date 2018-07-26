@@ -65,12 +65,11 @@ namespace Ched.UI
                 tickSet.Add(tick);
             }
             TickElement = new LinkedList<int?>(tickSet.Where(p => p >= startTick).OrderBy(p => p).Select(p => new int?(p))).First;
-            if (TickElement == null) return false; // 鳴らす対象ノーツがない
 
             BPMElement = new LinkedList<BPMChangeEvent>(NoteView.ScoreEvents.BPMChangeEvents.OrderBy(p => p.Tick)).First;
 
             // スタート時まで進める
-            while (TickElement.Value < startTick && TickElement.Next != null) TickElement = TickElement.Next;
+            while (TickElement != null && TickElement.Value < startTick) TickElement = TickElement.Next;
             while (BPMElement.Next != null && BPMElement.Next.Value.Tick <= startTick) BPMElement = BPMElement.Next;
 
             int clapLatencyTick = GetLatencyTick(ClapSource.Latency, (double)BPMElement.Value.BPM);
