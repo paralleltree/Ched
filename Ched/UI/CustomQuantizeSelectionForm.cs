@@ -14,11 +14,11 @@ namespace Ched.UI
     {
         private int BarTick { get; }
 
-        public int QuantizeTick
+        public double QuantizeTick
         {
             get
             {
-                return Math.Max(BarTick / (int)Math.Pow(2, noteLengthBox.SelectedIndex) / (int)noteDivisionBox.Value, 1);
+                return Math.Max(BarTick / Math.Pow(2, noteLengthBox.SelectedIndex) / (int)noteDivisionBox.Value, 1);
             }
         }
 
