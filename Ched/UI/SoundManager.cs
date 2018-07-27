@@ -128,6 +128,12 @@ namespace Ched.UI
             }
         }
 
+        public TimeSpan GetDuration(string path)
+        {
+            Register(path);
+            return sounds[path].Duration;
+        }
+
         protected void CheckSupported()
         {
             if (IsSupported) return;

@@ -29,6 +29,7 @@ namespace Ched.UI
         private Timer Timer { get; } = new Timer() { Interval = 4 };
 
         public bool Playing { get; private set; }
+        public bool IsStopAtLastNote { get; set; }
         public bool IsSupported { get { return SoundManager.IsSupported; } }
 
         public SoundPreviewManager(NoteView noteView)
@@ -49,7 +50,7 @@ namespace Ched.UI
             if (music == null) throw new ArgumentNullException("music");
             SoundManager.Register(ClapSource.FilePath);
             SoundManager.Register(music.FilePath);
-            EndTick = NoteView.Notes.GetLastTick();
+            EndTick = IsStopAtLastNote ? NoteView.Notes.GetLastTick() : GetTickFromTime(SoundManager.GetDuration(music.FilePath), NoteView.ScoreEvents.BPMChangeEvents);
             if (EndTick < startTick) return false;
 
             var tickSet = new HashSet<int>();
@@ -64,12 +65,11 @@ namespace Ched.UI
                 tickSet.Add(tick);
             }
             TickElement = new LinkedList<int?>(tickSet.Where(p => p >= startTick).OrderBy(p => p).Select(p => new int?(p))).First;
-            if (TickElement == null) return false; // 鳴らす対象ノーツがない
 
             BPMElement = new LinkedList<BPMChangeEvent>(NoteView.ScoreEvents.BPMChangeEvents.OrderBy(p => p.Tick)).First;
 
             // スタート時まで進める
-            while (TickElement.Value < startTick && TickElement.Next != null) TickElement = TickElement.Next;
+            while (TickElement != null && TickElement.Value < startTick) TickElement = TickElement.Next;
             while (BPMElement.Next != null && BPMElement.Next.Value.Tick <= startTick) BPMElement = BPMElement.Next;
 
             int clapLatencyTick = GetLatencyTick(ClapSource.Latency, (double)BPMElement.Value.BPM);
@@ -151,6 +151,22 @@ namespace Ched.UI
                 bpm = bpm.Next;
             }
             return time + GetLatencyTime(tick - bpm.Value.Tick, (double)bpm.Value.BPM);
+        }
+
+        private int GetTickFromTime(TimeSpan time, IEnumerable<BPMChangeEvent> bpmEvents)
+        {
+            var bpm = new LinkedList<BPMChangeEvent>(bpmEvents.OrderBy(p => p.Tick)).First;
+            if (bpm.Value.Tick != 0) throw new ArgumentException("Initial BPM change event not found");
+
+            TimeSpan sum = new TimeSpan();
+            while (bpm.Next != null)
+            {
+                TimeSpan section = GetLatencyTime(bpm.Next.Value.Tick - bpm.Value.Tick, (double)bpm.Value.BPM);
+                if (time < sum + section) break;
+                sum += section;
+                bpm = bpm.Next;
+            }
+            return bpm.Value.Tick + GetLatencyTick((time - sum).TotalSeconds, (double)bpm.Value.BPM);
         }
 
 
