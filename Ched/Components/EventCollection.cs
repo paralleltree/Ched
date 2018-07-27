@@ -38,5 +38,12 @@ namespace Ched.Components
             get { return highSpeedChangeEvents; }
             set { highSpeedChangeEvents = value; }
         }
+
+        public IEnumerable<EventBase> GetAllEvents()
+        {
+            return BPMChangeEvents.Cast<EventBase>()
+                .Concat(TimeSignatureChangeEvents)
+                .Concat(HighSpeedChangeEvents);
+        }
     }
 }

@@ -45,5 +45,18 @@ namespace Ched.Components
             get { return events; }
             set { events = value; }
         }
+
+        /// <summary>
+        /// 指定の位置に時間を挿入します。
+        /// </summary>
+        /// <param name="position">時間を挿入する位置(Tick)</param>
+        /// <param name="duration">挿入する時間(Tick)</param>
+        public void InsertTicks(int position, int duration)
+        {
+            foreach (var note in Notes.GetShortNotes().Where(p => p.Tick >= position)) note.Tick += duration;
+            foreach (var hold in Notes.Holds.Where(p => p.StartTick >= position)) hold.StartTick += duration;
+            foreach (var slide in Notes.Slides.Where(p => p.StartTick >= position)) slide.StartTick += duration;
+            foreach (var item in Events.GetAllEvents().Where(p => p.Tick >= position)) item.Tick += duration;
+        }
     }
 }
