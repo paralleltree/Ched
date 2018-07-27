@@ -383,11 +383,20 @@ namespace Ched.UI
                 noteView.Invalidate();
             });
 
+            var insertTickItems = new MenuItem("時間挿入", (s, e) =>
+            {
+                var op = new InsertTicksOperation(ScoreBook.Score, noteView.SelectedRange.StartTick, Math.Abs(noteView.SelectedRange.Duration));
+                op.Redo(); // サボサボ
+                OperationManager.Push(op);
+                noteView.Invalidate();
+            });
+
             var editMenuItems = new MenuItem[]
             {
                 undoItem, redoItem, new MenuItem("-"),
                 cutItem, copyItem, pasteItem, new MenuItem("-"),
-                flipSelectedNotesItem, removeSelectedNotesItem, removeEventsItem
+                flipSelectedNotesItem, removeSelectedNotesItem, removeEventsItem, new MenuItem("-"),
+                insertTickItems
             };
 
             var viewModeItem = new MenuItem("譜面プレビュー", (s, e) =>
