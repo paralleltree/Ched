@@ -157,7 +157,7 @@ namespace Ched.UI
         /// <summary>
         /// クォンタイズを行うTick数を指定します。
         /// </summary>
-        public int QuantizeTick { get; set; }
+        public double QuantizeTick { get; set; }
 
         /// <summary>
         /// 表示始端のTickを設定します。
@@ -500,7 +500,7 @@ namespace Ched.UI
                             .Do(q =>
                             {
                                 var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
-                                hold.Duration = Math.Max(QuantizeTick, GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - hold.StartTick);
+                                hold.Duration = (int)Math.Max(QuantizeTick, GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - hold.StartTick);
                                 Cursor.Current = Cursors.SizeNS;
                             })
                             .Finally(() => Cursor.Current = Cursors.Default);
@@ -882,7 +882,7 @@ namespace Ched.UI
                                 {
                                     StartTick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)),
                                     Width = LastWidth,
-                                    Duration = QuantizeTick
+                                    Duration = (int)QuantizeTick
                                 };
                                 newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - hold.Width / 2;
                                 hold.LaneIndex = Math.Min(Constants.LanesCount - hold.Width, Math.Max(0, newNoteLaneIndex));
@@ -938,7 +938,7 @@ namespace Ched.UI
                                 };
                                 newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - slide.StartWidth / 2;
                                 slide.StartLaneIndex = Math.Min(Constants.LanesCount - slide.StartWidth, Math.Max(0, newNoteLaneIndex));
-                                var step = new Slide.StepTap(slide) { TickOffset = QuantizeTick };
+                                var step = new Slide.StepTap(slide) { TickOffset = (int)QuantizeTick };
                                 slide.StepNotes.Add(step);
                                 Notes.Add(slide);
                                 Invalidate();
@@ -1004,7 +1004,7 @@ namespace Ched.UI
                                         // 既に配置されていれば追加しない
                                         if (Notes.GetReferencedAirAction(note).Count() > 0) break;
                                         var airAction = new AirAction(note);
-                                        var action = new AirAction.ActionNote(airAction) { Offset = QuantizeTick };
+                                        var action = new AirAction.ActionNote(airAction) { Offset = (int)QuantizeTick };
                                         airAction.ActionNotes.Add(action);
                                         Notes.Add(airAction);
                                         Invalidate();
@@ -1630,7 +1630,7 @@ namespace Ched.UI
 
         protected int GetQuantizedTick(float tick)
         {
-            return (int)Math.Round((float)tick / QuantizeTick) * QuantizeTick;
+            return (int)(Math.Round(tick / QuantizeTick) * QuantizeTick);
         }
 
         private RectangleF GetRectFromNotePosition(int tick, int laneIndex, int width)
