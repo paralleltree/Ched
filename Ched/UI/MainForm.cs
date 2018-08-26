@@ -352,6 +352,7 @@ namespace Ched.UI
             var pasteItem = new MenuItem("貼り付け", (s, e) => noteView.PasteNotes(), Shortcut.CtrlV);
 
             var flipSelectedNotesItem = new MenuItem("選択範囲内ノーツを反転", (s, e) => NoteView.FlipSelectedNotes());
+            var removeSelectedNotesItem = new MenuItem("選択範囲内ノーツを削除", (s, e) => noteView.RemoveSelectedNotes(), Shortcut.Del);
 
             var removeEventsItem = new MenuItem("選択範囲内のイベントを削除", (s, e) =>
             {
@@ -386,7 +387,7 @@ namespace Ched.UI
             {
                 undoItem, redoItem, new MenuItem("-"),
                 copyItem, pasteItem, new MenuItem("-"),
-                flipSelectedNotesItem, removeEventsItem
+                flipSelectedNotesItem, removeSelectedNotesItem, removeEventsItem
             };
 
             var viewModeItem = new MenuItem("譜面プレビュー", (s, e) =>

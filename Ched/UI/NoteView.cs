@@ -1726,6 +1726,65 @@ namespace Ched.UI
             Invalidate();
         }
 
+        public void RemoveSelectedNotes()
+        {
+            var selected = GetSelectedNotes();
+
+            var airs = selected.Airs.ToList().Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveAirOperation(Notes, p);
+            });
+            var airActions = selected.Taps.Cast<IAirable>().Concat(selected.ExTaps)
+                .Concat(selected.Flicks).Concat(selected.Damages)
+                .Concat(selected.Holds.Select(p => p.EndNote))
+                .Concat(selected.Slides.SelectMany(p => p.StepNotes))
+                .SelectMany(p => Notes.GetReferencedAirAction(p))
+                .ToList()
+                .Select(p =>
+                {
+                    Notes.Remove(p);
+                    return new RemoveAirActionOperation(Notes, p);
+                }).ToList();
+
+            var taps = selected.Taps.ToList().Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveTapOperation(Notes, p);
+            });
+            var extaps = selected.ExTaps.ToList().Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveExTapOperation(Notes, p);
+            });
+            var flicks = selected.Flicks.ToList().Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveFlickOperation(Notes, p);
+            });
+            var damages = selected.Damages.ToList().Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveDamageOperation(Notes, p);
+            });
+            var holds = selected.Holds.ToList().Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveHoldOperation(Notes, p);
+            });
+            var slides = selected.Slides.ToList().Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveSlideOperation(Notes, p);
+            });
+
+            var op = taps.Cast<IOperation>().Concat(extaps).Concat(flicks).Concat(damages)
+                .Concat(holds).Concat(slides)
+                .Concat(airs).Concat(airActions);
+            OperationManager.Push(new CompositeOperation("選択範囲内ノーツ削除", op.ToList()));
+            Invalidate();
+        }
+
         public void FlipSelectedNotes()
         {
             var selectedNotes = GetSelectedNotes();
