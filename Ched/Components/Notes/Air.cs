@@ -47,6 +47,12 @@ namespace Ched.Components.Notes
             parentNote = parent;
         }
 
+        public void Flip()
+        {
+            if (HorizontalDirection == HorizontalAirDirection.Center) return;
+            HorizontalDirection = HorizontalDirection == HorizontalAirDirection.Left ? HorizontalAirDirection.Right : HorizontalAirDirection.Left;
+        }
+
         internal void Draw(Graphics g, RectangleF targetNoteRect) // 描画対象のノートのrect
         {
             RectangleF targetRect = GetDestRectangle(targetNoteRect);
