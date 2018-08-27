@@ -348,10 +348,12 @@ namespace Ched.UI
                 Enabled = false
             };
 
+            var cutItem = new MenuItem("切り取り", (s, e) => noteView.CutSelectedNotes(), Shortcut.CtrlX);
             var copyItem = new MenuItem("コピー", (s, e) => noteView.CopySelectedNotes(), Shortcut.CtrlC);
             var pasteItem = new MenuItem("貼り付け", (s, e) => noteView.PasteNotes(), Shortcut.CtrlV);
 
             var flipSelectedNotesItem = new MenuItem("選択範囲内ノーツを反転", (s, e) => NoteView.FlipSelectedNotes());
+            var removeSelectedNotesItem = new MenuItem("選択範囲内ノーツを削除", (s, e) => noteView.RemoveSelectedNotes(), Shortcut.Del);
 
             var removeEventsItem = new MenuItem("選択範囲内のイベントを削除", (s, e) =>
             {
@@ -385,8 +387,8 @@ namespace Ched.UI
             var editMenuItems = new MenuItem[]
             {
                 undoItem, redoItem, new MenuItem("-"),
-                copyItem, pasteItem, new MenuItem("-"),
-                flipSelectedNotesItem, removeEventsItem
+                cutItem, copyItem, pasteItem, new MenuItem("-"),
+                flipSelectedNotesItem, removeSelectedNotesItem, removeEventsItem
             };
 
             var viewModeItem = new MenuItem("譜面プレビュー", (s, e) =>
@@ -604,6 +606,10 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
+            var cutButton = new ToolStripButton("切り取り", Resources.CutIcon, (s, e) => noteView.CutSelectedNotes())
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
             var copyButton = new ToolStripButton("コピー", Resources.CopyIcon, (s, e) => noteView.CopySelectedNotes())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
@@ -685,7 +691,7 @@ namespace Ched.UI
             return new ToolStrip(new ToolStripItem[]
             {
                 newFileButton, openFileButton, saveFileButton, exportButton, new ToolStripSeparator(),
-                copyButton, pasteButton, new ToolStripSeparator(),
+                cutButton, copyButton, pasteButton, new ToolStripSeparator(),
                 undoButton, redoButton, new ToolStripSeparator(),
                 penButton, selectionButton, eraserButton, new ToolStripSeparator(),
                 zoomInButton, zoomOutButton
