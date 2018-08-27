@@ -1762,32 +1762,32 @@ namespace Ched.UI
                 return new RemoveAirActionOperation(Notes, p);
             }).ToList();
 
-            var taps = selected.Taps.ToList().Select(p =>
+            var taps = selected.Taps.Select(p =>
             {
                 Notes.Remove(p);
                 return new RemoveTapOperation(Notes, p);
             });
-            var extaps = selected.ExTaps.ToList().Select(p =>
+            var extaps = selected.ExTaps.Select(p =>
             {
                 Notes.Remove(p);
                 return new RemoveExTapOperation(Notes, p);
             });
-            var flicks = selected.Flicks.ToList().Select(p =>
+            var flicks = selected.Flicks.Select(p =>
             {
                 Notes.Remove(p);
                 return new RemoveFlickOperation(Notes, p);
             });
-            var damages = selected.Damages.ToList().Select(p =>
+            var damages = selected.Damages.Select(p =>
             {
                 Notes.Remove(p);
                 return new RemoveDamageOperation(Notes, p);
             });
-            var holds = selected.Holds.ToList().Select(p =>
+            var holds = selected.Holds.Select(p =>
             {
                 Notes.Remove(p);
                 return new RemoveHoldOperation(Notes, p);
             });
-            var slides = selected.Slides.ToList().Select(p =>
+            var slides = selected.Slides.Select(p =>
             {
                 Notes.Remove(p);
                 return new RemoveSlideOperation(Notes, p);
