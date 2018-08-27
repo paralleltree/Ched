@@ -1477,7 +1477,7 @@ namespace Ched.UI
             foreach (var slide in slides)
             {
                 slide.StartNote.Draw(pe.Graphics, GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.StartWidth));
-                foreach (var step in slide.StepNotes)
+                foreach (var step in slide.StepNotes.OrderBy(p => p.TickOffset))
                 {
                     if (!Editable && !step.IsVisible) continue;
                     step.Draw(pe.Graphics, GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width));
@@ -1679,9 +1679,21 @@ namespace Ched.UI
             c.Damages.AddRange(Notes.Damages.Where(p => contained(p)));
             c.Holds.AddRange(Notes.Holds.Where(p => p.StartTick >= minTick && p.StartTick + p.Duration <= maxTick && p.LaneIndex >= startLaneIndex && p.LaneIndex + p.Width <= endLaneIndex));
             c.Slides.AddRange(Notes.Slides.Where(p => p.StartTick >= minTick && p.StartTick + p.GetDuration() <= maxTick && p.StartLaneIndex >= startLaneIndex && p.StartLaneIndex + p.StartWidth <= endLaneIndex && p.StepNotes.All(r => r.LaneIndex >= startLaneIndex && r.LaneIndex + r.Width <= endLaneIndex)));
-            c.Airs.AddRange(Notes.Airs.Where(p => contained(p.ParentNote)));
-            // TODO: ロングノーツが親のAIR-ACTIONの扱いに困っている
+
+            var airables = c.GetShortNotes().Cast<IAirable>()
+                .Concat(c.Holds.Select(p => p.EndNote))
+                .Concat(c.Slides.SelectMany(p => p.StepNotes))
+                .ToList();
+            c.Airs.AddRange(airables.SelectMany(p => Notes.GetReferencedAir(p)));
+            // AIR-ACTIONはとりあえず全コピー
+            c.AirActions.AddRange(airables.SelectMany(p => Notes.GetReferencedAirAction(p)));
             return c;
+        }
+
+        public void CutSelectedNotes()
+        {
+            CopySelectedNotes();
+            RemoveSelectedNotes();
         }
 
         public void CopySelectedNotes()
@@ -1713,16 +1725,78 @@ namespace Ched.UI
                 slide.StartTick = slide.StartTick - data.StartTick + CurrentTick;
             }
 
+            foreach (var airAction in data.SelectedNotes.AirActions)
+            {
+                // AIR-ACTIONの親ノート復元できないんやった……クソ設計だわ……
+                var notes = airAction.ActionNotes.Select(p => new AirAction.ActionNote(airAction) { Offset = p.Offset }).ToList();
+                airAction.ActionNotes.Clear();
+                airAction.ActionNotes.AddRange(notes);
+            }
+
             var op = data.SelectedNotes.Taps.Select(p => new InsertTapOperation(Notes, p)).Cast<IOperation>()
                 .Concat(data.SelectedNotes.ExTaps.Select(p => new InsertExTapOperation(Notes, p)))
                 .Concat(data.SelectedNotes.Flicks.Select(p => new InsertFlickOperation(Notes, p)))
                 .Concat(data.SelectedNotes.Damages.Select(p => new InsertDamageOperation(Notes, p)))
                 .Concat(data.SelectedNotes.Holds.Select(p => new InsertHoldOperation(Notes, p)))
                 .Concat(data.SelectedNotes.Slides.Select(p => new InsertSlideOperation(Notes, p)))
-                .Concat(data.SelectedNotes.Airs.Select(p => new InsertAirOperation(Notes, p)));
+                .Concat(data.SelectedNotes.Airs.Select(p => new InsertAirOperation(Notes, p)))
+                .Concat(data.SelectedNotes.AirActions.Select(p => new InsertAirActionOperation(Notes, p)));
             var composite = new CompositeOperation("クリップボードからペースト", op.ToList());
             composite.Redo(); // 追加書くの面倒になったので許せ
             OperationManager.Push(composite);
+            Invalidate();
+        }
+
+        public void RemoveSelectedNotes()
+        {
+            var selected = GetSelectedNotes();
+
+            var airs = selected.Airs.ToList().Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveAirOperation(Notes, p);
+            });
+            var airActions = selected.AirActions.Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveAirActionOperation(Notes, p);
+            }).ToList();
+
+            var taps = selected.Taps.Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveTapOperation(Notes, p);
+            });
+            var extaps = selected.ExTaps.Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveExTapOperation(Notes, p);
+            });
+            var flicks = selected.Flicks.Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveFlickOperation(Notes, p);
+            });
+            var damages = selected.Damages.Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveDamageOperation(Notes, p);
+            });
+            var holds = selected.Holds.Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveHoldOperation(Notes, p);
+            });
+            var slides = selected.Slides.Select(p =>
+            {
+                Notes.Remove(p);
+                return new RemoveSlideOperation(Notes, p);
+            });
+
+            var op = taps.Cast<IOperation>().Concat(extaps).Concat(flicks).Concat(damages)
+                .Concat(holds).Concat(slides)
+                .Concat(airs).Concat(airActions);
+            OperationManager.Push(new CompositeOperation("選択範囲内ノーツ削除", op.ToList()));
             Invalidate();
         }
 
@@ -1732,6 +1806,10 @@ namespace Ched.UI
             var dicShortNotes = selectedNotes.GetShortNotes().ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
             var dicHolds = selectedNotes.Holds.ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
             var dicSlides = selectedNotes.Slides;
+            var airs = selectedNotes.GetShortNotes().Cast<IAirable>()
+                .Concat(selectedNotes.Holds.Select(p => p.EndNote))
+                .Concat(selectedNotes.Slides.Select(p => p.StepNotes.OrderByDescending(q => q.TickOffset).First()))
+                .SelectMany(p => Notes.GetReferencedAir(p));
 
             var opShortNotes = dicShortNotes.Select(p =>
             {
@@ -1753,7 +1831,13 @@ namespace Ched.UI
                 return new FlipSlideOperation(p);
             });
 
-            OperationManager.Push(new CompositeOperation("ノーツの反転", opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).ToList()));
+            var opAirs = airs.Select(p =>
+            {
+                p.Flip();
+                return new FlipAirHorizontalDirectionOperation(p);
+            });
+
+            OperationManager.Push(new CompositeOperation("ノーツの反転", opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).Concat(opAirs).ToList()));
             Invalidate();
         }
 

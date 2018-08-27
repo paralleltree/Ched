@@ -326,6 +326,28 @@ namespace Ched.UI.Operations
         }
     }
 
+    public class FlipAirHorizontalDirectionOperation : IOperation
+    {
+        public string Description { get { return "AIRの反転"; } }
+
+        protected Air Note { get; }
+
+        public FlipAirHorizontalDirectionOperation(Air note)
+        {
+            Note = note;
+        }
+
+        public void Redo()
+        {
+            Note.Flip();
+        }
+
+        public void Undo()
+        {
+            Note.Flip();
+        }
+    }
+
     public class ChangeAirActionOffsetOperation : IOperation
     {
         public string Description { get { return "AIR-ACTION位置の変更"; } }
