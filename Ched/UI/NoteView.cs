@@ -1454,8 +1454,10 @@ namespace Ched.UI
                 }
             }
 
-            // AIR-ACTION(ガイド線)
+            var airs = Notes.Airs.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick).ToList();
             var airActions = Notes.AirActions.Where(p => p.StartTick <= tailTick && p.StartTick + p.GetDuration() >= HeadTick).ToList();
+
+            // AIR-ACTION(ガイド線)
             foreach (var note in airActions)
             {
                 note.DrawLine(pe.Graphics,
@@ -1465,11 +1467,20 @@ namespace Ched.UI
                     ShortNoteHeight);
             }
 
+            // ロングノーツ終点AIR
+            foreach (var note in airs)
+            {
+                if (!(note.ParentNote is LongNoteTapBase)) continue;
+                RectangleF rect = GetRectFromNotePosition(note.ParentNote.Tick, note.ParentNote.LaneIndex, note.ParentNote.Width);
+                (note.ParentNote as LongNoteTapBase).Draw(pe.Graphics, rect, true);
+            }
+
             // ショートノーツ
             // HOLD始点
             foreach (var hold in holds)
             {
                 hold.StartNote.Draw(pe.Graphics, GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width));
+                if (Notes.GetReferencedAir(hold.EndNote).Count() > 0) continue; // AIR付き終点
                 hold.EndNote.Draw(pe.Graphics, GetRectFromNotePosition(hold.StartTick + hold.Duration, hold.LaneIndex, hold.Width));
             }
 
@@ -1480,6 +1491,7 @@ namespace Ched.UI
                 foreach (var step in slide.StepNotes.OrderBy(p => p.TickOffset))
                 {
                     if (!Editable && !step.IsVisible) continue;
+                    if (Notes.GetReferencedAir(step).Count() > 0) break; // AIR付き終点
                     step.Draw(pe.Graphics, GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width));
                 }
             }
@@ -1515,14 +1527,10 @@ namespace Ched.UI
             }
 
             // AIR
-            foreach (var note in Notes.Airs.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
+            foreach (var note in airs)
             {
                 RectangleF rect = GetRectFromNotePosition(note.ParentNote.Tick, note.ParentNote.LaneIndex, note.ParentNote.Width);
                 note.Draw(pe.Graphics, rect);
-                if (note.ParentNote is LongNoteTapBase)
-                {
-                    (note.ParentNote as LongNoteTapBase).Draw(pe.Graphics, rect, true);
-                }
             }
 
             // 選択範囲描画
