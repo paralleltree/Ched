@@ -33,11 +33,11 @@ namespace Ched.UI
 
             BarTick = barTick;
 
-            noteLengthBox.Items.AddRange(Enumerable.Range(0, 8).Select(p => ((int)Math.Pow(2, p)).ToString()).ToArray());
+            noteLengthBox.Items.AddRange(Enumerable.Range(0, 7).Select(p => ((int)Math.Pow(2, p)).ToString()).ToArray());
             noteLengthBox.SelectedIndex = 2;
 
             noteDivisionBox.Minimum = 1;
-            noteDivisionBox.Maximum = 15;
+            noteDivisionBox.Maximum = 30;
             noteDivisionBox.Value = 1;
         }
     }
