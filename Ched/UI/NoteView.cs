@@ -1732,6 +1732,10 @@ namespace Ched.UI
             var dicShortNotes = selectedNotes.GetShortNotes().ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
             var dicHolds = selectedNotes.Holds.ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
             var dicSlides = selectedNotes.Slides;
+            var airs = selectedNotes.GetShortNotes().Cast<IAirable>()
+                .Concat(selectedNotes.Holds.Select(p => p.EndNote))
+                .Concat(selectedNotes.Slides.Select(p => p.StepNotes.OrderByDescending(q => q.TickOffset).First()))
+                .SelectMany(p => Notes.GetReferencedAir(p));
 
             var opShortNotes = dicShortNotes.Select(p =>
             {
@@ -1753,7 +1757,13 @@ namespace Ched.UI
                 return new FlipSlideOperation(p);
             });
 
-            OperationManager.Push(new CompositeOperation("ノーツの反転", opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).ToList()));
+            var opAirs = airs.Select(p =>
+            {
+                p.Flip();
+                return new FlipAirHorizontalDirectionOperation(p);
+            });
+
+            OperationManager.Push(new CompositeOperation("ノーツの反転", opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).Concat(opAirs).ToList()));
             Invalidate();
         }
 
