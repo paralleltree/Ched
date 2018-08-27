@@ -1477,7 +1477,7 @@ namespace Ched.UI
             foreach (var slide in slides)
             {
                 slide.StartNote.Draw(pe.Graphics, GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.StartWidth));
-                foreach (var step in slide.StepNotes)
+                foreach (var step in slide.StepNotes.OrderBy(p => p.TickOffset))
                 {
                     if (!Editable && !step.IsVisible) continue;
                     step.Draw(pe.Graphics, GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width));
