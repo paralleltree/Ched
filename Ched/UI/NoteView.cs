@@ -382,6 +382,7 @@ namespace Ched.UI
                                 return actionNoteHandler(action)
                                     .Finally(() =>
                                     {
+                                        if (beforeOffset == action.Offset) return;
                                         OperationManager.Push(new ChangeAirActionOffsetOperation(action, beforeOffset, action.Offset));
                                     });
                             }
@@ -463,6 +464,7 @@ namespace Ched.UI
                                 .Finally(() =>
                                 {
                                     var afterPos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
+                                    if (beforePos == afterPos) return;
                                     OperationManager.Push(new ChangeShortNoteWidthOperation(note, beforePos, afterPos));
                                 });
                         }
@@ -475,6 +477,7 @@ namespace Ched.UI
                                 .Finally(() =>
                                 {
                                     var afterPos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
+                                    if (beforePos == afterPos) return;
                                     OperationManager.Push(new ChangeShortNoteWidthOperation(note, beforePos, afterPos));
                                 });
                         }
@@ -487,6 +490,7 @@ namespace Ched.UI
                                 .Finally(() =>
                                 {
                                     var afterPos = new MoveShortNoteOperation.NotePosition(note.Tick, note.LaneIndex);
+                                    if (beforePos == afterPos) return;
                                     OperationManager.Push(new MoveShortNoteOperation(note, beforePos, afterPos));
                                 });
                         }
@@ -525,9 +529,10 @@ namespace Ched.UI
                             })
                             .Finally(() =>
                             {
-                                var afterPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
-                                OperationManager.Push(new MoveSlideStepNoteOperation(step, beforeStepPos, afterPos));
                                 Cursor.Current = Cursors.Default;
+                                var afterPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
+                                if (beforeStepPos == afterPos) return;
+                                OperationManager.Push(new MoveSlideStepNoteOperation(step, beforeStepPos, afterPos));
                             });
                     };
 
@@ -547,12 +552,14 @@ namespace Ched.UI
                             })
                             .Finally(() =>
                             {
-                                var afterPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
-                                OperationManager.Push(new MoveSlideStepNoteOperation(step, beforeStepPos, afterPos));
                                 Cursor.Current = Cursors.Default;
+                                var afterPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
+                                if (beforeStepPos == afterPos) return;
+                                OperationManager.Push(new MoveSlideStepNoteOperation(step, beforeStepPos, afterPos));
                             });
                     };
 
+                    // 挿入時のハンドラにも流用するのでFinallyつけられない
                     Func<Slide.StepTap, IObservable<MouseEventArgs>> moveSlideStepNoteHandler = step =>
                     {
                         var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
@@ -605,9 +612,10 @@ namespace Ched.UI
                                     return moveSlideStepNoteHandler(step)
                                         .Finally(() =>
                                         {
-                                            var afterPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
-                                            OperationManager.Push(new MoveSlideStepNoteOperation(step, beforeStepPos, afterPos));
                                             Cursor.Current = Cursors.Default;
+                                            var afterPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
+                                            if (beforeStepPos == afterPos) return;
+                                            OperationManager.Push(new MoveSlideStepNoteOperation(step, beforeStepPos, afterPos));
                                         });
                                 }
                             }
@@ -641,10 +649,11 @@ namespace Ched.UI
                                 })
                                 .Finally(() =>
                                 {
-                                    var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.StartWidth);
-                                    OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
                                     LastWidth = slide.StartWidth;
+                                    var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.StartWidth);
+                                    if (beforePos == afterPos) return;
+                                    OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
                                 });
                         }
 
@@ -662,10 +671,11 @@ namespace Ched.UI
                                 })
                                 .Finally(() =>
                                 {
-                                    var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.StartWidth);
-                                    OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
                                     LastWidth = slide.StartWidth;
+                                    var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.StartWidth);
+                                    if (beforePos == afterPos) return;
+                                    OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
                                 });
                         }
 
@@ -685,10 +695,11 @@ namespace Ched.UI
                                 })
                                 .Finally(() =>
                                 {
-                                    var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.StartWidth);
-                                    OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
                                     LastWidth = slide.StartWidth;
+                                    var afterPos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.StartWidth);
+                                    if (beforePos == afterPos) return;
+                                    OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
                                 });
                         }
 
@@ -702,7 +713,11 @@ namespace Ched.UI
                         {
                             int beforeDuration = hold.Duration;
                             return holdDurationHandler(hold)
-                                .Finally(() => OperationManager.Push(new ChangeHoldDurationOperation(hold, beforeDuration, hold.Duration)));
+                                .Finally(() =>
+                                {
+                                    if (beforeDuration == hold.Duration) return;
+                                    OperationManager.Push(new ChangeHoldDurationOperation(hold, beforeDuration, hold.Duration));
+                                });
                         }
 
                         RectangleF startRect = GetClickableRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
@@ -728,10 +743,11 @@ namespace Ched.UI
                                 })
                                 .Finally(() =>
                                 {
-                                    var afterPos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
-                                    OperationManager.Push(new MoveHoldOperation(hold, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
                                     LastWidth = hold.Width;
+                                    var afterPos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                                    if (beforePos == afterPos) return;
+                                    OperationManager.Push(new MoveHoldOperation(hold, beforePos, afterPos));
                                 });
                         }
 
@@ -749,10 +765,11 @@ namespace Ched.UI
                                 })
                                 .Finally(() =>
                                 {
-                                    var afterPos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
-                                    OperationManager.Push(new MoveHoldOperation(hold, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
                                     LastWidth = hold.Width;
+                                    var afterPos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                                    if (beforePos == afterPos) return;
+                                    OperationManager.Push(new MoveHoldOperation(hold, beforePos, afterPos));
                                 });
                         }
 
@@ -771,10 +788,11 @@ namespace Ched.UI
                                 })
                                 .Finally(() =>
                                 {
-                                    var afterPos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
-                                    OperationManager.Push(new MoveHoldOperation(hold, beforePos, afterPos));
                                     Cursor.Current = Cursors.Default;
                                     LastWidth = hold.Width;
+                                    var afterPos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                                    if (beforePos == afterPos) return;
+                                    OperationManager.Push(new MoveHoldOperation(hold, beforePos, afterPos));
                                 });
                         }
 
