@@ -594,8 +594,7 @@ namespace Ched.UI
                             RectangleF rightStepRect = new RectangleF(stepRect.Right - stepRect.Width * 0.2f, stepRect.Top, stepRect.Width * 0.2f, stepRect.Height);
                             var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
 
-                            // AIR or AIR-ACTION追加時で最終Stepだったら動かさない
-                            if (stepRect.Contains(scorePos) && (slide.StepNotes.Max(q => q.TickOffset) != step.TickOffset || !(NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType)))
+                            if (stepRect.Contains(scorePos))
                             {
                                 if (leftStepRect.Contains(scorePos))
                                 {
@@ -709,7 +708,7 @@ namespace Ched.UI
                     Func<Hold, IObservable<MouseEventArgs>> holdHandler = hold =>
                     {
                         // HOLD長さ変更
-                        if (GetClickableRectFromNotePosition(hold.EndNote.Tick, hold.LaneIndex, hold.Width).Contains(scorePos) && !(NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType))
+                        if (GetClickableRectFromNotePosition(hold.EndNote.Tick, hold.LaneIndex, hold.Width).Contains(scorePos))
                         {
                             int beforeDuration = hold.Duration;
                             return holdDurationHandler(hold)
@@ -799,7 +798,7 @@ namespace Ched.UI
                         return null;
                     };
 
-                    if (!(NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType))
+                    Func<IObservable<MouseEventArgs>> surfaceNotesHandler = () =>
                     {
                         foreach (var note in Notes.ExTaps.Reverse().Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
                         {
@@ -836,6 +835,110 @@ namespace Ched.UI
                             var subscription = holdHandler(note);
                             if (subscription != null) return subscription;
                         }
+
+                        return null;
+                    };
+
+                    // AIR系編集時
+                    if ((NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType))
+                    {
+                        var airables = Enumerable.Empty<IAirable>()
+                            .Concat(Notes.ExTaps.Reverse())
+                            .Concat(Notes.Taps.Reverse())
+                            .Concat(Notes.Flicks.Reverse())
+                            .Concat(Notes.Damages.Reverse())
+                            .Concat(Notes.Holds.Reverse().Select(q => q.EndNote))
+                            .Concat(Notes.Slides.Reverse().Select(q => q.StepNotes.OrderByDescending(r => r.TickOffset).First()));
+
+                        Func<IObservable<MouseEventArgs>> addAirHandler = () =>
+                        {
+                            foreach (var note in airables)
+                            {
+                                RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                                if (rect.Contains(scorePos))
+                                {
+                                    // 既に配置されていれば追加しない
+                                    if (Notes.GetReferencedAir(note).Count() > 0) break;
+                                    return mouseMove
+                                        .TakeUntil(mouseUp)
+                                        .Count()
+                                        .Zip(mouseUp, (q, r) => new { Args = r, Count = q })
+                                        .Where(q => q.Count == 0)
+                                        .Select(q => q.Args)
+                                        .Do(q =>
+                                        {
+                                            var air = new Air(note)
+                                            {
+                                                VerticalDirection = AirDirection.VerticalDirection,
+                                                HorizontalDirection = AirDirection.HorizontalDirection
+                                            };
+                                            Notes.Add(air);
+                                            Invalidate();
+                                            OperationManager.Push(new InsertAirOperation(Notes, air));
+                                        });
+                                }
+                            }
+                            return null;
+                        };
+
+                        Func<IObservable<MouseEventArgs>> addAirActionHandler = () =>
+                        {
+                            foreach (var note in Notes.AirActions.Reverse())
+                            {
+                                var size = new SizeF(UnitLaneWidth / 2, GetYPositionFromTick(note.ActionNotes.Max(q => q.Offset)));
+                                var rect = new RectangleF(
+                                    (UnitLaneWidth + BorderThickness) * (note.ParentNote.LaneIndex + note.ParentNote.Width / 2f) - size.Width / 2,
+                                    GetYPositionFromTick(note.ParentNote.Tick),
+                                    size.Width, size.Height);
+                                if (rect.Contains(scorePos))
+                                {
+                                    int offset = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)) - note.ParentNote.Tick;
+                                    if (offset > 0 && !note.ActionNotes.Any(q => q.Offset == offset))
+                                    {
+                                        var action = new AirAction.ActionNote(note) { Offset = offset };
+                                        note.ActionNotes.Add(action);
+                                        Invalidate();
+                                        return actionNoteHandler(action)
+                                            .Finally(() => OperationManager.Push(new InsertAirActionNoteOperation(note, action)));
+                                    }
+                                }
+                            }
+
+                            foreach (var note in airables)
+                            {
+                                RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                                if (rect.Contains(scorePos))
+                                {
+                                    // 既に配置されていれば追加しない
+                                    if (Notes.GetReferencedAirAction(note).Count() > 0) break;
+                                    var airAction = new AirAction(note);
+                                    var action = new AirAction.ActionNote(airAction) { Offset = (int)QuantizeTick };
+                                    airAction.ActionNotes.Add(action);
+                                    Notes.Add(airAction);
+                                    Invalidate();
+                                    return actionNoteHandler(action)
+                                        .Finally(() => OperationManager.Push(new InsertAirActionOperation(Notes, airAction)));
+                                }
+                            }
+
+                            return null;
+                        };
+
+                        switch (NewNoteType)
+                        {
+                            case NoteType.Air:
+                                // クリック後MouseMoveするならノーツ操作 / MouseUpならAIR追加
+                                return Observable.Merge(surfaceNotesHandler() ?? Observable.Empty<MouseEventArgs>(), addAirHandler() ?? Observable.Empty<MouseEventArgs>());
+
+                            case NoteType.AirAction:
+                                // AIR-ACTION追加時はその後のドラッグをハンドルする
+                                return addAirActionHandler() ?? surfaceNotesHandler() ?? Observable.Empty<MouseEventArgs>();
+                        }
+                    }
+                    else
+                    {
+                        var subscription = surfaceNotesHandler();
+                        if (subscription != null) return subscription;
                     }
 
                     // なんもねえなら追加だァ！
@@ -885,13 +988,6 @@ namespace Ched.UI
                     else
                     {
                         int newNoteLaneIndex;
-                        var airables = Enumerable.Empty<IAirable>();
-                        airables = airables.Concat(Notes.ExTaps.Reverse());
-                        airables = airables.Concat(Notes.Taps.Reverse());
-                        airables = airables.Concat(Notes.Flicks.Reverse());
-                        airables = airables.Concat(Notes.Damages.Reverse());
-                        airables = airables.Concat(Notes.Holds.Reverse().Select(q => q.EndNote));
-                        airables = airables.Concat(Notes.Slides.Reverse().Select(q => q.StepNotes.OrderByDescending(r => r.TickOffset).First()));
 
                         switch (NewNoteType)
                         {
@@ -962,75 +1058,6 @@ namespace Ched.UI
                                 Invalidate();
                                 return moveSlideStepNoteHandler(step)
                                     .Finally(() => OperationManager.Push(new InsertSlideOperation(Notes, slide)));
-
-                            case NoteType.Air:
-                                foreach (var note in airables)
-                                {
-                                    RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
-                                    if (rect.Contains(scorePos))
-                                    {
-                                        // 既に配置されていれば追加しない
-                                        if (Notes.GetReferencedAir(note).Count() > 0) break;
-                                        return mouseMove
-                                            .TakeUntil(mouseUp)
-                                            .Count()
-                                            .Zip(mouseUp, (q, r) => new { Args = r, Count = q })
-                                            .Where(q => q.Count == 0)
-                                            .Select(q => q.Args)
-                                            .Do(q =>
-                                            {
-                                                var air = new Air(note)
-                                                {
-                                                    VerticalDirection = AirDirection.VerticalDirection,
-                                                    HorizontalDirection = AirDirection.HorizontalDirection
-                                                };
-                                                Notes.Add(air);
-                                                Invalidate();
-                                                OperationManager.Push(new InsertAirOperation(Notes, air));
-                                            });
-                                    }
-                                }
-                                break;
-
-                            case NoteType.AirAction:
-                                foreach (var note in Notes.AirActions.Reverse())
-                                {
-                                    var size = new SizeF(UnitLaneWidth / 2, GetYPositionFromTick(note.ActionNotes.Max(q => q.Offset)));
-                                    var rect = new RectangleF(
-                                        (UnitLaneWidth + BorderThickness) * (note.ParentNote.LaneIndex + note.ParentNote.Width / 2f) - size.Width / 2,
-                                        GetYPositionFromTick(note.ParentNote.Tick),
-                                        size.Width, size.Height);
-                                    if (rect.Contains(scorePos))
-                                    {
-                                        int offset = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)) - note.ParentNote.Tick;
-                                        if (offset > 0 && !note.ActionNotes.Any(q => q.Offset == offset))
-                                        {
-                                            var action = new AirAction.ActionNote(note) { Offset = offset };
-                                            note.ActionNotes.Add(action);
-                                            Invalidate();
-                                            return actionNoteHandler(action)
-                                                .Finally(() => OperationManager.Push(new InsertAirActionNoteOperation(note, action)));
-                                        }
-                                    }
-                                }
-
-                                foreach (var note in airables)
-                                {
-                                    RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
-                                    if (rect.Contains(scorePos))
-                                    {
-                                        // 既に配置されていれば追加しない
-                                        if (Notes.GetReferencedAirAction(note).Count() > 0) break;
-                                        var airAction = new AirAction(note);
-                                        var action = new AirAction.ActionNote(airAction) { Offset = (int)QuantizeTick };
-                                        airAction.ActionNotes.Add(action);
-                                        Notes.Add(airAction);
-                                        Invalidate();
-                                        return actionNoteHandler(action)
-                                            .Finally(() => OperationManager.Push(new InsertAirActionOperation(Notes, airAction)));
-                                    }
-                                }
-                                break;
                         }
                     }
                     return Observable.Empty<MouseEventArgs>();
