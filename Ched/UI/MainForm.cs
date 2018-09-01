@@ -547,7 +547,7 @@ namespace Ched.UI
 
             var helpMenuItems = new MenuItem[]
             {
-                new MenuItem("プロジェクトサイトを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched")),
+                new MenuItem("ヘルプを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched/wiki"), Shortcut.F1),
                 new MenuItem("バージョン情報", (s, e) => new VersionInfoForm().ShowDialog(this))
             };
 
