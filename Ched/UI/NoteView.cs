@@ -296,7 +296,7 @@ namespace Ched.UI
 
         public bool CanRedo { get { return OperationManager.CanRedo; } }
 
-        public NoteCollection Notes { get; } = new NoteCollection();
+        public NoteCollection Notes { get; private set; } = new NoteCollection(new Components.NoteCollection());
 
         public EventCollection ScoreEvents { get; set; } = new EventCollection();
 
@@ -1347,6 +1347,8 @@ namespace Ched.UI
                                 return new MoveSlideOperation(q.Key, q.Value, after);
                             });
 
+                            // 同じ位置に戻ってきたら操作扱いにしない
+                            if (startTick == SelectedRange.StartTick && startLaneIndex == SelectedRange.StartLaneIndex) return;
                             OperationManager.Push(new CompositeOperation("ノーツの移動", opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).ToList()));
                         });
                     }
@@ -1895,10 +1897,11 @@ namespace Ched.UI
             var dicShortNotes = notes.GetShortNotes().ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
             var dicHolds = notes.Holds.ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
             var dicSlides = notes.Slides;
+            var referenced = new NoteCollection(notes);
             var airs = notes.GetShortNotes().Cast<IAirable>()
                 .Concat(notes.Holds.Select(p => p.EndNote))
                 .Concat(notes.Slides.Select(p => p.StepNotes.OrderByDescending(q => q.TickOffset).First()))
-                .SelectMany(p => Notes.GetReferencedAir(p));
+                .SelectMany(p => referenced.GetReferencedAir(p));
 
             var opShortNotes = dicShortNotes.Select(p =>
             {
@@ -1949,7 +1952,7 @@ namespace Ched.UI
         {
             SelectedRange = SelectionRange.Empty;
             CurrentTick = SelectedRange.StartTick;
-            Notes.Load(score.Notes);
+            Notes = new NoteCollection(score.Notes);
             ScoreEvents = score.Events;
             OperationManager.Clear();
             Invalidate();
@@ -1959,66 +1962,52 @@ namespace Ched.UI
         {
             public event EventHandler NoteChanged;
 
-            private List<Tap> taps;
-            private List<ExTap> exTaps;
-            private List<Hold> holds;
-            private List<Slide> slides;
-            private List<Air> airs;
-            private List<AirAction> airActions;
-            private List<Flick> flicks;
-            private List<Damage> damages;
+            private Components.NoteCollection source = new Components.NoteCollection();
 
             private Dictionary<IAirable, HashSet<Air>> AirDictionary { get; } = new Dictionary<IAirable, HashSet<Air>>();
             private Dictionary<IAirable, HashSet<AirAction>> AirActionDictionary { get; } = new Dictionary<IAirable, HashSet<AirAction>>();
 
-            public IReadOnlyCollection<Tap> Taps { get { return taps; } }
-            public IReadOnlyCollection<ExTap> ExTaps { get { return exTaps; } }
-            public IReadOnlyCollection<Hold> Holds { get { return holds; } }
-            public IReadOnlyCollection<Slide> Slides { get { return slides; } }
-            public IReadOnlyCollection<Air> Airs { get { return airs; } }
-            public IReadOnlyCollection<AirAction> AirActions { get { return airActions; } }
-            public IReadOnlyCollection<Flick> Flicks { get { return flicks; } }
-            public IReadOnlyCollection<Damage> Damages { get { return damages; } }
+            public IReadOnlyCollection<Tap> Taps { get { return source.Taps; } }
+            public IReadOnlyCollection<ExTap> ExTaps { get { return source.ExTaps; } }
+            public IReadOnlyCollection<Hold> Holds { get { return source.Holds; } }
+            public IReadOnlyCollection<Slide> Slides { get { return source.Slides; } }
+            public IReadOnlyCollection<Air> Airs { get { return source.Airs; } }
+            public IReadOnlyCollection<AirAction> AirActions { get { return source.AirActions; } }
+            public IReadOnlyCollection<Flick> Flicks { get { return source.Flicks; } }
+            public IReadOnlyCollection<Damage> Damages { get { return source.Damages; } }
 
-            public NoteCollection()
+            public NoteCollection(Components.NoteCollection src)
             {
-                taps = new List<Tap>();
-                exTaps = new List<ExTap>();
-                holds = new List<Hold>();
-                slides = new List<Slide>();
-                airs = new List<Air>();
-                airActions = new List<AirAction>();
-                flicks = new List<Flick>();
-                damages = new List<Damage>();
+                Load(src);
             }
 
             public void Add(Tap note)
             {
-                taps.Add(note);
+                source.Taps.Add(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Add(ExTap note)
             {
-                exTaps.Add(note);
+                source.ExTaps.Add(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Add(Hold note)
             {
-                holds.Add(note);
+                source.Holds.Add(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Add(Slide note)
             {
-                slides.Add(note);
+                source.Slides.Add(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Add(Air note)
             {
-                airs.Add(note);
+                source.Airs.Add(note);
                 if (!AirDictionary.ContainsKey(note.ParentNote))
                     AirDictionary.Add(note.ParentNote, new HashSet<Air>());
                 AirDictionary[note.ParentNote].Add(note);
@@ -2027,7 +2016,7 @@ namespace Ched.UI
 
             public void Add(AirAction note)
             {
-                airActions.Add(note);
+                source.AirActions.Add(note);
                 if (!AirActionDictionary.ContainsKey(note.ParentNote))
                     AirActionDictionary.Add(note.ParentNote, new HashSet<AirAction>());
                 AirActionDictionary[note.ParentNote].Add(note);
@@ -2036,64 +2025,64 @@ namespace Ched.UI
 
             public void Add(Flick note)
             {
-                flicks.Add(note);
+                source.Flicks.Add(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Add(Damage note)
             {
-                damages.Add(note);
+                source.Damages.Add(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
 
             public void Remove(Tap note)
             {
-                taps.Remove(note);
+                source.Taps.Remove(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Remove(ExTap note)
             {
-                exTaps.Remove(note);
+                source.ExTaps.Remove(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Remove(Hold note)
             {
-                holds.Remove(note);
+                source.Holds.Remove(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Remove(Slide note)
             {
-                slides.Remove(note);
+                source.Slides.Remove(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Remove(Air note)
             {
-                airs.Remove(note);
+                source.Airs.Remove(note);
                 AirDictionary[note.ParentNote].Remove(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Remove(AirAction note)
             {
-                airActions.Remove(note);
+                source.AirActions.Remove(note);
                 AirActionDictionary[note.ParentNote].Remove(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Remove(Flick note)
             {
-                flicks.Remove(note);
+                source.Flicks.Remove(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Remove(Damage note)
             {
-                damages.Remove(note);
+                source.Damages.Remove(note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
@@ -2111,7 +2100,7 @@ namespace Ched.UI
 
             public int GetLastTick()
             {
-                var shortNotes = Taps.Cast<TappableBase>().Concat(exTaps).Concat(Flicks).Concat(Damages).ToList();
+                var shortNotes = Taps.Cast<TappableBase>().Concat(ExTaps).Concat(Flicks).Concat(Damages).ToList();
                 var longNotes = Holds.Cast<ILongNote>().Concat(Slides).Concat(AirActions).ToList();
                 int lastShortNoteTick = shortNotes.Count == 0 ? 0 : shortNotes.Max(p => p.Tick);
                 int lastLongNoteTick = longNotes.Count == 0 ? 0 : longNotes.Max(p => p.StartTick + p.GetDuration());
@@ -2135,14 +2124,7 @@ namespace Ched.UI
 
             public void Clear()
             {
-                taps.Clear();
-                exTaps.Clear();
-                holds.Clear();
-                slides.Clear();
-                airs.Clear();
-                airActions.Clear();
-                flicks.Clear();
-                damages.Clear();
+                source = new Components.NoteCollection();
 
                 AirDictionary.Clear();
                 AirActionDictionary.Clear();
@@ -2314,6 +2296,23 @@ namespace Ched.UI
                 this.startTick = startTick;
                 selectedNotes = notes;
             }
+        }
+    }
+
+    internal static class UIExtensions
+    {
+        public static Components.NoteCollection Reposit(this NoteView.NoteCollection collection)
+        {
+            var res = new NoteCollection();
+            res.Taps = collection.Taps.ToList();
+            res.ExTaps = collection.ExTaps.ToList();
+            res.Holds = collection.Holds.ToList();
+            res.Slides = collection.Slides.ToList();
+            res.Airs = collection.Airs.ToList();
+            res.AirActions = collection.AirActions.ToList();
+            res.Flicks = collection.Flicks.ToList();
+            res.Damages = collection.Damages.ToList();
+            return res;
         }
     }
 }
