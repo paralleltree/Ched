@@ -1347,6 +1347,8 @@ namespace Ched.UI
                                 return new MoveSlideOperation(q.Key, q.Value, after);
                             });
 
+                            // 同じ位置に戻ってきたら操作扱いにしない
+                            if (startTick == SelectedRange.StartTick && startLaneIndex == SelectedRange.StartLaneIndex) return;
                             OperationManager.Push(new CompositeOperation("ノーツの移動", opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).ToList()));
                         });
                     }
