@@ -1895,10 +1895,11 @@ namespace Ched.UI
             var dicShortNotes = notes.GetShortNotes().ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
             var dicHolds = notes.Holds.ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
             var dicSlides = notes.Slides;
+            var referenced = new NoteCollection(notes);
             var airs = notes.GetShortNotes().Cast<IAirable>()
                 .Concat(notes.Holds.Select(p => p.EndNote))
                 .Concat(notes.Slides.Select(p => p.StepNotes.OrderByDescending(q => q.TickOffset).First()))
-                .SelectMany(p => Notes.GetReferencedAir(p));
+                .SelectMany(p => referenced.GetReferencedAir(p));
 
             var opShortNotes = dicShortNotes.Select(p =>
             {
