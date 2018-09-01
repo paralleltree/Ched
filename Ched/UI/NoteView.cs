@@ -1757,11 +1757,33 @@ namespace Ched.UI
 
         public void PasteNotes()
         {
+            var op = PasteNotes(p => { });
+            if (op == null) return;
+            OperationManager.Push(op);
+            Invalidate();
+        }
+
+        public void PasteFlippedNotes()
+        {
+            var op = PasteNotes(p => FlipNotes(p.SelectedNotes));
+            if (op == null) return;
+            OperationManager.Push(op);
+            Invalidate();
+        }
+
+        /// <summary>
+        /// クリップボードにコピーされたノーツをペーストしてその操作を表す<see cref="IOperation"/>を返します。
+        /// ペーストするノーツがない場合はnullを返します。
+        /// </summary>
+        /// <param name="action">選択データに対して適用するアクション</param>
+        /// <returns>ペースト操作を表す<see cref="IOperation"/></returns>
+        protected IOperation PasteNotes(Action<SelectionData> action)
+        {
             var obj = Clipboard.GetDataObject();
-            if (obj == null || !obj.GetDataPresent(typeof(SelectionData))) return;
+            if (obj == null || !obj.GetDataPresent(typeof(SelectionData))) return null;
 
             var data = obj.GetData(typeof(SelectionData)) as SelectionData;
-            if (data.IsEmpty) return;
+            if (data.IsEmpty) return null;
 
             foreach (var note in data.SelectedNotes.GetShortNotes())
             {
@@ -1786,6 +1808,8 @@ namespace Ched.UI
                 airAction.ActionNotes.AddRange(notes);
             }
 
+            action(data);
+
             var op = data.SelectedNotes.Taps.Select(p => new InsertTapOperation(Notes, p)).Cast<IOperation>()
                 .Concat(data.SelectedNotes.ExTaps.Select(p => new InsertExTapOperation(Notes, p)))
                 .Concat(data.SelectedNotes.Flicks.Select(p => new InsertFlickOperation(Notes, p)))
@@ -1796,8 +1820,7 @@ namespace Ched.UI
                 .Concat(data.SelectedNotes.AirActions.Select(p => new InsertAirActionOperation(Notes, p)));
             var composite = new CompositeOperation("クリップボードからペースト", op.ToList());
             composite.Redo(); // 追加書くの面倒になったので許せ
-            OperationManager.Push(composite);
-            Invalidate();
+            return composite;
         }
 
         public void RemoveSelectedNotes()
@@ -1855,13 +1878,26 @@ namespace Ched.UI
 
         public void FlipSelectedNotes()
         {
-            var selectedNotes = GetSelectedNotes();
-            var dicShortNotes = selectedNotes.GetShortNotes().ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
-            var dicHolds = selectedNotes.Holds.ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
-            var dicSlides = selectedNotes.Slides;
-            var airs = selectedNotes.GetShortNotes().Cast<IAirable>()
-                .Concat(selectedNotes.Holds.Select(p => p.EndNote))
-                .Concat(selectedNotes.Slides.Select(p => p.StepNotes.OrderByDescending(q => q.TickOffset).First()))
+            var op = FlipNotes(GetSelectedNotes());
+            if (op == null) return;
+            OperationManager.Push(op);
+            Invalidate();
+        }
+
+        /// <summary>
+        /// 指定のコレクション内のノーツを反転してその操作を表す<see cref="IOperation"/>を返します。
+        /// 反転するノーツがない場合はnullを返します。
+        /// </summary>
+        /// <param name="notes">反転対象となるノーツを含む<see cref="Components.NoteCollection"/></param>
+        /// <returns>反転操作を表す<see cref="IOperation"/></returns>
+        protected IOperation FlipNotes(Components.NoteCollection notes)
+        {
+            var dicShortNotes = notes.GetShortNotes().ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
+            var dicHolds = notes.Holds.ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
+            var dicSlides = notes.Slides;
+            var airs = notes.GetShortNotes().Cast<IAirable>()
+                .Concat(notes.Holds.Select(p => p.EndNote))
+                .Concat(notes.Slides.Select(p => p.StepNotes.OrderByDescending(q => q.TickOffset).First()))
                 .SelectMany(p => Notes.GetReferencedAir(p));
 
             var opShortNotes = dicShortNotes.Select(p =>
@@ -1890,8 +1926,8 @@ namespace Ched.UI
                 return new FlipAirHorizontalDirectionOperation(p);
             });
 
-            OperationManager.Push(new CompositeOperation("ノーツの反転", opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).Concat(opAirs).ToList()));
-            Invalidate();
+            var opList = opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).Concat(opAirs).ToList();
+            return opList.Count == 0 ? null : new CompositeOperation("ノーツの反転", opList);
         }
 
         public void Undo()
