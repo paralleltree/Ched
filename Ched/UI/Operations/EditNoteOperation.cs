@@ -48,7 +48,7 @@ namespace Ched.UI.Operations
             Note.LaneIndex = BeforePosition.LaneIndex;
         }
 
-        public class NotePosition
+        public struct NotePosition
         {
             public int Tick { get; }
             public int LaneIndex { get; }
@@ -57,6 +57,28 @@ namespace Ched.UI.Operations
             {
                 Tick = tick;
                 LaneIndex = laneIndex;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || !(obj is NotePosition)) return false;
+                NotePosition other = (NotePosition)obj;
+                return Tick == other.Tick && LaneIndex == other.LaneIndex;
+            }
+
+            public override int GetHashCode()
+            {
+                return Tick ^ LaneIndex;
+            }
+
+            public static bool operator ==(NotePosition a, NotePosition b)
+            {
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(NotePosition a, NotePosition b)
+            {
+                return !a.Equals(b);
             }
         }
     }
@@ -84,15 +106,37 @@ namespace Ched.UI.Operations
             Note.SetPosition(BeforePosition.LaneIndex, BeforePosition.Width);
         }
 
-        public class NotePosition
+        public struct NotePosition
         {
-            public int LaneIndex { get; set; }
+            public int LaneIndex { get; }
             public int Width { get; }
 
             public NotePosition(int laneIndex, int width)
             {
                 LaneIndex = laneIndex;
                 Width = width;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || !(obj is NotePosition)) return false;
+                NotePosition other = (NotePosition)obj;
+                return LaneIndex == other.LaneIndex && Width == other.Width;
+            }
+
+            public override int GetHashCode()
+            {
+                return LaneIndex ^ Width;
+            }
+
+            public static bool operator ==(NotePosition a, NotePosition b)
+            {
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(NotePosition a, NotePosition b)
+            {
+                return !a.Equals(b);
             }
         }
     }
@@ -150,7 +194,7 @@ namespace Ched.UI.Operations
             Note.SetPosition(BeforePosition.LaneIndex, BeforePosition.Width);
         }
 
-        public class NotePosition
+        public struct NotePosition
         {
             public int StartTick { get; }
             public int LaneIndex { get; }
@@ -161,6 +205,28 @@ namespace Ched.UI.Operations
                 StartTick = startTick;
                 LaneIndex = laneIndex;
                 Width = width;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || !(obj is NotePosition)) return false;
+                NotePosition other = (NotePosition)obj;
+                return StartTick == other.StartTick && LaneIndex == other.LaneIndex && Width == other.Width;
+            }
+
+            public override int GetHashCode()
+            {
+                return StartTick ^ LaneIndex ^ Width;
+            }
+
+            public static bool operator ==(NotePosition a, NotePosition b)
+            {
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(NotePosition a, NotePosition b)
+            {
+                return !a.Equals(b);
             }
         }
     }
@@ -192,7 +258,7 @@ namespace Ched.UI.Operations
             StepNote.SetPosition(BeforePosition.LaneIndexOffset, BeforePosition.WidthChange);
         }
 
-        public class NotePosition
+        public struct NotePosition
         {
             public int TickOffset { get; }
             public int LaneIndexOffset { get; }
@@ -203,6 +269,28 @@ namespace Ched.UI.Operations
                 TickOffset = tickOffset;
                 LaneIndexOffset = laneIndexOffset;
                 WidthChange = widthChange;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || !(obj is NotePosition)) return false;
+                NotePosition other = (NotePosition)obj;
+                return TickOffset == other.TickOffset && LaneIndexOffset == other.LaneIndexOffset && WidthChange == other.WidthChange;
+            }
+
+            public override int GetHashCode()
+            {
+                return TickOffset ^ LaneIndexOffset ^ WidthChange;
+            }
+
+            public static bool operator ==(NotePosition a, NotePosition b)
+            {
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(NotePosition a, NotePosition b)
+            {
+                return !a.Equals(b);
             }
         }
     }
@@ -234,7 +322,7 @@ namespace Ched.UI.Operations
             Note.SetPosition(BeforePosition.StartLaneIndex, BeforePosition.StartWidth);
         }
 
-        public class NotePosition
+        public struct NotePosition
         {
             public int StartTick { get; }
             public int StartLaneIndex { get; }
@@ -245,6 +333,28 @@ namespace Ched.UI.Operations
                 StartTick = startTick;
                 StartLaneIndex = startLaneIndex;
                 StartWidth = startWidth;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || !(obj is NotePosition)) return false;
+                NotePosition other = (NotePosition)obj;
+                return StartTick == other.StartTick && StartLaneIndex == other.StartLaneIndex && StartWidth == other.StartWidth;
+            }
+
+            public override int GetHashCode()
+            {
+                return StartTick ^ StartLaneIndex ^ StartWidth;
+            }
+
+            public static bool operator ==(NotePosition a, NotePosition b)
+            {
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(NotePosition a, NotePosition b)
+            {
+                return !a.Equals(b);
             }
         }
     }

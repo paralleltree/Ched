@@ -351,6 +351,7 @@ namespace Ched.UI
             var cutItem = new MenuItem("切り取り", (s, e) => noteView.CutSelectedNotes(), Shortcut.CtrlX);
             var copyItem = new MenuItem("コピー", (s, e) => noteView.CopySelectedNotes(), Shortcut.CtrlC);
             var pasteItem = new MenuItem("貼り付け", (s, e) => noteView.PasteNotes(), Shortcut.CtrlV);
+            var pasteFlippedItem = new MenuItem("反転貼り付け", (s, e) => noteView.PasteFlippedNotes());
 
             var flipSelectedNotesItem = new MenuItem("選択範囲内ノーツを反転", (s, e) => NoteView.FlipSelectedNotes());
             var removeSelectedNotesItem = new MenuItem("選択範囲内ノーツを削除", (s, e) => noteView.RemoveSelectedNotes(), Shortcut.Del);
@@ -387,7 +388,7 @@ namespace Ched.UI
             var editMenuItems = new MenuItem[]
             {
                 undoItem, redoItem, new MenuItem("-"),
-                cutItem, copyItem, pasteItem, new MenuItem("-"),
+                cutItem, copyItem, pasteItem, pasteFlippedItem, new MenuItem("-"),
                 flipSelectedNotesItem, removeSelectedNotesItem, removeEventsItem
             };
 
