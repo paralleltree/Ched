@@ -156,12 +156,12 @@
             // 
             // soundOffsetBox
             // 
-            this.soundOffsetBox.DecimalPlaces = 2;
+            this.soundOffsetBox.DecimalPlaces = 3;
             this.soundOffsetBox.Increment = new decimal(new int[] {
             1,
             0,
             0,
-            65536});
+            131072});
             this.soundOffsetBox.Location = new System.Drawing.Point(230, 190);
             this.soundOffsetBox.Maximum = new decimal(new int[] {
             1000,
