@@ -353,7 +353,7 @@ namespace Ched.UI
             var pasteItem = new MenuItem("貼り付け", (s, e) => noteView.PasteNotes(), Shortcut.CtrlV);
             var pasteFlippedItem = new MenuItem("反転貼り付け", (s, e) => noteView.PasteFlippedNotes());
 
-            var flipSelectedNotesItem = new MenuItem("選択範囲内ノーツを反転", (s, e) => NoteView.FlipSelectedNotes());
+            var flipSelectedNotesItem = new MenuItem("選択範囲内ノーツを反転", (s, e) => noteView.FlipSelectedNotes());
             var removeSelectedNotesItem = new MenuItem("選択範囲内ノーツを削除", (s, e) => noteView.RemoveSelectedNotes(), Shortcut.Del);
 
             var removeEventsItem = new MenuItem("選択範囲内のイベントを削除", (s, e) =>
@@ -447,7 +447,7 @@ namespace Ched.UI
                 }
                 else
                 {
-                    var removeOp = new RemoveEventOperation<Components.Events.HighSpeedChangeEvent>(NoteView.ScoreEvents.HighSpeedChangeEvents, prev);
+                    var removeOp = new RemoveEventOperation<Components.Events.HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, prev);
                     noteView.ScoreEvents.HighSpeedChangeEvents.Remove(prev);
                     OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
                 }
@@ -530,7 +530,7 @@ namespace Ched.UI
                 {
                     isAbortAtLastNoteItem.Enabled = false;
                     PreviewManager.Finished += lambda;
-                    NoteView.Editable = CanEdit;
+                    noteView.Editable = CanEdit;
                 }
             });
 
@@ -786,7 +786,7 @@ namespace Ched.UI
                 {
                     noteView.QuantizeTick = noteView.UnitBeatTick * 4 / quantizeTicks[quantizeComboBox.SelectedIndex];
                 }
-                NoteView.Focus();
+                noteView.Focus();
             };
             quantizeComboBox.SelectedIndex = 1;
 
