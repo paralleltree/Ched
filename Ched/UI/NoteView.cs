@@ -2166,6 +2166,9 @@ namespace Ched.UI
         }
     }
 
+    /// <summary>
+    /// <see cref="NoteView"/>における選択範囲を表します。
+    /// </summary>
     public struct SelectionRange
     {
         public static SelectionRange Empty = new SelectionRange()
@@ -2181,6 +2184,9 @@ namespace Ched.UI
         private int startLaneIndex;
         private int selectedLanesCount;
 
+        /// <summary>
+        /// 選択を開始したTickを設定します。
+        /// </summary>
         public int StartTick
         {
             get { return startTick; }
@@ -2191,6 +2197,10 @@ namespace Ched.UI
             }
         }
 
+        /// <summary>
+        /// 選択を終了したときの<see cref="StartTick"/>とのオフセットを表すTickを設定します。
+        /// この値が負であるとき、<see cref="StartTick"/>よりも前の範囲が選択されたことを表します。
+        /// </summary>
         public int Duration
         {
             get { return duration; }
@@ -2200,6 +2210,9 @@ namespace Ched.UI
             }
         }
 
+        /// <summary>
+        /// 選択されたレーンの左端のインデックスを設定します。
+        /// </summary>
         public int StartLaneIndex
         {
             get { return startLaneIndex; }
@@ -2210,6 +2223,9 @@ namespace Ched.UI
             }
         }
 
+        /// <summary>
+        /// 選択されたレーン数を設定します。
+        /// </summary>
         public int SelectedLanesCount
         {
             get { return selectedLanesCount; }
