@@ -1063,17 +1063,58 @@ namespace Ched.UI
                     return Observable.Empty<MouseEventArgs>();
                 }).Subscribe(p => Invalidate());
 
+            Func<PointF, IObservable<MouseEventArgs>> rangeSelection = startPos =>
+            {
+                SelectedRange = new SelectionRange()
+                {
+                    StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(startPos.Y)), 0),
+                    Duration = 0,
+                    StartLaneIndex = 0,
+                    SelectedLanesCount = 0
+                };
+
+                return mouseMove.TakeUntil(mouseUp)
+                    .Do(q =>
+                    {
+                        Matrix currentMatrix = GetDrawingMatrix(new Matrix());
+                        currentMatrix.Invert();
+                        var scorePos = currentMatrix.TransformPoint(q.Location);
+
+                        int startLaneIndex = Math.Min(Math.Max((int)startPos.X / (UnitLaneWidth + BorderThickness), 0), Constants.LanesCount - 1);
+                        int endLaneIndex = Math.Min(Math.Max((int)scorePos.X / (UnitLaneWidth + BorderThickness), 0), Constants.LanesCount - 1);
+                        int endTick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y));
+
+                        SelectedRange = new SelectionRange()
+                        {
+                            StartTick = SelectedRange.StartTick,
+                            Duration = endTick - SelectedRange.StartTick,
+                            StartLaneIndex = Math.Min(startLaneIndex, endLaneIndex),
+                            SelectedLanesCount = Math.Abs(endLaneIndex - startLaneIndex) + 1
+                        };
+                    });
+            };
+
             var eraseSubscription = mouseDown
                 .Where(p => Editable)
                 .Where(p => p.Button == MouseButtons.Left && EditMode == EditMode.Erase)
-                .SelectMany(p => mouseMove
-                    .TakeUntil(mouseUp)
-                    .Count()
-                    .Zip(mouseUp, (q, r) => new { Pos = r.Location, Count = q })
-                )
-                .Where(p => p.Count == 0) // ドラッグなし
+                .SelectMany(p =>
+                {
+                    Matrix startMatrix = GetDrawingMatrix(new Matrix());
+                    startMatrix.Invert();
+                    PointF startScorePos = startMatrix.TransformPoint(p.Location);
+                    return rangeSelection(startScorePos)
+                        .Count()
+                        .Zip(mouseUp, (q, r) => new { Pos = r.Location, Count = q });
+                })
                 .Do(p =>
                 {
+                    if (p.Count > 0) // ドラッグで範囲選択された
+                    {
+                        RemoveSelectedNotes();
+                        SelectedRange = SelectionRange.Empty;
+                        return;
+                    }
+
                     Matrix matrix = GetDrawingMatrix(new Matrix());
                     matrix.Invert();
                     PointF scorePos = matrix.TransformPoint(p.Pos);
@@ -1269,14 +1310,6 @@ namespace Ched.UI
                     startMatrix.Invert();
                     PointF startScorePos = startMatrix.TransformPoint(p.Location);
 
-                    var drag = mouseMove.TakeUntil(mouseUp)
-                        .Select(q =>
-                        {
-                            Matrix currentMatrix = GetDrawingMatrix(new Matrix());
-                            currentMatrix.Invert();
-                            return currentMatrix.TransformPoint(q.Location);
-                        });
-
                     if (GetSelectionRect().Contains(Point.Ceiling(startScorePos)))
                     {
                         int minTick = SelectedRange.StartTick + (SelectedRange.Duration < 0 ? SelectedRange.Duration : 0);
@@ -1291,14 +1324,18 @@ namespace Ched.UI
                         var dicSlides = selectedNotes.Slides.ToDictionary(q => q, q => new MoveSlideOperation.NotePosition(q.StartTick, q.StartLaneIndex, q.StartWidth));
 
                         // 選択範囲移動
-                        return drag.Do(q =>
+                        return mouseMove.TakeUntil(mouseUp).Do(q =>
                         {
-                            int xdiff = (int)((q.X - startScorePos.X) / (UnitLaneWidth + BorderThickness));
+                            Matrix currentMatrix = GetDrawingMatrix(new Matrix());
+                            currentMatrix.Invert();
+                            var scorePos = currentMatrix.TransformPoint(q.Location);
+
+                            int xdiff = (int)((scorePos.X - startScorePos.X) / (UnitLaneWidth + BorderThickness));
                             int laneIndex = startLaneIndex + xdiff;
 
                             SelectedRange = new SelectionRange()
                             {
-                                StartTick = startTick + Math.Max(GetQuantizedTick(GetTickFromYPosition(q.Y) - GetTickFromYPosition(startScorePos.Y)), -startTick - (SelectedRange.Duration < 0 ? SelectedRange.Duration : 0)),
+                                StartTick = startTick + Math.Max(GetQuantizedTick(GetTickFromYPosition(scorePos.Y) - GetTickFromYPosition(startScorePos.Y)), -startTick - (SelectedRange.Duration < 0 ? SelectedRange.Duration : 0)),
                                 Duration = SelectedRange.Duration,
                                 StartLaneIndex = Math.Min(Math.Max(laneIndex, 0), Constants.LanesCount - SelectedRange.SelectedLanesCount),
                                 SelectedLanesCount = SelectedRange.SelectedLanesCount
@@ -1356,28 +1393,7 @@ namespace Ched.UI
                     {
                         // 範囲選択
                         CurrentTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(startScorePos.Y)), 0);
-                        SelectedRange = new SelectionRange()
-                        {
-                            StartTick = CurrentTick,
-                            Duration = 0,
-                            StartLaneIndex = 0,
-                            SelectedLanesCount = 0
-                        };
-
-                        return drag.Do(q =>
-                        {
-                            int startLaneIndex = Math.Min(Math.Max((int)startScorePos.X / (UnitLaneWidth + BorderThickness), 0), Constants.LanesCount - 1);
-                            int endLaneIndex = Math.Min(Math.Max((int)q.X / (UnitLaneWidth + BorderThickness), 0), Constants.LanesCount - 1);
-                            int endTick = GetQuantizedTick(GetTickFromYPosition(q.Y));
-
-                            SelectedRange = new SelectionRange()
-                            {
-                                StartTick = SelectedRange.StartTick,
-                                Duration = endTick - SelectedRange.StartTick,
-                                StartLaneIndex = Math.Min(startLaneIndex, endLaneIndex),
-                                SelectedLanesCount = Math.Abs(endLaneIndex - startLaneIndex) + 1
-                            };
-                        });
+                        return rangeSelection(startScorePos);
                     }
                 }).Subscribe();
 
