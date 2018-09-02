@@ -1871,10 +1871,13 @@ namespace Ched.UI
                 return new RemoveSlideOperation(Notes, p);
             });
 
-            var op = taps.Cast<IOperation>().Concat(extaps).Concat(flicks).Concat(damages)
+            var opList = taps.Cast<IOperation>().Concat(extaps).Concat(flicks).Concat(damages)
                 .Concat(holds).Concat(slides)
-                .Concat(airs).Concat(airActions);
-            OperationManager.Push(new CompositeOperation("選択範囲内ノーツ削除", op.ToList()));
+                .Concat(airs).Concat(airActions)
+                .ToList();
+
+            if (opList.Count == 0) return;
+            OperationManager.Push(new CompositeOperation("選択範囲内ノーツ削除", opList));
             Invalidate();
         }
 
