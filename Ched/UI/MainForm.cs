@@ -351,12 +351,12 @@ namespace Ched.UI
             var cutItem = new MenuItem("切り取り", (s, e) => noteView.CutSelectedNotes(), Shortcut.CtrlX);
             var copyItem = new MenuItem("コピー", (s, e) => noteView.CopySelectedNotes(), Shortcut.CtrlC);
             var pasteItem = new MenuItem("貼り付け", (s, e) => noteView.PasteNotes(), Shortcut.CtrlV);
-            var pasteFlippedItem = new MenuItem("反転貼り付け", (s, e) => noteView.PasteFlippedNotes());
+            var pasteFlippedItem = new MenuItem("反転貼り付け", (s, e) => noteView.PasteFlippedNotes(), Shortcut.CtrlShiftV);
 
-            var flipSelectedNotesItem = new MenuItem("選択範囲内ノーツを反転", (s, e) => NoteView.FlipSelectedNotes());
+            var flipSelectedNotesItem = new MenuItem("選択範囲内ノーツを反転", (s, e) => noteView.FlipSelectedNotes());
             var removeSelectedNotesItem = new MenuItem("選択範囲内ノーツを削除", (s, e) => noteView.RemoveSelectedNotes(), Shortcut.Del);
 
-            var removeEventsItem = new MenuItem("選択範囲内のイベントを削除", (s, e) =>
+            var removeEventsItem = new MenuItem("選択範囲内イベントを削除", (s, e) =>
             {
                 int minTick = noteView.SelectedRange.StartTick + (noteView.SelectedRange.Duration < 0 ? noteView.SelectedRange.Duration : 0);
                 int maxTick = noteView.SelectedRange.StartTick + (noteView.SelectedRange.Duration < 0 ? 0 : noteView.SelectedRange.Duration);
@@ -396,7 +396,7 @@ namespace Ched.UI
             {
                 IsPreviewMode = !IsPreviewMode;
                 ((MenuItem)s).Checked = IsPreviewMode;
-            });
+            }, Shortcut.CtrlP);
 
             var viewMenuItems = new MenuItem[] { viewModeItem };
 
@@ -447,7 +447,7 @@ namespace Ched.UI
                 }
                 else
                 {
-                    var removeOp = new RemoveEventOperation<Components.Events.HighSpeedChangeEvent>(NoteView.ScoreEvents.HighSpeedChangeEvents, prev);
+                    var removeOp = new RemoveEventOperation<Components.Events.HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, prev);
                     noteView.ScoreEvents.HighSpeedChangeEvents.Remove(prev);
                     OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
                 }
@@ -487,7 +487,7 @@ namespace Ched.UI
 
             var insertMenuItems = new MenuItem[] { insertBPMItem, insertHighSpeedItem, insertTimeSignatureItem };
 
-            var isAbortAtLastNoteItem = new MenuItem("最後のノート発声時に停止する", (s, e) =>
+            var isAbortAtLastNoteItem = new MenuItem("最終ノートで停止", (s, e) =>
             {
                 var item = s as MenuItem;
                 item.Checked = !item.Checked;
@@ -530,9 +530,9 @@ namespace Ched.UI
                 {
                     isAbortAtLastNoteItem.Enabled = false;
                     PreviewManager.Finished += lambda;
-                    NoteView.Editable = CanEdit;
+                    noteView.Editable = CanEdit;
                 }
-            });
+            }, (Shortcut)Keys.Space);
 
             var stopItem = new MenuItem("停止", (s, e) =>
             {
@@ -547,7 +547,7 @@ namespace Ched.UI
 
             var helpMenuItems = new MenuItem[]
             {
-                new MenuItem("プロジェクトサイトを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched")),
+                new MenuItem("ヘルプを開く", (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched/wiki"), Shortcut.F1),
                 new MenuItem("バージョン情報", (s, e) => new VersionInfoForm().ShowDialog(this))
             };
 
@@ -786,7 +786,7 @@ namespace Ched.UI
                 {
                     noteView.QuantizeTick = noteView.UnitBeatTick * 4 / quantizeTicks[quantizeComboBox.SelectedIndex];
                 }
-                NoteView.Focus();
+                noteView.Focus();
             };
             quantizeComboBox.SelectedIndex = 1;
 
