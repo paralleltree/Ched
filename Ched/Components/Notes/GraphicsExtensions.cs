@@ -42,14 +42,15 @@ namespace Ched.Components.Notes
             return new RectangleF(rect.Left - dx, rect.Top - dy, rect.Width + dx * 2, rect.Height + dy * 2);
         }
 
-        public static RectangleF GetLeftThumb(this RectangleF rect, float widthRate)
+        public static RectangleF GetLeftThumb(this RectangleF rect, float widthRate, float minimumWidth)
         {
-            return new RectangleF(rect.X, rect.Y, rect.Width * widthRate, rect.Height);
+            return new RectangleF(rect.X, rect.Y, Math.Max(rect.Width * widthRate, minimumWidth), rect.Height);
         }
 
-        public static RectangleF GetRightThumb(this RectangleF rect, float widthRate)
+        public static RectangleF GetRightThumb(this RectangleF rect, float widthRate, float minimumWidth)
         {
-            return new RectangleF(rect.Right - rect.Width * widthRate, rect.Y, rect.Width * widthRate, rect.Height);
+            float width = Math.Max(rect.Width * widthRate, minimumWidth);
+            return new RectangleF(rect.Right - width, rect.Y, width, rect.Height);
         }
 
         public static Matrix GetInvertedMatrix(this Matrix src)

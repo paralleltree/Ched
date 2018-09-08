@@ -295,6 +295,11 @@ namespace Ched.UI
         /// </summary>
         public float EdgeHitWidthRate { get; set; } = 0.2f;
 
+        /// <summary>
+        /// ノート端の当たり判定幅の下限を取得します。
+        /// </summary>
+        public float MinimumEdgeHitWidth => UnitLaneWidth * 0.4f;
+
         protected int LastWidth { get; set; } = 4;
 
         public bool CanUndo { get { return OperationManager.CanUndo; } }
@@ -460,7 +465,7 @@ namespace Ched.UI
                     {
                         RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                         // ノートの左側
-                        if (rect.GetLeftThumb(EdgeHitWidthRate).Contains(scorePos))
+                        if (rect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             var beforePos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
                             return tappableNoteLeftThumbHandler(note)
@@ -473,7 +478,7 @@ namespace Ched.UI
                         }
 
                         // ノートの右側
-                        if (rect.GetRightThumb(EdgeHitWidthRate).Contains(scorePos))
+                        if (rect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             var beforePos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
                             return tappableNoteRightThumbHandler(note)
@@ -597,12 +602,12 @@ namespace Ched.UI
 
                             if (stepRect.Contains(scorePos))
                             {
-                                if (stepRect.GetLeftThumb(EdgeHitWidthRate).Contains(scorePos))
+                                if (stepRect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                                 {
                                     return leftSlideStepNoteHandler(step);
                                 }
 
-                                if (stepRect.GetRightThumb(EdgeHitWidthRate).Contains(scorePos))
+                                if (stepRect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                                 {
                                     return rightSlideStepNoteHandler(step);
                                 }
@@ -628,7 +633,7 @@ namespace Ched.UI
                         int minWidthChange = Math.Min(0, slide.StepNotes.Min(q => q.WidthChange));
 
                         var beforePos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.StartWidth);
-                        if (startRect.GetLeftThumb(EdgeHitWidthRate).Contains(scorePos))
+                        if (startRect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             return mouseMove
                                 .TakeUntil(mouseUp)
@@ -655,7 +660,7 @@ namespace Ched.UI
                                 });
                         }
 
-                        if (startRect.GetRightThumb(EdgeHitWidthRate).Contains(scorePos))
+                        if (startRect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             return mouseMove
                                 .TakeUntil(mouseUp)
@@ -721,7 +726,7 @@ namespace Ched.UI
                         RectangleF startRect = GetClickableRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
 
                         var beforePos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
-                        if (startRect.GetLeftThumb(EdgeHitWidthRate).Contains(scorePos))
+                        if (startRect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             return mouseMove
                                 .TakeUntil(mouseUp)
@@ -747,7 +752,7 @@ namespace Ched.UI
                                 });
                         }
 
-                        if (startRect.GetRightThumb(EdgeHitWidthRate).Contains(scorePos))
+                        if (startRect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             return mouseMove
                                 .TakeUntil(mouseUp)
