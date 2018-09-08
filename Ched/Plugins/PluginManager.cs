@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,6 +13,8 @@ namespace Ched.Plugins
 {
     public class PluginManager
     {
+        protected static string PluginPath => "Plugins";
+
         private PluginManager()
         {
         }
@@ -24,7 +27,9 @@ namespace Ched.Plugins
 
             var self = new AssemblyCatalog(typeof(PluginManager).Assembly, builder);
             var catalog = new AggregateCatalog(self);
-            // import dlls
+
+            if (Directory.Exists(PluginPath))
+                catalog.Catalogs.Add(new DirectoryCatalog(PluginPath));
 
             var container = new CompositionContainer(catalog);
             return container.GetExportedValue<PluginManager>();
