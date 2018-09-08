@@ -657,7 +657,7 @@ namespace Ched.UI
 
                     Func<Slide, IObservable<MouseEventArgs>> slideHandler = slide =>
                     {
-                        foreach (var step in slide.StepNotes)
+                        foreach (var step in slide.StepNotes.OrderByDescending(q => q.TickOffset))
                         {
                             RectangleF stepRect = GetClickableRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
                             var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
