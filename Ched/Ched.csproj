@@ -136,6 +136,7 @@
     <Compile Include="Components\Score.cs" />
     <Compile Include="Components\ScoreBook.cs" />
     <Compile Include="Plugins\IPlugin.cs" />
+    <Compile Include="Plugins\PluginManager.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="UI\BookPropertiesForm.cs">
       <SubType>Form</SubType>
