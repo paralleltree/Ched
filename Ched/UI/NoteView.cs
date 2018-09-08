@@ -330,6 +330,67 @@ namespace Ched.UI
             var mouseMove = this.MouseMoveAsObservable();
             var mouseUp = this.MouseUpAsObservable();
 
+            // マウスをクリックしているとき以外
+            var mouseMoveSubscription = mouseMove.TakeUntil(mouseDown).Concat(mouseMove.SkipUntil(mouseUp).TakeUntil(mouseDown).Repeat())
+                .Do(p =>
+                {
+                    var pos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(p.Location);
+                    int tailTick = TailTick;
+                    Func<int, bool> visibleTick = t => t >= HeadTick && t <= tailTick;
+
+                    var airActions = Notes.AirActions.Reverse()
+                        .SelectMany(q => q.ActionNotes.Where(r => visibleTick(q.StartTick + r.Offset)))
+                        .Select(q => GetClickableRectFromNotePosition(q.ParentNote.StartTick + q.Offset, q.ParentNote.ParentNote.LaneIndex, q.ParentNote.ParentNote.Width));
+
+                    var shortNotes = Enumerable.Empty<TappableBase>()
+                        .Concat(Notes.ExTaps.Reverse())
+                        .Concat(Notes.Taps.Reverse())
+                        .Concat(Notes.Flicks.Reverse())
+                        .Concat(Notes.Damages.Reverse())
+                        .Where(q => visibleTick(q.Tick))
+                        .Select(q => GetClickableRectFromNotePosition(q.Tick, q.LaneIndex, q.Width));
+
+                    var slides = Notes.Slides.Reverse()
+                        .SelectMany(q => q.StepNotes.OrderByDescending(r => r.TickOffset).Concat(new LongNoteTapBase[] { q.StartNote }))
+                        .Where(q => visibleTick(q.Tick))
+                        .Select(q => GetClickableRectFromNotePosition(q.Tick, q.LaneIndex, q.Width));
+
+                    foreach (RectangleF rect in airActions)
+                    {
+                        if (!rect.Contains(pos)) continue;
+                        Cursor = Cursors.SizeNS;
+                        return;
+                    }
+
+                    foreach (RectangleF rect in shortNotes.Concat(slides))
+                    {
+                        if (!rect.Contains(pos)) continue;
+                        RectangleF left = rect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth);
+                        RectangleF right = rect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth);
+                        Cursor = (left.Contains(pos) || right.Contains(pos)) ? Cursors.SizeWE : Cursors.SizeAll;
+                        return;
+                    }
+
+                    foreach (var hold in Notes.Holds.Reverse())
+                    {
+                        if (GetClickableRectFromNotePosition(hold.EndNote.Tick, hold.LaneIndex, hold.Width).Contains(pos))
+                        {
+                            Cursor = Cursors.SizeNS;
+                            return;
+                        }
+
+                        RectangleF rect = GetClickableRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                        if (!rect.Contains(pos)) continue;
+                        RectangleF left = rect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth);
+                        RectangleF right = rect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth);
+                        Cursor = (left.Contains(pos) || right.Contains(pos)) ? Cursors.SizeWE : Cursors.SizeAll;
+                        return;
+                    }
+
+                    Cursor = Cursors.Default;
+                })
+                .Subscribe();
+
             var dragSubscription = mouseDown
                 .SelectMany(p => mouseMove.TakeUntil(mouseUp).TakeUntil(mouseUp)
                     .CombineLatest(Observable.Interval(TimeSpan.FromMilliseconds(200)).TakeUntil(mouseUp), (q, r) => q)
@@ -1399,6 +1460,7 @@ namespace Ched.UI
                     }
                 }).Subscribe();
 
+            Subscriptions.Add(mouseMoveSubscription);
             Subscriptions.Add(dragSubscription);
             Subscriptions.Add(editSubscription);
             Subscriptions.Add(eraseSubscription);
