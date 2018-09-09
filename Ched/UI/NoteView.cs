@@ -332,6 +332,7 @@ namespace Ched.UI
 
             // マウスをクリックしているとき以外
             var mouseMoveSubscription = mouseMove.TakeUntil(mouseDown).Concat(mouseMove.SkipUntil(mouseUp).TakeUntil(mouseDown).Repeat())
+                .Where(p => EditMode == EditMode.Edit && Editable)
                 .Do(p =>
                 {
                     var pos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(p.Location);
