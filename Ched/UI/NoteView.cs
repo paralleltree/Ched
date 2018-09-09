@@ -1481,6 +1481,16 @@ namespace Ched.UI
             }
         }
 
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
+        {
+            base.OnMouseDoubleClick(e);
+
+            if (e.Button == MouseButtons.Right)
+            {
+                EditMode = EditMode == EditMode.Edit ? EditMode.Select : EditMode.Edit;
+            }
+        }
+
         protected override void OnPaint(PaintEventArgs pe)
         {
             base.OnPaint(pe);
