@@ -290,6 +290,16 @@ namespace Ched.UI
             }
         }
 
+        /// <summary>
+        /// ノート幅に対するノート端の当たり判定に含める割合を設定します。
+        /// </summary>
+        public float EdgeHitWidthRate { get; set; } = 0.2f;
+
+        /// <summary>
+        /// ノート端の当たり判定幅の下限を取得します。
+        /// </summary>
+        public float MinimumEdgeHitWidth => UnitLaneWidth * 0.4f;
+
         protected int LastWidth { get; set; } = 4;
 
         public bool CanUndo { get { return OperationManager.CanUndo; } }
@@ -319,6 +329,68 @@ namespace Ched.UI
             var mouseDown = this.MouseDownAsObservable();
             var mouseMove = this.MouseMoveAsObservable();
             var mouseUp = this.MouseUpAsObservable();
+
+            // マウスをクリックしているとき以外
+            var mouseMoveSubscription = mouseMove.TakeUntil(mouseDown).Concat(mouseMove.SkipUntil(mouseUp).TakeUntil(mouseDown).Repeat())
+                .Where(p => EditMode == EditMode.Edit && Editable)
+                .Do(p =>
+                {
+                    var pos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(p.Location);
+                    int tailTick = TailTick;
+                    Func<int, bool> visibleTick = t => t >= HeadTick && t <= tailTick;
+
+                    var airActions = Notes.AirActions.Reverse()
+                        .SelectMany(q => q.ActionNotes.Where(r => visibleTick(q.StartTick + r.Offset)))
+                        .Select(q => GetClickableRectFromNotePosition(q.ParentNote.StartTick + q.Offset, q.ParentNote.ParentNote.LaneIndex, q.ParentNote.ParentNote.Width));
+
+                    var shortNotes = Enumerable.Empty<TappableBase>()
+                        .Concat(Notes.ExTaps.Reverse())
+                        .Concat(Notes.Taps.Reverse())
+                        .Concat(Notes.Flicks.Reverse())
+                        .Concat(Notes.Damages.Reverse())
+                        .Where(q => visibleTick(q.Tick))
+                        .Select(q => GetClickableRectFromNotePosition(q.Tick, q.LaneIndex, q.Width));
+
+                    var slides = Notes.Slides.Reverse()
+                        .SelectMany(q => q.StepNotes.OrderByDescending(r => r.TickOffset).Concat(new LongNoteTapBase[] { q.StartNote }))
+                        .Where(q => visibleTick(q.Tick))
+                        .Select(q => GetClickableRectFromNotePosition(q.Tick, q.LaneIndex, q.Width));
+
+                    foreach (RectangleF rect in airActions)
+                    {
+                        if (!rect.Contains(pos)) continue;
+                        Cursor = Cursors.SizeNS;
+                        return;
+                    }
+
+                    foreach (RectangleF rect in shortNotes.Concat(slides))
+                    {
+                        if (!rect.Contains(pos)) continue;
+                        RectangleF left = rect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth);
+                        RectangleF right = rect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth);
+                        Cursor = (left.Contains(pos) || right.Contains(pos)) ? Cursors.SizeWE : Cursors.SizeAll;
+                        return;
+                    }
+
+                    foreach (var hold in Notes.Holds.Reverse())
+                    {
+                        if (GetClickableRectFromNotePosition(hold.EndNote.Tick, hold.LaneIndex, hold.Width).Contains(pos))
+                        {
+                            Cursor = Cursors.SizeNS;
+                            return;
+                        }
+
+                        RectangleF rect = GetClickableRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
+                        if (!rect.Contains(pos)) continue;
+                        RectangleF left = rect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth);
+                        RectangleF right = rect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth);
+                        Cursor = (left.Contains(pos) || right.Contains(pos)) ? Cursors.SizeWE : Cursors.SizeAll;
+                        return;
+                    }
+
+                    Cursor = Cursors.Default;
+                })
+                .Subscribe();
 
             var dragSubscription = mouseDown
                 .SelectMany(p => mouseMove.TakeUntil(mouseUp).TakeUntil(mouseUp)
@@ -454,10 +526,8 @@ namespace Ched.UI
                     Func<TappableBase, IObservable<MouseEventArgs>> shortNoteHandler = note =>
                     {
                         RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
-                        RectangleF leftThumb = new RectangleF(rect.X, rect.Y, rect.Width * 0.2f, rect.Height);
-                        RectangleF rightThumb = new RectangleF(rect.Right - rect.Width * 0.2f, rect.Y, rect.Width * 0.2f, rect.Height);
                         // ノートの左側
-                        if (leftThumb.Contains(scorePos))
+                        if (rect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             var beforePos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
                             return tappableNoteLeftThumbHandler(note)
@@ -470,7 +540,7 @@ namespace Ched.UI
                         }
 
                         // ノートの右側
-                        if (rightThumb.Contains(scorePos))
+                        if (rect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             var beforePos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
                             return tappableNoteRightThumbHandler(note)
@@ -590,18 +660,16 @@ namespace Ched.UI
                         foreach (var step in slide.StepNotes)
                         {
                             RectangleF stepRect = GetClickableRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
-                            RectangleF leftStepRect = new RectangleF(stepRect.Left, stepRect.Top, stepRect.Width * 0.2f, stepRect.Height);
-                            RectangleF rightStepRect = new RectangleF(stepRect.Right - stepRect.Width * 0.2f, stepRect.Top, stepRect.Width * 0.2f, stepRect.Height);
                             var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
 
                             if (stepRect.Contains(scorePos))
                             {
-                                if (leftStepRect.Contains(scorePos))
+                                if (stepRect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                                 {
                                     return leftSlideStepNoteHandler(step);
                                 }
 
-                                if (rightStepRect.Contains(scorePos))
+                                if (stepRect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                                 {
                                     return rightSlideStepNoteHandler(step);
                                 }
@@ -621,15 +689,13 @@ namespace Ched.UI
                         }
 
                         RectangleF startRect = GetClickableRectFromNotePosition(slide.StartNote.Tick, slide.StartNote.LaneIndex, slide.StartNote.Width);
-                        RectangleF leftThumbRect = new RectangleF(startRect.Left, startRect.Top, startRect.Width * 0.2f, startRect.Height);
-                        RectangleF rightThumbRect = new RectangleF(startRect.Right - startRect.Width * 0.2f, startRect.Top, startRect.Width * 0.2f, startRect.Height);
 
                         int leftStepLaneIndexOffset = Math.Min(0, slide.StepNotes.Min(q => q.LaneIndexOffset));
                         int rightStepLaneIndexOffset = Math.Max(0, slide.StepNotes.Max(q => q.LaneIndexOffset + q.WidthChange)); // 最も右にあるStepNoteの右端に対するStartNoteの右端からのオフセット
                         int minWidthChange = Math.Min(0, slide.StepNotes.Min(q => q.WidthChange));
 
                         var beforePos = new MoveSlideOperation.NotePosition(slide.StartTick, slide.StartLaneIndex, slide.StartWidth);
-                        if (leftThumbRect.Contains(scorePos))
+                        if (startRect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             return mouseMove
                                 .TakeUntil(mouseUp)
@@ -656,7 +722,7 @@ namespace Ched.UI
                                 });
                         }
 
-                        if (rightThumbRect.Contains(scorePos))
+                        if (startRect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             return mouseMove
                                 .TakeUntil(mouseUp)
@@ -720,11 +786,9 @@ namespace Ched.UI
                         }
 
                         RectangleF startRect = GetClickableRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
-                        RectangleF leftThumbRect = new RectangleF(startRect.Left, startRect.Top, startRect.Width * 0.2f, startRect.Height);
-                        RectangleF rightThumbRect = new RectangleF(startRect.Right - startRect.Width * 0.2f, startRect.Top, startRect.Width * 0.2f, startRect.Height);
 
                         var beforePos = new MoveHoldOperation.NotePosition(hold.StartTick, hold.LaneIndex, hold.Width);
-                        if (leftThumbRect.Contains(scorePos))
+                        if (startRect.GetLeftThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             return mouseMove
                                 .TakeUntil(mouseUp)
@@ -750,7 +814,7 @@ namespace Ched.UI
                                 });
                         }
 
-                        if (rightThumbRect.Contains(scorePos))
+                        if (startRect.GetRightThumb(EdgeHitWidthRate, MinimumEdgeHitWidth).Contains(scorePos))
                         {
                             return mouseMove
                                 .TakeUntil(mouseUp)
@@ -1397,6 +1461,7 @@ namespace Ched.UI
                     }
                 }).Subscribe();
 
+            Subscriptions.Add(mouseMoveSubscription);
             Subscriptions.Add(dragSubscription);
             Subscriptions.Add(editSubscription);
             Subscriptions.Add(eraseSubscription);
