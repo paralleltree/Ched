@@ -657,7 +657,7 @@ namespace Ched.UI
 
                     Func<Slide, IObservable<MouseEventArgs>> slideHandler = slide =>
                     {
-                        foreach (var step in slide.StepNotes)
+                        foreach (var step in slide.StepNotes.OrderByDescending(q => q.TickOffset))
                         {
                             RectangleF stepRect = GetClickableRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
                             var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
@@ -1478,6 +1478,16 @@ namespace Ched.UI
             {
                 var scorePos = matrix.TransformPoint(e.Location);
                 Cursor = GetSelectionRect().Contains(scorePos) ? Cursors.SizeAll : Cursors.Default;
+            }
+        }
+
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
+        {
+            base.OnMouseDoubleClick(e);
+
+            if (e.Button == MouseButtons.Right)
+            {
+                EditMode = EditMode == EditMode.Edit ? EditMode.Select : EditMode.Edit;
             }
         }
 
