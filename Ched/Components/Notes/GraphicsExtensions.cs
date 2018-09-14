@@ -21,13 +21,9 @@ namespace Ched.Components.Notes
             var path = new GraphicsPath();
 
             path.AddArc(rect.Left, rect.Top, radius * 2, radius * 2, 180, 90);
-            //path.AddLine(rect.Left + radius, rect.Top, rect.Right - radius, rect.Top);
             path.AddArc(rect.Right - radius * 2, rect.Top, radius * 2, radius * 2, 270, 90);
-            //path.AddLine(rect.Right, rect.Top + radius, rect.Right, rect.Bottom - radius);
             path.AddArc(rect.Right - radius * 2, rect.Bottom - radius * 2, radius * 2, radius * 2, 0, 90);
-            //path.AddLine(rect.Right - radius, rect.Bottom, rect.Left + radius, rect.Bottom);
             path.AddArc(rect.Left, rect.Bottom - radius * 2, radius * 2, radius * 2, 90, 90);
-            //path.AddLine(rect.Left, rect.Bottom - radius, rect.Left, rect.Top + radius);
             path.CloseFigure();
             return path;
         }
@@ -40,6 +36,17 @@ namespace Ched.Components.Notes
         public static RectangleF Expand(this RectangleF rect, float dx, float dy)
         {
             return new RectangleF(rect.Left - dx, rect.Top - dy, rect.Width + dx * 2, rect.Height + dy * 2);
+        }
+
+        public static RectangleF GetLeftThumb(this RectangleF rect, float widthRate, float minimumWidth)
+        {
+            return new RectangleF(rect.X, rect.Y, Math.Max(rect.Width * widthRate, minimumWidth), rect.Height);
+        }
+
+        public static RectangleF GetRightThumb(this RectangleF rect, float widthRate, float minimumWidth)
+        {
+            float width = Math.Max(rect.Width * widthRate, minimumWidth);
+            return new RectangleF(rect.Right - width, rect.Y, width, rect.Height);
         }
 
         public static Matrix GetInvertedMatrix(this Matrix src)
