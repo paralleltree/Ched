@@ -344,10 +344,10 @@ namespace Ched.UI
                         .Select(q => GetClickableRectFromNotePosition(q.ParentNote.StartTick + q.Offset, q.ParentNote.ParentNote.LaneIndex, q.ParentNote.ParentNote.Width));
 
                     var shortNotes = Enumerable.Empty<TappableBase>()
+                        .Concat(Notes.Damages.Reverse())
                         .Concat(Notes.ExTaps.Reverse())
                         .Concat(Notes.Taps.Reverse())
                         .Concat(Notes.Flicks.Reverse())
-                        .Concat(Notes.Damages.Reverse())
                         .Where(q => visibleTick(q.Tick))
                         .Select(q => GetClickableRectFromNotePosition(q.Tick, q.LaneIndex, q.Width));
 
@@ -864,6 +864,12 @@ namespace Ched.UI
 
                     Func<IObservable<MouseEventArgs>> surfaceNotesHandler = () =>
                     {
+                        foreach (var note in Notes.Damages.Reverse().Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
+                        {
+                            var subscription = shortNoteHandler(note);
+                            if (subscription != null) return subscription;
+                        }
+
                         foreach (var note in Notes.ExTaps.Reverse().Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
                         {
                             var subscription = shortNoteHandler(note);
@@ -877,12 +883,6 @@ namespace Ched.UI
                         }
 
                         foreach (var note in Notes.Flicks.Reverse().Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
-                        {
-                            var subscription = shortNoteHandler(note);
-                            if (subscription != null) return subscription;
-                        }
-
-                        foreach (var note in Notes.Damages.Reverse().Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
                         {
                             var subscription = shortNoteHandler(note);
                             if (subscription != null) return subscription;
@@ -907,12 +907,12 @@ namespace Ched.UI
                     if ((NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType))
                     {
                         var airables = Enumerable.Empty<IAirable>()
+                            .Concat(Notes.Damages.Reverse())
                             .Concat(Notes.ExTaps.Reverse())
                             .Concat(Notes.Taps.Reverse())
                             .Concat(Notes.Flicks.Reverse())
-                            .Concat(Notes.Damages.Reverse())
-                            .Concat(Notes.Holds.Reverse().Select(q => q.EndNote))
-                            .Concat(Notes.Slides.Reverse().Select(q => q.StepNotes.OrderByDescending(r => r.TickOffset).First()));
+                            .Concat(Notes.Slides.Reverse().Select(q => q.StepNotes.OrderByDescending(r => r.TickOffset).First()))
+                            .Concat(Notes.Holds.Reverse().Select(q => q.EndNote));
 
                         Func<IObservable<MouseEventArgs>> addAirHandler = () =>
                         {
@@ -1232,6 +1232,26 @@ namespace Ched.UI
                         }
                     }
 
+                    foreach (var note in Notes.Damages.Reverse())
+                    {
+                        RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
+                        if (rect.Contains(scorePos))
+                        {
+                            var airOp = removeReferencedAirs(note).ToList();
+                            var op = new RemoveDamageOperation(Notes, note);
+                            Notes.Remove(note);
+                            if (airOp.Count > 0)
+                            {
+                                OperationManager.Push(new CompositeOperation(op.Description, new IOperation[] { op }.Concat(airOp)));
+                            }
+                            else
+                            {
+                                OperationManager.Push(op);
+                            }
+                            return;
+                        }
+                    }
+
                     foreach (var note in Notes.ExTaps.Reverse())
                     {
                         RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
@@ -1279,26 +1299,6 @@ namespace Ched.UI
                         {
                             var airOp = removeReferencedAirs(note).ToList();
                             var op = new RemoveFlickOperation(Notes, note);
-                            Notes.Remove(note);
-                            if (airOp.Count > 0)
-                            {
-                                OperationManager.Push(new CompositeOperation(op.Description, new IOperation[] { op }.Concat(airOp)));
-                            }
-                            else
-                            {
-                                OperationManager.Push(op);
-                            }
-                            return;
-                        }
-                    }
-
-                    foreach (var note in Notes.Damages.Reverse())
-                    {
-                        RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
-                        if (rect.Contains(scorePos))
-                        {
-                            var airOp = removeReferencedAirs(note).ToList();
-                            var op = new RemoveDamageOperation(Notes, note);
                             Notes.Remove(note);
                             if (airOp.Count > 0)
                             {
@@ -1635,11 +1635,6 @@ namespace Ched.UI
             }
 
             // TAP, ExTAP, FLICK, DAMAGE
-            foreach (var note in Notes.Damages.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
-            {
-                note.Draw(pe.Graphics, GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
-            }
-
             foreach (var note in Notes.Flicks.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
             {
                 note.Draw(pe.Graphics, GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
@@ -1651,6 +1646,11 @@ namespace Ched.UI
             }
 
             foreach (var note in Notes.ExTaps.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
+            {
+                note.Draw(pe.Graphics, GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
+            }
+
+            foreach (var note in Notes.Damages.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
             {
                 note.Draw(pe.Graphics, GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
             }
