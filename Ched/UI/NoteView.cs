@@ -1795,7 +1795,9 @@ namespace Ched.UI
 
                 int headBarTick = head + (tick - head) / barTick * barTick;
                 int offsetCount = (int)Math.Round((float)(tick - headBarTick) / QuantizeTick);
-                return headBarTick + (int)(offsetCount * QuantizeTick);
+                int maxOffsetCount = (int)(barTick / QuantizeTick);
+                int remnantTick = barTick - (int)(maxOffsetCount * QuantizeTick);
+                return headBarTick + ((tick - headBarTick >= barTick - remnantTick / 2) ? barTick : (int)(offsetCount * QuantizeTick));
             }
 
             throw new InvalidOperationException();
