@@ -1774,9 +1774,33 @@ namespace Ched.UI
             return (int)(y * UnitBeatTick / UnitBeatHeight);
         }
 
-        protected int GetQuantizedTick(float tick)
+        protected int GetQuantizedTick(int tick)
         {
-            return (int)(Math.Round(tick / QuantizeTick) * QuantizeTick);
+            var sigs = ScoreEvents.TimeSignatureChangeEvents.OrderBy(p => p.Tick).ToList();
+
+            int head = 0;
+            for (int i = 0; i < sigs.Count; i++)
+            {
+                int barTick = UnitBeatTick * 4 * sigs[i].Numerator / sigs[i].Denominator;
+
+                if (i < sigs.Count - 1)
+                {
+                    int nextHead = head + (sigs[i + 1].Tick - head) / barTick * barTick;
+                    if (tick >= nextHead)
+                    {
+                        head = nextHead;
+                        continue;
+                    }
+                }
+
+                int headBarTick = head + (tick - head) / barTick * barTick;
+                int offsetCount = (int)Math.Round((float)(tick - headBarTick) / QuantizeTick);
+                int maxOffsetCount = (int)(barTick / QuantizeTick);
+                int remnantTick = barTick - (int)(maxOffsetCount * QuantizeTick);
+                return headBarTick + ((tick - headBarTick >= barTick - remnantTick / 2) ? barTick : (int)(offsetCount * QuantizeTick));
+            }
+
+            throw new InvalidOperationException();
         }
 
         private RectangleF GetRectFromNotePosition(int tick, int laneIndex, int width)
