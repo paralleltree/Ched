@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Ched")]
-[assembly: AssemblyDescription("CHUNITHM Notes Editor")]
+[assembly: AssemblyDescription("Yet Another Chart Editor")]
 [assembly: AssemblyCompany("paltee.net")]
 [assembly: AssemblyProduct("Ched")]
 [assembly: AssemblyCopyright("Copyright (C) 2017 Paralleltree")]
@@ -11,4 +11,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 [assembly: Guid("4c0c9f98-6fcf-4d2f-b821-37a66362dc75")]
 
-[assembly: AssemblyVersion("2.1.9.0")]
+[assembly: AssemblyVersion("2.1.9.1")]
