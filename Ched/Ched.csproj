@@ -135,6 +135,7 @@
     <Compile Include="Components\Notes\TappableBase.cs" />
     <Compile Include="Components\Score.cs" />
     <Compile Include="Components\ScoreBook.cs" />
+    <Compile Include="Plugins\ComboCalculator.cs" />
     <Compile Include="Plugins\IPlugin.cs" />
     <Compile Include="Plugins\IScorePlugin.cs" />
     <Compile Include="Plugins\PluginManager.cs" />
