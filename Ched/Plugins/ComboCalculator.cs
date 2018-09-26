@@ -51,30 +51,25 @@ namespace Ched.Plugins
             Func<decimal, int> comboDivider = bpm => bpm < 120 ? 16 : (bpm < 240 ? 8 : 4);
 
             // コンボとしてカウントされるstartTickからのオフセットを求める
-            Func<int, int, List<int>> calcComboTicks = (startTick, duration) =>
+            Func<int, IEnumerable<int>, List<int>> calcComboTicks = (startTick, stepTicks) =>
             {
                 var tickList = new List<int>();
-                int head = startTick;
-                int endTick = startTick + duration;
+                var sortedStepTicks = stepTicks.OrderBy(p => p).ToList();
+                int duration = sortedStepTicks[sortedStepTicks.Count - 1];
+                int head = 0;
                 int bpmIndex = 0;
+                int stepIndex = 0;
 
-                while (bpmIndex + 1 < bpmEvents.Count && startTick >= bpmEvents[bpmIndex + 1].Tick) bpmIndex++;
-
-                while (head < endTick)
+                while (head < duration)
                 {
+                    while (bpmIndex + 1 < bpmEvents.Count && startTick + head >= bpmEvents[bpmIndex + 1].Tick) bpmIndex++;
                     int interval = barTick / comboDivider(bpmEvents[bpmIndex].BPM);
-                    int currentFirstTickOffset = (int)Math.Ceiling((double)(head - startTick) / interval) * interval;
-                    int nextTick = bpmIndex + 1 < bpmEvents.Count ? Math.Min(endTick, bpmEvents[bpmIndex + 1].Tick) : endTick;
-                    var ticks = Enumerable.Range(1, (nextTick - startTick) / interval - currentFirstTickOffset / interval)
-                        .Select(p => currentFirstTickOffset + interval * p)
-                        .ToList();
-
-                    tickList.AddRange(ticks);
-
-                    head = nextTick;
-                    bpmIndex++;
-                    continue;
+                    int diff = Math.Min(interval, sortedStepTicks[stepIndex] - head);
+                    head += diff;
+                    tickList.Add(head);
+                    if (head == sortedStepTicks[stepIndex]) stepIndex++;
                 }
+
                 return tickList;
             };
             Func<IEnumerable<int>, int, int, IEnumerable<int>> removeLostTicks = (ticks, startTick, duration) =>
@@ -85,7 +80,7 @@ namespace Ched.Plugins
 
             foreach (var hold in score.Notes.Holds)
             {
-                var tickList = new HashSet<int>(calcComboTicks(hold.StartTick, hold.Duration));
+                var tickList = new HashSet<int>(calcComboTicks(hold.StartTick, new int[] { hold.Duration }));
 
                 if (airList.Contains(hold.EndNote))
                 {
@@ -99,11 +94,7 @@ namespace Ched.Plugins
 
             foreach (var slide in score.Notes.Slides)
             {
-                var tickList = new HashSet<int>(calcComboTicks(slide.StartTick, slide.GetDuration()));
-                foreach (var step in slide.StepNotes.Where(p => p.IsVisible))
-                {
-                    tickList.Add(step.TickOffset);
-                }
+                var tickList = new HashSet<int>(calcComboTicks(slide.StartTick, slide.StepNotes.Where(p => p.IsVisible).Select(p => p.TickOffset)));
 
                 if (airList.Contains(slide.StepNotes.OrderByDescending(p => p.TickOffset).First()))
                 {
@@ -121,9 +112,9 @@ namespace Ched.Plugins
                 {
                     int interval = barTick / comboDivider(getHeadBpmAt(airAction.StartTick + p));
                     return Tuple.Create(p, interval);
-                });
+                }).ToList();
 
-                var validTicks = calcComboTicks(airAction.StartTick, airAction.GetDuration())
+                var validTicks = calcComboTicks(airAction.StartTick, airAction.ActionNotes.Select(p => p.Offset))
                     .Where(p => lostSections.All(q => p < q.Item1 || p > q.Item1 + q.Item2));
 
                 var tickList = new HashSet<int>(airAction.ActionNotes.Select(p => p.Offset).Concat(validTicks));
