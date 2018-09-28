@@ -115,11 +115,9 @@ namespace Ched.Plugins
                 }).ToList();
 
                 var validTicks = calcComboTicks(airAction.StartTick, airAction.ActionNotes.Select(p => p.Offset))
-                    .Where(p => lostSections.All(q => p < q.Item1 || p > q.Item1 + q.Item2));
+                    .Where(p => lostSections.All(q => p <= q.Item1 || p > q.Item1 + q.Item2));
 
-                var tickList = new HashSet<int>(airAction.ActionNotes.Select(p => p.Offset).Concat(validTicks));
-
-                combo.Air += tickList.Count;
+                combo.Air += new HashSet<int>(validTicks).Count;
             }
 
             return combo;
