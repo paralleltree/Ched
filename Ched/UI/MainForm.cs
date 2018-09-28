@@ -38,6 +38,8 @@ namespace Ched.UI
         private SoundPreviewManager PreviewManager { get; }
         private SoundSource CurrentMusicSource;
 
+        private Plugins.PluginManager PluginManager { get; } = Plugins.PluginManager.GetInstance();
+
         private bool IsPreviewMode
         {
             get { return isPreviewMode; }
@@ -385,11 +387,19 @@ namespace Ched.UI
                 noteView.Invalidate();
             });
 
+            var pluginItems = PluginManager.ScorePlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
+            {
+                CommitChanges();
+                p.Run(ScoreBook.Score);
+            })).ToArray();
+            var pluginItem = new MenuItem("プラグイン", pluginItems);
+
             var editMenuItems = new MenuItem[]
             {
                 undoItem, redoItem, new MenuItem("-"),
                 cutItem, copyItem, pasteItem, pasteFlippedItem, new MenuItem("-"),
-                flipSelectedNotesItem, removeSelectedNotesItem, removeEventsItem
+                flipSelectedNotesItem, removeSelectedNotesItem, removeEventsItem, new MenuItem("-"),
+                pluginItem
             };
 
             var viewModeItem = new MenuItem("譜面プレビュー", (s, e) =>

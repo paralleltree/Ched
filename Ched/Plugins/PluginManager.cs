@@ -15,6 +15,11 @@ namespace Ched.Plugins
     {
         protected static string PluginPath => "Plugins";
 
+        [ImportMany]
+        IEnumerable<IScorePlugin> scorePlugins = Enumerable.Empty<IScorePlugin>();
+
+        public IEnumerable<IScorePlugin> ScorePlugins => scorePlugins;
+
         private PluginManager()
         {
         }
