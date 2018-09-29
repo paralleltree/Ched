@@ -23,8 +23,8 @@ namespace Ched.UI
             buttonOK.DialogResult = DialogResult.OK;
             buttonCancel.DialogResult = DialogResult.Cancel;
 
-            speedRatioBox.Minimum = -9.99m;
-            speedRatioBox.Maximum = 9.99m;
+            speedRatioBox.Minimum = -100m;
+            speedRatioBox.Maximum = 100m;
             speedRatioBox.Increment = 0.01m;
             speedRatioBox.DecimalPlaces = 2;
             speedRatioBox.Value = 1;
