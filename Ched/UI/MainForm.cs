@@ -390,7 +390,16 @@ namespace Ched.UI
             var pluginItems = PluginManager.ScorePlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
             {
                 CommitChanges();
-                p.Run(ScoreBook.Score);
+
+                try
+                {
+                    p.Run(ScoreBook.Score);
+                }
+                catch (Exception ex)
+                {
+                    Program.DumpExceptionTo(ex, "plugin_exception.json");
+                    MessageBox.Show(this, "プラグインの実行中にエラーが発生しました。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             })).ToArray();
             var pluginItem = new MenuItem("プラグイン", pluginItems);
 
