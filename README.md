@@ -75,3 +75,4 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   * [@kb10uy](https://twitter.com/kb10uy)
   * [@Horeizai_YMK](https://twitter.com/Horeizai_YMK)
   * [@Citringo](https://github.com/Citringo)
+  * [@ORIent_8](https://twitter.com/ORIent_8)
