@@ -1041,7 +1041,7 @@ namespace Ched.UI
                                 break;
                         }
                         newNote.Width = LastWidth;
-                        newNote.Tick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y));
+                        newNote.Tick = Math.Max(GetQuantizedTick(GetTickFromYPosition(scorePos.Y)), 0);
                         int newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - newNote.Width / 2;
                         newNoteLaneIndex = Math.Min(Constants.LanesCount - newNote.Width, Math.Max(0, newNoteLaneIndex));
                         newNote.LaneIndex = newNoteLaneIndex;
@@ -1058,7 +1058,7 @@ namespace Ched.UI
                             case NoteType.Hold:
                                 var hold = new Hold
                                 {
-                                    StartTick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)),
+                                    StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(scorePos.Y)), 0),
                                     Width = LastWidth,
                                     Duration = (int)QuantizeTick
                                 };
@@ -1111,7 +1111,7 @@ namespace Ched.UI
                                 // 新規SLIDE
                                 var slide = new Slide()
                                 {
-                                    StartTick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y)),
+                                    StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(scorePos.Y)), 0),
                                     StartWidth = LastWidth
                                 };
                                 newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - slide.StartWidth / 2;
