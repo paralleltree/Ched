@@ -118,9 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AudioFilter" xml:space="preserve">
-    <value>Audio File({0})|{1}</value>
+    <value>Audio File</value>
   </data>
   <data name="ChedFilter" xml:space="preserve">
-    <value>Ched File Format(*.chs)|*.chs</value>
+    <value>Ched File Format</value>
   </data>
 </root>

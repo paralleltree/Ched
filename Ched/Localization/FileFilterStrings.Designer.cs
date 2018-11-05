@@ -61,7 +61,7 @@ namespace Ched.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 音声ファイル({0})|{1}.
+        ///   Looks up a localized string similar to 音声ファイル.
         /// </summary>
         internal static string AudioFilter {
             get {
@@ -70,7 +70,7 @@ namespace Ched.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ched専用形式(*.chs)|*.chs.
+        ///   Looks up a localized string similar to Ched専用形式.
         /// </summary>
         internal static string ChedFilter {
             get {

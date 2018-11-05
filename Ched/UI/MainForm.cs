@@ -21,7 +21,7 @@ namespace Ched.UI
     public partial class MainForm : Form
     {
         private readonly string FileExtension = ".chs";
-        private readonly string FileTypeFilter = FileFilterStrings.ChedFilter;
+        private string FileTypeFilter => FileFilterStrings.ChedFilter + string.Format("({0})|{1}", "*" + FileExtension, "*" + FileExtension);
 
         private bool isPreviewMode;
 
