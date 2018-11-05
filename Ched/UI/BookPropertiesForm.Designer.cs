@@ -28,13 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BookPropertiesForm));
             this.titleBox = new System.Windows.Forms.TextBox();
             this.artistBox = new System.Windows.Forms.TextBox();
             this.notesDesignerBox = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.musicSourceSelector = new Ched.UI.SoundSourceSelector();
             this.buttonOK = new System.Windows.Forms.Button();
@@ -45,107 +46,75 @@
             // 
             // titleBox
             // 
-            this.titleBox.Location = new System.Drawing.Point(97, 18);
+            resources.ApplyResources(this.titleBox, "titleBox");
             this.titleBox.Name = "titleBox";
-            this.titleBox.Size = new System.Drawing.Size(235, 19);
-            this.titleBox.TabIndex = 0;
             // 
             // artistBox
             // 
-            this.artistBox.Location = new System.Drawing.Point(97, 43);
+            resources.ApplyResources(this.artistBox, "artistBox");
             this.artistBox.Name = "artistBox";
-            this.artistBox.Size = new System.Drawing.Size(235, 19);
-            this.artistBox.TabIndex = 1;
             // 
             // notesDesignerBox
             // 
-            this.notesDesignerBox.Location = new System.Drawing.Point(97, 68);
+            resources.ApplyResources(this.notesDesignerBox, "notesDesignerBox");
             this.notesDesignerBox.Name = "notesDesignerBox";
-            this.notesDesignerBox.Size = new System.Drawing.Size(235, 19);
-            this.notesDesignerBox.TabIndex = 2;
             // 
             // groupBox1
             // 
+            resources.ApplyResources(this.groupBox1, "groupBox1");
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.titleBox);
             this.groupBox1.Controls.Add(this.notesDesignerBox);
             this.groupBox1.Controls.Add(this.artistBox);
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(349, 100);
-            this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "基本情報";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(51, 21);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(40, 12);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "タイトル";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(34, 46);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(57, 12);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "アーティスト";
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(10, 71);
+            resources.ApplyResources(this.label3, "label3");
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(81, 12);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "ノーツデザイナー";
+            // 
+            // label2
+            // 
+            resources.ApplyResources(this.label2, "label2");
+            this.label2.Name = "label2";
+            // 
+            // label1
+            // 
+            resources.ApplyResources(this.label1, "label1");
+            this.label1.Name = "label1";
             // 
             // groupBox2
             // 
+            resources.ApplyResources(this.groupBox2, "groupBox2");
             this.groupBox2.Controls.Add(this.musicSourceSelector);
-            this.groupBox2.Location = new System.Drawing.Point(12, 118);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(349, 115);
-            this.groupBox2.TabIndex = 4;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "音源情報";
             // 
             // musicSourceSelector
             // 
-            this.musicSourceSelector.Location = new System.Drawing.Point(12, 16);
+            resources.ApplyResources(this.musicSourceSelector, "musicSourceSelector");
+            this.musicSourceSelector.AllowDrop = true;
             this.musicSourceSelector.Name = "musicSourceSelector";
-            this.musicSourceSelector.Size = new System.Drawing.Size(331, 91);
-            this.musicSourceSelector.TabIndex = 0;
             // 
             // buttonOK
             // 
-            this.buttonOK.Location = new System.Drawing.Point(205, 239);
+            resources.ApplyResources(this.buttonOK, "buttonOK");
             this.buttonOK.Name = "buttonOK";
-            this.buttonOK.Size = new System.Drawing.Size(75, 23);
-            this.buttonOK.TabIndex = 5;
-            this.buttonOK.Text = "OK";
             this.buttonOK.UseVisualStyleBackColor = true;
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Location = new System.Drawing.Point(286, 239);
+            resources.ApplyResources(this.buttonCancel, "buttonCancel");
             this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(75, 23);
-            this.buttonCancel.TabIndex = 6;
-            this.buttonCancel.Text = "キャンセル";
             this.buttonCancel.UseVisualStyleBackColor = true;
             // 
-            // BookPropertyForm
+            // BookPropertiesForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(373, 274);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOK);
             this.Controls.Add(this.groupBox2);
@@ -153,8 +122,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "BookPropertyForm";
-            this.Text = "BookPropertyForm";
+            this.Name = "BookPropertiesForm";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
