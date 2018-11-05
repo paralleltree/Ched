@@ -142,7 +142,7 @@
     <value>終了</value>
   </data>
   <data name="Export" xml:space="preserve">
-    <value>再エクスポート</value>
+    <value>エクスポート</value>
   </data>
   <data name="FileMenu" xml:space="preserve">
     <value>ファイル(&amp;F)</value>

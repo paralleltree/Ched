@@ -205,7 +205,7 @@ namespace Ched.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 再エクスポート.
+        ///   Looks up a localized string similar to エクスポート.
         /// </summary>
         internal static string Export {
             get {
