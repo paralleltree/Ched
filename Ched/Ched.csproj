@@ -125,7 +125,6 @@
     <Compile Include="Components\Notes\Damage.cs" />
     <Compile Include="Components\Notes\ExTap.cs" />
     <Compile Include="Components\Notes\Flick.cs" />
-    <Compile Include="Components\Notes\GraphicsExtensions.cs" />
     <Compile Include="Components\Notes\Hold.cs" />
     <Compile Include="Components\Notes\LongNoteBase.cs" />
     <Compile Include="Components\Notes\NoteBase.cs" />
