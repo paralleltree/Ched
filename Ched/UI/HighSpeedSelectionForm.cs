@@ -17,7 +17,6 @@ namespace Ched.UI
         public HighSpeedSelectionForm()
         {
             InitializeComponent();
-            Text = "ハイスピード速度指定";
             AcceptButton = buttonOK;
             CancelButton = buttonCancel;
             buttonOK.DialogResult = DialogResult.OK;

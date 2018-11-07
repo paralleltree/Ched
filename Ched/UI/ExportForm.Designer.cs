@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ExportForm));
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -57,112 +58,69 @@
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(14, 16);
+            resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(40, 12);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "タイトル";
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(14, 41);
+            resources.ApplyResources(this.label2, "label2");
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(57, 12);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "アーティスト";
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(14, 66);
+            resources.ApplyResources(this.label3, "label3");
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(81, 12);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "ノーツデザイナー";
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(14, 91);
+            resources.ApplyResources(this.label4, "label4");
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(41, 12);
-            this.label4.TabIndex = 3;
-            this.label4.Text = "難易度";
             // 
             // label5
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(14, 117);
+            resources.ApplyResources(this.label5, "label5");
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(34, 12);
-            this.label5.TabIndex = 4;
-            this.label5.Text = "レベル";
             // 
             // label6
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(14, 143);
+            resources.ApplyResources(this.label6, "label6");
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(47, 12);
-            this.label6.TabIndex = 5;
-            this.label6.Text = "SONGID";
             // 
             // label7
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(14, 168);
+            resources.ApplyResources(this.label7, "label7");
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(88, 12);
-            this.label7.TabIndex = 6;
-            this.label7.Text = "サウンドファイル名";
             // 
             // label8
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(14, 192);
+            resources.ApplyResources(this.label8, "label8");
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(71, 12);
-            this.label8.TabIndex = 7;
-            this.label8.Text = "再生オフセット";
             // 
             // label9
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(14, 218);
+            resources.ApplyResources(this.label9, "label9");
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(93, 12);
-            this.label9.TabIndex = 8;
-            this.label9.Text = "ジャケットファイル名";
             // 
             // browseButton
             // 
-            this.browseButton.Location = new System.Drawing.Point(305, 287);
+            resources.ApplyResources(this.browseButton, "browseButton");
             this.browseButton.Name = "browseButton";
-            this.browseButton.Size = new System.Drawing.Size(75, 23);
-            this.browseButton.TabIndex = 25;
-            this.browseButton.Text = "参照";
             this.browseButton.UseVisualStyleBackColor = true;
             // 
             // label11
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(14, 268);
+            resources.ApplyResources(this.label11, "label11");
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(41, 12);
-            this.label11.TabIndex = 11;
-            this.label11.Text = "出力先";
             // 
             // soundOffsetBox
             // 
+            resources.ApplyResources(this.soundOffsetBox, "soundOffsetBox");
             this.soundOffsetBox.DecimalPlaces = 3;
             this.soundOffsetBox.Increment = new decimal(new int[] {
             1,
             0,
             0,
             131072});
-            this.soundOffsetBox.Location = new System.Drawing.Point(230, 190);
             this.soundOffsetBox.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -174,110 +132,76 @@
             0,
             -2147483648});
             this.soundOffsetBox.Name = "soundOffsetBox";
-            this.soundOffsetBox.Size = new System.Drawing.Size(67, 19);
-            this.soundOffsetBox.TabIndex = 21;
-            this.soundOffsetBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // titleBox
             // 
-            this.titleBox.Location = new System.Drawing.Point(119, 13);
+            resources.ApplyResources(this.titleBox, "titleBox");
             this.titleBox.Name = "titleBox";
-            this.titleBox.Size = new System.Drawing.Size(178, 19);
-            this.titleBox.TabIndex = 14;
             // 
             // artistBox
             // 
-            this.artistBox.Location = new System.Drawing.Point(119, 38);
+            resources.ApplyResources(this.artistBox, "artistBox");
             this.artistBox.Name = "artistBox";
-            this.artistBox.Size = new System.Drawing.Size(178, 19);
-            this.artistBox.TabIndex = 15;
             // 
             // notesDesignerBox
             // 
-            this.notesDesignerBox.Location = new System.Drawing.Point(119, 63);
+            resources.ApplyResources(this.notesDesignerBox, "notesDesignerBox");
             this.notesDesignerBox.Name = "notesDesignerBox";
-            this.notesDesignerBox.Size = new System.Drawing.Size(178, 19);
-            this.notesDesignerBox.TabIndex = 16;
             // 
             // difficultyDropDown
             // 
+            resources.ApplyResources(this.difficultyDropDown, "difficultyDropDown");
             this.difficultyDropDown.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.difficultyDropDown.FormattingEnabled = true;
-            this.difficultyDropDown.Location = new System.Drawing.Point(178, 88);
             this.difficultyDropDown.Name = "difficultyDropDown";
-            this.difficultyDropDown.Size = new System.Drawing.Size(119, 20);
-            this.difficultyDropDown.TabIndex = 17;
             // 
             // levelDropDown
             // 
+            resources.ApplyResources(this.levelDropDown, "levelDropDown");
             this.levelDropDown.FormattingEnabled = true;
-            this.levelDropDown.Location = new System.Drawing.Point(178, 114);
             this.levelDropDown.Name = "levelDropDown";
-            this.levelDropDown.Size = new System.Drawing.Size(119, 20);
-            this.levelDropDown.TabIndex = 18;
             // 
             // songIdBox
             // 
-            this.songIdBox.Location = new System.Drawing.Point(119, 140);
+            resources.ApplyResources(this.songIdBox, "songIdBox");
             this.songIdBox.Name = "songIdBox";
-            this.songIdBox.Size = new System.Drawing.Size(178, 19);
-            this.songIdBox.TabIndex = 19;
             // 
             // soundFileBox
             // 
-            this.soundFileBox.Location = new System.Drawing.Point(119, 165);
+            resources.ApplyResources(this.soundFileBox, "soundFileBox");
             this.soundFileBox.Name = "soundFileBox";
-            this.soundFileBox.Size = new System.Drawing.Size(178, 19);
-            this.soundFileBox.TabIndex = 20;
             // 
             // jacketFileBox
             // 
-            this.jacketFileBox.Location = new System.Drawing.Point(119, 215);
+            resources.ApplyResources(this.jacketFileBox, "jacketFileBox");
             this.jacketFileBox.Name = "jacketFileBox";
-            this.jacketFileBox.Size = new System.Drawing.Size(178, 19);
-            this.jacketFileBox.TabIndex = 22;
             // 
             // outputBox
             // 
-            this.outputBox.Location = new System.Drawing.Point(16, 289);
+            resources.ApplyResources(this.outputBox, "outputBox");
             this.outputBox.Name = "outputBox";
-            this.outputBox.Size = new System.Drawing.Size(281, 19);
-            this.outputBox.TabIndex = 24;
             // 
             // label12
             // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(303, 192);
+            resources.ApplyResources(this.label12, "label12");
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(19, 12);
-            this.label12.TabIndex = 23;
-            this.label12.Text = "[s]";
             // 
             // exportButton
             // 
-            this.exportButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.exportButton.Location = new System.Drawing.Point(16, 321);
+            resources.ApplyResources(this.exportButton, "exportButton");
             this.exportButton.Name = "exportButton";
-            this.exportButton.Size = new System.Drawing.Size(364, 23);
-            this.exportButton.TabIndex = 26;
-            this.exportButton.Text = "エクスポート";
             this.exportButton.UseVisualStyleBackColor = true;
             // 
             // hasPaddingBarBox
             // 
-            this.hasPaddingBarBox.AutoSize = true;
-            this.hasPaddingBarBox.Location = new System.Drawing.Point(124, 243);
+            resources.ApplyResources(this.hasPaddingBarBox, "hasPaddingBarBox");
             this.hasPaddingBarBox.Name = "hasPaddingBarBox";
-            this.hasPaddingBarBox.Size = new System.Drawing.Size(173, 16);
-            this.hasPaddingBarBox.TabIndex = 27;
-            this.hasPaddingBarBox.Text = "先頭に1小節の空白を挿入する";
             this.hasPaddingBarBox.UseVisualStyleBackColor = true;
             // 
             // ExportForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(398, 356);
             this.Controls.Add(this.hasPaddingBarBox);
             this.Controls.Add(this.exportButton);
             this.Controls.Add(this.label12);
@@ -306,7 +230,6 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ExportForm";
-            this.Text = "エクスポート";
             ((System.ComponentModel.ISupportInitialize)(this.soundOffsetBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

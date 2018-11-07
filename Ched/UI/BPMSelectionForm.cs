@@ -17,7 +17,6 @@ namespace Ched.UI
         public BPMSelectionForm()
         {
             InitializeComponent();
-            Text = "BPMの変更";
             AcceptButton = buttonOK;
             CancelButton = buttonCancel;
             buttonOK.DialogResult = DialogResult.OK;

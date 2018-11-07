@@ -25,7 +25,6 @@ namespace Ched.UI
         public CustomQuantizeSelectionForm(int barTick)
         {
             InitializeComponent();
-            Text = "カスタム音符指定";
             AcceptButton = buttonOK;
             CancelButton = buttonCancel;
             buttonOK.DialogResult = DialogResult.OK;

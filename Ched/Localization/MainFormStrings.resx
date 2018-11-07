@@ -117,127 +117,142 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="buttonOK.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Right</value>
+  <data name="AbortAtLastNote" xml:space="preserve">
+    <value>最終ノートで停止</value>
   </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="buttonOK.Location" type="System.Drawing.Point, System.Drawing">
-    <value>66, 68</value>
+  <data name="bookProperty" xml:space="preserve">
+    <value>譜面プロパティ</value>
   </data>
-  <data name="buttonOK.Size" type="System.Drawing.Size, System.Drawing">
-    <value>75, 25</value>
+  <data name="Copy" xml:space="preserve">
+    <value>コピー</value>
   </data>
-  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="buttonOK.TabIndex" type="System.Int32, mscorlib">
-    <value>1</value>
+  <data name="Cut" xml:space="preserve">
+    <value>切り取り</value>
   </data>
-  <data name="buttonOK.Text" xml:space="preserve">
-    <value>OK</value>
+  <data name="DeleteEvent" xml:space="preserve">
+    <value>イベント削除</value>
   </data>
-  <data name="&gt;&gt;buttonOK.Name" xml:space="preserve">
-    <value>buttonOK</value>
+  <data name="EditMenu" xml:space="preserve">
+    <value>編集(&amp;E)</value>
   </data>
-  <data name="&gt;&gt;buttonOK.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Eraser" xml:space="preserve">
+    <value>消しゴム</value>
   </data>
-  <data name="&gt;&gt;buttonOK.Parent" xml:space="preserve">
-    <value>$this</value>
+  <data name="Exit" xml:space="preserve">
+    <value>終了</value>
   </data>
-  <data name="&gt;&gt;buttonOK.ZOrder" xml:space="preserve">
-    <value>3</value>
+  <data name="Export" xml:space="preserve">
+    <value>エクスポート</value>
   </data>
-  <data name="buttonCancel.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Right</value>
+  <data name="FileMenu" xml:space="preserve">
+    <value>ファイル(&amp;F)</value>
   </data>
-  <data name="buttonCancel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>147, 68</value>
+  <data name="FlipSelectedNotes" xml:space="preserve">
+    <value>選択範囲内ノーツを反転</value>
   </data>
-  <data name="buttonCancel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>75, 25</value>
+  <data name="Help" xml:space="preserve">
+    <value>ヘルプを開く</value>
   </data>
-  <data name="buttonCancel.TabIndex" type="System.Int32, mscorlib">
-    <value>2</value>
+  <data name="HelpMenu" xml:space="preserve">
+    <value>ヘルプ(&amp;H)</value>
   </data>
-  <data name="buttonCancel.Text" xml:space="preserve">
-    <value>キャンセル</value>
+  <data name="HighSpeed" xml:space="preserve">
+    <value>ハイスピード</value>
   </data>
-  <data name="&gt;&gt;buttonCancel.Name" xml:space="preserve">
-    <value>buttonCancel</value>
+  <data name="InsertMenu" xml:space="preserve">
+    <value>挿入(&amp;I)</value>
   </data>
-  <data name="&gt;&gt;buttonCancel.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="NewFile" xml:space="preserve">
+    <value>新規作成</value>
   </data>
-  <data name="&gt;&gt;buttonCancel.Parent" xml:space="preserve">
-    <value>$this</value>
+  <data name="OpenFile" xml:space="preserve">
+    <value>開く</value>
   </data>
-  <data name="&gt;&gt;buttonCancel.ZOrder" xml:space="preserve">
-    <value>2</value>
+  <data name="Paste" xml:space="preserve">
+    <value>貼り付け</value>
   </data>
-  <data name="bpmBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>65, 26</value>
+  <data name="PasteFlipped" xml:space="preserve">
+    <value>反転貼り付け</value>
   </data>
-  <data name="bpmBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>103, 20</value>
+  <data name="Pen" xml:space="preserve">
+    <value>ペン</value>
   </data>
-  <data name="bpmBox.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
+  <data name="Play" xml:space="preserve">
+    <value>再生/停止</value>
   </data>
-  <data name="&gt;&gt;bpmBox.Name" xml:space="preserve">
-    <value>bpmBox</value>
+  <data name="PlayMenu" xml:space="preserve">
+    <value>再生(&amp;P)</value>
   </data>
-  <data name="&gt;&gt;bpmBox.Type" xml:space="preserve">
-    <value>System.Windows.Forms.NumericUpDown, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Plugin" xml:space="preserve">
+    <value>プラグイン</value>
   </data>
-  <data name="&gt;&gt;bpmBox.Parent" xml:space="preserve">
-    <value>$this</value>
+  <data name="Redo" xml:space="preserve">
+    <value>やり直す</value>
   </data>
-  <data name="&gt;&gt;bpmBox.ZOrder" xml:space="preserve">
-    <value>1</value>
+  <data name="RemoveEvents" xml:space="preserve">
+    <value>選択範囲内イベントを削除</value>
   </data>
-  <data name="label1.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
+  <data name="RemoveSelectedNotes" xml:space="preserve">
+    <value>選択範囲内ノーツを削除</value>
   </data>
-  <data name="label1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>23, 29</value>
+  <data name="SaveAs" xml:space="preserve">
+    <value>名前を付けて保存</value>
   </data>
-  <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>30, 13</value>
+  <data name="SaveFile" xml:space="preserve">
+    <value>上書き保存</value>
   </data>
-  <data name="label1.TabIndex" type="System.Int32, mscorlib">
-    <value>3</value>
+  <data name="ScorePreview" xml:space="preserve">
+    <value>譜面プレビュー</value>
   </data>
-  <data name="label1.Text" xml:space="preserve">
-    <value>BPM</value>
+  <data name="Selection" xml:space="preserve">
+    <value>選択</value>
   </data>
-  <data name="&gt;&gt;label1.Name" xml:space="preserve">
-    <value>label1</value>
+  <data name="Stop" xml:space="preserve">
+    <value>停止</value>
   </data>
-  <data name="&gt;&gt;label1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="TimeSignature" xml:space="preserve">
+    <value>拍子</value>
   </data>
-  <data name="&gt;&gt;label1.Parent" xml:space="preserve">
-    <value>$this</value>
+  <data name="Undo" xml:space="preserve">
+    <value>元に戻す</value>
   </data>
-  <data name="&gt;&gt;label1.ZOrder" xml:space="preserve">
-    <value>0</value>
+  <data name="VersionInfo" xml:space="preserve">
+    <value>バージョン情報</value>
   </data>
-  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
-  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>6, 13</value>
+  <data name="ViewMenu" xml:space="preserve">
+    <value>表示(&amp;V)</value>
   </data>
-  <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>234, 106</value>
+  <data name="ZoomIn" xml:space="preserve">
+    <value>拡大</value>
   </data>
-  <data name="$this.Text" xml:space="preserve">
-    <value>BPMの変更</value>
+  <data name="ZoomOut" xml:space="preserve">
+    <value>縮小</value>
   </data>
-  <data name="&gt;&gt;$this.Name" xml:space="preserve">
-    <value>BPMSelectionForm</value>
+  <data name="AirDown" xml:space="preserve">
+    <value>振り下げAIR</value>
   </data>
-  <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="AirLeftDown" xml:space="preserve">
+    <value>振り下げ左AIR</value>
+  </data>
+  <data name="AirLeftUp" xml:space="preserve">
+    <value>振り上げ左AIR</value>
+  </data>
+  <data name="AirRightDown" xml:space="preserve">
+    <value>振り下げ右AIR</value>
+  </data>
+  <data name="AirRightUp" xml:space="preserve">
+    <value>振り上げ右AIR</value>
+  </data>
+  <data name="AirUp" xml:space="preserve">
+    <value>振り上げAIR</value>
+  </data>
+  <data name="Custom" xml:space="preserve">
+    <value>カスタム</value>
+  </data>
+  <data name="Division" xml:space="preserve">
+    <value>分</value>
+  </data>
+  <data name="SlideStep" xml:space="preserve">
+    <value>SLIDE(中継点)</value>
   </data>
 </root>

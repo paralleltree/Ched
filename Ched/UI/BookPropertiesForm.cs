@@ -19,7 +19,6 @@ namespace Ched.UI
         public BookPropertiesForm(ScoreBook book, SoundSource musicSource)
         {
             InitializeComponent();
-            Text = "譜面プロパティ";
             AcceptButton = buttonOK;
             CancelButton = buttonCancel;
             buttonOK.DialogResult = DialogResult.OK;
