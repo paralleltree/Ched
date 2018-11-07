@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ched", "Ched\Ched.csproj", "{4C0C9F98-6FCF-4D2F-B821-37A66362DC75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ched.Drawing", "Ched.Drawing\Ched.Drawing.csproj", "{A41EA7D5-9776-421B-A338-DD662287069B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{4C0C9F98-6FCF-4D2F-B821-37A66362DC75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C0C9F98-6FCF-4D2F-B821-37A66362DC75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C0C9F98-6FCF-4D2F-B821-37A66362DC75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A41EA7D5-9776-421B-A338-DD662287069B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A41EA7D5-9776-421B-A338-DD662287069B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A41EA7D5-9776-421B-A338-DD662287069B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A41EA7D5-9776-421B-A338-DD662287069B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

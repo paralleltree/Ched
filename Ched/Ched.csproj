@@ -423,6 +423,12 @@
   <ItemGroup>
     <None Include="Resources\scissors-blue.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ched.Drawing\Ched.Drawing.csproj">
+      <Project>{a41ea7d5-9776-421b-a338-dd662287069b}</Project>
+      <Name>Ched.Drawing</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
