@@ -17,7 +17,7 @@ namespace Ched.Core
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class ScoreBook
     {
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
+        internal static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,

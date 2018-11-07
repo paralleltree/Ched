@@ -45,5 +45,10 @@ namespace Ched.Core
             get { return events; }
             set { events = value; }
         }
+
+        public Score Clone()
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Score>(Newtonsoft.Json.JsonConvert.SerializeObject(this, ScoreBook.SerializerSettings));
+        }
     }
 }
