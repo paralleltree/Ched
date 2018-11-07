@@ -424,6 +424,10 @@
     <None Include="Resources\scissors-blue.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Ched.Core\Ched.Core.csproj">
+      <Project>{5a5ff947-79dc-4352-94d5-eec14065f93a}</Project>
+      <Name>Ched.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Ched.Drawing\Ched.Drawing.csproj">
       <Project>{a41ea7d5-9776-421b-a338-dd662287069b}</Project>
       <Name>Ched.Drawing</Name>

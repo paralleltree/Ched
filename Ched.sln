@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ched", "Ched\Ched.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ched.Drawing", "Ched.Drawing\Ched.Drawing.csproj", "{A41EA7D5-9776-421B-A338-DD662287069B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ched.Core", "Ched.Core\Ched.Core.csproj", "{5A5FF947-79DC-4352-94D5-EEC14065F93A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A41EA7D5-9776-421B-A338-DD662287069B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A41EA7D5-9776-421B-A338-DD662287069B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A41EA7D5-9776-421B-A338-DD662287069B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A5FF947-79DC-4352-94D5-EEC14065F93A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A5FF947-79DC-4352-94D5-EEC14065F93A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A5FF947-79DC-4352-94D5-EEC14065F93A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A5FF947-79DC-4352-94D5-EEC14065F93A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
