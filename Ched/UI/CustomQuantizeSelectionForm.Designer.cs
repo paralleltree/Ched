@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CustomQuantizeSelectionForm));
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.noteLengthBox = new System.Windows.Forms.ComboBox();
@@ -39,63 +40,42 @@
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(98, 32);
+            resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(50, 12);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "分音符を";
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(229, 32);
+            resources.ApplyResources(this.label2, "label2");
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(48, 12);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "分割する";
             // 
             // noteLengthBox
             // 
             this.noteLengthBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.noteLengthBox.FormattingEnabled = true;
-            this.noteLengthBox.Location = new System.Drawing.Point(31, 29);
+            resources.ApplyResources(this.noteLengthBox, "noteLengthBox");
             this.noteLengthBox.Name = "noteLengthBox";
-            this.noteLengthBox.Size = new System.Drawing.Size(61, 20);
-            this.noteLengthBox.TabIndex = 2;
             // 
             // noteDivisionBox
             // 
-            this.noteDivisionBox.Location = new System.Drawing.Point(154, 30);
+            resources.ApplyResources(this.noteDivisionBox, "noteDivisionBox");
             this.noteDivisionBox.Name = "noteDivisionBox";
-            this.noteDivisionBox.Size = new System.Drawing.Size(69, 19);
-            this.noteDivisionBox.TabIndex = 3;
             // 
             // buttonOK
             // 
-            this.buttonOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonOK.Location = new System.Drawing.Point(162, 71);
+            resources.ApplyResources(this.buttonOK, "buttonOK");
             this.buttonOK.Name = "buttonOK";
-            this.buttonOK.Size = new System.Drawing.Size(75, 23);
-            this.buttonOK.TabIndex = 4;
-            this.buttonOK.Text = "OK";
             this.buttonOK.UseVisualStyleBackColor = true;
             // 
             // buttonCancel
             // 
-            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCancel.Location = new System.Drawing.Point(243, 71);
+            resources.ApplyResources(this.buttonCancel, "buttonCancel");
             this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(75, 23);
-            this.buttonCancel.TabIndex = 5;
-            this.buttonCancel.Text = "キャンセル";
             this.buttonCancel.UseVisualStyleBackColor = true;
             // 
             // CustomQuantizeSelectionForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(330, 106);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOK);
             this.Controls.Add(this.noteDivisionBox);
@@ -106,7 +86,6 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "CustomQuantizeSelectionForm";
-            this.Text = "CustomQuantizeSelectionForm";
             ((System.ComponentModel.ISupportInitialize)(this.noteDivisionBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

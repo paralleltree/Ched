@@ -135,6 +135,26 @@
     <Compile Include="Components\Notes\TappableBase.cs" />
     <Compile Include="Components\Score.cs" />
     <Compile Include="Components\ScoreBook.cs" />
+    <Compile Include="Localization\ErrorStrings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ErrorStrings.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Localization\FileFilterStrings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>FileFilterStrings.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Localization\MainFormStrings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MainFormStrings.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Localization\MainFormStrings.en.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MainFormStrings.en.resx</DependentUpon>
+    </Compile>
     <Compile Include="Plugins\ComboCalculator.cs" />
     <Compile Include="Plugins\IPlugin.cs" />
     <Compile Include="Plugins\IScorePlugin.cs" />
@@ -217,6 +237,24 @@
     <Compile Include="UI\VersionInfoForm.Designer.cs">
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Localization\ErrorStrings.en.resx" />
+    <EmbeddedResource Include="Localization\ErrorStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ErrorStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\FileFilterStrings.en.resx" />
+    <EmbeddedResource Include="Localization\FileFilterStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>FileFilterStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\MainFormStrings.en.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MainFormStrings.en.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\MainFormStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MainFormStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -227,17 +265,32 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UI\BookPropertiesForm.en.resx">
+      <DependentUpon>BookPropertiesForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\BookPropertiesForm.resx">
       <DependentUpon>BookPropertiesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\BPMSelectionForm.en.resx">
+      <DependentUpon>BPMSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\BPMSelectionForm.resx">
       <DependentUpon>BPMSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\CustomQuantizeSelectionForm.en.resx">
+      <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\CustomQuantizeSelectionForm.resx">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\ExportForm.en.resx">
+      <DependentUpon>ExportForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\ExportForm.resx">
       <DependentUpon>ExportForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\HighSpeedSelectionForm.en.resx">
+      <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\HighSpeedSelectionForm.resx">
       <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
@@ -245,11 +298,20 @@
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\SoundSourceSelector.en.resx">
+      <DependentUpon>SoundSourceSelector.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\SoundSourceSelector.resx">
       <DependentUpon>SoundSourceSelector.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\TimeSignatureSelectionForm.en.resx">
+      <DependentUpon>TimeSignatureSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\TimeSignatureSelectionForm.resx">
       <DependentUpon>TimeSignatureSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\VersionInfoForm.en.resx">
+      <DependentUpon>VersionInfoForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\VersionInfoForm.resx">
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
