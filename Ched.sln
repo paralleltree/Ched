@@ -9,6 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ched.Drawing", "Ched.Drawin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ched.Core", "Ched.Core\Ched.Core.csproj", "{5A5FF947-79DC-4352-94D5-EEC14065F93A}"
 EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ched.Plugins", "Ched.Plugins\Ched.Plugins.csproj", "{BD335AFA-195D-4C2A-986A-167438C81976}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +30,10 @@ Global
 		{5A5FF947-79DC-4352-94D5-EEC14065F93A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A5FF947-79DC-4352-94D5-EEC14065F93A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A5FF947-79DC-4352-94D5-EEC14065F93A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD335AFA-195D-4C2A-986A-167438C81976}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD335AFA-195D-4C2A-986A-167438C81976}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD335AFA-195D-4C2A-986A-167438C81976}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD335AFA-195D-4C2A-986A-167438C81976}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
