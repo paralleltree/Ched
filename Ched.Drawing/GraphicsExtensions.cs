@@ -15,7 +15,7 @@ namespace Ched.Drawing
         {
             if (radius * 2 > Math.Min(rect.Width, rect.Height))
             {
-                throw new ArgumentException("radius must be less than short side.", "radius");
+                radius = Math.Min(rect.Width, rect.Height) / 2;
             }
 
             var path = new GraphicsPath();
