@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ched.Components
+namespace Ched.Core.Notes
 {
-    internal static class Constants
+    public class Flick : TappableBase
     {
-        public static int LanesCount = 16;
     }
 }

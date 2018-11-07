@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ched.Components.Notes
+namespace Ched.Core.Notes
 {
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class Hold : MovableLongNoteBase

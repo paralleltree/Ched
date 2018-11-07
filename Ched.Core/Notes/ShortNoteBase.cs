@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ched.Components.Notes
+namespace Ched.Core.Notes
 {
-    public class Flick : TappableBase
+    public abstract class ShortNoteBase : NoteBase
     {
     }
 }

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Ched.Components;
+using Ched.Core;
 using Ched.Components.Exporter;
 using Ched.Localization;
 

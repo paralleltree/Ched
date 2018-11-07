@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using Ched.Core.Notes;
-using Ched.Components;
-using Ched.Components.Events;
+using Ched.Core;
+using Ched.Core.Events;
 using Ched.Localization;
 using Ched.UI.Operations;
 using Ched.Properties;
@@ -426,20 +426,20 @@ namespace Ched.UI
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
                 var prev = noteView.ScoreEvents.BPMChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
-                var item = new Components.Events.BPMChangeEvent()
+                var item = new BPMChangeEvent()
                 {
                     Tick = noteView.SelectedRange.StartTick,
                     BPM = form.BPM
                 };
 
-                var insertOp = new InsertEventOperation<Components.Events.BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, item);
+                var insertOp = new InsertEventOperation<BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, item);
                 if (prev == null)
                 {
                     OperationManager.Push(insertOp);
                 }
                 else
                 {
-                    var removeOp = new RemoveEventOperation<Components.Events.BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, prev);
+                    var removeOp = new RemoveEventOperation<BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, prev);
                     noteView.ScoreEvents.BPMChangeEvents.Remove(prev);
                     OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
                 }
@@ -454,20 +454,20 @@ namespace Ched.UI
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
                 var prev = noteView.ScoreEvents.HighSpeedChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
-                var item = new Components.Events.HighSpeedChangeEvent()
+                var item = new HighSpeedChangeEvent()
                 {
                     Tick = noteView.SelectedRange.StartTick,
                     SpeedRatio = form.SpeedRatio
                 };
 
-                var insertOp = new InsertEventOperation<Components.Events.HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, item);
+                var insertOp = new InsertEventOperation<HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, item);
                 if (prev == null)
                 {
                     OperationManager.Push(insertOp);
                 }
                 else
                 {
-                    var removeOp = new RemoveEventOperation<Components.Events.HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, prev);
+                    var removeOp = new RemoveEventOperation<HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, prev);
                     noteView.ScoreEvents.HighSpeedChangeEvents.Remove(prev);
                     OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
                 }
@@ -482,18 +482,18 @@ namespace Ched.UI
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
                 var prev = noteView.ScoreEvents.TimeSignatureChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
-                var item = new Components.Events.TimeSignatureChangeEvent()
+                var item = new TimeSignatureChangeEvent()
                 {
                     Tick = noteView.SelectedRange.StartTick,
                     Numerator = form.Numerator,
                     DenominatorExponent = form.DenominatorExponent
                 };
 
-                var insertOp = new InsertEventOperation<Components.Events.TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
+                var insertOp = new InsertEventOperation<TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
                 if (prev != null)
                 {
                     noteView.ScoreEvents.TimeSignatureChangeEvents.Remove(prev);
-                    var removeOp = new RemoveEventOperation<Components.Events.TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, prev);
+                    var removeOp = new RemoveEventOperation<TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, prev);
                     OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
                 }
                 else

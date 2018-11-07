@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Ched.Components;
+using Ched.Core;
 
 namespace Ched.Plugins
 {

@@ -12,9 +12,8 @@ using System.Reactive.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 
+using Ched.Core;
 using Ched.Core.Notes;
-using Ched.Components;
-using Ched.Components.Notes;
 using Ched.Drawing;
 using Ched.UI.Operations;
 
@@ -317,7 +316,7 @@ namespace Ched.UI
 
         public bool CanRedo { get { return OperationManager.CanRedo; } }
 
-        public NoteCollection Notes { get; private set; } = new NoteCollection(new Components.NoteCollection());
+        public NoteCollection Notes { get; private set; } = new NoteCollection(new Core.NoteCollection());
 
         public EventCollection ScoreEvents { get; set; } = new EventCollection();
 
@@ -1867,14 +1866,14 @@ namespace Ched.UI
             g.DrawXorRectangle(PenStyles.Dot, g.Transform.TransformPoint(selectedRect.Location), g.Transform.TransformPoint(selectedRect.Location + selectedRect.Size));
         }
 
-        public Components.NoteCollection GetSelectedNotes()
+        public Core.NoteCollection GetSelectedNotes()
         {
             int minTick = SelectedRange.StartTick + (SelectedRange.Duration < 0 ? SelectedRange.Duration : 0);
             int maxTick = SelectedRange.StartTick + (SelectedRange.Duration < 0 ? 0 : SelectedRange.Duration);
             int startLaneIndex = SelectedRange.StartLaneIndex;
             int endLaneIndex = SelectedRange.StartLaneIndex + SelectedRange.SelectedLanesCount;
 
-            var c = new Components.NoteCollection();
+            var c = new Core.NoteCollection();
 
             Func<IAirable, bool> contained = p => p.Tick >= minTick && p.Tick <= maxTick & p.LaneIndex >= startLaneIndex && p.LaneIndex + p.Width <= endLaneIndex;
             c.Taps.AddRange(Notes.Taps.Where(p => contained(p)));
@@ -2042,9 +2041,9 @@ namespace Ched.UI
         /// 指定のコレクション内のノーツを反転してその操作を表す<see cref="IOperation"/>を返します。
         /// 反転するノーツがない場合はnullを返します。
         /// </summary>
-        /// <param name="notes">反転対象となるノーツを含む<see cref="Components.NoteCollection"/></param>
+        /// <param name="notes">反転対象となるノーツを含む<see cref="Core.NoteCollection"/></param>
         /// <returns>反転操作を表す<see cref="IOperation"/></returns>
-        protected IOperation FlipNotes(Components.NoteCollection notes)
+        protected IOperation FlipNotes(Core.NoteCollection notes)
         {
             var dicShortNotes = notes.GetShortNotes().ToDictionary(q => q, q => new MoveShortNoteOperation.NotePosition(q.Tick, q.LaneIndex));
             var dicHolds = notes.Holds.ToDictionary(q => q, q => new MoveHoldOperation.NotePosition(q.StartTick, q.LaneIndex, q.Width));
@@ -2114,7 +2113,7 @@ namespace Ched.UI
         {
             public event EventHandler NoteChanged;
 
-            private Components.NoteCollection source = new Components.NoteCollection();
+            private Core.NoteCollection source = new Core.NoteCollection();
 
             private Dictionary<IAirable, HashSet<Air>> AirDictionary { get; } = new Dictionary<IAirable, HashSet<Air>>();
             private Dictionary<IAirable, HashSet<AirAction>> AirActionDictionary { get; } = new Dictionary<IAirable, HashSet<AirAction>>();
@@ -2128,7 +2127,7 @@ namespace Ched.UI
             public IReadOnlyCollection<Flick> Flicks { get { return source.Flicks; } }
             public IReadOnlyCollection<Damage> Damages { get { return source.Damages; } }
 
-            public NoteCollection(Components.NoteCollection src)
+            public NoteCollection(Core.NoteCollection src)
             {
                 Load(src);
             }
@@ -2260,7 +2259,7 @@ namespace Ched.UI
             }
 
 
-            public void Load(Components.NoteCollection collection)
+            public void Load(Core.NoteCollection collection)
             {
                 Clear();
 
@@ -2276,7 +2275,7 @@ namespace Ched.UI
 
             public void Clear()
             {
-                source = new Components.NoteCollection();
+                source = new Core.NoteCollection();
 
                 AirDictionary.Clear();
                 AirActionDictionary.Clear();
@@ -2406,7 +2405,7 @@ namespace Ched.UI
             }
         }
 
-        public Components.NoteCollection SelectedNotes
+        public Core.NoteCollection SelectedNotes
         {
             get
             {
@@ -2428,7 +2427,7 @@ namespace Ched.UI
         {
         }
 
-        public SelectionData(int startTick, Components.NoteCollection notes)
+        public SelectionData(int startTick, Core.NoteCollection notes)
         {
             Data = new InnerData(startTick, notes);
             serializedText = Newtonsoft.Json.JsonConvert.SerializeObject(Data, SerializerSettings);
@@ -2469,7 +2468,7 @@ namespace Ched.UI
 
     internal static class UIExtensions
     {
-        public static Components.NoteCollection Reposit(this NoteView.NoteCollection collection)
+        public static Core.NoteCollection Reposit(this NoteView.NoteCollection collection)
         {
             var res = new NoteCollection();
             res.Taps = collection.Taps.ToList();

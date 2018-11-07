@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ched.Components.Events
+namespace Ched.Core.Events
 {
     /// <summary>
     /// ハイスピードの変更を表すクラスです。

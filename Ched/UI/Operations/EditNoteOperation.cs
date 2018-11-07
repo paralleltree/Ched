@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Ched.Components.Notes;
+using Ched.Core.Notes;
 using Ched.UI;
 
 namespace Ched.UI.Operations
