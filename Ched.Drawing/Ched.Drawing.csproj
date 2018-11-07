@@ -36,7 +36,11 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColorProfile.cs" />
+    <Compile Include="ComponentGraphics.cs" />
+    <Compile Include="DrawingContext.cs" />
     <Compile Include="GraphicsExtensions.cs" />
+    <Compile Include="NoteGraphics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

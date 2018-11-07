@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ConcurrentPriorityQueue;
+using Ched.Core.Notes;
 using Ched.Components.Notes;
 using Ched.Components.Events;
 

@@ -3,17 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 
 namespace Ched.Components.Notes
 {
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class Hold : MovableLongNoteBase
     {
-        private static readonly Color BackgroundMiddleColor = Color.FromArgb(196, 216, 216, 0);
-        private static readonly Color BackgroundEdgeColor = Color.FromArgb(196, 166, 44, 168);
-
         [Newtonsoft.Json.JsonProperty]
         private int laneIndex;
         [Newtonsoft.Json.JsonProperty]
@@ -90,23 +85,6 @@ namespace Ched.Components.Notes
             endNote = new EndTap(this);
         }
 
-        internal void DrawBackground(Graphics g, RectangleF rect)
-        {
-            var prevMode = g.SmoothingMode;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            using (var brush = new LinearGradientBrush(rect, BackgroundEdgeColor, BackgroundMiddleColor, LinearGradientMode.Vertical))
-            {
-                var blend = new ColorBlend(4)
-                {
-                    Colors = new Color[] { BackgroundEdgeColor, BackgroundMiddleColor, BackgroundMiddleColor, BackgroundEdgeColor },
-                    Positions = new float[] { 0.0f, 0.3f, 0.7f, 1.0f }
-                };
-                brush.InterpolationColors = blend;
-                g.FillRectangle(brush, rect);
-            }
-            g.SmoothingMode = prevMode;
-        }
-
         public override int GetDuration()
         {
             return Duration;
@@ -115,9 +93,6 @@ namespace Ched.Components.Notes
         [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
         public abstract class TapBase : LongNoteTapBase
         {
-            private static readonly Color DarkNoteColor = Color.FromArgb(196, 86, 0);
-            private static readonly Color LightNoteColor = Color.FromArgb(244, 156, 102);
-
             protected Hold parent;
 
             public override int LaneIndex { get { return parent.LaneIndex; } }
@@ -127,11 +102,6 @@ namespace Ched.Components.Notes
             public TapBase(Hold parent)
             {
                 this.parent = parent;
-            }
-
-            protected override void DrawNote(Graphics g, RectangleF rect)
-            {
-                DrawNote(g, rect, DarkNoteColor, LightNoteColor);
             }
         }
 

@@ -9,8 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Ched.Core.Notes;
 using Ched.Components;
-using Ched.Components.Notes;
 using Ched.Components.Events;
 using Ched.Localization;
 using Ched.UI.Operations;

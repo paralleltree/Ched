@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace Ched.Drawing
 {
-    internal static class GraphicsExtensions
+    public static class GraphicsExtensions
     {
         // ref: http://csharphelper.com/blog/2016/01/draw-rounded-rectangles-in-c/
-        public static GraphicsPath ToRoundedPath(this RectangleF rect, float radius)
+        internal static GraphicsPath ToRoundedPath(this RectangleF rect, float radius)
         {
             if (radius * 2 > Math.Min(rect.Width, rect.Height))
             {

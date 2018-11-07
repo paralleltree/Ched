@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -54,31 +53,9 @@ namespace Ched.Components.Notes
 
     public abstract class LongNoteTapBase : TapBase, IAirable
     {
-        private static readonly Color AirDarkNoteColor = Color.FromArgb(6, 180, 10);
-        private static readonly Color AirLightNoteColor = Color.FromArgb(80, 224, 64);
-
         public abstract bool IsTap { get; }
         public abstract int LaneIndex { get; }
         public abstract int Tick { get; }
         public abstract int Width { get; }
-
-        internal override void Draw(Graphics g, RectangleF rect)
-        {
-            Draw(g, rect, false);
-        }
-
-        internal void Draw(Graphics g, RectangleF rect, bool isAir)
-        {
-            if (isAir)
-            {
-                DrawNote(g, rect, AirDarkNoteColor, AirLightNoteColor);
-                DrawBorder(g, rect);
-            }
-            else
-            {
-                base.Draw(g, rect);
-                if (IsTap) DrawTapSymbol(g, rect);
-            }
-        }
     }
 }
