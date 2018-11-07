@@ -14,7 +14,9 @@ after_build:
 
     New-Item -Type directory $artifacts
 
-    Get-ChildItem **\bin\$env:CONFIGURATION\* -Recurse -Include *.exe, *.dll, *.config, *.mp3 | Copy-Item -Destination $artifacts
+    Get-ChildItem Ched\bin\$env:CONFIGURATION | Copy-Item -Destination $artifacts -Recurse -Container
+
+    Get-ChildItem $artifacts -File -Recurse -Exclude *.exe, *.dll, *.config, *.mp3 | Remove-Item
 
     $shell = New-Object -ComObject("WScript.Shell")
 
