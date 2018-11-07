@@ -138,6 +138,7 @@
     </Compile>
     <Compile Include="Plugins\ComboCalculator.cs" />
     <Compile Include="Plugins\PluginManager.cs" />
+    <Compile Include="Plugins\ScorePluginArgs.cs" />
     <Compile Include="UI\BookPropertiesForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -194,6 +195,7 @@
     <Compile Include="UI\Operations\IOperation.cs" />
     <Compile Include="UI\Operations\NoteCollectionOperation.cs" />
     <Compile Include="UI\Operations\OperationManager.cs" />
+    <Compile Include="UI\Operations\ScoreOperation.cs" />
     <Compile Include="UI\PlaneExtensions.cs" />
     <Compile Include="UI\SoundManager.cs" />
     <Compile Include="UI\SoundPreviewManager.cs" />

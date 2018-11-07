@@ -14,8 +14,9 @@ namespace Ched.Plugins
     {
         public string DisplayName => "コンボ計算";
 
-        public void Run(Score score)
+        public void Run(IScorePluginArgs args)
         {
+            var score = args.GetCurrentScore();
             var combo = CalculateCombo(score);
             var sb = new StringBuilder();
             sb.AppendLine(string.Format("総コンボ数: {0}", combo.Total));

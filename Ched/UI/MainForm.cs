@@ -14,6 +14,7 @@ using Ched.Core;
 using Ched.Core.Events;
 using Ched.Configuration;
 using Ched.Localization;
+using Ched.Plugins;
 using Ched.Properties;
 using Ched.UI.Operations;
 
@@ -403,10 +404,20 @@ namespace Ched.UI
             var pluginItems = PluginManager.ScorePlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
             {
                 CommitChanges();
+                Action<Score> updateScore = newScore =>
+                {
+                    var op = new UpdateScoreOperation(ScoreBook.Score, newScore, score =>
+                    {
+                        ScoreBook.Score = score;
+                        noteView.LoadScore(score);
+                    });
+                    OperationManager.Push(op);
+                    op.Redo();
+                };
 
                 try
                 {
-                    p.Run(ScoreBook.Score);
+                    p.Run(new ScorePluginArgs(() => ScoreBook.Score.Clone(), updateScore));
                 }
                 catch (Exception ex)
                 {
