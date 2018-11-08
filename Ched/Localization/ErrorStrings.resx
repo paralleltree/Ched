@@ -149,7 +149,7 @@
   <data name="ReExportComplete" xml:space="preserve">
     <value>再エクスポートが完了しました。</value>
   </data>
-  <data name="SouceFileNotFound" xml:space="preserve">
+  <data name="SourceFileNotFound" xml:space="preserve">
     <value>音源ファイルが見つかりません。</value>
   </data>
 </root>
