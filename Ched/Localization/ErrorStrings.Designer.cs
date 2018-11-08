@@ -153,9 +153,9 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 音源ファイルが見つかりません。.
         /// </summary>
-        internal static string SouceFileNotFound {
+        internal static string SourceFileNotFound {
             get {
-                return ResourceManager.GetString("SouceFileNotFound", resourceCulture);
+                return ResourceManager.GetString("SourceFileNotFound", resourceCulture);
             }
         }
     }
