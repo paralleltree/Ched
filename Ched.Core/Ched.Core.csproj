@@ -68,6 +68,7 @@
     <Compile Include="ScoreBook.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Ched.Core.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
