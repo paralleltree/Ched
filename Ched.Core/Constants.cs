@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ched.Components
+namespace Ched.Core
 {
-    internal static class Constants
+    public static class Constants
     {
         public static int LanesCount = 16;
     }

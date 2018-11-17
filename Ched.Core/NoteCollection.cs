@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Ched.Components.Notes;
+using Ched.Core.Notes;
 
-namespace Ched.Components
+namespace Ched.Core
 {
     /// <summary>
     /// ノーツを格納するコレクションを表すクラスです。

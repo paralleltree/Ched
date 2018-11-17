@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ched.Components
+namespace Ched.Core
 {
     /// <summary>
     /// 譜面データを表すクラスです。

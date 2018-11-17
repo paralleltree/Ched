@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Ched.Components.Events;
+using Ched.Core.Events;
 
-namespace Ched.Components
+namespace Ched.Core
 {
     /// <summary>
     /// イベントを格納するコレクションを表すクラスです。

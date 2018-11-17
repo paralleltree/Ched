@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Ched.Components.Events;
-using Ched.Components.Notes;
+using Ched.Core.Events;
+using Ched.Core.Notes;
 
 namespace Ched.UI
 {

@@ -111,30 +111,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\EventCollection.cs" />
-    <Compile Include="Components\Events\BPMChangeEvent.cs" />
-    <Compile Include="Components\Events\EventBase.cs" />
-    <Compile Include="Components\Events\HighSpeedChangeEvent.cs" />
-    <Compile Include="Components\Events\TimeSignatureChangeEvent.cs" />
     <Compile Include="Components\Exporter\IExporter.cs" />
     <Compile Include="Components\Exporter\SusExporter.cs" />
-    <Compile Include="Components\NoteCollection.cs" />
-    <Compile Include="Components\Notes\Air.cs" />
-    <Compile Include="Components\Notes\AirAction.cs" />
-    <Compile Include="Components\Constants.cs" />
-    <Compile Include="Components\Notes\Damage.cs" />
-    <Compile Include="Components\Notes\ExTap.cs" />
-    <Compile Include="Components\Notes\Flick.cs" />
-    <Compile Include="Components\Notes\GraphicsExtensions.cs" />
-    <Compile Include="Components\Notes\Hold.cs" />
-    <Compile Include="Components\Notes\LongNoteBase.cs" />
-    <Compile Include="Components\Notes\NoteBase.cs" />
-    <Compile Include="Components\Notes\ShortNoteBase.cs" />
-    <Compile Include="Components\Notes\Slide.cs" />
-    <Compile Include="Components\Notes\Tap.cs" />
-    <Compile Include="Components\Notes\TappableBase.cs" />
-    <Compile Include="Components\Score.cs" />
-    <Compile Include="Components\ScoreBook.cs" />
     <Compile Include="Localization\ErrorStrings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -216,6 +194,7 @@
     <Compile Include="UI\Operations\IOperation.cs" />
     <Compile Include="UI\Operations\NoteCollectionOperation.cs" />
     <Compile Include="UI\Operations\OperationManager.cs" />
+    <Compile Include="UI\PlaneExtensions.cs" />
     <Compile Include="UI\SoundConfiguration.cs" />
     <Compile Include="UI\SoundManager.cs" />
     <Compile Include="UI\SoundPreviewManager.cs" />
@@ -422,6 +401,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\scissors-blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ched.Core\Ched.Core.csproj">
+      <Project>{5a5ff947-79dc-4352-94d5-eec14065f93a}</Project>
+      <Name>Ched.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Ched.Drawing\Ched.Drawing.csproj">
+      <Project>{a41ea7d5-9776-421b-a338-dd662287069b}</Project>
+      <Name>Ched.Drawing</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
