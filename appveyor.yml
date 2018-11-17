@@ -8,13 +8,17 @@ before_build:
     nuget restore
 build:
   verbosity: minimal
+  publish_nuget: true
+  include_nuget_references: true
 after_build:
 - ps: >-
     $artifacts = "Binaries\Ched"
 
     New-Item -Type directory $artifacts
 
-    Get-ChildItem **\bin\$env:CONFIGURATION\* -Recurse -Include *.exe, *.dll, *.config, *.mp3 | Copy-Item -Destination $artifacts
+    Get-ChildItem Ched\bin\$env:CONFIGURATION | Copy-Item -Destination $artifacts -Recurse -Container
+
+    Get-ChildItem $artifacts -File -Recurse -Exclude *.exe, *.dll, *.config, *.mp3 | Remove-Item
 
     $shell = New-Object -ComObject("WScript.Shell")
 
@@ -33,6 +37,12 @@ deploy:
     secure: KkbkUfg5iFaqdqxRAHRvPZv5+nfF99DyufxN6IijxL2TWoV3QTdkAkrnyNvIPt9+
   artifact: Ched
   draft: true
+  on:
+    branch: master
+- provider: NuGet
+  api_key:
+    secure: hSC3efdRHF0rbtteQOM+tZhMrPB76fhSKLQ21hkY7DC20HfovL8069dZPBMnuGP2
+  skip_symbols: false
   on:
     branch: master
 cache:

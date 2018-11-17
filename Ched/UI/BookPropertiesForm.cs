@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Ched.Components;
+using Ched.Core;
 
 namespace Ched.UI
 {
@@ -19,7 +19,6 @@ namespace Ched.UI
         public BookPropertiesForm(ScoreBook book, SoundSource musicSource)
         {
             InitializeComponent();
-            Text = "譜面プロパティ";
             AcceptButton = buttonOK;
             CancelButton = buttonCancel;
             buttonOK.DialogResult = DialogResult.OK;

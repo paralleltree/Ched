@@ -8,8 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Ched.Components;
+using Ched.Core;
 using Ched.Components.Exporter;
+using Ched.Localization;
 
 namespace Ched.UI
 {
@@ -72,7 +73,7 @@ namespace Ched.UI
                 if (string.IsNullOrEmpty(OutputPath)) browseButton.PerformClick();
                 if (string.IsNullOrEmpty(OutputPath))
                 {
-                    MessageBox.Show(this, "出力先を指定してください。", Program.ApplicationName);
+                    MessageBox.Show(this, ErrorStrings.OutputPathRequired, Program.ApplicationName);
                     return;
                 }
                 book.Title = titleBox.Text;
@@ -95,7 +96,7 @@ namespace Ched.UI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, "エクスポートに失敗しました。", Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(this, ErrorStrings.ExportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Program.DumpException(ex);
                 }
             };
