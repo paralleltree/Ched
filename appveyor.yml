@@ -43,5 +43,7 @@ deploy:
   api_key:
     secure: hSC3efdRHF0rbtteQOM+tZhMrPB76fhSKLQ21hkY7DC20HfovL8069dZPBMnuGP2
   skip_symbols: false
+  on:
+    branch: master
 cache:
 - packages -> **\packages.config
