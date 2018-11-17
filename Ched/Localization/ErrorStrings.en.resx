@@ -130,7 +130,9 @@
     <value>The file is not compatible with the current version.</value>
   </data>
   <data name="FileUpgradeNeeded" xml:space="preserve">
-    <value>The file was created in an older version of the software.\nSelect "Yes" to upgrade this file.\n(You will NOT be able to use this file on older versions.)</value>
+    <value>The file was created in an older version of the software.
+Select "Yes" to upgrade this file.
+(You will NOT be able to use this file on older versions.)</value>
   </data>
   <data name="MusicSourceNull" xml:space="preserve">
     <value>Please select an audio file in the Score Property.</value>
