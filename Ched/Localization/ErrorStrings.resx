@@ -130,7 +130,9 @@
     <value>現在のバージョンでは開けないファイルです。</value>
   </data>
   <data name="FileUpgradeNeeded" xml:space="preserve">
-    <value>古いバージョンで作成されたファイルです。\nバージョンアップしてよろしいですか？\n(以前のバージョンでは開けなくなります。)</value>
+    <value>古いバージョンで作成されたファイルです。
+バージョンアップしてよろしいですか？
+(以前のバージョンでは開けなくなります。)</value>
   </data>
   <data name="MusicSourceNull" xml:space="preserve">
     <value>譜面プロパティから音源ファイルを指定してください。</value>
@@ -147,7 +149,7 @@
   <data name="ReExportComplete" xml:space="preserve">
     <value>再エクスポートが完了しました。</value>
   </data>
-  <data name="SouceFileNotFound" xml:space="preserve">
+  <data name="SourceFileNotFound" xml:space="preserve">
     <value>音源ファイルが見つかりません。</value>
   </data>
 </root>

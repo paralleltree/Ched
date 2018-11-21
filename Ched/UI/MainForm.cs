@@ -527,7 +527,7 @@ namespace Ched.UI
                 }
                 if (!File.Exists(CurrentMusicSource.FilePath))
                 {
-                    MessageBox.Show(this, ErrorStrings.SouceFileNotFound, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(this, ErrorStrings.SourceFileNotFound, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 

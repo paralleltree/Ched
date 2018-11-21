@@ -97,7 +97,9 @@ namespace Ched.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 古いバージョンで作成されたファイルです。\nバージョンアップしてよろしいですか？\n(以前のバージョンでは開けなくなります。).
+        ///   Looks up a localized string similar to 古いバージョンで作成されたファイルです。
+        ///バージョンアップしてよろしいですか？
+        ///(以前のバージョンでは開けなくなります。).
         /// </summary>
         internal static string FileUpgradeNeeded {
             get {
@@ -153,9 +155,9 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 音源ファイルが見つかりません。.
         /// </summary>
-        internal static string SouceFileNotFound {
+        internal static string SourceFileNotFound {
             get {
-                return ResourceManager.GetString("SouceFileNotFound", resourceCulture);
+                return ResourceManager.GetString("SourceFileNotFound", resourceCulture);
             }
         }
     }
