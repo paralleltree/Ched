@@ -95,6 +95,7 @@ namespace Ched.Components.Exporter
                 });
                 writer.WriteLine("#TIL00: \"{0}\"", string.Join(", ", speeds));
                 writer.WriteLine("#HISPEED 00");
+                writer.WriteLine("#MEASUREHS 00");
 
                 writer.WriteLine();
 
