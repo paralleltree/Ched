@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Ched.Components;
-using Ched.Components.Notes;
+using Ched.Core;
+using Ched.Core.Notes;
 
 namespace Ched.Plugins
 {

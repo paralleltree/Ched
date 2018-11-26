@@ -17,7 +17,7 @@
 
 ## ダウンロード
 
-現在の最新版は[v2.2.0 Rev.3](https://github.com/paralleltree/Ched/releases)です。
+現在の最新版は[v2.3.0](https://github.com/paralleltree/Ched/releases)です。
 
 ## 使い方
 

@@ -97,7 +97,9 @@ namespace Ched.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 古いバージョンで作成されたファイルです。\nバージョンアップしてよろしいですか？\n(以前のバージョンでは開けなくなります。).
+        ///   Looks up a localized string similar to 古いバージョンで作成されたファイルです。
+        ///バージョンアップしてよろしいですか？
+        ///(以前のバージョンでは開けなくなります。).
         /// </summary>
         internal static string FileUpgradeNeeded {
             get {

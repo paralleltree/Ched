@@ -8,6 +8,8 @@ before_build:
     nuget restore
 build:
   verbosity: minimal
+  publish_nuget: true
+  include_nuget_references: true
 after_build:
 - ps: >-
     $artifacts = "Binaries\Ched"
@@ -35,6 +37,12 @@ deploy:
     secure: KkbkUfg5iFaqdqxRAHRvPZv5+nfF99DyufxN6IijxL2TWoV3QTdkAkrnyNvIPt9+
   artifact: Ched
   draft: true
+  on:
+    branch: master
+- provider: NuGet
+  api_key:
+    secure: hSC3efdRHF0rbtteQOM+tZhMrPB76fhSKLQ21hkY7DC20HfovL8069dZPBMnuGP2
+  skip_symbols: false
   on:
     branch: master
 cache:

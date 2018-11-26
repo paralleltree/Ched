@@ -4,24 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ched.Components.Events
+namespace Ched.Core.Events
 {
     /// <summary>
-    /// 譜面におけるイベントを表すクラスです。
+    /// BPMの変更イベントを表すクラスです。
     /// </summary>
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
-    public abstract class EventBase
+    public class BPMChangeEvent : EventBase
     {
         [Newtonsoft.Json.JsonProperty]
-        private int tick;
+        private decimal bpm;
 
-        public int Tick
+        public decimal BPM
         {
-            get { return tick; }
-            set
-            {
-                tick = value;
-            }
+            get { return bpm; }
+            set { bpm = value; }
         }
     }
 }

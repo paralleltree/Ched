@@ -7,8 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ConcurrentPriorityQueue;
-using Ched.Components.Notes;
-using Ched.Components.Events;
+using Ched.Core;
+using Ched.Core.Notes;
+using Ched.Core.Events;
 
 namespace Ched.Components.Exporter
 {
