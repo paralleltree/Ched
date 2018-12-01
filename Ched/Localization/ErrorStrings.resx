@@ -143,6 +143,9 @@
   <data name="PluginException" xml:space="preserve">
     <value>プラグインの実行中にエラーが発生しました。</value>
   </data>
+  <data name="PreviewException" xml:space="preserve">
+    <value>プレビュー中にエラーが発生しました。</value>
+  </data>
   <data name="PreviewNotSupported" xml:space="preserve">
     <value>簡易プレビューが利用できない環境です。</value>
   </data>

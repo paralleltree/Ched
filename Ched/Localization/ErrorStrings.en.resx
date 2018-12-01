@@ -143,6 +143,9 @@ Select "Yes" to upgrade this file.
   <data name="PluginException" xml:space="preserve">
     <value>An exception occured while executing the plugin.</value>
   </data>
+  <data name="PreviewException" xml:space="preserve">
+    <value>An error occured while previewing.</value>
+  </data>
   <data name="PreviewNotSupported" xml:space="preserve">
     <value>Preview cannot be used.</value>
   </data>

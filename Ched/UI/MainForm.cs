@@ -85,6 +85,7 @@ namespace Ched.UI
             PreviewManager.IsStopAtLastNote = Settings.Default.IsPreviewAbortAtLastNote;
             PreviewManager.Finished += (s, e) => NoteView.Editable = CanEdit;
             PreviewManager.TickUpdated += (s, e) => NoteView.CurrentTick = e.Tick;
+            PreviewManager.ExceptionThrown += (s, e) => MessageBox.Show(this, ErrorStrings.PreviewException, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
             NoteViewScrollBar = new VScrollBar()
             {
