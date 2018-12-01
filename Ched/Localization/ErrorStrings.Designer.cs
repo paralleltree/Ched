@@ -144,6 +144,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 以下のプラグインの読み込みに失敗しました。DLLファイルがブロックされている可能性があります。.
+        /// </summary>
+        internal static string PluginLoadError {
+            get {
+                return ResourceManager.GetString("PluginLoadError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to プレビュー中にエラーが発生しました。.
         /// </summary>
         internal static string PreviewException {

@@ -146,6 +146,9 @@ Select "Yes" to upgrade this file.
   <data name="PluginException" xml:space="preserve">
     <value>An exception occured while executing the plugin.</value>
   </data>
+  <data name="PluginLoadError" xml:space="preserve">
+    <value>The following plugin(s) is (are) not loaded. It may be occured due to the dll file(s) is (are) blocked.</value>
+  </data>
   <data name="PreviewException" xml:space="preserve">
     <value>An error occured while previewing.</value>
   </data>
