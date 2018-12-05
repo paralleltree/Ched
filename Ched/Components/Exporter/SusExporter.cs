@@ -95,6 +95,7 @@ namespace Ched.Components.Exporter
                 });
                 writer.WriteLine("#TIL00: \"{0}\"", string.Join(", ", speeds));
                 writer.WriteLine("#HISPEED 00");
+                writer.WriteLine("#MEASUREHS 00");
 
                 writer.WriteLine();
 
@@ -445,7 +446,7 @@ namespace Ched.Components.Exporter
                     };
 
                     // 時間逆順で追加
-                    if (dic.ContainsKey(pos)) dic[-pos] = item;
+                    if (dic.ContainsKey(-pos)) dic[-pos] = item;
                     else dic.Add(-pos, item);
 
                     if (i < ordered.Count - 1)
