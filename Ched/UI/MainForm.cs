@@ -208,7 +208,7 @@ namespace Ched.UI
             catch (Exception ex)
             {
                 MessageBox.Show(this, ErrorStrings.FileLoadError, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Program.DumpException(ex);
+                Program.DumpExceptionTo(ex, "file_exception.json");
                 LoadBook(new ScoreBook());
             }
         }
