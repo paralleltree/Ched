@@ -135,6 +135,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to プレビュー中にエラーが発生しました。.
+        /// </summary>
+        internal static string PreviewException {
+            get {
+                return ResourceManager.GetString("PreviewException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 簡易プレビューが利用できない環境です。.
         /// </summary>
         internal static string PreviewNotSupported {
