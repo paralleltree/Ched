@@ -88,6 +88,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ファイルにアクセスできません。.
+        /// </summary>
+        internal static string FileNotAccessible {
+            get {
+                return ResourceManager.GetString("FileNotAccessible", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 現在のバージョンでは開けないファイルです。.
         /// </summary>
         internal static string FileNotCompatible {

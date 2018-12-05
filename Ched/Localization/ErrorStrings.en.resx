@@ -126,6 +126,9 @@
   <data name="FileLoadError" xml:space="preserve">
     <value>An error occured while attempting to read the file.</value>
   </data>
+  <data name="FileNotAccessible" xml:space="preserve">
+    <value>The file is not accessible.</value>
+  </data>
   <data name="FileNotCompatible" xml:space="preserve">
     <value>The file is not compatible with the current version.</value>
   </data>
