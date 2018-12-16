@@ -177,6 +177,11 @@ namespace Ched.UI
 
             if (!PreviewManager.IsSupported)
                 MessageBox.Show(this, ErrorStrings.PreviewNotSupported, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            if (PluginManager.FailedFiles.Count > 0)
+            {
+                MessageBox.Show(this, string.Join("\n", new[] { ErrorStrings.PluginLoadError }.Concat(PluginManager.FailedFiles)), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         public MainForm(string filePath) : this()
@@ -200,10 +205,15 @@ namespace Ched.UI
                 }
                 LoadBook(ScoreBook.LoadFile(filePath));
             }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show(this, ErrorStrings.FileNotAccessible, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LoadBook(new ScoreBook());
+            }
             catch (Exception ex)
             {
                 MessageBox.Show(this, ErrorStrings.FileLoadError, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Program.DumpException(ex);
+                Program.DumpExceptionTo(ex, "file_exception.json");
                 LoadBook(new ScoreBook());
             }
         }

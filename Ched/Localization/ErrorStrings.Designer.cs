@@ -88,6 +88,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ファイルにアクセスできません。.
+        /// </summary>
+        internal static string FileNotAccessible {
+            get {
+                return ResourceManager.GetString("FileNotAccessible", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 現在のバージョンでは開けないファイルです。.
         /// </summary>
         internal static string FileNotCompatible {
@@ -131,6 +140,15 @@ namespace Ched.Localization {
         internal static string PluginException {
             get {
                 return ResourceManager.GetString("PluginException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 以下のプラグインの読み込みに失敗しました。DLLファイルがブロックされている可能性があります。.
+        /// </summary>
+        internal static string PluginLoadError {
+            get {
+                return ResourceManager.GetString("PluginLoadError", resourceCulture);
             }
         }
         
