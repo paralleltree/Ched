@@ -433,7 +433,10 @@ namespace Ched.UI
 
             var insertBPMItem = new MenuItem("BPM", (s, e) =>
             {
-                var form = new BPMSelectionForm();
+                var form = new BPMSelectionForm()
+                {
+                    BPM = noteView.ScoreEvents.BPMChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.BPM ?? 120m
+                };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
                 var prev = noteView.ScoreEvents.BPMChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
@@ -461,7 +464,10 @@ namespace Ched.UI
 
             var insertHighSpeedItem = new MenuItem(MainFormStrings.HighSpeed, (s, e) =>
             {
-                var form = new HighSpeedSelectionForm();
+                var form = new HighSpeedSelectionForm()
+                {
+                    SpeedRatio = noteView.ScoreEvents.HighSpeedChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.SpeedRatio ?? 1.0m
+                };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
                 var prev = noteView.ScoreEvents.HighSpeedChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
