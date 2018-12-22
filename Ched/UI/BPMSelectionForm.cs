@@ -28,7 +28,7 @@ namespace Ched.UI
 
             bpmBox.DecimalPlaces = 0;
             bpmBox.Increment = 1;
-            bpmBox.Maximum = 999;
+            bpmBox.Maximum = 10000;
             bpmBox.Minimum = 10;
             bpmBox.Value = 120;
         }
