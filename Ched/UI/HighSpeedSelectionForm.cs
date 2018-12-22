@@ -12,7 +12,11 @@ namespace Ched.UI
 {
     public partial class HighSpeedSelectionForm : Form
     {
-        public decimal SpeedRatio { get { return speedRatioBox.Value; } }
+        public decimal SpeedRatio
+        {
+            get { return speedRatioBox.Value; }
+            set { speedRatioBox.Value = value; }
+        }
 
         public HighSpeedSelectionForm()
         {
