@@ -7,25 +7,17 @@ using System.Configuration;
 
 using Ched.UI;
 
-namespace Ched.Properties
+namespace Ched.Configuration
 {
-    internal sealed class SoundConfiguration : ApplicationSettingsBase
+    internal sealed class SoundSettings : SettingsBase
     {
-        private static SoundConfiguration defaultInstance = (SoundConfiguration)Synchronized(new SoundConfiguration());
+        private static SoundSettings defaultInstance = (SoundSettings)Synchronized(new SoundSettings());
 
-        private SoundConfiguration()
+        private SoundSettings()
         {
         }
 
-        public static SoundConfiguration Default { get { return defaultInstance; } }
-
-        [UserScopedSetting]
-        [DefaultSettingValue("False")]
-        public bool HasUpgraded
-        {
-            get { return (bool)this["HasUpgraded"]; }
-            set { this["HasUpgraded"] = value; }
-        }
+        public static SoundSettings Default => defaultInstance;
 
         // ref: https://stackoverflow.com/a/12807699
         [UserScopedSetting]
