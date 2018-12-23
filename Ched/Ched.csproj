@@ -113,6 +113,9 @@
   <ItemGroup>
     <Compile Include="Components\Exporter\IExporter.cs" />
     <Compile Include="Components\Exporter\SusExporter.cs" />
+    <Compile Include="Configuration\ApplicationSettings.cs" />
+    <Compile Include="Configuration\SettingsBase.cs" />
+    <Compile Include="Configuration\SoundSettings.cs" />
     <Compile Include="Localization\ErrorStrings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -137,7 +140,6 @@
     <Compile Include="Plugins\IPlugin.cs" />
     <Compile Include="Plugins\IScorePlugin.cs" />
     <Compile Include="Plugins\PluginManager.cs" />
-    <Compile Include="Settings.cs" />
     <Compile Include="UI\BookPropertiesForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -195,7 +197,6 @@
     <Compile Include="UI\Operations\NoteCollectionOperation.cs" />
     <Compile Include="UI\Operations\OperationManager.cs" />
     <Compile Include="UI\PlaneExtensions.cs" />
-    <Compile Include="UI\SoundConfiguration.cs" />
     <Compile Include="UI\SoundManager.cs" />
     <Compile Include="UI\SoundPreviewManager.cs" />
     <Compile Include="UI\SoundSourceSelector.cs">
@@ -296,15 +297,6 @@
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
