@@ -1119,11 +1119,13 @@ namespace Ched.UI
                                             // 同一Tickに追加させない
                                             if (tickOffset != 0 && !note.StepNotes.Any(q => q.TickOffset == tickOffset))
                                             {
-                                                int laneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - note.StartWidth / 2;
-                                                laneIndex = Math.Min(Constants.LanesCount - note.StartWidth, Math.Max(0, laneIndex));
+                                                int width = note.StepNotes.OrderBy(q => q.TickOffset).LastOrDefault(q => q.TickOffset <= tickOffset)?.Width ?? note.StartWidth;
+                                                int laneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - width / 2;
+                                                laneIndex = Math.Min(Constants.LanesCount - width, Math.Max(0, laneIndex));
                                                 int laneIndexOffset = laneIndex - note.StartLaneIndex;
                                                 var newStep = new Slide.StepTap(note)
                                                 {
+                                                    WidthChange = width - note.StartWidth,
                                                     TickOffset = tickOffset,
                                                     LaneIndexOffset = laneIndexOffset,
                                                     IsVisible = IsNewSlideStepVisible

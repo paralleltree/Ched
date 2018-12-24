@@ -395,7 +395,7 @@ namespace Ched.Components.Exporter
             public void Clear()
             {
                 lastStartTick = 0;
-                IdentifierStack = new Stack<char>(Enumerable.Range(0, 26).Select(p => (char)('A' + p)).Reverse());
+                IdentifierStack = new Stack<char>(EnumerateIdentifiers(1).Select(p => p.Single()).Reverse());
                 UsedIdentifiers = new ConcurrentPriorityQueue<Tuple<int, char>, int>();
             }
 
