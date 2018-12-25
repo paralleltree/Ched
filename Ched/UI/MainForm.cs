@@ -223,7 +223,8 @@ namespace Ched.UI
         protected void LoadBook(ScoreBook book)
         {
             ScoreBook = book;
-            NoteView.LoadScore(book.Score);
+            OperationManager.Clear();
+            NoteView.Initialize(book.Score);
             NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             UpdateThumbHeight();
@@ -409,7 +410,7 @@ namespace Ched.UI
                     var op = new UpdateScoreOperation(ScoreBook.Score, newScore, score =>
                     {
                         ScoreBook.Score = score;
-                        noteView.LoadScore(score);
+                        noteView.UpdateScore(score);
                     });
                     OperationManager.Push(op);
                     op.Redo();
