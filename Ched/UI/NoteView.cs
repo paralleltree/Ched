@@ -1122,14 +1122,12 @@ namespace Ched.UI
                                                 int width = note.StepNotes.OrderBy(q => q.TickOffset).LastOrDefault(q => q.TickOffset <= tickOffset)?.Width ?? note.StartWidth;
                                                 int laneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - width / 2;
                                                 laneIndex = Math.Min(Constants.LanesCount - width, Math.Max(0, laneIndex));
-                                                int laneIndexOffset = laneIndex - note.StartLaneIndex;
                                                 var newStep = new Slide.StepTap(note)
                                                 {
-                                                    WidthChange = width - note.StartWidth,
                                                     TickOffset = tickOffset,
-                                                    LaneIndexOffset = laneIndexOffset,
                                                     IsVisible = IsNewSlideStepVisible
                                                 };
+                                                newStep.SetPosition(laneIndex - note.StartLaneIndex, width - note.StartWidth);
                                                 note.StepNotes.Add(newStep);
                                                 Invalidate();
                                                 return moveSlideStepNoteHandler(newStep)
