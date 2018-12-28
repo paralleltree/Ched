@@ -1007,10 +1007,12 @@ namespace Ched.UI
                                     var airAction = new AirAction(note);
                                     var action = new AirAction.ActionNote(airAction) { Offset = (int)QuantizeTick };
                                     airAction.ActionNotes.Add(action);
-                                    Notes.Add(airAction);
+                                    var op = new InsertAirActionOperation(Notes, airAction);
+                                    IOperation comp = Notes.GetReferencedAir(note).Count() > 0 ? (IOperation)op : new CompositeOperation("AIR, AIR-ACTIONの追加", new IOperation[] { new InsertAirOperation(Notes, new Air(note)), op });
+                                    comp.Redo();
                                     Invalidate();
                                     return actionNoteHandler(action)
-                                        .Finally(() => OperationManager.Push(new InsertAirActionOperation(Notes, airAction)));
+                                        .Finally(() => OperationManager.Push(comp));
                                 }
                             }
 
