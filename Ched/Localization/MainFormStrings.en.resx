@@ -255,4 +255,7 @@
   <data name="SlideStep" xml:space="preserve">
     <value>SLIDE (STEP)</value>
   </data>
+  <data name="InsertAirWithAirAction" xml:space="preserve">
+    <value>Add AIR with AIR-ACTION</value>
+  </data>
 </root>

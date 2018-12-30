@@ -13,6 +13,15 @@ namespace Ched.Plugins
     /// </summary>
     public interface IScorePlugin : IPlugin
     {
-        void Run(Score score);
+        void Run(IScorePluginArgs args);
+    }
+
+    /// <summary>
+    /// <see cref="IScorePlugin"/>の実行時に渡される情報を表します。
+    /// </summary>
+    public interface IScorePluginArgs
+    {
+        Score GetCurrentScore();
+        void UpdateScore(Score score);
     }
 }
