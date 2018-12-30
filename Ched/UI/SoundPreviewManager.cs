@@ -92,6 +92,14 @@ namespace Ched.UI
 
                 System.Threading.Thread.Sleep(TimeSpan.FromSeconds(Math.Max(ClapSource.Latency, 0)));
                 SoundManager.Play(music.FilePath, startTime + TimeSpan.FromSeconds(music.Latency));
+            })
+            .ContinueWith(p =>
+            {
+                if (p.Exception != null)
+                {
+                    Program.DumpExceptionTo(p.Exception, "sound_exception.json");
+                    ExceptionThrown?.Invoke(this, EventArgs.Empty);
+                }
             });
 
             Playing = true;
