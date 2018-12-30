@@ -174,7 +174,7 @@ namespace Ched.UI
             NoteView.NewNoteType = NoteType.Tap;
             NoteView.EditMode = EditMode.Edit;
 
-            LoadBook(new ScoreBook());
+            LoadEmptyBook();
             SetText();
 
             if (!PreviewManager.IsSupported)
@@ -210,13 +210,13 @@ namespace Ched.UI
             catch (UnauthorizedAccessException)
             {
                 MessageBox.Show(this, ErrorStrings.FileNotAccessible, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                LoadBook(new ScoreBook());
+                LoadEmptyBook();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(this, ErrorStrings.FileLoadError, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Program.DumpExceptionTo(ex, "file_exception.json");
-                LoadBook(new ScoreBook());
+                LoadEmptyBook();
             }
         }
 
@@ -238,6 +238,15 @@ namespace Ched.UI
             {
                 CurrentMusicSource = null;
             }
+        }
+
+        protected void LoadEmptyBook()
+        {
+            var book = new ScoreBook();
+            var events = book.Score.Events;
+            events.BPMChangeEvents.Add(new BPMChangeEvent() { Tick = 0, BPM = 120 });
+            events.TimeSignatureChangeEvents.Add(new TimeSignatureChangeEvent() { Tick = 0, Numerator = 4, DenominatorExponent = 2 });
+            LoadBook(book);
         }
 
         protected void OpenFile()
@@ -307,7 +316,7 @@ namespace Ched.UI
         {
             if (!OperationManager.IsChanged || this.ConfirmDiscardChanges())
             {
-                LoadBook(new ScoreBook());
+                LoadEmptyBook();
             }
         }
 

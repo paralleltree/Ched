@@ -15,9 +15,9 @@ namespace Ched.Core
     public class EventCollection
     {
         [Newtonsoft.Json.JsonProperty]
-        private List<BPMChangeEvent> bpmChangeEvents = new List<BPMChangeEvent>() { new BPMChangeEvent() { Tick = 0, BPM = 120 } };
+        private List<BPMChangeEvent> bpmChangeEvents = new List<BPMChangeEvent>();
         [Newtonsoft.Json.JsonProperty]
-        private List<TimeSignatureChangeEvent> timeSignatureChangeEvents = new List<TimeSignatureChangeEvent>() { new TimeSignatureChangeEvent() { Tick = 0, Numerator = 4, DenominatorExponent = 2 } };
+        private List<TimeSignatureChangeEvent> timeSignatureChangeEvents = new List<TimeSignatureChangeEvent>();
         [Newtonsoft.Json.JsonProperty]
         private List<HighSpeedChangeEvent> highSpeedChangeEvents = new List<HighSpeedChangeEvent>();
 
