@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Ched.Core;
+using Ched.Core.Events;
 
 namespace Ched.Plugins
 {
@@ -26,7 +27,17 @@ namespace Ched.Plugins
 
         public void UpdateScore(Score score)
         {
+            CheckEventDuplicate(score.Events.BPMChangeEvents);
+            CheckEventDuplicate(score.Events.TimeSignatureChangeEvents);
+            CheckEventDuplicate(score.Events.HighSpeedChangeEvents);
             updateScoreAction(score);
+        }
+
+        private void CheckEventDuplicate<T>(IList<T> src) where T : EventBase
+        {
+            var set = new HashSet<int>();
+            if (src.All(p => set.Add(p.Tick))) return;
+            throw new ArgumentException("There are some events in same ticks.");
         }
     }
 }
