@@ -45,5 +45,17 @@ namespace Ched.Core
             get { return events; }
             set { events = value; }
         }
+
+        public Score Clone()
+        {
+            var score = Newtonsoft.Json.JsonConvert.DeserializeObject<Score>(Newtonsoft.Json.JsonConvert.SerializeObject(this, ScoreBook.SerializerSettings));
+            foreach (var note in score.Notes.AirActions)
+            {
+                var restored = new List<Notes.AirAction.ActionNote>(note.ActionNotes.Select(p => new Notes.AirAction.ActionNote(note) { Offset = p.Offset }));
+                note.ActionNotes.Clear();
+                note.ActionNotes.AddRange(restored);
+            }
+            return score;
+        }
     }
 }
