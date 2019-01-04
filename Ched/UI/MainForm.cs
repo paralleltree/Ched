@@ -411,6 +411,17 @@ namespace Ched.UI
                 noteView.Invalidate();
             });
 
+            var insertAirWithAirActionItem = new MenuItem(MainFormStrings.InsertAirWithAirAction, (s, e) =>
+            {
+                var item = s as MenuItem;
+                item.Checked = !item.Checked;
+                NoteView.InsertAirWithAirAction = item.Checked;
+                ApplicationSettings.Default.InsertAirWithAirAction = item.Checked;
+            })
+            {
+                Checked = ApplicationSettings.Default.InsertAirWithAirAction
+            };
+
             var pluginItems = PluginManager.ScorePlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
             {
                 CommitChanges();
@@ -442,6 +453,7 @@ namespace Ched.UI
                 undoItem, redoItem, new MenuItem("-"),
                 cutItem, copyItem, pasteItem, pasteFlippedItem, new MenuItem("-"),
                 flipSelectedNotesItem, removeSelectedNotesItem, removeEventsItem, new MenuItem("-"),
+                insertAirWithAirActionItem, new MenuItem("-"),
                 pluginItem
             };
 

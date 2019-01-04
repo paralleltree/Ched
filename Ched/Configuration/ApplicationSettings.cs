@@ -26,6 +26,14 @@ namespace Ched.Configuration
         }
 
         [UserScopedSetting]
+        [DefaultSettingValue("True")]
+        public bool InsertAirWithAirAction
+        {
+            get { return ((bool)(this["InsertAirWithAirAction"])); }
+            set { this["InsertAirWithAirAction"] = value; }
+        }
+
+        [UserScopedSetting]
         [DefaultSettingValue("False")]
         public bool IsPreviewAbortAtLastNote
         {

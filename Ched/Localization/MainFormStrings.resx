@@ -255,4 +255,7 @@
   <data name="SlideStep" xml:space="preserve">
     <value>SLIDE(中継点)</value>
   </data>
+  <data name="InsertAirWithAirAction" xml:space="preserve">
+    <value>AIR-ACTIONとAIRを同時に追加する</value>
+  </data>
 </root>
