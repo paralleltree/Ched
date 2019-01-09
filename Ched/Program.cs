@@ -5,6 +5,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Ched.Configuration;
+
 namespace Ched
 {
     static class Program
@@ -22,18 +24,8 @@ namespace Ched
             AppDomain.CurrentDomain.UnhandledException += (s, e) => DumpException((Exception)e.ExceptionObject, true);
 #endif
 
-            if (!Properties.Settings.Default.HasUpgraded)
-            {
-                Properties.Settings.Default.Upgrade();
-                Properties.Settings.Default.HasUpgraded = true;
-                Properties.Settings.Default.Save();
-            }
-            if (!Properties.SoundConfiguration.Default.HasUpgraded)
-            {
-                Properties.SoundConfiguration.Default.Upgrade();
-                Properties.SoundConfiguration.Default.HasUpgraded = true;
-                Properties.SoundConfiguration.Default.Save();
-            }
+            UpgradeConfiguration(ApplicationSettings.Default);
+            UpgradeConfiguration(SoundSettings.Default);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -62,6 +54,21 @@ namespace Ched
             {
                 Environment.Exit(1);
             }
+        }
+
+        private static bool UpgradeConfiguration(SettingsBase setting)
+        {
+            try
+            {
+                if (!setting.HasUpgraded) setting.Upgrade();
+            }
+            catch (Exception ex)
+            {
+                DumpExceptionTo(ex, "configuration_exeption.json");
+                setting.Reset();
+                return false;
+            }
+            return true;
         }
     }
 }

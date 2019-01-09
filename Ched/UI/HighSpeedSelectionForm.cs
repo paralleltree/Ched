@@ -12,7 +12,11 @@ namespace Ched.UI
 {
     public partial class HighSpeedSelectionForm : Form
     {
-        public decimal SpeedRatio { get { return speedRatioBox.Value; } }
+        public decimal SpeedRatio
+        {
+            get { return speedRatioBox.Value; }
+            set { speedRatioBox.Value = value; }
+        }
 
         public HighSpeedSelectionForm()
         {
@@ -22,8 +26,8 @@ namespace Ched.UI
             buttonOK.DialogResult = DialogResult.OK;
             buttonCancel.DialogResult = DialogResult.Cancel;
 
-            speedRatioBox.Minimum = -100m;
-            speedRatioBox.Maximum = 100m;
+            speedRatioBox.Minimum = -10000m;
+            speedRatioBox.Maximum = 10000m;
             speedRatioBox.Increment = 0.01m;
             speedRatioBox.DecimalPlaces = 2;
             speedRatioBox.Value = 1;

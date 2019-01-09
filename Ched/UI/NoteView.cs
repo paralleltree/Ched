@@ -301,6 +301,11 @@ namespace Ched.UI
         }
 
         /// <summary>
+        /// AIR-ACTION挿入時に未追加のAIRを追加するかどうか指定します。
+        /// </summary>
+        public bool InsertAirWithAirAction { get; set; }
+
+        /// <summary>
         /// ノート幅に対するノート端の当たり判定に含める割合を設定します。
         /// </summary>
         public float EdgeHitWidthRate { get; set; } = 0.2f;
@@ -1007,10 +1012,12 @@ namespace Ched.UI
                                     var airAction = new AirAction(note);
                                     var action = new AirAction.ActionNote(airAction) { Offset = (int)QuantizeTick };
                                     airAction.ActionNotes.Add(action);
-                                    Notes.Add(airAction);
+                                    var op = new InsertAirActionOperation(Notes, airAction);
+                                    IOperation comp = InsertAirWithAirAction && Notes.GetReferencedAir(note).Count() == 0 ? (IOperation)new CompositeOperation("AIR, AIR-ACTIONの追加", new IOperation[] { new InsertAirOperation(Notes, new Air(note)), op }) : op;
+                                    comp.Redo();
                                     Invalidate();
                                     return actionNoteHandler(action)
-                                        .Finally(() => OperationManager.Push(new InsertAirActionOperation(Notes, airAction)));
+                                        .Finally(() => OperationManager.Push(comp));
                                 }
                             }
 
@@ -1119,15 +1126,15 @@ namespace Ched.UI
                                             // 同一Tickに追加させない
                                             if (tickOffset != 0 && !note.StepNotes.Any(q => q.TickOffset == tickOffset))
                                             {
-                                                int laneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - note.StartWidth / 2;
-                                                laneIndex = Math.Min(Constants.LanesCount - note.StartWidth, Math.Max(0, laneIndex));
-                                                int laneIndexOffset = laneIndex - note.StartLaneIndex;
+                                                int width = note.StepNotes.OrderBy(q => q.TickOffset).LastOrDefault(q => q.TickOffset <= tickOffset)?.Width ?? note.StartWidth;
+                                                int laneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - width / 2;
+                                                laneIndex = Math.Min(Constants.LanesCount - width, Math.Max(0, laneIndex));
                                                 var newStep = new Slide.StepTap(note)
                                                 {
                                                     TickOffset = tickOffset,
-                                                    LaneIndexOffset = laneIndexOffset,
                                                     IsVisible = IsNewSlideStepVisible
                                                 };
+                                                newStep.SetPosition(laneIndex - note.StartLaneIndex, width - note.StartWidth);
                                                 note.StepNotes.Add(newStep);
                                                 Invalidate();
                                                 return moveSlideStepNoteHandler(newStep)
@@ -2099,13 +2106,23 @@ namespace Ched.UI
         }
 
 
-        public void LoadScore(Score score)
+        public void Initialize()
         {
             SelectedRange = SelectionRange.Empty;
             CurrentTick = SelectedRange.StartTick;
+            Invalidate();
+        }
+
+        public void Initialize(Score score)
+        {
+            Initialize();
+            UpdateScore(score);
+        }
+
+        public void UpdateScore(Score score)
+        {
             Notes = new NoteCollection(score.Notes);
             ScoreEvents = score.Events;
-            OperationManager.Clear();
             Invalidate();
         }
 

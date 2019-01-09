@@ -19,6 +19,8 @@ namespace Ched.UI
 
         public bool IsSupported { get; private set; } = true;
 
+        public event EventHandler ExceptionThrown;
+
         public void Dispose()
         {
             foreach (var item in voices) item.Key.Dispose();
@@ -60,7 +62,15 @@ namespace Ched.UI
         public void Play(string path, TimeSpan offset)
         {
             CheckSupported();
-            Task.Run(() => PlayInternal(path, offset));
+            Task.Run(() => PlayInternal(path, offset))
+                .ContinueWith(p =>
+                {
+                    if (p.Exception != null)
+                    {
+                        Program.DumpExceptionTo(p.Exception, "sound_exception.json");
+                        ExceptionThrown?.Invoke(this, EventArgs.Empty);
+                    }
+                });
         }
 
         private void PlayInternal(string path, TimeSpan offset)
