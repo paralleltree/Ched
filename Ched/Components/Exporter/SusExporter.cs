@@ -64,7 +64,7 @@ namespace Ched.Components.Exporter
                 if (bpmlist.Count >= 36 * 36) throw new ArgumentException("BPM定義数が上限を超えました。");
 
                 var bpmIdentifiers = EnumerateIdentifiers(2).Skip(1).Take(bpmlist.Count).ToList();
-                foreach (var item in bpmlist)
+                foreach (var item in bpmlist.GroupBy(p => p.Index).Select(p => p.First()))
                 {
                     writer.WriteLine("#BPM{0}: {1}", bpmIdentifiers[item.Index], item.Value.BPM);
                 }
