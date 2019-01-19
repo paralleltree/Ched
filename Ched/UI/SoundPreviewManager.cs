@@ -38,11 +38,11 @@ namespace Ched.UI
             ClapSource = new SoundSource("guide.mp3", 0.036);
             NoteView = noteView;
             Timer.Tick += Tick;
-            SoundManager.ExceptionThrown += (s, e) =>
+            SoundManager.ExceptionThrown += (s, e) => noteView.InvokeIfRequired(() =>
             {
                 Stop();
                 ExceptionThrown?.Invoke(this, EventArgs.Empty);
-            };
+            });
         }
 
         public bool Start(SoundSource music)
