@@ -1,7 +1,7 @@
 version: '{build}'
 os: Visual Studio 2015
 configuration: Release
-platform: Any CPU
+platform: x86
 skip_tags: true
 before_build:
 - ps: >-
@@ -16,7 +16,7 @@ after_build:
 
     New-Item -Type directory $artifacts
 
-    Get-ChildItem Ched\bin\$env:CONFIGURATION | Copy-Item -Destination $artifacts -Recurse -Container
+    Get-ChildItem Ched\bin\$env:PLATFORM\$env:CONFIGURATION | Copy-Item -Destination $artifacts -Recurse -Container
 
     Get-ChildItem $artifacts -File -Recurse -Exclude *.exe, *.dll, *.config, *.mp3 | Remove-Item
 
