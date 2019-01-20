@@ -34,7 +34,13 @@ namespace Ched
 
         public static void DumpExceptionTo(Exception ex, string filename)
         {
-            File.WriteAllText(filename, Newtonsoft.Json.JsonConvert.SerializeObject(ex));
+            try
+            {
+                File.WriteAllText(filename, Newtonsoft.Json.JsonConvert.SerializeObject(ex));
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
         }
 
         public static void DumpException(Exception ex)

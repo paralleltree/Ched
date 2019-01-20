@@ -44,7 +44,7 @@ namespace Ched.Plugins
                         var assembly = System.Reflection.Assembly.LoadFile(path);
                         catalog.Catalogs.Add(new AssemblyCatalog(assembly, builder));
                     }
-                    catch (NotSupportedException ex)
+                    catch (Exception ex) when (ex is NotSupportedException || ex is BadImageFormatException)
                     {
                         failed.Add(Uri.UnescapeDataString(new Uri(Path.GetFullPath(PluginPath)).MakeRelativeUri(new Uri(path)).ToString().Replace('/', Path.DirectorySeparatorChar)));
                     }
