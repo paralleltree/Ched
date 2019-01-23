@@ -20,6 +20,8 @@ after_build:
 
     Get-ChildItem $artifacts -File -Recurse -Exclude *.exe, *.dll, *.config, *.mp3 | Remove-Item
 
+    Get-ChildItem $artifacts\Addon -File -Recurse -Include basszxtune.dll | Remove-Item
+
     $shell = New-Object -ComObject("WScript.Shell")
 
     $wiki = $shell.CreateShortcut("$env:APPVEYOR_BUILD_FOLDER\$artifacts\Ched Wiki.url")
