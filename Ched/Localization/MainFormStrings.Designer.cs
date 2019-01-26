@@ -259,6 +259,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to インポート.
+        /// </summary>
+        internal static string Import {
+            get {
+                return ResourceManager.GetString("Import", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AIR-ACTIONとAIRを同時に追加する.
         /// </summary>
         internal static string InsertAirWithAirAction {

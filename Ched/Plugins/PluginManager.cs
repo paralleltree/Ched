@@ -17,9 +17,13 @@ namespace Ched.Plugins
 
         [ImportMany]
         IEnumerable<IScorePlugin> scorePlugins = Enumerable.Empty<IScorePlugin>();
+        [ImportMany]
+        IEnumerable<IScoreBookImportPlugin> bookImportPlugins = Enumerable.Empty<IScoreBookImportPlugin>();
+
         public List<string> FailedFiles { get; private set; } = new List<string>();
 
         public IEnumerable<IScorePlugin> ScorePlugins => scorePlugins;
+        public IEnumerable<IScoreBookImportPlugin> ScoreBookImportPlugins => bookImportPlugins;
 
         private PluginManager()
         {
