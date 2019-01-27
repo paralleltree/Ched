@@ -35,6 +35,7 @@ namespace Ched.UI
         private ColorProfile colorProfile;
         private int unitLaneWidth = 12;
         private int shortNoteHeight = 5;
+        private int unitBeatTick = 480;
         private float unitBeatHeight = 120;
 
         private int headTick = 0;
@@ -146,9 +147,17 @@ namespace Ched.UI
         }
 
         /// <summary>
-        /// 1拍あたりのTick数を取得します。
+        /// 1拍あたりのTick数を設定します。
         /// </summary>
-        public int UnitBeatTick { get { return 480; } }
+        public int UnitBeatTick
+        {
+            get { return unitBeatTick; }
+            set
+            {
+                unitBeatTick = value;
+                Invalidate();
+            }
+        }
 
         /// <summary>
         /// 1拍あたりの表示高さを設定します。
@@ -2121,6 +2130,7 @@ namespace Ched.UI
 
         public void UpdateScore(Score score)
         {
+            UnitBeatTick = score.TicksPerBeat;
             Notes = new NoteCollection(score.Notes);
             ScoreEvents = score.Events;
             Invalidate();
