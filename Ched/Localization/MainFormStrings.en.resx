@@ -258,4 +258,7 @@
   <data name="InsertAirWithAirAction" xml:space="preserve">
     <value>Add AIR with AIR-ACTION</value>
   </data>
+  <data name="Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
 </root>

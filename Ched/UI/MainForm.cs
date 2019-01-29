@@ -251,16 +251,21 @@ namespace Ched.UI
 
         protected void OpenFile()
         {
+            OpenFile(FileTypeFilter, p => LoadFile(p));
+        }
+
+        protected void OpenFile(string filter, Action<string> loadAction)
+        {
             if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) return;
 
             var dialog = new OpenFileDialog()
             {
-                Filter = FileTypeFilter
+                Filter = filter
             };
 
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
-                LoadFile(dialog.FileName);
+                loadAction(dialog.FileName);
             }
         }
 
@@ -338,6 +343,24 @@ namespace Ched.UI
 
         private MainMenu CreateMainMenu(NoteView noteView)
         {
+            var importPluginItems = PluginManager.ScoreBookImportPlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
+            {
+                OpenFile(p.FileFilter, q =>
+                {
+                    try
+                    {
+                        using (var reader = new StreamReader(q))
+                            LoadBook(p.Import(reader));
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(this, ErrorStrings.ImportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Program.DumpExceptionTo(ex, "import_exception.json");
+                        LoadEmptyBook();
+                    }
+                });
+            })).ToArray();
+
             var bookPropertiesMenuItem = new MenuItem(MainFormStrings.bookProperty, (s, e) =>
             {
                 var form = new BookPropertiesForm(ScoreBook, CurrentMusicSource);
@@ -356,6 +379,8 @@ namespace Ched.UI
                 new MenuItem(MainFormStrings.OpenFile + "(&O)", (s, e) => OpenFile()) { Shortcut = Shortcut.CtrlO },
                 new MenuItem(MainFormStrings.SaveFile + "(&S)", (s, e) => SaveFile()) { Shortcut = Shortcut.CtrlS },
                 new MenuItem(MainFormStrings.SaveAs + "(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
+                new MenuItem("-"),
+                new MenuItem(MainFormStrings.Import, importPluginItems),
                 new MenuItem(MainFormStrings.Export, (s, e) => ExportFile()),
                 new MenuItem("-"),
                 bookPropertiesMenuItem,

@@ -137,6 +137,9 @@
 バージョンアップしてよろしいですか？
 (以前のバージョンでは開けなくなります。)</value>
   </data>
+  <data name="ImportFailed" xml:space="preserve">
+    <value>インポートに失敗しました。</value>
+  </data>
   <data name="MusicSourceNull" xml:space="preserve">
     <value>譜面プロパティから音源ファイルを指定してください。</value>
   </data>
