@@ -117,6 +117,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to インポートに失敗しました。.
+        /// </summary>
+        internal static string ImportFailed {
+            get {
+                return ResourceManager.GetString("ImportFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 譜面プロパティから音源ファイルを指定してください。.
         /// </summary>
         internal static string MusicSourceNull {

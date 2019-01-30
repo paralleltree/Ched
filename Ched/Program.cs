@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -23,6 +24,12 @@ namespace Ched
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
             AppDomain.CurrentDomain.UnhandledException += (s, e) => DumpException((Exception)e.ExceptionObject, true);
 #endif
+
+            AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
+            {
+                string path = Path.Combine(Plugins.PluginManager.PluginPath, new AssemblyName(e.Name).Name + ".dll");
+                return File.Exists(path) ? Assembly.LoadFrom(path) : null;
+            };
 
             UpgradeConfiguration(ApplicationSettings.Default);
             UpgradeConfiguration(SoundSettings.Default);
