@@ -105,7 +105,7 @@ namespace Ched.UI
                 }
             }
 
-            playing.Add(handle);
+            lock (playing) playing.Add(handle);
             Bass.BASS_ChannelSetPosition(handle, offset.TotalSeconds);
             Bass.BASS_ChannelPlay(handle, false);
         }
