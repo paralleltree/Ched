@@ -80,7 +80,8 @@ namespace Ched.UI
             NoteView = new NoteView(OperationManager)
             {
                 Dock = DockStyle.Fill,
-                UnitBeatHeight = ApplicationSettings.Default.UnitBeatHeight
+                UnitBeatHeight = ApplicationSettings.Default.UnitBeatHeight,
+                InsertAirWithAirAction = ApplicationSettings.Default.InsertAirWithAirAction
             };
 
             PreviewManager = new SoundPreviewManager(NoteView);
