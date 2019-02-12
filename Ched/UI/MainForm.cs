@@ -33,8 +33,8 @@ namespace Ched.UI
         private ScrollBar NoteViewScrollBar { get; }
         private NoteView NoteView { get; }
 
-        private ToolStripButton ZoomInButton;
-        private ToolStripButton ZoomOutButton;
+        private MainToolBar MainToolBar { get; }
+        private NoteToolBar NoteToolBar { get; }
 
         private ExportData LastExportData { get; set; }
 
@@ -56,8 +56,8 @@ namespace Ched.UI
                 NoteView.ShortNoteHeight = isPreviewMode ? 4 : 5;
                 NoteView.UnitBeatHeight = isPreviewMode ? 48 : ApplicationSettings.Default.UnitBeatHeight;
                 UpdateThumbHeight();
-                ZoomInButton.Enabled = CanZoomIn;
-                ZoomOutButton.Enabled = CanZoomOut;
+                MainToolBar.ZoomInButton.Enabled = CanZoomIn;
+                MainToolBar.ZoomOutButton.Enabled = CanZoomOut;
             }
         }
 
@@ -74,7 +74,12 @@ namespace Ched.UI
             ToolStripManager.RenderMode = ToolStripManagerRenderMode.System;
 
             OperationManager = new OperationManager();
-            OperationManager.OperationHistoryChanged += (s, e) => SetText(ScoreBook.Path);
+            OperationManager.OperationHistoryChanged += (s, e) =>
+            {
+                SetText(ScoreBook.Path);
+                MainToolBar.UndoButton.Enabled = NoteView.CanUndo;
+                MainToolBar.RedoButton.Enabled = NoteView.CanRedo;
+            };
             OperationManager.ChangesCommited += (s, e) => SetText(ScoreBook.Path);
 
             NoteView = new NoteView(OperationManager)
@@ -162,13 +167,73 @@ namespace Ched.UI
                 ApplicationSettings.Default.Save();
             };
 
+            MainToolBar = new MainToolBar(NoteView);
+            NoteToolBar = new NoteToolBar(NoteView);
+
+            MainToolBar.ZoomIn += (s, e) =>
+            {
+                NoteView.UnitBeatHeight *= 2;
+                ApplicationSettings.Default.UnitBeatHeight = (int)NoteView.UnitBeatHeight;
+                MainToolBar.ZoomOutButton.Enabled = CanZoomOut;
+                MainToolBar.ZoomInButton.Enabled = CanZoomIn;
+                UpdateThumbHeight();
+            };
+            MainToolBar.ZoomOut += (s, e) =>
+            {
+                NoteView.UnitBeatHeight /= 2;
+                ApplicationSettings.Default.UnitBeatHeight = (int)NoteView.UnitBeatHeight;
+                MainToolBar.ZoomOutButton.Enabled = CanZoomOut;
+                MainToolBar.ZoomInButton.Enabled = CanZoomIn;
+                UpdateThumbHeight();
+            };
+
+            MainToolBar.ExportFile += (s, e) =>
+            {
+                if (LastExportData == null)
+                {
+                    ExportFile();
+                    return;
+                }
+
+                CommitChanges();
+                try
+                {
+                    LastExportData.Exporter.Export(LastExportData.OutputPath, ScoreBook);
+                    MessageBox.Show(this, ErrorStrings.ReExportComplete, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ErrorStrings.ExportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Program.DumpException(ex);
+                }
+            };
+
+            NoteToolBar.QuantizeTickChanging += (s, e) =>
+            {
+                var comboBox = (ToolStripComboBox)s;
+                if (comboBox.SelectedIndex == comboBox.Items.Count - 1)
+                {
+                    // ユーザー定義
+                    var form = new CustomQuantizeSelectionForm(ScoreBook.Score.TicksPerBeat * 4);
+                    if (form.ShowDialog(this) == DialogResult.OK)
+                    {
+                        NoteView.QuantizeTick = form.QuantizeTick;
+                    }
+                }
+                else
+                {
+                    NoteView.QuantizeTick = NoteView.UnitBeatTick * 4 / NoteToolBar.QuantizeTicks[comboBox.SelectedIndex];
+                }
+                NoteView.Focus();
+            };
+
             using (var manager = this.WorkWithLayout())
             {
                 this.Menu = CreateMainMenu(NoteView);
                 this.Controls.Add(NoteView);
                 this.Controls.Add(NoteViewScrollBar);
-                this.Controls.Add(CreateNewNoteTypeToolStrip(NoteView));
-                this.Controls.Add(CreateMainToolStrip(NoteView));
+                this.Controls.Add(NoteToolBar.Root);
+                this.Controls.Add(MainToolBar.Root);
             }
 
             NoteView.NewNoteType = NoteType.Tap;
@@ -664,41 +729,41 @@ namespace Ched.UI
                 new MenuItem(MainFormStrings.HelpMenu, helpMenuItems)
             });
         }
+    }
 
-        private ToolStrip CreateMainToolStrip(NoteView noteView)
+    internal class MainToolBar
+    {
+        public ToolStrip Root { get; }
+
+        public ToolStripButton UndoButton { get; }
+        public ToolStripButton RedoButton { get; }
+
+        public ToolStripButton ZoomInButton { get; }
+        public ToolStripButton ZoomOutButton { get; }
+
+        public event EventHandler ClearFile;
+        public event EventHandler OpenFile;
+        public event EventHandler SaveFile;
+        public event EventHandler ExportFile;
+
+        public event EventHandler ZoomIn;
+        public event EventHandler ZoomOut;
+
+        public MainToolBar(NoteView noteView)
         {
-            var newFileButton = new ToolStripButton(MainFormStrings.NewFile, Resources.NewFileIcon, (s, e) => ClearFile())
+            var newFileButton = new ToolStripButton(MainFormStrings.NewFile, Resources.NewFileIcon, ClearFile)
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
-            var openFileButton = new ToolStripButton(MainFormStrings.OpenFile, Resources.OpenFileIcon, (s, e) => OpenFile())
+            var openFileButton = new ToolStripButton(MainFormStrings.OpenFile, Resources.OpenFileIcon, OpenFile)
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
-            var saveFileButton = new ToolStripButton(MainFormStrings.SaveFile, Resources.SaveFileIcon, (s, e) => SaveFile())
+            var saveFileButton = new ToolStripButton(MainFormStrings.SaveFile, Resources.SaveFileIcon, SaveFile)
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
-            var exportButton = new ToolStripButton(MainFormStrings.Export, Resources.ExportIcon, (s, e) =>
-            {
-                if (LastExportData == null)
-                {
-                    ExportFile();
-                    return;
-                }
-
-                CommitChanges();
-                try
-                {
-                    LastExportData.Exporter.Export(LastExportData.OutputPath, ScoreBook);
-                    MessageBox.Show(this, ErrorStrings.ReExportComplete, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(this, ErrorStrings.ExportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Program.DumpException(ex);
-                }
-            })
+            var exportButton = new ToolStripButton(MainFormStrings.Export, Resources.ExportIcon, ExportFile)
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
@@ -716,12 +781,12 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
-            var undoButton = new ToolStripButton(MainFormStrings.Undo, Resources.UndoIcon, (s, e) => noteView.Undo())
+            UndoButton = new ToolStripButton(MainFormStrings.Undo, Resources.UndoIcon, (s, e) => noteView.Undo())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 Enabled = false
             };
-            var redoButton = new ToolStripButton(MainFormStrings.Redo, Resources.RedoIcon, (s, e) => noteView.Redo())
+            RedoButton = new ToolStripButton(MainFormStrings.Redo, Resources.RedoIcon, (s, e) => noteView.Redo())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 Enabled = false
@@ -740,43 +805,19 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
-            var zoomInButton = new ToolStripButton(MainFormStrings.ZoomIn, Resources.ZoomInIcon)
+            ZoomInButton = new ToolStripButton(MainFormStrings.ZoomIn, Resources.ZoomInIcon)
             {
                 Enabled = noteView.UnitBeatHeight < 960,
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
-            var zoomOutButton = new ToolStripButton(MainFormStrings.ZoomOut, Resources.ZoomOutIcon)
+            ZoomOutButton = new ToolStripButton(MainFormStrings.ZoomOut, Resources.ZoomOutIcon)
             {
                 Enabled = noteView.UnitBeatHeight > 30,
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
-            zoomInButton.Click += (s, e) =>
-            {
-                noteView.UnitBeatHeight *= 2;
-                ApplicationSettings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
-                zoomOutButton.Enabled = CanZoomOut;
-                zoomInButton.Enabled = CanZoomIn;
-                UpdateThumbHeight();
-            };
-
-            zoomOutButton.Click += (s, e) =>
-            {
-                noteView.UnitBeatHeight /= 2;
-                ApplicationSettings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
-                zoomInButton.Enabled = CanZoomIn;
-                zoomOutButton.Enabled = CanZoomOut;
-                UpdateThumbHeight();
-            };
-
-            ZoomInButton = zoomInButton;
-            ZoomOutButton = zoomOutButton;
-
-            OperationManager.OperationHistoryChanged += (s, e) =>
-            {
-                undoButton.Enabled = noteView.CanUndo;
-                redoButton.Enabled = noteView.CanRedo;
-            };
+            ZoomInButton.Click += ZoomIn;
+            ZoomOutButton.Click += ZoomOut;
 
             noteView.EditModeChanged += (s, e) =>
             {
@@ -785,17 +826,27 @@ namespace Ched.UI
                 eraserButton.Checked = noteView.EditMode == EditMode.Erase;
             };
 
-            return new ToolStrip(new ToolStripItem[]
+            Root = new ToolStrip(new ToolStripItem[]
             {
                 newFileButton, openFileButton, saveFileButton, exportButton, new ToolStripSeparator(),
                 cutButton, copyButton, pasteButton, new ToolStripSeparator(),
-                undoButton, redoButton, new ToolStripSeparator(),
+                UndoButton, RedoButton, new ToolStripSeparator(),
                 penButton, selectionButton, eraserButton, new ToolStripSeparator(),
-                zoomInButton, zoomOutButton
+                ZoomInButton, ZoomOutButton
             });
         }
+    }
 
-        private ToolStrip CreateNewNoteTypeToolStrip(NoteView noteView)
+    internal class NoteToolBar
+    {
+        public ToolStrip Root { get; }
+
+        public IReadOnlyList<int> QuantizeTicks { get; }
+        public ToolStripComboBox QuantizeComboBox { get; }
+
+        public event EventHandler QuantizeTickChanging;
+
+        public NoteToolBar(NoteView noteView)
         {
             var tapButton = new ToolStripButton("TAP", Resources.TapIcon, (s, e) => noteView.NewNoteType = NoteType.Tap)
             {
@@ -855,36 +906,20 @@ namespace Ched.UI
             });
             airKind.Image = Resources.AirUpIcon;
 
-            var quantizeTicks = new int[]
+            QuantizeTicks = new int[]
             {
                 4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192
             };
-            var quantizeComboBox = new ToolStripComboBox("クォンタイズ")
+            var QuantizeComboBox = new ToolStripComboBox("クォンタイズ")
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 AutoSize = false,
                 Width = 80
             };
-            quantizeComboBox.Items.AddRange(quantizeTicks.Select(p => p + MainFormStrings.Division).ToArray());
-            quantizeComboBox.Items.Add(MainFormStrings.Custom);
-            quantizeComboBox.SelectedIndexChanged += (s, e) =>
-            {
-                if (quantizeComboBox.SelectedIndex == quantizeComboBox.Items.Count - 1)
-                {
-                    // ユーザー定義
-                    var form = new CustomQuantizeSelectionForm(ScoreBook.Score.TicksPerBeat * 4);
-                    if (form.ShowDialog(this) == DialogResult.OK)
-                    {
-                        noteView.QuantizeTick = form.QuantizeTick;
-                    }
-                }
-                else
-                {
-                    noteView.QuantizeTick = noteView.UnitBeatTick * 4 / quantizeTicks[quantizeComboBox.SelectedIndex];
-                }
-                noteView.Focus();
-            };
-            quantizeComboBox.SelectedIndex = 1;
+            QuantizeComboBox.Items.AddRange(QuantizeTicks.Select(p => p + MainFormStrings.Division).ToArray());
+            QuantizeComboBox.Items.Add(MainFormStrings.Custom);
+            QuantizeComboBox.SelectedIndexChanged += QuantizeTickChanging;
+            QuantizeComboBox.SelectedIndex = 1;
 
             noteView.NewNoteTypeChanged += (s, e) =>
             {
@@ -917,10 +952,10 @@ namespace Ched.UI
                 }
             };
 
-            return new ToolStrip(new ToolStripItem[]
+            Root = new ToolStrip(new ToolStripItem[]
             {
                 tapButton, exTapButton, holdButton, slideButton, slideStepButton, airKind, airActionButton, flickButton, damageButton,
-                quantizeComboBox
+                QuantizeComboBox
             });
         }
     }
