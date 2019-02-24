@@ -338,6 +338,8 @@ namespace Ched.UI
 
         protected CompositeDisposable Subscriptions { get; } = new CompositeDisposable();
 
+        private Dictionary<Score, NoteCollection> NoteCollectionCache { get; } = new Dictionary<Score, NoteCollection>();
+
         public NoteView(OperationManager manager)
         {
             InitializeComponent();
@@ -2136,7 +2138,15 @@ namespace Ched.UI
         public void UpdateScore(Score score)
         {
             UnitBeatTick = score.TicksPerBeat;
-            Notes = new NoteCollection(score.Notes);
+            if (NoteCollectionCache.ContainsKey(score))
+            {
+                Notes = NoteCollectionCache[score];
+            }
+            else
+            {
+                Notes = new NoteCollection(score.Notes);
+                NoteCollectionCache.Add(score, Notes);
+            }
             ScoreEvents = score.Events;
             Invalidate();
         }
