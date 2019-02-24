@@ -152,6 +152,7 @@
     <Compile Include="Plugins\ComboCalculator.cs" />
     <Compile Include="Plugins\PluginManager.cs" />
     <Compile Include="Plugins\ScorePluginArgs.cs" />
+    <Compile Include="Plugins\SlideKnitter.cs" />
     <Compile Include="UI\BookPropertiesForm.cs">
       <SubType>Form</SubType>
     </Compile>
