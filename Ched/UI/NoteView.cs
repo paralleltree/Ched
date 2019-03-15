@@ -1917,7 +1917,7 @@ namespace Ched.UI
 
         public void CopySelectedNotes()
         {
-            var data = new SelectionData(SelectedRange.StartTick + Math.Min(SelectedRange.Duration, 0), GetSelectedNotes());
+            var data = new SelectionData(SelectedRange.StartTick + Math.Min(SelectedRange.Duration, 0), UnitBeatTick, GetSelectedNotes());
             Clipboard.SetDataObject(data, true);
         }
 
@@ -1951,19 +1951,24 @@ namespace Ched.UI
             var data = obj.GetData(typeof(SelectionData)) as SelectionData;
             if (data.IsEmpty) return null;
 
+            double tickFactor = UnitBeatTick / (double)data.TicksPerBeat;
+            int originTick = (int)(data.StartTick * tickFactor);
+            if (data.TicksPerBeat != UnitBeatTick)
+                data.SelectedNotes.UpdateTicksPerBeat(tickFactor);
+
             foreach (var note in data.SelectedNotes.GetShortNotes())
             {
-                note.Tick = note.Tick - data.StartTick + CurrentTick;
+                note.Tick = note.Tick - originTick + CurrentTick;
             }
 
             foreach (var hold in data.SelectedNotes.Holds)
             {
-                hold.StartTick = hold.StartTick - data.StartTick + CurrentTick;
+                hold.StartTick = hold.StartTick - originTick + CurrentTick;
             }
 
             foreach (var slide in data.SelectedNotes.Slides)
             {
-                slide.StartTick = slide.StartTick - data.StartTick + CurrentTick;
+                slide.StartTick = slide.StartTick - originTick + CurrentTick;
             }
 
             foreach (var airAction in data.SelectedNotes.AirActions)
@@ -2309,6 +2314,11 @@ namespace Ched.UI
 
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
+
+            public void UpdateTicksPerBeat(double factor)
+            {
+                source.UpdateTicksPerBeat(factor);
+            }
         }
     }
 
@@ -2427,7 +2437,7 @@ namespace Ched.UI
         {
             get
             {
-                if (Data == null) Restore();
+                CheckRestored();
                 return Data.StartTick;
             }
         }
@@ -2436,7 +2446,7 @@ namespace Ched.UI
         {
             get
             {
-                if (Data == null) Restore();
+                CheckRestored();
                 return Data.SelectedNotes;
             }
         }
@@ -2445,8 +2455,17 @@ namespace Ched.UI
         {
             get
             {
-                if (Data == null) Restore();
+                CheckRestored();
                 return SelectedNotes.GetShortNotes().Count() == 0 && SelectedNotes.Holds.Count == 0 && SelectedNotes.Slides.Count == 0 && SelectedNotes.Airs.Count == 0 && SelectedNotes.AirActions.Count == 0;
+            }
+        }
+
+        public int TicksPerBeat
+        {
+            get
+            {
+                CheckRestored();
+                return Data.TicksPerBeat;
             }
         }
 
@@ -2454,10 +2473,15 @@ namespace Ched.UI
         {
         }
 
-        public SelectionData(int startTick, Core.NoteCollection notes)
+        public SelectionData(int startTick, int ticksPerBeat, NoteCollection notes)
         {
-            Data = new InnerData(startTick, notes);
+            Data = new InnerData(startTick, ticksPerBeat, notes);
             serializedText = Newtonsoft.Json.JsonConvert.SerializeObject(Data, SerializerSettings);
+        }
+
+        protected void CheckRestored()
+        {
+            if (Data == null) Restore();
         }
 
         protected void Restore()
@@ -2480,14 +2504,19 @@ namespace Ched.UI
             private int startTick;
 
             [Newtonsoft.Json.JsonProperty]
+            private int ticksPerBeat;
+
+            [Newtonsoft.Json.JsonProperty]
             private NoteCollection selectedNotes;
 
-            public int StartTick { get { return startTick; } }
-            public NoteCollection SelectedNotes { get { return selectedNotes; } }
+            public int StartTick => startTick;
+            public int TicksPerBeat => ticksPerBeat;
+            public NoteCollection SelectedNotes => selectedNotes;
 
-            public InnerData(int startTick, NoteCollection notes)
+            public InnerData(int startTick, int ticksPerBeat, NoteCollection notes)
             {
                 this.startTick = startTick;
+                this.ticksPerBeat = ticksPerBeat;
                 selectedNotes = notes;
             }
         }
