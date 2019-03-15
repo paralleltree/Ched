@@ -465,7 +465,7 @@ namespace Ched.UI
 
                 try
                 {
-                    p.Run(new ScorePluginArgs(() => ScoreBook.Score.Clone(), updateScore));
+                    p.Run(new ScorePluginArgs(() => ScoreBook.Score.Clone(), noteView.SelectedRange, updateScore));
                 }
                 catch (Exception ex)
                 {
