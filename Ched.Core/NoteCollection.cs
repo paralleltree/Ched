@@ -107,5 +107,27 @@ namespace Ched.Core
         {
             return Taps.Cast<TappableBase>().Concat(ExTaps).Concat(Flicks).Concat(Damages);
         }
+
+        public void UpdateTicksPerBeat(double factor)
+        {
+            foreach (var note in GetShortNotes())
+                note.Tick = (int)(note.Tick * factor);
+
+            foreach (var hold in Holds)
+            {
+                hold.StartTick = (int)(hold.StartTick * factor);
+                hold.Duration = (int)(hold.Duration * factor);
+            }
+
+            foreach (var slide in Slides)
+            {
+                slide.StartTick = (int)(slide.StartTick * factor);
+                foreach (var step in slide.StepNotes)
+                    step.TickOffset = (int)(step.TickOffset * factor);
+            }
+
+            foreach (var action in AirActions.SelectMany(p => p.ActionNotes))
+                action.Offset = (int)(action.Offset * factor);
+        }
     }
 }

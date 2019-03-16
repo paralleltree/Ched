@@ -228,6 +228,7 @@ namespace Ched.UI
             NoteView.Initialize(book.Score);
             NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
+            NoteViewScrollBar.SmallChange = NoteView.UnitBeatTick;
             UpdateThumbHeight();
             SetText(book.Path);
             LastExportData = null;
