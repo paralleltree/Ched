@@ -18,6 +18,13 @@ namespace Ched.Plugins
             var range = args.GetSelectedRange();
             bool modified = false;
             var targets = score.Notes.Slides.Where(p => p.StartTick < range.StartTick && p.StepNotes.OrderByDescending(q => q.TickOffset).First().Tick > range.StartTick);
+            var endStepDic = score.Notes.Slides.ToDictionary(p => p, p => p.StepNotes.OrderByDescending(q => q.TickOffset).First());
+            var airStepDic = score.Notes.Airs
+                .Where(p => endStepDic.Values.Contains(p.ParentNote))
+                .ToDictionary(p => p.ParentNote as Slide.StepTap, p => p);
+            var airActionStepDic = score.Notes.AirActions
+               .Where(p => endStepDic.Values.Contains(p.ParentNote))
+               .ToDictionary(p => p.ParentNote as Slide.StepTap, p => p);
 
             foreach (var slide in targets.ToList())
             {
@@ -44,6 +51,27 @@ namespace Ched.Plugins
                     step.SetPosition(p.LaneIndex - second.StartLaneIndex, p.Width - second.StartWidth);
                     return step;
                 }));
+
+                // 終点AIRをsecondに挿入
+                if (airStepDic.ContainsKey(endStepDic[slide]))
+                {
+                    var origAir = airStepDic[endStepDic[slide]];
+                    var air = new Air(second.StepNotes[second.StepNotes.Count - 1])
+                    {
+                        VerticalDirection = origAir.VerticalDirection,
+                        HorizontalDirection = origAir.HorizontalDirection
+                    };
+                    score.Notes.Airs.Remove(origAir);
+                    score.Notes.Airs.Add(air);
+                }
+                if (airActionStepDic.ContainsKey(endStepDic[slide]))
+                {
+                    var origAirAction = airActionStepDic[endStepDic[slide]];
+                    var airAction = new AirAction(second.StepNotes[second.StepNotes.Count - 1]);
+                    airAction.ActionNotes.AddRange(origAirAction.ActionNotes.Select(p => new AirAction.ActionNote(airAction) { Offset = p.Offset }));
+                    score.Notes.AirActions.Remove(origAirAction);
+                    score.Notes.AirActions.Add(airAction);
+                }
 
                 score.Notes.Slides.Add(first);
                 score.Notes.Slides.Add(second);
