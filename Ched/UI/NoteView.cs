@@ -1662,19 +1662,15 @@ namespace Ched.UI
                 dc.DrawAirStep(rect);
             }
 
-            // ショートノーツ
-            // HOLD始点
+            // 中継点
             foreach (var hold in holds)
             {
-                dc.DrawHoldBegin(GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width));
                 if (Notes.GetReferencedAir(hold.EndNote).Count() > 0) continue; // AIR付き終点
                 dc.DrawHoldEnd(GetRectFromNotePosition(hold.StartTick + hold.Duration, hold.LaneIndex, hold.Width));
             }
 
-            // SLIDE始点
             foreach (var slide in slides)
             {
-                dc.DrawSlideBegin(GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.StartWidth));
                 foreach (var step in slide.StepNotes.OrderBy(p => p.TickOffset))
                 {
                     if (!Editable && !step.IsVisible) continue;
@@ -1683,6 +1679,17 @@ namespace Ched.UI
                     if (step.IsVisible) dc.DrawSlideStep(rect);
                     else dc.DrawBorder(rect);
                 }
+            }
+
+            // 始点
+            foreach (var hold in holds)
+            {
+                dc.DrawHoldBegin(GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width));
+            }
+
+            foreach (var slide in slides)
+            {
+                dc.DrawSlideBegin(GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.StartWidth));
             }
 
             // TAP, ExTAP, FLICK, DAMAGE
