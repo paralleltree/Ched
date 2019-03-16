@@ -46,6 +46,14 @@ namespace Ched.Core
             set { events = value; }
         }
 
+        public void UpdateTicksPerBeat(int value)
+        {
+            double factor = value / TicksPerBeat;
+            Notes.UpdateTicksPerBeat(factor);
+            Events.UpdateTicksPerBeat(factor);
+            TicksPerBeat = value;
+        }
+
         public Score Clone()
         {
             var score = Newtonsoft.Json.JsonConvert.DeserializeObject<Score>(Newtonsoft.Json.JsonConvert.SerializeObject(this, ScoreBook.SerializerSettings));

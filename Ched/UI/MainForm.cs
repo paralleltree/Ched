@@ -228,6 +228,7 @@ namespace Ched.UI
             NoteView.Initialize(book.Score);
             NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
+            NoteViewScrollBar.SmallChange = NoteView.UnitBeatTick;
             UpdateThumbHeight();
             SetText(book.Path);
             LastExportData = null;
@@ -464,7 +465,7 @@ namespace Ched.UI
 
                 try
                 {
-                    p.Run(new ScorePluginArgs(() => ScoreBook.Score.Clone(), updateScore));
+                    p.Run(new ScorePluginArgs(() => ScoreBook.Score.Clone(), noteView.SelectedRange, updateScore));
                 }
                 catch (Exception ex)
                 {
@@ -743,7 +744,7 @@ namespace Ched.UI
 
             var zoomInButton = new ToolStripButton(MainFormStrings.ZoomIn, Resources.ZoomInIcon)
             {
-                Enabled = noteView.UnitBeatHeight < 960,
+                Enabled = noteView.UnitBeatHeight < 1920,
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
             var zoomOutButton = new ToolStripButton(MainFormStrings.ZoomOut, Resources.ZoomOutIcon)

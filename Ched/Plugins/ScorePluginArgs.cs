@@ -6,24 +6,26 @@ using System.Threading.Tasks;
 
 using Ched.Core;
 using Ched.Core.Events;
+using Ched.UI;
 
 namespace Ched.Plugins
 {
     public class ScorePluginArgs : IScorePluginArgs
     {
         private Func<Score> getScoreFunc;
+        private SelectionRange selectedRange;
         private Action<Score> updateScoreAction;
 
-        public ScorePluginArgs(Func<Score> getScoreFunc, Action<Score> updateScoreAction)
+        public ScorePluginArgs(Func<Score> getScoreFunc, SelectionRange selectedRange, Action<Score> updateScoreAction)
         {
             this.getScoreFunc = getScoreFunc;
+            this.selectedRange = selectedRange;
             this.updateScoreAction = updateScoreAction;
         }
 
-        public Score GetCurrentScore()
-        {
-            return getScoreFunc();
-        }
+        public Score GetCurrentScore() => getScoreFunc();
+
+        public SelectionRange GetSelectedRange() => selectedRange;
 
         public void UpdateScore(Score score)
         {
