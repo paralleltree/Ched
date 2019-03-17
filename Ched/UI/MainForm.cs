@@ -744,7 +744,7 @@ namespace Ched.UI
 
             var zoomInButton = new ToolStripButton(MainFormStrings.ZoomIn, Resources.ZoomInIcon)
             {
-                Enabled = noteView.UnitBeatHeight < 960,
+                Enabled = noteView.UnitBeatHeight < 1920,
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
             var zoomOutButton = new ToolStripButton(MainFormStrings.ZoomOut, Resources.ZoomOutIcon)

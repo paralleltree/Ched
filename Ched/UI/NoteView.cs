@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Reactive.Linq;
@@ -1662,19 +1663,15 @@ namespace Ched.UI
                 dc.DrawAirStep(rect);
             }
 
-            // ショートノーツ
-            // HOLD始点
+            // 中継点
             foreach (var hold in holds)
             {
-                dc.DrawHoldBegin(GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width));
                 if (Notes.GetReferencedAir(hold.EndNote).Count() > 0) continue; // AIR付き終点
                 dc.DrawHoldEnd(GetRectFromNotePosition(hold.StartTick + hold.Duration, hold.LaneIndex, hold.Width));
             }
 
-            // SLIDE始点
             foreach (var slide in slides)
             {
-                dc.DrawSlideBegin(GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.StartWidth));
                 foreach (var step in slide.StepNotes.OrderBy(p => p.TickOffset))
                 {
                     if (!Editable && !step.IsVisible) continue;
@@ -1683,6 +1680,17 @@ namespace Ched.UI
                     if (step.IsVisible) dc.DrawSlideStep(rect);
                     else dc.DrawBorder(rect);
                 }
+            }
+
+            // 始点
+            foreach (var hold in holds)
+            {
+                dc.DrawHoldBegin(GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width));
+            }
+
+            foreach (var slide in slides)
+            {
+                dc.DrawSlideBegin(GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.StartWidth));
             }
 
             // TAP, ExTAP, FLICK, DAMAGE
@@ -1764,7 +1772,7 @@ namespace Ched.UI
                     foreach (var item in ScoreEvents.BPMChangeEvents.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
                     {
                         var point = new PointF(rightBase, -GetYPositionFromTick(item.Tick) - strSize.Height);
-                        pe.Graphics.DrawString(item.BPM.ToString().PadLeft(3), font, Brushes.Lime, point);
+                        pe.Graphics.DrawString(Regex.Replace(item.BPM.ToString(), @"\.0$", "").PadLeft(3), font, Brushes.Lime, point);
                     }
                 }
 
