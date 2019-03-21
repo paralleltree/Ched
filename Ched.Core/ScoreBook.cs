@@ -147,6 +147,12 @@ namespace Ched.Core
                 note.ActionNotes.Clear();
                 note.ActionNotes.AddRange(restored);
             }
+
+            if (res.Score.Events.TimeSignatureChangeEvents.Count == 0)
+            {
+                res.Score.Events.TimeSignatureChangeEvents.Add(new Events.TimeSignatureChangeEvent() { Tick = 0, Numerator = 4, DenominatorExponent = 2 });
+            }
+
             res.Path = path;
             return res;
         }
