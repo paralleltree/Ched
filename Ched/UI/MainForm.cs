@@ -624,11 +624,16 @@ namespace Ched.UI
                     noteView.CurrentTick = startTick;
                 };
 
-                if (PreviewManager.Start(CurrentMusicSource, startTick))
+                try
                 {
+                    if (!PreviewManager.Start(CurrentMusicSource, startTick)) return;
                     isAbortAtLastNoteItem.Enabled = false;
                     PreviewManager.Finished += lambda;
                     noteView.Editable = CanEdit;
+                }
+                catch (Exception ex)
+                {
+                    Program.DumpExceptionTo(ex, "sound_exception.json");
                 }
             }, (Shortcut)Keys.Space);
 
