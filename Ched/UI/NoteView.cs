@@ -132,7 +132,7 @@ namespace Ched.UI
         /// <summary>
         /// レーンのガイド線の幅を取得します。
         /// </summary>
-        public int BorderThickness { get { return (int)Math.Round(UnitLaneWidth * 0.1f); } }
+        public int BorderThickness => UnitLaneWidth < 5 ? 0 : 1;
 
         /// <summary>
         /// ショートノーツの表示高さを設定します。

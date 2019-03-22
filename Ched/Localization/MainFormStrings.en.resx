@@ -261,4 +261,10 @@
   <data name="Import" xml:space="preserve">
     <value>Import</value>
   </data>
+  <data name="NarrowLaneWidth" xml:space="preserve">
+    <value>Narrow Lane Width</value>
+  </data>
+  <data name="WidenLaneWidth" xml:space="preserve">
+    <value>Widen Lane Width</value>
+  </data>
 </root>
