@@ -35,6 +35,8 @@ namespace Ched.UI
 
         private ToolStripButton ZoomInButton;
         private ToolStripButton ZoomOutButton;
+        private MenuItem WidenLaneWidthMenuItem;
+        private MenuItem NarrowLaneWidthMenuItem;
 
         private ExportData LastExportData { get; set; }
 
@@ -52,18 +54,22 @@ namespace Ched.UI
                 NoteView.Editable = CanEdit;
                 NoteView.LaneBorderLightColor = isPreviewMode ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
                 NoteView.LaneBorderDarkColor = isPreviewMode ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
-                NoteView.UnitLaneWidth = isPreviewMode ? 4 : 12;
+                NoteView.UnitLaneWidth = isPreviewMode ? 4 : ApplicationSettings.Default.UnitLaneWidth;
                 NoteView.ShortNoteHeight = isPreviewMode ? 4 : 5;
                 NoteView.UnitBeatHeight = isPreviewMode ? 48 : ApplicationSettings.Default.UnitBeatHeight;
                 UpdateThumbHeight();
                 ZoomInButton.Enabled = CanZoomIn;
                 ZoomOutButton.Enabled = CanZoomOut;
+                WidenLaneWidthMenuItem.Enabled = CanWidenLaneWidth;
+                NarrowLaneWidthMenuItem.Enabled = CanNarrowLaneWidth;
             }
         }
 
-        private bool CanZoomIn { get { return !IsPreviewMode && NoteView.UnitBeatHeight < 960; } }
-        private bool CanZoomOut { get { return !IsPreviewMode && NoteView.UnitBeatHeight > 30; } }
-        private bool CanEdit { get { return !IsPreviewMode && !PreviewManager.Playing; } }
+        private bool CanWidenLaneWidth => !IsPreviewMode && NoteView.UnitLaneWidth < 24;
+        private bool CanNarrowLaneWidth => !IsPreviewMode && NoteView.UnitLaneWidth > 12;
+        private bool CanZoomIn => !IsPreviewMode && NoteView.UnitBeatHeight < 960;
+        private bool CanZoomOut => !IsPreviewMode && NoteView.UnitBeatHeight > 30;
+        private bool CanEdit => !IsPreviewMode && !PreviewManager.Playing;
 
         public MainForm()
         {
@@ -81,6 +87,7 @@ namespace Ched.UI
             {
                 Dock = DockStyle.Fill,
                 UnitBeatHeight = ApplicationSettings.Default.UnitBeatHeight,
+                UnitLaneWidth = ApplicationSettings.Default.UnitLaneWidth,
                 InsertAirWithAirAction = ApplicationSettings.Default.InsertAirWithAirAction
             };
 
@@ -166,10 +173,10 @@ namespace Ched.UI
             using (var manager = this.WorkWithLayout())
             {
                 this.Menu = CreateMainMenu(NoteView);
-                this.Controls.Add(NoteView);
                 this.Controls.Add(NoteViewScrollBar);
                 this.Controls.Add(CreateNewNoteTypeToolStrip(NoteView));
                 this.Controls.Add(CreateMainToolStrip(NoteView));
+                this.Controls.Add(NoteView);
             }
 
             NoteView.NewNoteType = NoteType.Tap;
@@ -490,7 +497,29 @@ namespace Ched.UI
                 ((MenuItem)s).Checked = IsPreviewMode;
             }, Shortcut.CtrlP);
 
-            var viewMenuItems = new MenuItem[] { viewModeItem };
+            WidenLaneWidthMenuItem = new MenuItem(MainFormStrings.WidenLaneWidth);
+            NarrowLaneWidthMenuItem = new MenuItem(MainFormStrings.NarrowLaneWidth);
+
+            WidenLaneWidthMenuItem.Click += (s, e) =>
+            {
+                noteView.UnitLaneWidth += 4;
+                ApplicationSettings.Default.UnitLaneWidth = noteView.UnitLaneWidth;
+                WidenLaneWidthMenuItem.Enabled = CanWidenLaneWidth;
+                NarrowLaneWidthMenuItem.Enabled = CanNarrowLaneWidth;
+            };
+            NarrowLaneWidthMenuItem.Click += (s, e) =>
+            {
+                noteView.UnitLaneWidth -= 4;
+                ApplicationSettings.Default.UnitLaneWidth = noteView.UnitLaneWidth;
+                WidenLaneWidthMenuItem.Enabled = CanWidenLaneWidth;
+                NarrowLaneWidthMenuItem.Enabled = CanNarrowLaneWidth;
+            };
+
+            var viewMenuItems = new MenuItem[] {
+                viewModeItem,
+                new MenuItem("-"),
+                WidenLaneWidthMenuItem, NarrowLaneWidthMenuItem
+            };
 
             var insertBPMItem = new MenuItem("BPM", (s, e) =>
             {
@@ -624,11 +653,16 @@ namespace Ched.UI
                     noteView.CurrentTick = startTick;
                 };
 
-                if (PreviewManager.Start(CurrentMusicSource, startTick))
+                try
                 {
+                    if (!PreviewManager.Start(CurrentMusicSource, startTick)) return;
                     isAbortAtLastNoteItem.Enabled = false;
                     PreviewManager.Finished += lambda;
                     noteView.Editable = CanEdit;
+                }
+                catch (Exception ex)
+                {
+                    Program.DumpExceptionTo(ex, "sound_exception.json");
                 }
             }, (Shortcut)Keys.Space);
 

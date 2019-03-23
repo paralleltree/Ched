@@ -132,7 +132,7 @@ namespace Ched.UI
         /// <summary>
         /// レーンのガイド線の幅を取得します。
         /// </summary>
-        public int BorderThickness { get { return (int)Math.Round(UnitLaneWidth * 0.1f); } }
+        public int BorderThickness => UnitLaneWidth < 5 ? 0 : 1;
 
         /// <summary>
         /// ショートノーツの表示高さを設定します。
@@ -1627,19 +1627,25 @@ namespace Ched.UI
             {
                 var bg = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.OrderBy(p => p.Tick)).ToList();
                 var visibleSteps = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.Where(p => p.IsVisible).OrderBy(p => p.Tick)).ToList();
-                for (int i = 0; i < bg.Count - 1; i++)
-                {
-                    dc.DrawSlideBackground(
-                        (UnitLaneWidth + BorderThickness) * bg[i].Width - BorderThickness,
-                        (UnitLaneWidth + BorderThickness) * bg[i + 1].Width - BorderThickness,
-                        (UnitLaneWidth + BorderThickness) * bg[i].LaneIndex,
-                        GetYPositionFromTick(bg[i].Tick),
-                        (UnitLaneWidth + BorderThickness) * bg[i + 1].LaneIndex,
-                        GetYPositionFromTick(bg[i + 1].Tick) + 0.4f,
-                        GetYPositionFromTick(visibleSteps.Last(p => p.Tick <= bg[i].Tick).Tick),
-                        GetYPositionFromTick(visibleSteps.First(p => p.Tick >= bg[i + 1].Tick).Tick),
-                        ShortNoteHeight);
-                }
+
+                int stepHead = bg.LastOrDefault(p => p.Tick <= HeadTick)?.Tick ?? bg[0].Tick;
+                int stepTail = bg.FirstOrDefault(p => p.Tick >= tailTick)?.Tick ?? bg[bg.Count - 1].Tick;
+                int visibleHead = visibleSteps.LastOrDefault(p => p.Tick <= HeadTick)?.Tick ?? visibleSteps[0].Tick;
+                int visibleTail = visibleSteps.FirstOrDefault(p => p.Tick >= tailTick)?.Tick ?? visibleSteps[visibleSteps.Count - 1].Tick;
+
+                var steps = bg
+                    .Where(p => p.Tick >= stepHead && p.Tick <= stepTail)
+                    .Select(p => new SlideStepElement()
+                    {
+                        Point = new PointF((UnitLaneWidth + BorderThickness) * p.LaneIndex, GetYPositionFromTick(p.Tick)),
+                        Width = (UnitLaneWidth + BorderThickness) * p.Width - BorderThickness
+                    });
+                var visibleStepPos = visibleSteps
+                    .Where(p => p.Tick >= visibleHead && p.Tick <= visibleTail)
+                    .Select(p => GetYPositionFromTick(p.Tick));
+
+                if (stepHead == stepTail) continue;
+                dc.DrawSlideBackground(steps, visibleStepPos, ShortNoteHeight);
             }
 
             var airs = Notes.Airs.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick).ToList();

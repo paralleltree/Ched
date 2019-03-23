@@ -137,6 +137,18 @@ namespace Ched.Core
                 }
             }
 
+            if (fileVersion.Major < 3)
+            {
+                var notes = doc["score"]["notes"];
+                var types = new[] { notes["airs"], notes["airActions"] }.SelectMany(p => p.Select(q => (JObject)q["parentNote"])).Where(p => p.ContainsKey("$type"));
+                foreach (var obj in types)
+                {
+                    string type = obj["$type"].ToString();
+                    type = System.Text.RegularExpressions.Regex.Replace(type, "Ched$", "Ched.Core").Replace("Components", "Core");
+                    obj["$type"] = type;
+                }
+            }
+
             doc["version"] = JObject.FromObject(typeof(ScoreBook).Assembly.GetName().Version);
 
             var res = doc.ToObject<ScoreBook>(JsonSerializer.Create(SerializerSettings));
@@ -147,6 +159,12 @@ namespace Ched.Core
                 note.ActionNotes.Clear();
                 note.ActionNotes.AddRange(restored);
             }
+
+            if (res.Score.Events.TimeSignatureChangeEvents.Count == 0)
+            {
+                res.Score.Events.TimeSignatureChangeEvents.Add(new Events.TimeSignatureChangeEvent() { Tick = 0, Numerator = 4, DenominatorExponent = 2 });
+            }
+
             res.Path = path;
             return res;
         }

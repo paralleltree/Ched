@@ -20,6 +20,8 @@ namespace Ched
         [STAThread]
         static void Main(string[] args)
         {
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(Application.ExecutablePath));
+
 #if !DEBUG
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
             AppDomain.CurrentDomain.UnhandledException += (s, e) => DumpException((Exception)e.ExceptionObject, true);

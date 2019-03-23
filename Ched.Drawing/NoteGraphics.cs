@@ -81,41 +81,55 @@ namespace Ched.Drawing
         /// <summary>
         /// SLIDEの背景を描画します。
         /// </summary>
-        /// <param name="g">描画先Graphics</param>
-        /// <param name="width1">ノートの描画幅</param>
-        /// <param name="x1">開始ノートの左端位置</param>
-        /// <param name="y1">開始ノートのY座標</param>
-        /// <param name="x2">終了ノートの左端位置</param>
-        /// <param name="y2">終了ノートのY座標</param>
-        /// <param name="gradStartY">始点Step以前の中継点のY座標(グラデーション描画用)</param>
-        /// <param name="gradEndY">終点Step以後の中継点のY座標(グラデーション描画用)</param>
-        /// <param name="noteHeight">ノートの描画高さ</param>
-        public static void DrawSlideBackground(this DrawingContext dc, float width1, float width2, float x1, float y1, float x2, float y2, float gradStartY, float gradEndY, float noteHeight)
+        /// <param name="dc">処理対象の<see cref="DrawingContext"/></param>
+        /// <param name="steps">全ての中継点位置からなるリスト</param>
+        /// <param name="visibleSteps">可視中継点のY座標からなるリスト</param>
+        /// <param name="noteHeight">ノート描画高さ</param>
+        public static void DrawSlideBackground(this DrawingContext dc, IEnumerable<SlideStepElement> steps, IEnumerable<float> visibleSteps, float noteHeight)
         {
+            var prevMode = dc.Graphics.SmoothingMode;
+            dc.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
             Color BackgroundEdgeColor = dc.ColorProfile.SlideBackgroundColor.DarkColor;
             Color BackgroundMiddleColor = dc.ColorProfile.SlideBackgroundColor.LightColor;
 
-            var prevMode = dc.Graphics.SmoothingMode;
-            dc.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            var rect = new RectangleF(Math.Min(x1, x2), Math.Min(y1, y2), Math.Abs(x1 - x2) + width1, Math.Abs(y1 - y2));
-            var gradientRect = new RectangleF(rect.Left, gradStartY, rect.Width, gradEndY - gradStartY);
-            using (var brush = new LinearGradientBrush(gradientRect, BackgroundEdgeColor, BackgroundMiddleColor, LinearGradientMode.Vertical))
+            var orderedSteps = steps.OrderBy(p => p.Point.Y).ToList();
+            var orderedVisibleSteps = visibleSteps.OrderBy(p => p).ToList();
+
+            if (orderedSteps[0].Point.Y < orderedVisibleSteps[0] || orderedSteps[orderedSteps.Count - 1].Point.Y > orderedVisibleSteps[orderedVisibleSteps.Count - 1])
             {
-                var blend = new ColorBlend(4)
+                throw new ArgumentOutOfRangeException("visibleSteps", "visibleSteps must contain steps");
+            }
+
+            using (var path = new GraphicsPath())
+            {
+                var left = orderedSteps.Select(p => p.Point);
+                var right = orderedSteps.Select(p => new PointF(p.Point.X + p.Width, p.Point.Y)).Reverse();
+                path.AddPolygon(left.Concat(right).ToArray());
+
+                float head = orderedVisibleSteps[0];
+                float height = orderedVisibleSteps[orderedVisibleSteps.Count - 1] - head;
+                var pathBounds = path.GetBounds();
+                var blendBounds = new RectangleF(pathBounds.X, head, pathBounds.Width, height);
+                using (var brush = new LinearGradientBrush(blendBounds, Color.Black, Color.Black, LinearGradientMode.Vertical))
                 {
-                    Colors = new Color[] { BackgroundEdgeColor, BackgroundMiddleColor, BackgroundMiddleColor, BackgroundEdgeColor },
-                    Positions = new float[] { 0.0f, 0.3f, 0.7f, 1.0f }
-                };
-                brush.InterpolationColors = blend;
-                using (var path = GetSlideBackgroundPath(width1, width2, x1, y1, x2, y2))
-                {
+                    var heights = orderedVisibleSteps.Zip(orderedVisibleSteps.Skip(1), (p, q) => Tuple.Create(p, q - p));
+                    var absPos = new[] { head }.Concat(heights.SelectMany(p => new[] { p.Item1 + p.Item2 * 0.3f, p.Item1 + p.Item2 * 0.7f, p.Item1 + p.Item2 }));
+                    var blend = new ColorBlend()
+                    {
+                        Positions = absPos.Select(p => (p - head) / height).ToArray(),
+                        Colors = new[] { BackgroundEdgeColor }.Concat(Enumerable.Range(0, orderedVisibleSteps.Count - 1).SelectMany(p => new[] { BackgroundMiddleColor, BackgroundMiddleColor, BackgroundEdgeColor })).ToArray()
+                    };
+                    brush.InterpolationColors = blend;
                     dc.Graphics.FillPath(brush, path);
                 }
             }
+
             using (var pen = new Pen(dc.ColorProfile.SlideLineColor, noteHeight * 0.4f))
             {
-                dc.Graphics.DrawLine(pen, x1 + width1 / 2, y1, x2 + width2 / 2, y2);
+                dc.Graphics.DrawLines(pen, orderedSteps.Select(p => new PointF(p.Point.X + p.Width / 2, p.Point.Y)).ToArray());
             }
+
             dc.Graphics.SmoothingMode = prevMode;
         }
 
@@ -218,5 +232,11 @@ namespace Ched.Drawing
         {
             dc.Graphics.DrawBorder(rect, dc.ColorProfile.BorderColor);
         }
+    }
+
+    public class SlideStepElement
+    {
+        public PointF Point { get; set; }
+        public float Width { get; set; }
     }
 }
