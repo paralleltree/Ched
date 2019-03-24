@@ -286,6 +286,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to レーン幅を狭める.
+        /// </summary>
+        internal static string NarrowLaneWidth {
+            get {
+                return ResourceManager.GetString("NarrowLaneWidth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 新規作成.
         /// </summary>
         internal static string NewFile {
@@ -471,6 +480,15 @@ namespace Ched.Localization {
         internal static string ViewMenu {
             get {
                 return ResourceManager.GetString("ViewMenu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to レーン幅を広げる.
+        /// </summary>
+        internal static string WidenLaneWidth {
+            get {
+                return ResourceManager.GetString("WidenLaneWidth", resourceCulture);
             }
         }
         

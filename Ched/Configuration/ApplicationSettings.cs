@@ -18,6 +18,14 @@ namespace Ched.Configuration
         public static ApplicationSettings Default => defaultInstance;
 
         [UserScopedSetting]
+        [DefaultSettingValue("12")]
+        public int UnitLaneWidth
+        {
+            get { return ((int)(this["UnitLaneWidth"])); }
+            set { this["UnitLaneWidth"] = value; }
+        }
+
+        [UserScopedSetting]
         [DefaultSettingValue("120")]
         public int UnitBeatHeight
         {
