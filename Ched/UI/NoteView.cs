@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Reactive.Linq;
@@ -35,6 +36,7 @@ namespace Ched.UI
         private ColorProfile colorProfile;
         private int unitLaneWidth = 12;
         private int shortNoteHeight = 5;
+        private int unitBeatTick = 480;
         private float unitBeatHeight = 120;
 
         private int headTick = 0;
@@ -130,7 +132,7 @@ namespace Ched.UI
         /// <summary>
         /// レーンのガイド線の幅を取得します。
         /// </summary>
-        public int BorderThickness { get { return (int)Math.Round(UnitLaneWidth * 0.1f); } }
+        public int BorderThickness => UnitLaneWidth < 5 ? 0 : 1;
 
         /// <summary>
         /// ショートノーツの表示高さを設定します。
@@ -146,9 +148,17 @@ namespace Ched.UI
         }
 
         /// <summary>
-        /// 1拍あたりのTick数を取得します。
+        /// 1拍あたりのTick数を設定します。
         /// </summary>
-        public int UnitBeatTick { get { return 480; } }
+        public int UnitBeatTick
+        {
+            get { return unitBeatTick; }
+            set
+            {
+                unitBeatTick = value;
+                Invalidate();
+            }
+        }
 
         /// <summary>
         /// 1拍あたりの表示高さを設定します。
@@ -328,6 +338,8 @@ namespace Ched.UI
         protected OperationManager OperationManager { get; }
 
         protected CompositeDisposable Subscriptions { get; } = new CompositeDisposable();
+
+        private Dictionary<Score, NoteCollection> NoteCollectionCache { get; } = new Dictionary<Score, NoteCollection>();
 
         public NoteView(OperationManager manager)
         {
@@ -1615,19 +1627,25 @@ namespace Ched.UI
             {
                 var bg = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.OrderBy(p => p.Tick)).ToList();
                 var visibleSteps = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.Where(p => p.IsVisible).OrderBy(p => p.Tick)).ToList();
-                for (int i = 0; i < bg.Count - 1; i++)
-                {
-                    dc.DrawSlideBackground(
-                        (UnitLaneWidth + BorderThickness) * bg[i].Width - BorderThickness,
-                        (UnitLaneWidth + BorderThickness) * bg[i + 1].Width - BorderThickness,
-                        (UnitLaneWidth + BorderThickness) * bg[i].LaneIndex,
-                        GetYPositionFromTick(bg[i].Tick),
-                        (UnitLaneWidth + BorderThickness) * bg[i + 1].LaneIndex,
-                        GetYPositionFromTick(bg[i + 1].Tick) + 0.4f,
-                        GetYPositionFromTick(visibleSteps.Last(p => p.Tick <= bg[i].Tick).Tick),
-                        GetYPositionFromTick(visibleSteps.First(p => p.Tick >= bg[i + 1].Tick).Tick),
-                        ShortNoteHeight);
-                }
+
+                int stepHead = bg.LastOrDefault(p => p.Tick <= HeadTick)?.Tick ?? bg[0].Tick;
+                int stepTail = bg.FirstOrDefault(p => p.Tick >= tailTick)?.Tick ?? bg[bg.Count - 1].Tick;
+                int visibleHead = visibleSteps.LastOrDefault(p => p.Tick <= HeadTick)?.Tick ?? visibleSteps[0].Tick;
+                int visibleTail = visibleSteps.FirstOrDefault(p => p.Tick >= tailTick)?.Tick ?? visibleSteps[visibleSteps.Count - 1].Tick;
+
+                var steps = bg
+                    .Where(p => p.Tick >= stepHead && p.Tick <= stepTail)
+                    .Select(p => new SlideStepElement()
+                    {
+                        Point = new PointF((UnitLaneWidth + BorderThickness) * p.LaneIndex, GetYPositionFromTick(p.Tick)),
+                        Width = (UnitLaneWidth + BorderThickness) * p.Width - BorderThickness
+                    });
+                var visibleStepPos = visibleSteps
+                    .Where(p => p.Tick >= visibleHead && p.Tick <= visibleTail)
+                    .Select(p => GetYPositionFromTick(p.Tick));
+
+                if (stepHead == stepTail) continue;
+                dc.DrawSlideBackground(steps, visibleStepPos, ShortNoteHeight);
             }
 
             var airs = Notes.Airs.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick).ToList();
@@ -1651,19 +1669,15 @@ namespace Ched.UI
                 dc.DrawAirStep(rect);
             }
 
-            // ショートノーツ
-            // HOLD始点
+            // 中継点
             foreach (var hold in holds)
             {
-                dc.DrawHoldBegin(GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width));
                 if (Notes.GetReferencedAir(hold.EndNote).Count() > 0) continue; // AIR付き終点
                 dc.DrawHoldEnd(GetRectFromNotePosition(hold.StartTick + hold.Duration, hold.LaneIndex, hold.Width));
             }
 
-            // SLIDE始点
             foreach (var slide in slides)
             {
-                dc.DrawSlideBegin(GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.StartWidth));
                 foreach (var step in slide.StepNotes.OrderBy(p => p.TickOffset))
                 {
                     if (!Editable && !step.IsVisible) continue;
@@ -1672,6 +1686,17 @@ namespace Ched.UI
                     if (step.IsVisible) dc.DrawSlideStep(rect);
                     else dc.DrawBorder(rect);
                 }
+            }
+
+            // 始点
+            foreach (var hold in holds)
+            {
+                dc.DrawHoldBegin(GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width));
+            }
+
+            foreach (var slide in slides)
+            {
+                dc.DrawSlideBegin(GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.StartWidth));
             }
 
             // TAP, ExTAP, FLICK, DAMAGE
@@ -1753,7 +1778,7 @@ namespace Ched.UI
                     foreach (var item in ScoreEvents.BPMChangeEvents.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
                     {
                         var point = new PointF(rightBase, -GetYPositionFromTick(item.Tick) - strSize.Height);
-                        pe.Graphics.DrawString(item.BPM.ToString().PadLeft(3), font, Brushes.Lime, point);
+                        pe.Graphics.DrawString(Regex.Replace(item.BPM.ToString(), @"\.0$", "").PadLeft(3), font, Brushes.Lime, point);
                     }
                 }
 
@@ -1908,7 +1933,7 @@ namespace Ched.UI
 
         public void CopySelectedNotes()
         {
-            var data = new SelectionData(SelectedRange.StartTick + Math.Min(SelectedRange.Duration, 0), GetSelectedNotes());
+            var data = new SelectionData(SelectedRange.StartTick + Math.Min(SelectedRange.Duration, 0), UnitBeatTick, GetSelectedNotes());
             Clipboard.SetDataObject(data, true);
         }
 
@@ -1942,19 +1967,24 @@ namespace Ched.UI
             var data = obj.GetData(typeof(SelectionData)) as SelectionData;
             if (data.IsEmpty) return null;
 
+            double tickFactor = UnitBeatTick / (double)data.TicksPerBeat;
+            int originTick = (int)(data.StartTick * tickFactor);
+            if (data.TicksPerBeat != UnitBeatTick)
+                data.SelectedNotes.UpdateTicksPerBeat(tickFactor);
+
             foreach (var note in data.SelectedNotes.GetShortNotes())
             {
-                note.Tick = note.Tick - data.StartTick + CurrentTick;
+                note.Tick = note.Tick - originTick + CurrentTick;
             }
 
             foreach (var hold in data.SelectedNotes.Holds)
             {
-                hold.StartTick = hold.StartTick - data.StartTick + CurrentTick;
+                hold.StartTick = hold.StartTick - originTick + CurrentTick;
             }
 
             foreach (var slide in data.SelectedNotes.Slides)
             {
-                slide.StartTick = slide.StartTick - data.StartTick + CurrentTick;
+                slide.StartTick = slide.StartTick - originTick + CurrentTick;
             }
 
             foreach (var airAction in data.SelectedNotes.AirActions)
@@ -2121,7 +2151,16 @@ namespace Ched.UI
 
         public void UpdateScore(Score score)
         {
-            Notes = new NoteCollection(score.Notes);
+            UnitBeatTick = score.TicksPerBeat;
+            if (NoteCollectionCache.ContainsKey(score))
+            {
+                Notes = NoteCollectionCache[score];
+            }
+            else
+            {
+                Notes = new NoteCollection(score.Notes);
+                NoteCollectionCache.Add(score, Notes);
+            }
             ScoreEvents = score.Events;
             Invalidate();
         }
@@ -2299,6 +2338,11 @@ namespace Ched.UI
 
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
+
+            public void UpdateTicksPerBeat(double factor)
+            {
+                source.UpdateTicksPerBeat(factor);
+            }
         }
     }
 
@@ -2334,77 +2378,6 @@ namespace Ched.UI
         }
     }
 
-    /// <summary>
-    /// <see cref="NoteView"/>における選択範囲を表します。
-    /// </summary>
-    public struct SelectionRange
-    {
-        public static SelectionRange Empty = new SelectionRange()
-        {
-            StartTick = 0,
-            Duration = 0,
-            StartLaneIndex = 0,
-            SelectedLanesCount = 0
-        };
-
-        private int startTick;
-        private int duration;
-        private int startLaneIndex;
-        private int selectedLanesCount;
-
-        /// <summary>
-        /// 選択を開始したTickを設定します。
-        /// </summary>
-        public int StartTick
-        {
-            get { return startTick; }
-            set
-            {
-                if (value < 0) throw new ArgumentOutOfRangeException("value must not be negative.");
-                startTick = value;
-            }
-        }
-
-        /// <summary>
-        /// 選択を終了したときの<see cref="StartTick"/>とのオフセットを表すTickを設定します。
-        /// この値が負であるとき、<see cref="StartTick"/>よりも前の範囲が選択されたことを表します。
-        /// </summary>
-        public int Duration
-        {
-            get { return duration; }
-            set
-            {
-                duration = value;
-            }
-        }
-
-        /// <summary>
-        /// 選択されたレーンの左端のインデックスを設定します。
-        /// </summary>
-        public int StartLaneIndex
-        {
-            get { return startLaneIndex; }
-            set
-            {
-                if (value < 0 || value > Constants.LanesCount - 1) throw new ArgumentOutOfRangeException();
-                startLaneIndex = value;
-            }
-        }
-
-        /// <summary>
-        /// 選択されたレーン数を設定します。
-        /// </summary>
-        public int SelectedLanesCount
-        {
-            get { return selectedLanesCount; }
-            set
-            {
-                if (StartLaneIndex + value < 0 || StartLaneIndex + value > Constants.LanesCount) throw new ArgumentOutOfRangeException();
-                selectedLanesCount = value;
-            }
-        }
-    }
-
     [Serializable]
     public class SelectionData
     {
@@ -2417,7 +2390,7 @@ namespace Ched.UI
         {
             get
             {
-                if (Data == null) Restore();
+                CheckRestored();
                 return Data.StartTick;
             }
         }
@@ -2426,7 +2399,7 @@ namespace Ched.UI
         {
             get
             {
-                if (Data == null) Restore();
+                CheckRestored();
                 return Data.SelectedNotes;
             }
         }
@@ -2435,8 +2408,17 @@ namespace Ched.UI
         {
             get
             {
-                if (Data == null) Restore();
+                CheckRestored();
                 return SelectedNotes.GetShortNotes().Count() == 0 && SelectedNotes.Holds.Count == 0 && SelectedNotes.Slides.Count == 0 && SelectedNotes.Airs.Count == 0 && SelectedNotes.AirActions.Count == 0;
+            }
+        }
+
+        public int TicksPerBeat
+        {
+            get
+            {
+                CheckRestored();
+                return Data.TicksPerBeat;
             }
         }
 
@@ -2444,10 +2426,15 @@ namespace Ched.UI
         {
         }
 
-        public SelectionData(int startTick, Core.NoteCollection notes)
+        public SelectionData(int startTick, int ticksPerBeat, NoteCollection notes)
         {
-            Data = new InnerData(startTick, notes);
+            Data = new InnerData(startTick, ticksPerBeat, notes);
             serializedText = Newtonsoft.Json.JsonConvert.SerializeObject(Data, SerializerSettings);
+        }
+
+        protected void CheckRestored()
+        {
+            if (Data == null) Restore();
         }
 
         protected void Restore()
@@ -2470,14 +2457,19 @@ namespace Ched.UI
             private int startTick;
 
             [Newtonsoft.Json.JsonProperty]
+            private int ticksPerBeat;
+
+            [Newtonsoft.Json.JsonProperty]
             private NoteCollection selectedNotes;
 
-            public int StartTick { get { return startTick; } }
-            public NoteCollection SelectedNotes { get { return selectedNotes; } }
+            public int StartTick => startTick;
+            public int TicksPerBeat => ticksPerBeat;
+            public NoteCollection SelectedNotes => selectedNotes;
 
-            public InnerData(int startTick, NoteCollection notes)
+            public InnerData(int startTick, int ticksPerBeat, NoteCollection notes)
             {
                 this.startTick = startTick;
+                this.ticksPerBeat = ticksPerBeat;
                 selectedNotes = notes;
             }
         }

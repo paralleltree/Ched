@@ -13,13 +13,17 @@ namespace Ched.Plugins
 {
     public class PluginManager
     {
-        protected static string PluginPath => "Plugins";
+        internal static string PluginPath => "Plugins";
 
         [ImportMany]
         IEnumerable<IScorePlugin> scorePlugins = Enumerable.Empty<IScorePlugin>();
+        [ImportMany]
+        IEnumerable<IScoreBookImportPlugin> bookImportPlugins = Enumerable.Empty<IScoreBookImportPlugin>();
+
         public List<string> FailedFiles { get; private set; } = new List<string>();
 
         public IEnumerable<IScorePlugin> ScorePlugins => scorePlugins;
+        public IEnumerable<IScoreBookImportPlugin> ScoreBookImportPlugins => bookImportPlugins;
 
         private PluginManager()
         {
@@ -44,7 +48,7 @@ namespace Ched.Plugins
                         var assembly = System.Reflection.Assembly.LoadFile(path);
                         catalog.Catalogs.Add(new AssemblyCatalog(assembly, builder));
                     }
-                    catch (NotSupportedException ex)
+                    catch (Exception ex) when (ex is NotSupportedException || ex is BadImageFormatException)
                     {
                         failed.Add(Uri.UnescapeDataString(new Uri(Path.GetFullPath(PluginPath)).MakeRelativeUri(new Uri(path)).ToString().Replace('/', Path.DirectorySeparatorChar)));
                     }

@@ -15,7 +15,7 @@ namespace Ched.UI
 {
     public partial class SoundSourceSelector : UserControl
     {
-        public IEnumerable<string> SupportedExtensions => new string[] { ".wav", ".mp3" };
+        public IEnumerable<string> SupportedExtensions => new string[] { ".wav", ".mp3", ".ogg" };
 
         public SoundSource Value
         {

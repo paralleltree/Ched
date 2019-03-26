@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -19,10 +20,18 @@ namespace Ched
         [STAThread]
         static void Main(string[] args)
         {
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(Application.ExecutablePath));
+
 #if !DEBUG
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
             AppDomain.CurrentDomain.UnhandledException += (s, e) => DumpException((Exception)e.ExceptionObject, true);
 #endif
+
+            AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
+            {
+                string path = Path.Combine(Plugins.PluginManager.PluginPath, new AssemblyName(e.Name).Name + ".dll");
+                return File.Exists(path) ? Assembly.LoadFrom(path) : null;
+            };
 
             UpgradeConfiguration(ApplicationSettings.Default);
             UpgradeConfiguration(SoundSettings.Default);
@@ -34,7 +43,13 @@ namespace Ched
 
         public static void DumpExceptionTo(Exception ex, string filename)
         {
-            File.WriteAllText(filename, Newtonsoft.Json.JsonConvert.SerializeObject(ex));
+            try
+            {
+                File.WriteAllText(filename, Newtonsoft.Json.JsonConvert.SerializeObject(ex));
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
         }
 
         public static void DumpException(Exception ex)

@@ -26,7 +26,7 @@ namespace Ched.Core
         };
 
         [Newtonsoft.Json.JsonProperty]
-        private Version version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
+        private Version version = typeof(ScoreBook).Assembly.GetName().Version;
         [Newtonsoft.Json.JsonProperty]
         private string title = "";
         [Newtonsoft.Json.JsonProperty]
@@ -137,7 +137,19 @@ namespace Ched.Core
                 }
             }
 
-            doc["version"] = JObject.FromObject(System.Reflection.Assembly.GetEntryAssembly().GetName().Version);
+            if (fileVersion.Major < 3)
+            {
+                var notes = doc["score"]["notes"];
+                var types = new[] { notes["airs"], notes["airActions"] }.SelectMany(p => p.Select(q => (JObject)q["parentNote"])).Where(p => p.ContainsKey("$type"));
+                foreach (var obj in types)
+                {
+                    string type = obj["$type"].ToString();
+                    type = System.Text.RegularExpressions.Regex.Replace(type, "Ched$", "Ched.Core").Replace("Components", "Core");
+                    obj["$type"] = type;
+                }
+            }
+
+            doc["version"] = JObject.FromObject(typeof(ScoreBook).Assembly.GetName().Version);
 
             var res = doc.ToObject<ScoreBook>(JsonSerializer.Create(SerializerSettings));
             // 循環参照は復元できないねん……
@@ -147,6 +159,12 @@ namespace Ched.Core
                 note.ActionNotes.Clear();
                 note.ActionNotes.AddRange(restored);
             }
+
+            if (res.Score.Events.TimeSignatureChangeEvents.Count == 0)
+            {
+                res.Score.Events.TimeSignatureChangeEvents.Add(new Events.TimeSignatureChangeEvent() { Tick = 0, Numerator = 4, DenominatorExponent = 2 });
+            }
+
             res.Path = path;
             return res;
         }
@@ -158,7 +176,7 @@ namespace Ched.Core
         /// <returns>互換性があればtrue, 互換性がなければfalse</returns>
         public static bool IsCompatible(string path)
         {
-            Version current = System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
+            Version current = typeof(ScoreBook).Assembly.GetName().Version;
             return GetFileVersion(path).Major <= current.Major;
         }
 
@@ -169,7 +187,7 @@ namespace Ched.Core
         /// <returns>読み込み可能であればtrue, 不可能であればfalse</returns>
         public static bool IsUpgradeNeeded(string path)
         {
-            Version current = System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
+            Version current = typeof(ScoreBook).Assembly.GetName().Version;
             return GetFileVersion(path).Major == current.Major;
         }
 
@@ -191,7 +209,7 @@ namespace Ched.Core
         private static Version GetFileVersion(string path)
         {
             var doc = JObject.Parse(GetDecompressedData(path));
-            Version current = System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
+            Version current = typeof(ScoreBook).Assembly.GetName().Version;
             return doc["version"].ToObject<Version>();
         }
     }

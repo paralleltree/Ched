@@ -38,5 +38,14 @@ namespace Ched.Core
             get { return highSpeedChangeEvents; }
             set { highSpeedChangeEvents = value; }
         }
+
+        public void UpdateTicksPerBeat(double factor)
+        {
+            var events = BPMChangeEvents.Cast<EventBase>()
+                 .Concat(TimeSignatureChangeEvents)
+                 .Concat(HighSpeedChangeEvents);
+            foreach (var e in events)
+                e.Tick = (int)(e.Tick * factor);
+        }
     }
 }

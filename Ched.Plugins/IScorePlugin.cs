@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Ched.Core;
+using Ched.UI;
 
 namespace Ched.Plugins
 {
@@ -22,6 +23,7 @@ namespace Ched.Plugins
     public interface IScorePluginArgs
     {
         Score GetCurrentScore();
+        SelectionRange GetSelectedRange();
         void UpdateScore(Score score);
     }
 }

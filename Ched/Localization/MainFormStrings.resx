@@ -258,4 +258,13 @@
   <data name="InsertAirWithAirAction" xml:space="preserve">
     <value>AIR-ACTIONとAIRを同時に追加する</value>
   </data>
+  <data name="Import" xml:space="preserve">
+    <value>インポート</value>
+  </data>
+  <data name="NarrowLaneWidth" xml:space="preserve">
+    <value>レーン幅を狭める</value>
+  </data>
+  <data name="WidenLaneWidth" xml:space="preserve">
+    <value>レーン幅を広げる</value>
+  </data>
 </root>
