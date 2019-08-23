@@ -15,7 +15,11 @@ namespace Ched.UI
         public decimal SpeedRatio
         {
             get { return speedRatioBox.Value; }
-            set { speedRatioBox.Value = value; }
+            set
+            {
+                speedRatioBox.Value = value;
+                speedRatioBox.SelectAll();
+            }
         }
 
         public HighSpeedSelectionForm()

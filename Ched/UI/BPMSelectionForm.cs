@@ -15,7 +15,11 @@ namespace Ched.UI
         public decimal BPM
         {
             get { return bpmBox.Value; }
-            set { bpmBox.Value = value; }
+            set
+            {
+                bpmBox.Value = value;
+                bpmBox.SelectAll();
+            }
         }
 
         public BPMSelectionForm()
