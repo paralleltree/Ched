@@ -173,10 +173,10 @@ namespace Ched.UI
             using (var manager = this.WorkWithLayout())
             {
                 this.Menu = CreateMainMenu(NoteView);
+                this.Controls.Add(NoteView);
                 this.Controls.Add(NoteViewScrollBar);
                 this.Controls.Add(CreateNewNoteTypeToolStrip(NoteView));
                 this.Controls.Add(CreateMainToolStrip(NoteView));
-                this.Controls.Add(NoteView);
             }
 
             NoteView.NewNoteType = NoteType.Tap;
