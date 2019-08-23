@@ -154,6 +154,7 @@
     <Compile Include="Plugins\ScorePluginArgs.cs" />
     <Compile Include="Plugins\SlideKnitter.cs" />
     <Compile Include="Plugins\SlideMerger.cs" />
+    <Compile Include="Plugins\SlideReverser.cs" />
     <Compile Include="Plugins\SlideSplitter.cs" />
     <Compile Include="UI\BookPropertiesForm.cs">
       <SubType>Form</SubType>
