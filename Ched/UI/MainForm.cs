@@ -141,6 +141,8 @@ namespace Ched.UI
                 }
             };
 
+            NoteView.NewNoteTypeChanged += (s, e) => NoteView.EditMode = EditMode.Edit;
+
             AllowDrop = true;
             DragEnter += (s, e) =>
             {
