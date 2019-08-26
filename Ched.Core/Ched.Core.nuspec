@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <description>$description$</description>
+    <authors>$author$</authors>
+
+    <projectUrl>https://github.com/paralleltree/Ched</projectUrl>
+    <licenseUrl>https://github.com/paralleltree/Ched/blob/develop/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+  </metadata>
+</package>

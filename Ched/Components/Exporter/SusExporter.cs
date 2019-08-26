@@ -7,8 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ConcurrentPriorityQueue;
-using Ched.Components.Notes;
-using Ched.Components.Events;
+using Ched.Core;
+using Ched.Core.Notes;
+using Ched.Core.Events;
 
 namespace Ched.Components.Exporter
 {
@@ -63,7 +64,7 @@ namespace Ched.Components.Exporter
                 if (bpmlist.Count >= 36 * 36) throw new ArgumentException("BPM定義数が上限を超えました。");
 
                 var bpmIdentifiers = EnumerateIdentifiers(2).Skip(1).Take(bpmlist.Count).ToList();
-                foreach (var item in bpmlist)
+                foreach (var item in bpmlist.GroupBy(p => p.Index).Select(p => p.First()))
                 {
                     writer.WriteLine("#BPM{0}: {1}", bpmIdentifiers[item.Index], item.Value.BPM);
                 }
@@ -94,6 +95,7 @@ namespace Ched.Components.Exporter
                 });
                 writer.WriteLine("#TIL00: \"{0}\"", string.Join(", ", speeds));
                 writer.WriteLine("#HISPEED 00");
+                writer.WriteLine("#MEASUREHS 00");
 
                 writer.WriteLine();
 
@@ -393,7 +395,7 @@ namespace Ched.Components.Exporter
             public void Clear()
             {
                 lastStartTick = 0;
-                IdentifierStack = new Stack<char>(Enumerable.Range(0, 26).Select(p => (char)('A' + p)).Reverse());
+                IdentifierStack = new Stack<char>(EnumerateIdentifiers(1).Select(p => p.Single()).Reverse());
                 UsedIdentifiers = new ConcurrentPriorityQueue<Tuple<int, char>, int>();
             }
 
@@ -444,7 +446,7 @@ namespace Ched.Components.Exporter
                     };
 
                     // 時間逆順で追加
-                    if (dic.ContainsKey(pos)) dic[-pos] = item;
+                    if (dic.ContainsKey(-pos)) dic[-pos] = item;
                     else dic.Add(-pos, item);
 
                     if (i < ordered.Count - 1)

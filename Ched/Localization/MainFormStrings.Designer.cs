@@ -259,11 +259,38 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to インポート.
+        /// </summary>
+        internal static string Import {
+            get {
+                return ResourceManager.GetString("Import", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AIR-ACTIONとAIRを同時に追加する.
+        /// </summary>
+        internal static string InsertAirWithAirAction {
+            get {
+                return ResourceManager.GetString("InsertAirWithAirAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 挿入(&amp;I).
         /// </summary>
         internal static string InsertMenu {
             get {
                 return ResourceManager.GetString("InsertMenu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to レーン幅を狭める.
+        /// </summary>
+        internal static string NarrowLaneWidth {
+            get {
+                return ResourceManager.GetString("NarrowLaneWidth", resourceCulture);
             }
         }
         
@@ -453,6 +480,15 @@ namespace Ched.Localization {
         internal static string ViewMenu {
             get {
                 return ResourceManager.GetString("ViewMenu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to レーン幅を広げる.
+        /// </summary>
+        internal static string WidenLaneWidth {
+            get {
+                return ResourceManager.GetString("WidenLaneWidth", resourceCulture);
             }
         }
         

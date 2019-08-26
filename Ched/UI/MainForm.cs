@@ -9,12 +9,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Ched.Components;
-using Ched.Components.Notes;
-using Ched.Components.Events;
+using Ched.Core.Notes;
+using Ched.Core;
+using Ched.Core.Events;
+using Ched.Configuration;
 using Ched.Localization;
-using Ched.UI.Operations;
+using Ched.Plugins;
 using Ched.Properties;
+using Ched.UI.Operations;
 
 namespace Ched.UI
 {
@@ -33,6 +35,8 @@ namespace Ched.UI
 
         private ToolStripButton ZoomInButton;
         private ToolStripButton ZoomOutButton;
+        private MenuItem WidenLaneWidthMenuItem;
+        private MenuItem NarrowLaneWidthMenuItem;
 
         private ExportData LastExportData { get; set; }
 
@@ -50,18 +54,22 @@ namespace Ched.UI
                 NoteView.Editable = CanEdit;
                 NoteView.LaneBorderLightColor = isPreviewMode ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
                 NoteView.LaneBorderDarkColor = isPreviewMode ? Color.FromArgb(10, 10, 10) : Color.FromArgb(30, 30, 30);
-                NoteView.UnitLaneWidth = isPreviewMode ? 4 : 12;
+                NoteView.UnitLaneWidth = isPreviewMode ? 4 : ApplicationSettings.Default.UnitLaneWidth;
                 NoteView.ShortNoteHeight = isPreviewMode ? 4 : 5;
-                NoteView.UnitBeatHeight = isPreviewMode ? 48 : Settings.Default.UnitBeatHeight;
+                NoteView.UnitBeatHeight = isPreviewMode ? 48 : ApplicationSettings.Default.UnitBeatHeight;
                 UpdateThumbHeight();
                 ZoomInButton.Enabled = CanZoomIn;
                 ZoomOutButton.Enabled = CanZoomOut;
+                WidenLaneWidthMenuItem.Enabled = CanWidenLaneWidth;
+                NarrowLaneWidthMenuItem.Enabled = CanNarrowLaneWidth;
             }
         }
 
-        private bool CanZoomIn { get { return !IsPreviewMode && NoteView.UnitBeatHeight < 960; } }
-        private bool CanZoomOut { get { return !IsPreviewMode && NoteView.UnitBeatHeight > 30; } }
-        private bool CanEdit { get { return !IsPreviewMode && !PreviewManager.Playing; } }
+        private bool CanWidenLaneWidth => !IsPreviewMode && NoteView.UnitLaneWidth < 24;
+        private bool CanNarrowLaneWidth => !IsPreviewMode && NoteView.UnitLaneWidth > 12;
+        private bool CanZoomIn => !IsPreviewMode && NoteView.UnitBeatHeight < 960;
+        private bool CanZoomOut => !IsPreviewMode && NoteView.UnitBeatHeight > 30;
+        private bool CanEdit => !IsPreviewMode && !PreviewManager.Playing;
 
         public MainForm()
         {
@@ -78,13 +86,16 @@ namespace Ched.UI
             NoteView = new NoteView(OperationManager)
             {
                 Dock = DockStyle.Fill,
-                UnitBeatHeight = Settings.Default.UnitBeatHeight
+                UnitBeatHeight = ApplicationSettings.Default.UnitBeatHeight,
+                UnitLaneWidth = ApplicationSettings.Default.UnitLaneWidth,
+                InsertAirWithAirAction = ApplicationSettings.Default.InsertAirWithAirAction
             };
 
             PreviewManager = new SoundPreviewManager(NoteView);
-            PreviewManager.IsStopAtLastNote = Settings.Default.IsPreviewAbortAtLastNote;
+            PreviewManager.IsStopAtLastNote = ApplicationSettings.Default.IsPreviewAbortAtLastNote;
             PreviewManager.Finished += (s, e) => NoteView.Editable = CanEdit;
             PreviewManager.TickUpdated += (s, e) => NoteView.CurrentTick = e.Tick;
+            PreviewManager.ExceptionThrown += (s, e) => MessageBox.Show(this, ErrorStrings.PreviewException, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
             NoteViewScrollBar = new VScrollBar()
             {
@@ -130,6 +141,8 @@ namespace Ched.UI
                 }
             };
 
+            NoteView.NewNoteTypeChanged += (s, e) => NoteView.EditMode = EditMode.Edit;
+
             AllowDrop = true;
             DragEnter += (s, e) =>
             {
@@ -156,7 +169,7 @@ namespace Ched.UI
                     return;
                 }
 
-                Settings.Default.Save();
+                ApplicationSettings.Default.Save();
             };
 
             using (var manager = this.WorkWithLayout())
@@ -171,11 +184,16 @@ namespace Ched.UI
             NoteView.NewNoteType = NoteType.Tap;
             NoteView.EditMode = EditMode.Edit;
 
-            LoadBook(new ScoreBook());
+            LoadEmptyBook();
             SetText();
 
             if (!PreviewManager.IsSupported)
                 MessageBox.Show(this, ErrorStrings.PreviewNotSupported, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            if (PluginManager.FailedFiles.Count > 0)
+            {
+                MessageBox.Show(this, string.Join("\n", new[] { ErrorStrings.PluginLoadError }.Concat(PluginManager.FailedFiles)), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         public MainForm(string filePath) : this()
@@ -199,26 +217,33 @@ namespace Ched.UI
                 }
                 LoadBook(ScoreBook.LoadFile(filePath));
             }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show(this, ErrorStrings.FileNotAccessible, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LoadEmptyBook();
+            }
             catch (Exception ex)
             {
                 MessageBox.Show(this, ErrorStrings.FileLoadError, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Program.DumpException(ex);
-                LoadBook(new ScoreBook());
+                Program.DumpExceptionTo(ex, "file_exception.json");
+                LoadEmptyBook();
             }
         }
 
         protected void LoadBook(ScoreBook book)
         {
             ScoreBook = book;
-            NoteView.LoadScore(book.Score);
+            OperationManager.Clear();
+            NoteView.Initialize(book.Score);
             NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
+            NoteViewScrollBar.SmallChange = NoteView.UnitBeatTick;
             UpdateThumbHeight();
             SetText(book.Path);
             LastExportData = null;
             if (!string.IsNullOrEmpty(book.Path))
             {
-                SoundConfiguration.Default.ScoreSound.TryGetValue(book.Path, out CurrentMusicSource);
+                SoundSettings.Default.ScoreSound.TryGetValue(book.Path, out CurrentMusicSource);
             }
             else
             {
@@ -226,18 +251,32 @@ namespace Ched.UI
             }
         }
 
+        protected void LoadEmptyBook()
+        {
+            var book = new ScoreBook();
+            var events = book.Score.Events;
+            events.BPMChangeEvents.Add(new BPMChangeEvent() { Tick = 0, BPM = 120 });
+            events.TimeSignatureChangeEvents.Add(new TimeSignatureChangeEvent() { Tick = 0, Numerator = 4, DenominatorExponent = 2 });
+            LoadBook(book);
+        }
+
         protected void OpenFile()
+        {
+            OpenFile(FileTypeFilter, p => LoadFile(p));
+        }
+
+        protected void OpenFile(string filter, Action<string> loadAction)
         {
             if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) return;
 
             var dialog = new OpenFileDialog()
             {
-                Filter = FileTypeFilter
+                Filter = filter
             };
 
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
-                LoadFile(dialog.FileName);
+                loadAction(dialog.FileName);
             }
         }
 
@@ -267,8 +306,8 @@ namespace Ched.UI
             ScoreBook.Save();
             if (CurrentMusicSource != null)
             {
-                SoundConfiguration.Default.ScoreSound[ScoreBook.Path] = CurrentMusicSource;
-                SoundConfiguration.Default.Save();
+                SoundSettings.Default.ScoreSound[ScoreBook.Path] = CurrentMusicSource;
+                SoundSettings.Default.Save();
             }
             OperationManager.CommitChanges();
         }
@@ -293,7 +332,7 @@ namespace Ched.UI
         {
             if (!OperationManager.IsChanged || this.ConfirmDiscardChanges())
             {
-                LoadBook(new ScoreBook());
+                LoadEmptyBook();
             }
         }
 
@@ -315,6 +354,24 @@ namespace Ched.UI
 
         private MainMenu CreateMainMenu(NoteView noteView)
         {
+            var importPluginItems = PluginManager.ScoreBookImportPlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
+            {
+                OpenFile(p.FileFilter, q =>
+                {
+                    try
+                    {
+                        using (var reader = new StreamReader(q))
+                            LoadBook(p.Import(reader));
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(this, ErrorStrings.ImportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Program.DumpExceptionTo(ex, "import_exception.json");
+                        LoadEmptyBook();
+                    }
+                });
+            })).ToArray();
+
             var bookPropertiesMenuItem = new MenuItem(MainFormStrings.bookProperty, (s, e) =>
             {
                 var form = new BookPropertiesForm(ScoreBook, CurrentMusicSource);
@@ -322,8 +379,8 @@ namespace Ched.UI
                 {
                     CurrentMusicSource = form.MusicSource;
                     if (string.IsNullOrEmpty(ScoreBook.Path)) return;
-                    SoundConfiguration.Default.ScoreSound[ScoreBook.Path] = CurrentMusicSource;
-                    SoundConfiguration.Default.Save();
+                    SoundSettings.Default.ScoreSound[ScoreBook.Path] = CurrentMusicSource;
+                    SoundSettings.Default.Save();
                 }
             });
 
@@ -333,6 +390,8 @@ namespace Ched.UI
                 new MenuItem(MainFormStrings.OpenFile + "(&O)", (s, e) => OpenFile()) { Shortcut = Shortcut.CtrlO },
                 new MenuItem(MainFormStrings.SaveFile + "(&S)", (s, e) => SaveFile()) { Shortcut = Shortcut.CtrlS },
                 new MenuItem(MainFormStrings.SaveAs + "(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
+                new MenuItem("-"),
+                new MenuItem(MainFormStrings.Import, importPluginItems),
                 new MenuItem(MainFormStrings.Export, (s, e) => ExportFile()),
                 new MenuItem("-"),
                 bookPropertiesMenuItem,
@@ -388,13 +447,34 @@ namespace Ched.UI
                 noteView.Invalidate();
             });
 
+            var insertAirWithAirActionItem = new MenuItem(MainFormStrings.InsertAirWithAirAction, (s, e) =>
+            {
+                var item = s as MenuItem;
+                item.Checked = !item.Checked;
+                NoteView.InsertAirWithAirAction = item.Checked;
+                ApplicationSettings.Default.InsertAirWithAirAction = item.Checked;
+            })
+            {
+                Checked = ApplicationSettings.Default.InsertAirWithAirAction
+            };
+
             var pluginItems = PluginManager.ScorePlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
             {
                 CommitChanges();
+                Action<Score> updateScore = newScore =>
+                {
+                    var op = new UpdateScoreOperation(ScoreBook.Score, newScore, score =>
+                    {
+                        ScoreBook.Score = score;
+                        noteView.UpdateScore(score);
+                    });
+                    OperationManager.Push(op);
+                    op.Redo();
+                };
 
                 try
                 {
-                    p.Run(ScoreBook.Score);
+                    p.Run(new ScorePluginArgs(() => ScoreBook.Score.Clone(), noteView.SelectedRange, updateScore));
                 }
                 catch (Exception ex)
                 {
@@ -409,6 +489,7 @@ namespace Ched.UI
                 undoItem, redoItem, new MenuItem("-"),
                 cutItem, copyItem, pasteItem, pasteFlippedItem, new MenuItem("-"),
                 flipSelectedNotesItem, removeSelectedNotesItem, removeEventsItem, new MenuItem("-"),
+                insertAirWithAirActionItem, new MenuItem("-"),
                 pluginItem
             };
 
@@ -418,28 +499,53 @@ namespace Ched.UI
                 ((MenuItem)s).Checked = IsPreviewMode;
             }, Shortcut.CtrlP);
 
-            var viewMenuItems = new MenuItem[] { viewModeItem };
+            WidenLaneWidthMenuItem = new MenuItem(MainFormStrings.WidenLaneWidth);
+            NarrowLaneWidthMenuItem = new MenuItem(MainFormStrings.NarrowLaneWidth);
+
+            WidenLaneWidthMenuItem.Click += (s, e) =>
+            {
+                noteView.UnitLaneWidth += 4;
+                ApplicationSettings.Default.UnitLaneWidth = noteView.UnitLaneWidth;
+                WidenLaneWidthMenuItem.Enabled = CanWidenLaneWidth;
+                NarrowLaneWidthMenuItem.Enabled = CanNarrowLaneWidth;
+            };
+            NarrowLaneWidthMenuItem.Click += (s, e) =>
+            {
+                noteView.UnitLaneWidth -= 4;
+                ApplicationSettings.Default.UnitLaneWidth = noteView.UnitLaneWidth;
+                WidenLaneWidthMenuItem.Enabled = CanWidenLaneWidth;
+                NarrowLaneWidthMenuItem.Enabled = CanNarrowLaneWidth;
+            };
+
+            var viewMenuItems = new MenuItem[] {
+                viewModeItem,
+                new MenuItem("-"),
+                WidenLaneWidthMenuItem, NarrowLaneWidthMenuItem
+            };
 
             var insertBPMItem = new MenuItem("BPM", (s, e) =>
             {
-                var form = new BPMSelectionForm();
+                var form = new BPMSelectionForm()
+                {
+                    BPM = noteView.ScoreEvents.BPMChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.BPM ?? 120m
+                };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
                 var prev = noteView.ScoreEvents.BPMChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
-                var item = new Components.Events.BPMChangeEvent()
+                var item = new BPMChangeEvent()
                 {
                     Tick = noteView.SelectedRange.StartTick,
                     BPM = form.BPM
                 };
 
-                var insertOp = new InsertEventOperation<Components.Events.BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, item);
+                var insertOp = new InsertEventOperation<BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, item);
                 if (prev == null)
                 {
                     OperationManager.Push(insertOp);
                 }
                 else
                 {
-                    var removeOp = new RemoveEventOperation<Components.Events.BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, prev);
+                    var removeOp = new RemoveEventOperation<BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, prev);
                     noteView.ScoreEvents.BPMChangeEvents.Remove(prev);
                     OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
                 }
@@ -450,24 +556,27 @@ namespace Ched.UI
 
             var insertHighSpeedItem = new MenuItem(MainFormStrings.HighSpeed, (s, e) =>
             {
-                var form = new HighSpeedSelectionForm();
+                var form = new HighSpeedSelectionForm()
+                {
+                    SpeedRatio = noteView.ScoreEvents.HighSpeedChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.SpeedRatio ?? 1.0m
+                };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
                 var prev = noteView.ScoreEvents.HighSpeedChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
-                var item = new Components.Events.HighSpeedChangeEvent()
+                var item = new HighSpeedChangeEvent()
                 {
                     Tick = noteView.SelectedRange.StartTick,
                     SpeedRatio = form.SpeedRatio
                 };
 
-                var insertOp = new InsertEventOperation<Components.Events.HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, item);
+                var insertOp = new InsertEventOperation<HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, item);
                 if (prev == null)
                 {
                     OperationManager.Push(insertOp);
                 }
                 else
                 {
-                    var removeOp = new RemoveEventOperation<Components.Events.HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, prev);
+                    var removeOp = new RemoveEventOperation<HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, prev);
                     noteView.ScoreEvents.HighSpeedChangeEvents.Remove(prev);
                     OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
                 }
@@ -482,18 +591,18 @@ namespace Ched.UI
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
                 var prev = noteView.ScoreEvents.TimeSignatureChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
-                var item = new Components.Events.TimeSignatureChangeEvent()
+                var item = new TimeSignatureChangeEvent()
                 {
                     Tick = noteView.SelectedRange.StartTick,
                     Numerator = form.Numerator,
                     DenominatorExponent = form.DenominatorExponent
                 };
 
-                var insertOp = new InsertEventOperation<Components.Events.TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
+                var insertOp = new InsertEventOperation<TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
                 if (prev != null)
                 {
                     noteView.ScoreEvents.TimeSignatureChangeEvents.Remove(prev);
-                    var removeOp = new RemoveEventOperation<Components.Events.TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, prev);
+                    var removeOp = new RemoveEventOperation<TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, prev);
                     OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
                 }
                 else
@@ -512,10 +621,10 @@ namespace Ched.UI
                 var item = s as MenuItem;
                 item.Checked = !item.Checked;
                 PreviewManager.IsStopAtLastNote = item.Checked;
-                Settings.Default.IsPreviewAbortAtLastNote = item.Checked;
+                ApplicationSettings.Default.IsPreviewAbortAtLastNote = item.Checked;
             })
             {
-                Checked = Settings.Default.IsPreviewAbortAtLastNote
+                Checked = ApplicationSettings.Default.IsPreviewAbortAtLastNote
             };
 
             var playItem = new MenuItem(MainFormStrings.Play, (s, e) =>
@@ -546,11 +655,16 @@ namespace Ched.UI
                     noteView.CurrentTick = startTick;
                 };
 
-                if (PreviewManager.Start(CurrentMusicSource, startTick))
+                try
                 {
+                    if (!PreviewManager.Start(CurrentMusicSource, startTick)) return;
                     isAbortAtLastNoteItem.Enabled = false;
                     PreviewManager.Finished += lambda;
                     noteView.Editable = CanEdit;
+                }
+                catch (Exception ex)
+                {
+                    Program.DumpExceptionTo(ex, "sound_exception.json");
                 }
             }, (Shortcut)Keys.Space);
 
@@ -666,7 +780,7 @@ namespace Ched.UI
 
             var zoomInButton = new ToolStripButton(MainFormStrings.ZoomIn, Resources.ZoomInIcon)
             {
-                Enabled = noteView.UnitBeatHeight < 960,
+                Enabled = noteView.UnitBeatHeight < 1920,
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
             var zoomOutButton = new ToolStripButton(MainFormStrings.ZoomOut, Resources.ZoomOutIcon)
@@ -678,7 +792,7 @@ namespace Ched.UI
             zoomInButton.Click += (s, e) =>
             {
                 noteView.UnitBeatHeight *= 2;
-                Settings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
+                ApplicationSettings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
                 zoomOutButton.Enabled = CanZoomOut;
                 zoomInButton.Enabled = CanZoomIn;
                 UpdateThumbHeight();
@@ -687,7 +801,7 @@ namespace Ched.UI
             zoomOutButton.Click += (s, e) =>
             {
                 noteView.UnitBeatHeight /= 2;
-                Settings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
+                ApplicationSettings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
                 zoomInButton.Enabled = CanZoomIn;
                 zoomOutButton.Enabled = CanZoomOut;
                 UpdateThumbHeight();

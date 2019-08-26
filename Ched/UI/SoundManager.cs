@@ -4,52 +4,57 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using SharpDX.IO;
-using SharpDX.MediaFoundation;
-using SharpDX.XAudio2;
+using Un4seen.Bass;
 
 namespace Ched.UI
 {
     public class SoundManager : IDisposable
     {
-        private readonly XAudio2 xAudio;
-        readonly HashSet<SourceVoice> playing = new HashSet<SourceVoice>();
-        readonly Dictionary<string, AudioDecoder> sounds = new Dictionary<string, AudioDecoder>();
-        readonly Dictionary<AudioDecoder, Queue<SourceVoice>> voices = new Dictionary<AudioDecoder, Queue<SourceVoice>>();
+        readonly HashSet<int> playing = new HashSet<int>();
+        readonly HashSet<SYNCPROC> syncProcs = new HashSet<SYNCPROC>();
+        readonly Dictionary<string, Queue<int>> handles = new Dictionary<string, Queue<int>>();
+        readonly Dictionary<string, TimeSpan> durations = new Dictionary<string, TimeSpan>();
 
         public bool IsSupported { get; private set; } = true;
 
+        public event EventHandler ExceptionThrown;
+
         public void Dispose()
         {
-            foreach (var item in voices) item.Key.Dispose();
-            xAudio?.Dispose();
+            if (!IsSupported) return;
+            Bass.BASS_Stop();
+            Bass.BASS_PluginFree(0);
+            Bass.BASS_Free();
         }
 
         public SoundManager()
         {
-            try
+            // なぜBass.LoadMe()呼び出すとfalseなんでしょうね
+            if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
             {
-                xAudio = new XAudio2();
-                xAudio.StartEngine();
-                new MasteringVoice(xAudio).SetVolume(1);
-            }
-            catch (Exception ex)
-            {
-                Program.DumpExceptionTo(ex, "sound_exception.json");
                 IsSupported = false;
+                return;
             }
         }
 
-        public void Register(string filepath)
+        public void Register(string path)
         {
             CheckSupported();
-            if (sounds.ContainsKey(filepath)) return;
-            var nfs = new NativeFileStream(filepath, NativeFileMode.Open, NativeFileAccess.Read);
-            var decoder = new AudioDecoder(nfs);
-            lock (sounds) sounds.Add(filepath, decoder);
+            lock (handles)
+            {
+                if (handles.ContainsKey(path)) return;
+                int handle = GetHandle(path);
+                long len = Bass.BASS_ChannelGetLength(handle);
+                handles.Add(path, new Queue<int>());
+                lock (durations) durations.Add(path, TimeSpan.FromSeconds(Bass.BASS_ChannelBytes2Seconds(handle, len)));
+            }
+        }
 
-            var freelist = new Queue<SourceVoice>();
-            voices.Add(decoder, freelist);
+        protected int GetHandle(string filepath)
+        {
+            int handle = Bass.BASS_StreamCreateFile(filepath, 0, 0, BASSFlag.BASS_DEFAULT);
+            if (handle == 0) throw new ArgumentException("cannot create a stream.");
+            return handle;
         }
 
         public void Play(string path)
@@ -60,59 +65,49 @@ namespace Ched.UI
         public void Play(string path, TimeSpan offset)
         {
             CheckSupported();
-            Task.Run(() => PlayInternal(path, offset));
+            Task.Run(() => PlayInternal(path, offset))
+                .ContinueWith(p =>
+                {
+                    if (p.Exception != null)
+                    {
+                        Program.DumpExceptionTo(p.Exception, "sound_exception.json");
+                        ExceptionThrown?.Invoke(this, EventArgs.Empty);
+                    }
+                });
         }
 
         private void PlayInternal(string path, TimeSpan offset)
         {
-            AudioDecoder decoder;
-            Queue<SourceVoice> freelist;
-
-            Register(path);
-
-            lock (sounds)
+            Queue<int> freelist;
+            lock (handles)
             {
-                decoder = sounds[path];
-                freelist = voices[decoder];
+                if (!handles.ContainsKey(path)) throw new InvalidOperationException("sound source was not registered.");
+                freelist = handles[path];
             }
 
-
-            SourceVoice voice;
+            int handle;
             lock (freelist)
             {
-                if (freelist.Count > 0)
-                {
-                    voice = freelist.Dequeue();
-                }
+                if (freelist.Count > 0) handle = freelist.Dequeue();
                 else
                 {
-                    voice = new SourceVoice(xAudio, decoder.WaveFormat);
+                    handle = GetHandle(path);
+
+                    var proc = new SYNCPROC((h, channel, data, user) =>
+                    {
+                        lock (freelist) freelist.Enqueue(handle);
+                    });
+
+                    int syncHandle;
+                    syncHandle = Bass.BASS_ChannelSetSync(handle, BASSSync.BASS_SYNC_END, 0, proc, IntPtr.Zero);
+                    if (syncHandle == 0) throw new InvalidOperationException("cannot set sync");
+                    lock (syncProcs) syncProcs.Add(proc); // avoid GC
                 }
             }
 
-            // .m4aがシークできない！！！！
-            // .mp3のビットレートによって再生位置が正しくなくなる？
-            var it = decoder.GetSamples(offset).GetEnumerator();
-
-            Action<IntPtr> lambda = null;
-            lambda = i =>
-            {
-                if (it.MoveNext())
-                {
-                    voice.SubmitSourceBuffer(new AudioBuffer(it.Current), null);
-                }
-                else
-                {
-                    voice.BufferEnd -= lambda;
-                    lock (freelist) freelist.Enqueue(voice);
-                    lock (playing) playing.Remove(voice);
-                }
-            };
-            voice.BufferEnd += lambda;
-
-            if (it.MoveNext()) voice.SubmitSourceBuffer(new AudioBuffer(it.Current), null);
-            voice.Start();
-            lock (playing) playing.Add(voice);
+            lock (playing) playing.Add(handle);
+            Bass.BASS_ChannelSetPosition(handle, offset.TotalSeconds);
+            Bass.BASS_ChannelPlay(handle, false);
         }
 
         public void StopAll()
@@ -120,9 +115,9 @@ namespace Ched.UI
             CheckSupported();
             lock (playing)
             {
-                foreach (var voice in playing)
+                foreach (int handle in playing)
                 {
-                    voice.Stop();
+                    Bass.BASS_ChannelStop(handle);
                 }
                 playing.Clear();
             }
@@ -131,7 +126,7 @@ namespace Ched.UI
         public TimeSpan GetDuration(string path)
         {
             Register(path);
-            return sounds[path].Duration;
+            lock (durations) return durations[path];
         }
 
         protected void CheckSupported()

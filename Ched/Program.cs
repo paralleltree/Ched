@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using Ched.Configuration;
 
 namespace Ched
 {
@@ -17,23 +20,21 @@ namespace Ched
         [STAThread]
         static void Main(string[] args)
         {
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(Application.ExecutablePath));
+
 #if !DEBUG
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
             AppDomain.CurrentDomain.UnhandledException += (s, e) => DumpException((Exception)e.ExceptionObject, true);
 #endif
 
-            if (!Properties.Settings.Default.HasUpgraded)
+            AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
             {
-                Properties.Settings.Default.Upgrade();
-                Properties.Settings.Default.HasUpgraded = true;
-                Properties.Settings.Default.Save();
-            }
-            if (!Properties.SoundConfiguration.Default.HasUpgraded)
-            {
-                Properties.SoundConfiguration.Default.Upgrade();
-                Properties.SoundConfiguration.Default.HasUpgraded = true;
-                Properties.SoundConfiguration.Default.Save();
-            }
+                string path = Path.Combine(Plugins.PluginManager.PluginPath, new AssemblyName(e.Name).Name + ".dll");
+                return File.Exists(path) ? Assembly.LoadFrom(path) : null;
+            };
+
+            UpgradeConfiguration(ApplicationSettings.Default);
+            UpgradeConfiguration(SoundSettings.Default);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -42,7 +43,13 @@ namespace Ched
 
         public static void DumpExceptionTo(Exception ex, string filename)
         {
-            File.WriteAllText(filename, Newtonsoft.Json.JsonConvert.SerializeObject(ex));
+            try
+            {
+                File.WriteAllText(filename, Newtonsoft.Json.JsonConvert.SerializeObject(ex));
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
         }
 
         public static void DumpException(Exception ex)
@@ -62,6 +69,21 @@ namespace Ched
             {
                 Environment.Exit(1);
             }
+        }
+
+        private static bool UpgradeConfiguration(SettingsBase setting)
+        {
+            try
+            {
+                if (!setting.HasUpgraded) setting.Upgrade();
+            }
+            catch (Exception ex)
+            {
+                DumpExceptionTo(ex, "configuration_exeption.json");
+                setting.Reset();
+                return false;
+            }
+            return true;
         }
     }
 }

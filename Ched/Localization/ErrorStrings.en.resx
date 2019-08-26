@@ -126,11 +126,19 @@
   <data name="FileLoadError" xml:space="preserve">
     <value>An error occured while attempting to read the file.</value>
   </data>
+  <data name="FileNotAccessible" xml:space="preserve">
+    <value>The file is not accessible.</value>
+  </data>
   <data name="FileNotCompatible" xml:space="preserve">
     <value>The file is not compatible with the current version.</value>
   </data>
   <data name="FileUpgradeNeeded" xml:space="preserve">
-    <value>The file was created in an older version of the software.\nSelect "Yes" to upgrade this file.\n(You will NOT be able to use this file on older versions.)</value>
+    <value>The file was created in an older version of the software.
+Select "Yes" to upgrade this file.
+(You will NOT be able to use this file on older versions.)</value>
+  </data>
+  <data name="ImportFailed" xml:space="preserve">
+    <value>The import failed.</value>
   </data>
   <data name="MusicSourceNull" xml:space="preserve">
     <value>Please select an audio file in the Score Property.</value>
@@ -140,6 +148,12 @@
   </data>
   <data name="PluginException" xml:space="preserve">
     <value>An exception occured while executing the plugin.</value>
+  </data>
+  <data name="PluginLoadError" xml:space="preserve">
+    <value>The following plugin(s) is (are) not loaded. It may be occured due to the dll file(s) is (are) blocked.</value>
+  </data>
+  <data name="PreviewException" xml:space="preserve">
+    <value>An error occured while previewing.</value>
   </data>
   <data name="PreviewNotSupported" xml:space="preserve">
     <value>Preview cannot be used.</value>

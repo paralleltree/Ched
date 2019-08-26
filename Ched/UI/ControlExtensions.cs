@@ -15,6 +15,12 @@ namespace Ched.UI
             return new LayoutManager(control);
         }
 
+        public static void InvokeIfRequired(this Control control, Action action)
+        {
+            if (control.InvokeRequired) control.Invoke((MethodInvoker)(() => action()));
+            else action();
+        }
+
         public static IObservable<MouseEventArgs> MouseDownAsObservable(this Control control)
         {
             return Observable.FromEvent<MouseEventHandler, MouseEventArgs>(
@@ -42,6 +48,11 @@ namespace Ched.UI
         public static int GetMaximumValue(this ScrollBar scrollbar)
         {
             return scrollbar.Maximum - scrollbar.LargeChange + 1;
+        }
+
+        public static void SelectAll(this NumericUpDown control)
+        {
+            control.Select(0, control.Text.Length);
         }
     }
 

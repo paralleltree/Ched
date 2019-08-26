@@ -88,6 +88,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ファイルにアクセスできません。.
+        /// </summary>
+        internal static string FileNotAccessible {
+            get {
+                return ResourceManager.GetString("FileNotAccessible", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 現在のバージョンでは開けないファイルです。.
         /// </summary>
         internal static string FileNotCompatible {
@@ -97,11 +106,22 @@ namespace Ched.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 古いバージョンで作成されたファイルです。\nバージョンアップしてよろしいですか？\n(以前のバージョンでは開けなくなります。).
+        ///   Looks up a localized string similar to 古いバージョンで作成されたファイルです。
+        ///バージョンアップしてよろしいですか？
+        ///(以前のバージョンでは開けなくなります。).
         /// </summary>
         internal static string FileUpgradeNeeded {
             get {
                 return ResourceManager.GetString("FileUpgradeNeeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to インポートに失敗しました。.
+        /// </summary>
+        internal static string ImportFailed {
+            get {
+                return ResourceManager.GetString("ImportFailed", resourceCulture);
             }
         }
         
@@ -129,6 +149,24 @@ namespace Ched.Localization {
         internal static string PluginException {
             get {
                 return ResourceManager.GetString("PluginException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 以下のプラグインの読み込みに失敗しました。DLLファイルがブロックされている可能性があります。.
+        /// </summary>
+        internal static string PluginLoadError {
+            get {
+                return ResourceManager.GetString("PluginLoadError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to プレビュー中にエラーが発生しました。.
+        /// </summary>
+        internal static string PreviewException {
+            get {
+                return ResourceManager.GetString("PreviewException", resourceCulture);
             }
         }
         

@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Ched.Components;
-using Ched.Components.Notes;
+using Ched.Core;
+using Ched.Core.Notes;
 
 namespace Ched.Plugins
 {
@@ -14,8 +14,9 @@ namespace Ched.Plugins
     {
         public string DisplayName => "コンボ計算";
 
-        public void Run(Score score)
+        public void Run(IScorePluginArgs args)
         {
+            var score = args.GetCurrentScore();
             var combo = CalculateCombo(score);
             var sb = new StringBuilder();
             sb.AppendLine(string.Format("総コンボ数: {0}", combo.Total));
@@ -108,16 +109,19 @@ namespace Ched.Plugins
 
             foreach (var airAction in score.Notes.AirActions)
             {
-                var lostSections = airAction.ActionNotes.Select(p => p.Offset).Concat(new[] { 0 }).Select(p =>
-                {
-                    int interval = barTick / comboDivider(getHeadBpmAt(airAction.StartTick + p));
-                    return Tuple.Create(p, interval);
-                }).ToList();
+                var airActionTicks = airAction.ActionNotes.Select(p => p.Offset).ToList();
+                var lostSections = airActionTicks.Concat(new[] { 0 }).Select(p =>
+                 {
+                     int interval = barTick / comboDivider(getHeadBpmAt(airAction.StartTick + p));
+                     return Tuple.Create(p, interval);
+                 }).ToList();
 
-                var validTicks = calcComboTicks(airAction.StartTick, airAction.ActionNotes.Select(p => p.Offset))
-                    .Where(p => lostSections.All(q => p <= q.Item1 || p > q.Item1 + q.Item2));
+                var validAirHoldTicks = calcComboTicks(airAction.StartTick, airActionTicks)
+                    .Where(p => lostSections.All(q => p <= q.Item1 || p > q.Item1 + q.Item2))
+                    .Except(airActionTicks)
+                    .ToList();
 
-                combo.Air += new HashSet<int>(validTicks).Count;
+                combo.Air += validAirHoldTicks.Count + airActionTicks.Count;
             }
 
             return combo;

@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using Ched.Components.Events;
-using Ched.Components.Notes;
+using Ched.Core.Events;
+using Ched.Core.Notes;
 
 namespace Ched.UI
 {
@@ -14,6 +14,7 @@ namespace Ched.UI
     {
         public event EventHandler<TickUpdatedEventArgs> TickUpdated;
         public event EventHandler Finished;
+        public event EventHandler ExceptionThrown;
 
         private int CurrentTick { get; set; }
         private SoundSource ClapSource { get; set; }
@@ -37,6 +38,11 @@ namespace Ched.UI
             ClapSource = new SoundSource("guide.mp3", 0.036);
             NoteView = noteView;
             Timer.Tick += Tick;
+            SoundManager.ExceptionThrown += (s, e) => noteView.InvokeIfRequired(() =>
+            {
+                Stop();
+                ExceptionThrown?.Invoke(this, EventArgs.Empty);
+            });
         }
 
         public bool Start(SoundSource music)
@@ -86,6 +92,14 @@ namespace Ched.UI
 
                 System.Threading.Thread.Sleep(TimeSpan.FromSeconds(Math.Max(ClapSource.Latency, 0)));
                 SoundManager.Play(music.FilePath, startTime + TimeSpan.FromSeconds(music.Latency));
+            })
+            .ContinueWith(p =>
+            {
+                if (p.Exception != null)
+                {
+                    Program.DumpExceptionTo(p.Exception, "sound_exception.json");
+                    ExceptionThrown?.Invoke(this, EventArgs.Empty);
+                }
             });
 
             Playing = true;
