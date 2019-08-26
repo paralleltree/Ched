@@ -49,6 +49,11 @@ namespace Ched.UI
         {
             return scrollbar.Maximum - scrollbar.LargeChange + 1;
         }
+
+        public static void SelectAll(this NumericUpDown control)
+        {
+            control.Select(0, control.Text.Length);
+        }
     }
 
     internal class LayoutManager : IDisposable

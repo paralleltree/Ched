@@ -141,6 +141,8 @@ namespace Ched.UI
                 }
             };
 
+            NoteView.NewNoteTypeChanged += (s, e) => NoteView.EditMode = EditMode.Edit;
+
             AllowDrop = true;
             DragEnter += (s, e) =>
             {
@@ -173,10 +175,10 @@ namespace Ched.UI
             using (var manager = this.WorkWithLayout())
             {
                 this.Menu = CreateMainMenu(NoteView);
+                this.Controls.Add(NoteView);
                 this.Controls.Add(NoteViewScrollBar);
                 this.Controls.Add(CreateNewNoteTypeToolStrip(NoteView));
                 this.Controls.Add(CreateMainToolStrip(NoteView));
-                this.Controls.Add(NoteView);
             }
 
             NoteView.NewNoteType = NoteType.Tap;
