@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Ched.Core.Notes;
+using Ched.Localization;
 
 namespace Ched.Plugins
 {
     public class SlideSplitter : IScorePlugin
     {
-        public string DisplayName => "スライド分割";
+        public string DisplayName => PluginStrings.SlideSplitter;
 
         public void Run(IScorePluginArgs args)
         {

@@ -7,12 +7,13 @@ using System.Windows.Forms;
 
 using Ched.Core;
 using Ched.Core.Notes;
+using Ched.Localization;
 
 namespace Ched.Plugins
 {
     public class ComboCalculator : IScorePlugin
     {
-        public string DisplayName => "コンボ計算";
+        public string DisplayName => PluginStrings.ComboCalculator;
 
         public void Run(IScorePluginArgs args)
         {
