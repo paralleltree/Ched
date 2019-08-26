@@ -149,6 +149,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>MainFormStrings.en.resx</DependentUpon>
     </Compile>
+    <Compile Include="Localization\PluginStrings.en.Designer.cs">
+      <DependentUpon>PluginStrings.en.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Localization\PluginStrings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PluginStrings.resx</DependentUpon>
+    </Compile>
     <Compile Include="Plugins\ComboCalculator.cs" />
     <Compile Include="Plugins\PluginManager.cs" />
     <Compile Include="Plugins\ScorePluginArgs.cs" />
@@ -251,6 +261,14 @@
     <EmbeddedResource Include="Localization\MainFormStrings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>MainFormStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\PluginStrings.en.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>PluginStrings.en.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\PluginStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>PluginStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Ched.Core.Notes;
+using Ched.Localization;
 
 namespace Ched.Plugins
 {
     public class SlideMerger : IScorePlugin
     {
-        public string DisplayName => "スライド結合";
+        public string DisplayName => PluginStrings.SlideMerger;
 
         public void Run(IScorePluginArgs args)
         {
