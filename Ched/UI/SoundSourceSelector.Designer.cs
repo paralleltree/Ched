@@ -64,6 +64,11 @@
             0,
             0,
             0});
+            this.latencyBox.Minimum = new decimal(new int[] {
+            60,
+            0,
+            0,
+            -2147483648});
             this.latencyBox.Name = "latencyBox";
             // 
             // label1
