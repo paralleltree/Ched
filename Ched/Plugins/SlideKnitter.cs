@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Ched.Localization;
+
 namespace Ched.Plugins
 {
     public class SlideKnitter : IScorePlugin
     {
-        public string DisplayName => "スライド編み込み";
+        public string DisplayName => PluginStrings.SlideKnitter;
 
         public void Run(IScorePluginArgs args)
         {

@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Ched.Core.Notes;
+using Ched.Localization;
 
 namespace Ched.Plugins
 {
     public class SlideReverser : IScorePlugin
     {
-        public string DisplayName => "スライド時間軸反転";
+        public string DisplayName => PluginStrings.SlideReverser;
 
         public void Run(IScorePluginArgs args)
         {

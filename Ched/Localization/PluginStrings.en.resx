@@ -117,154 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AbortAtLastNote" xml:space="preserve">
-    <value>Stop At Last Note</value>
+  <data name="ComboCalculator" xml:space="preserve">
+    <value>Combo Calculator</value>
   </data>
-  <data name="bookProperty" xml:space="preserve">
-    <value>Score Properties</value>
+  <data name="SlideKnitter" xml:space="preserve">
+    <value>Slide Wiggle Generator</value>
   </data>
-  <data name="Copy" xml:space="preserve">
-    <value>Copy</value>
+  <data name="SlideMerger" xml:space="preserve">
+    <value>Slide Merger</value>
   </data>
-  <data name="Cut" xml:space="preserve">
-    <value>Cut</value>
+  <data name="SlideReverser" xml:space="preserve">
+    <value>Slide Reverser</value>
   </data>
-  <data name="DeleteEvent" xml:space="preserve">
-    <value>Delete Event</value>
-  </data>
-  <data name="EditMenu" xml:space="preserve">
-    <value>Edit(&amp;E)</value>
-  </data>
-  <data name="Eraser" xml:space="preserve">
-    <value>Eraser</value>
-  </data>
-  <data name="Exit" xml:space="preserve">
-    <value>Exit</value>
-  </data>
-  <data name="Export" xml:space="preserve">
-    <value>Export</value>
-  </data>
-  <data name="FileMenu" xml:space="preserve">
-    <value>File(&amp;F)</value>
-  </data>
-  <data name="FlipSelectedNotes" xml:space="preserve">
-    <value>Flip Selected Notes</value>
-  </data>
-  <data name="Help" xml:space="preserve">
-    <value>Help</value>
-  </data>
-  <data name="HelpMenu" xml:space="preserve">
-    <value>Help(&amp;H)</value>
-  </data>
-  <data name="HighSpeed" xml:space="preserve">
-    <value>High Speed Selection</value>
-  </data>
-  <data name="InsertMenu" xml:space="preserve">
-    <value>Insert(&amp;I)</value>
-  </data>
-  <data name="NewFile" xml:space="preserve">
-    <value>New</value>
-  </data>
-  <data name="OpenFile" xml:space="preserve">
-    <value>Open</value>
-  </data>
-  <data name="Paste" xml:space="preserve">
-    <value>Paste</value>
-  </data>
-  <data name="PasteFlipped" xml:space="preserve">
-    <value>Paste Flipped</value>
-  </data>
-  <data name="Pen" xml:space="preserve">
-    <value>Pen</value>
-  </data>
-  <data name="Play" xml:space="preserve">
-    <value>Play / Stop</value>
-  </data>
-  <data name="PlayMenu" xml:space="preserve">
-    <value>Play(&amp;P)</value>
-  </data>
-  <data name="Plugin" xml:space="preserve">
-    <value>Plugin</value>
-  </data>
-  <data name="Redo" xml:space="preserve">
-    <value>Redo</value>
-  </data>
-  <data name="RemoveEvents" xml:space="preserve">
-    <value>Remove Selected Events</value>
-  </data>
-  <data name="RemoveSelectedNotes" xml:space="preserve">
-    <value>Remove Selected Notes</value>
-  </data>
-  <data name="SaveAs" xml:space="preserve">
-    <value>Save As</value>
-  </data>
-  <data name="SaveFile" xml:space="preserve">
-    <value>Save</value>
-  </data>
-  <data name="ScorePreview" xml:space="preserve">
-    <value>Score Preview</value>
-  </data>
-  <data name="Selection" xml:space="preserve">
-    <value>Selection</value>
-  </data>
-  <data name="Stop" xml:space="preserve">
-    <value>Stop</value>
-  </data>
-  <data name="TimeSignature" xml:space="preserve">
-    <value>Time Signature Selection</value>
-  </data>
-  <data name="Undo" xml:space="preserve">
-    <value>Undo</value>
-  </data>
-  <data name="VersionInfo" xml:space="preserve">
-    <value>Version Info</value>
-  </data>
-  <data name="ViewMenu" xml:space="preserve">
-    <value>View(&amp;V)</value>
-  </data>
-  <data name="ZoomIn" xml:space="preserve">
-    <value>Zoom In</value>
-  </data>
-  <data name="ZoomOut" xml:space="preserve">
-    <value>Zoom Out</value>
-  </data>
-  <data name="AirDown" xml:space="preserve">
-    <value>AIR DOWN</value>
-  </data>
-  <data name="AirLeftDown" xml:space="preserve">
-    <value>AIR DOWN LEFT</value>
-  </data>
-  <data name="AirLeftUp" xml:space="preserve">
-    <value>AIR UP LEFT</value>
-  </data>
-  <data name="AirRightDown" xml:space="preserve">
-    <value>AIR DOWN RIGHT</value>
-  </data>
-  <data name="AirRightUp" xml:space="preserve">
-    <value>AIR UP RIGHT</value>
-  </data>
-  <data name="AirUp" xml:space="preserve">
-    <value>AIR UP</value>
-  </data>
-  <data name="Custom" xml:space="preserve">
-    <value>Custom</value>
-  </data>
-  <data name="Division" xml:space="preserve">
-    <value> Division</value>
-  </data>
-  <data name="SlideStep" xml:space="preserve">
-    <value>SLIDE (STEP)</value>
-  </data>
-  <data name="InsertAirWithAirAction" xml:space="preserve">
-    <value>Add AIR with AIR-ACTION</value>
-  </data>
-  <data name="Import" xml:space="preserve">
-    <value>Import</value>
-  </data>
-  <data name="NarrowLaneWidth" xml:space="preserve">
-    <value>Narrow Lane Width</value>
-  </data>
-  <data name="WidenLaneWidth" xml:space="preserve">
-    <value>Widen Lane Width</value>
+  <data name="SlideSplitter" xml:space="preserve">
+    <value>Slide Splitter</value>
   </data>
 </root>

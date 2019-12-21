@@ -84,13 +84,19 @@ namespace Ched.UI
             StartTick = startTick;
 
             TimeSpan startTime = GetTimeFromTick(startTick, NoteView.ScoreEvents.BPMChangeEvents);
+            TimeSpan headGap = TimeSpan.FromSeconds(-music.Latency) - startTime;
+            elapsedTick = 0;
             Task.Run(() =>
             {
                 LastSystemTick = Environment.TickCount;
-                elapsedTick = 0;
                 NoteView.Invoke((MethodInvoker)(() => Timer.Start()));
 
                 System.Threading.Thread.Sleep(TimeSpan.FromSeconds(Math.Max(ClapSource.Latency, 0)));
+                if (headGap.TotalSeconds > 0)
+                {
+                    System.Threading.Thread.Sleep(headGap);
+                }
+                if (!Playing) return;
                 SoundManager.Play(music.FilePath, startTime + TimeSpan.FromSeconds(music.Latency));
             })
             .ContinueWith(p =>

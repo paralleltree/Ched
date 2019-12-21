@@ -93,7 +93,6 @@ namespace Ched.UI
 
             PreviewManager = new SoundPreviewManager(NoteView);
             PreviewManager.IsStopAtLastNote = ApplicationSettings.Default.IsPreviewAbortAtLastNote;
-            PreviewManager.Finished += (s, e) => NoteView.Editable = CanEdit;
             PreviewManager.TickUpdated += (s, e) => NoteView.CurrentTick = e.Tick;
             PreviewManager.ExceptionThrown += (s, e) => MessageBox.Show(this, ErrorStrings.PreviewException, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
@@ -653,6 +652,7 @@ namespace Ched.UI
                     isAbortAtLastNoteItem.Enabled = true;
                     PreviewManager.Finished -= lambda;
                     noteView.CurrentTick = startTick;
+                    noteView.Editable = CanEdit;
                 };
 
                 try
