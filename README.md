@@ -86,3 +86,4 @@ package are the property of their respective owners.
   * [@Citringo](https://github.com/Citringo)
   * [@aripen1231](https://twitter.com/aripen1231)
   * [@ORIent_8](https://twitter.com/ORIent_8)
+  * [@masa_otoge](https://twitter.com/masa_otoge)
