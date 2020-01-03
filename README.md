@@ -17,7 +17,7 @@
 
 ## ダウンロード
 
-現在の最新版は[v2.6.1](https://github.com/paralleltree/Ched/releases)です。
+現在の最新版は[v2.6.3](https://github.com/paralleltree/Ched/releases)です。
 
 ## 使い方
 
@@ -86,3 +86,4 @@ package are the property of their respective owners.
   * [@Citringo](https://github.com/Citringo)
   * [@aripen1231](https://twitter.com/aripen1231)
   * [@ORIent_8](https://twitter.com/ORIent_8)
+  * [@masa_otoge](https://twitter.com/masa_otoge)
