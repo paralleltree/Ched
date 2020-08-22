@@ -11,13 +11,13 @@ using System.Windows.Forms;
 using Ched.Core;
 using Ched.Components.Exporter;
 using Ched.Localization;
+using System.IO;
 
 namespace Ched.UI
 {
     public partial class ExportForm : Form
     {
         private readonly string ArgsKey = "sus";
-        private readonly string Filter = "Seaurchin Score File(*.sus)|*.sus";
 
         private SusExporter exporter = new SusExporter();
 
@@ -55,12 +55,49 @@ namespace Ched.UI
             soundOffsetBox.Value = args.SoundOffset;
             jacketFileBox.Text = args.JacketFilePath;
             hasPaddingBarBox.Checked = args.HasPaddingBar;
+            bgFileBox.Text = args.BgFilePath;            
+
+            browseBgButton.Click += (s, e) =>
+            {
+                var dialog = new OpenFileDialog()
+                {
+                    Filter = "Background file(*.JPG;*.JPEG；*.PNG;*.MP4;*.MOV) | *.JPG;*.JPEG；*.PNG;*.MP4;*.MOV | All files (*.*) | *.* "
+                };
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    bgFileBox.Text = Path.GetFileName(dialog.FileName);
+                }
+            };
+
+            browseSoundButton.Click += (s, e) =>
+            {
+                var dialog = new OpenFileDialog()
+                {
+                    Filter = "Sound file(*.MP3;*.WAV;*.OGG;*.AAC) | *.MP3;*.WAV;*.OGG;*.AAC | All files (*.*) | *.* "
+                };
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    soundFileBox.Text = Path.GetFileName(dialog.FileName);
+                }
+            };
+
+            browseJacketButton.Click += (s, e) =>
+            {
+                var dialog = new OpenFileDialog()
+                {
+                    Filter = "Jacket file(*.JPG;*.JPEG；*.PNG) | *.JPG;*.JPEG；*.PNG | All files (*.*) | *.* "
+                };
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    jacketFileBox.Text = Path.GetFileName(dialog.FileName);
+                }
+            };
 
             browseOutputButton.Click += (s, e) =>
             {
                 var dialog = new SaveFileDialog()
                 {
-                    Filter = Filter
+                    Filter = "Seaurchin Score File(*.sus)|*.sus"
                 };
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
@@ -86,6 +123,10 @@ namespace Ched.UI
                 args.SoundOffset = soundOffsetBox.Value;
                 args.JacketFilePath = jacketFileBox.Text;
                 args.HasPaddingBar = hasPaddingBarBox.Checked;
+                args.BgFilePath = bgFileBox.Text;
+                args.MovieOffset = movieOffsetBox.Value;
+                if (new[] { "mp4", "mov" }.Contains(Path.GetExtension(bgFileBox.Text)))
+                    args.IsMovieBg = true;
 
                 try
                 {
