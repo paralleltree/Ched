@@ -56,7 +56,7 @@ namespace Ched.UI
             jacketFileBox.Text = args.JacketFilePath;
             hasPaddingBarBox.Checked = args.HasPaddingBar;
 
-            browseButton.Click += (s, e) =>
+            browseOutputButton.Click += (s, e) =>
             {
                 var dialog = new SaveFileDialog()
                 {
@@ -70,7 +70,7 @@ namespace Ched.UI
 
             exportButton.Click += (s, e) =>
             {
-                if (string.IsNullOrEmpty(OutputPath)) browseButton.PerformClick();
+                if (string.IsNullOrEmpty(OutputPath)) browseOutputButton.PerformClick();
                 if (string.IsNullOrEmpty(OutputPath))
                 {
                     MessageBox.Show(this, ErrorStrings.OutputPathRequired, Program.ApplicationName);
