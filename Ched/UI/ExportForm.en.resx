@@ -166,7 +166,7 @@
   <data name="label9.Text" xml:space="preserve">
     <value>Jacket Filename</value>
   </data>
-  <data name="browseButton.Text" xml:space="preserve">
+  <data name="browseOutputButton.Text" xml:space="preserve">
     <value>Browse</value>
   </data>
   <data name="label11.Size" type="System.Drawing.Size, System.Drawing">
@@ -182,9 +182,24 @@
     <value>231, 17</value>
   </data>
   <data name="hasPaddingBarBox.Text" xml:space="preserve">
-    <value>Insert a single blank space at the beginning</value>
+    <value>Insert 1 bar of silence in front</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>Export</value>
+  </data>
+  <data name="browseBgButton.Text" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="browseJacketButton.Text" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="browseSoundButton.Text" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="label10.Text" xml:space="preserve">
+    <value>Background Filename</value>
+  </data>
+  <data name="label13.Text" xml:space="preserve">
+    <value>Background Offset</value>
   </data>
 </root>

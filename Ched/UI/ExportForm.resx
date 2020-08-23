@@ -343,7 +343,7 @@
     <value>NoControl</value>
   </data>
   <data name="hasPaddingBarBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>148, 297</value>
+    <value>148, 295</value>
   </data>
   <data name="hasPaddingBarBox.Size" type="System.Drawing.Size, System.Drawing">
     <value>186, 16</value>
@@ -373,7 +373,7 @@
     <value>NoControl</value>
   </data>
   <data name="exportButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 353</value>
+    <value>12, 349</value>
   </data>
   <data name="exportButton.Size" type="System.Drawing.Size, System.Drawing">
     <value>381, 23</value>
@@ -427,7 +427,7 @@
     <value>10</value>
   </data>
   <data name="outputBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 319</value>
+    <value>12, 317</value>
   </data>
   <data name="outputBox.Size" type="System.Drawing.Size, System.Drawing">
     <value>316, 21</value>
@@ -646,7 +646,7 @@
     <value>NoControl</value>
   </data>
   <data name="label11.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 297</value>
+    <value>12, 295</value>
   </data>
   <data name="label11.Size" type="System.Drawing.Size, System.Drawing">
     <value>41, 12</value>
@@ -673,7 +673,7 @@
     <value>NoControl</value>
   </data>
   <data name="browseOutputButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>334, 318</value>
+    <value>334, 316</value>
   </data>
   <data name="browseOutputButton.Size" type="System.Drawing.Size, System.Drawing">
     <value>59, 23</value>
@@ -973,7 +973,7 @@
     <value>6, 12</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>411, 388</value>
+    <value>411, 384</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>エクスポート</value>

@@ -39,13 +39,13 @@ namespace Ched.Components.Exporter
                 writer.WriteLine("#WAVE \"{0}\"", args.SoundFileName);
                 writer.WriteLine("#WAVEOFFSET {0}", args.SoundOffset);
                 writer.WriteLine("#JACKET \"{0}\"", args.JacketFilePath);
-                if(Path.GetExtension(args.BgFilePath).ToLower() == "mp4")
+                if(Path.GetExtension(args.BgFilePath).ToLower() == ".mp4")
                 {
-                    writer.WriteLine("#MOVIE\"{0}\"", args.BgFilePath);
-                    writer.WriteLine("#MOVIEOFFSET\"{0}\"", args.MovieOffset);
+                    writer.WriteLine("#MOVIE \"{0}\"", args.BgFilePath);
+                    writer.WriteLine("#MOVIEOFFSET {0}", args.MovieOffset);
                 }
                 else
-                    writer.WriteLine("#BACKGROUND\"{0}\"", args.BgFilePath);
+                    writer.WriteLine("#BACKGROUND \"{0}\"", args.BgFilePath);
 
                 writer.WriteLine();
 

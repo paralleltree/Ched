@@ -61,7 +61,7 @@ namespace Ched.UI
             {
                 var dialog = new OpenFileDialog()
                 {
-                    Filter = "Background file(*.JPG;*.JPEG；*.PNG;*.MP4;) | *.JPG;*.JPEG；*.PNG;*.MP4; | All files (*.*) | *.* "
+                    Filter = "Background file(*.JPG;*.JPEG;*.PNG;*.MP4;) | *.JPG;*.JPEG;*.PNG;*.MP4; | All files (*.*) | *.* "
                 };
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
