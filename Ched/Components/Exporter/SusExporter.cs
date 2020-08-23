@@ -39,7 +39,7 @@ namespace Ched.Components.Exporter
                 writer.WriteLine("#WAVE \"{0}\"", args.SoundFileName);
                 writer.WriteLine("#WAVEOFFSET {0}", args.SoundOffset);
                 writer.WriteLine("#JACKET \"{0}\"", args.JacketFilePath);
-                if(args.IsMovieBg)
+                if(Path.GetExtension(args.BgFilePath).ToLower() == "mp4")
                 {
                     writer.WriteLine("#MOVIE\"{0}\"", args.BgFilePath);
                     writer.WriteLine("#MOVIEOFFSET\"{0}\"", args.MovieOffset);
@@ -592,7 +592,6 @@ namespace Ched.Components.Exporter
             WorldsEnd
         }
 
-        public bool IsMovieBg { get; set; }
         public string BgFilePath { get; set; }
         public decimal MovieOffset { get; set; }
     }

@@ -61,7 +61,7 @@ namespace Ched.UI
             {
                 var dialog = new OpenFileDialog()
                 {
-                    Filter = "Background file(*.JPG;*.JPEG；*.PNG;*.MP4;*.MOV) | *.JPG;*.JPEG；*.PNG;*.MP4;*.MOV | All files (*.*) | *.* "
+                    Filter = "Background file(*.JPG;*.JPEG；*.PNG;*.MP4;) | *.JPG;*.JPEG；*.PNG;*.MP4; | All files (*.*) | *.* "
                 };
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
@@ -73,7 +73,7 @@ namespace Ched.UI
             {
                 var dialog = new OpenFileDialog()
                 {
-                    Filter = "Sound file(*.MP3;*.WAV;*.OGG;*.AAC) | *.MP3;*.WAV;*.OGG;*.AAC | All files (*.*) | *.* "
+                    Filter = "Sound file(*.MP3;*.WAV;*.OGG;) | *.MP3;*.WAV;*.OGG; | All files (*.*) | *.* "
                 };
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
@@ -125,9 +125,7 @@ namespace Ched.UI
                 args.HasPaddingBar = hasPaddingBarBox.Checked;
                 args.BgFilePath = bgFileBox.Text;
                 args.MovieOffset = movieOffsetBox.Value;
-                if (new[] { "mp4", "mov" }.Contains(Path.GetExtension(bgFileBox.Text)))
-                    args.IsMovieBg = true;
-
+                
                 try
                 {
                     exporter.CustomArgs = args;
