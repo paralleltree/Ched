@@ -66,6 +66,7 @@ namespace Ched.UI
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
                     bgFileBox.Text = Path.GetFileName(dialog.FileName);
+                    movieOffsetBox.Enabled = Path.GetExtension(dialog.FileName) == ".mp4";
                 }
             };
 
