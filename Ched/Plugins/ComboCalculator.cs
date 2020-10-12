@@ -48,12 +48,12 @@ namespace Ched.Plugins
             int barTick = 4 * score.TicksPerBeat;
             var bpmEvents = score.Events.BPMChangeEvents.OrderBy(p => p.Tick).ToList();
             var airList = new HashSet<IAirable>(score.Notes.Airs.Select(p => p.ParentNote));
-            Func<int, decimal> getHeadBpmAt = tick => (bpmEvents.LastOrDefault(p => p.Tick <= tick) ?? bpmEvents[0]).BPM;
-            Func<int, decimal> getTailBpmAt = tick => (bpmEvents.LastOrDefault(p => p.Tick < tick) ?? bpmEvents[0]).BPM;
-            Func<decimal, int> comboDivider = bpm => bpm < 120 ? 16 : (bpm < 240 ? 8 : 4);
+            decimal getHeadBpmAt(int tick) => (bpmEvents.LastOrDefault(p => p.Tick <= tick) ?? bpmEvents[0]).BPM;
+            decimal getTailBpmAt(int tick) => (bpmEvents.LastOrDefault(p => p.Tick < tick) ?? bpmEvents[0]).BPM;
+            int comboDivider(decimal bpm) => bpm < 120 ? 16 : (bpm < 240 ? 8 : 4);
 
             // コンボとしてカウントされるstartTickからのオフセットを求める
-            Func<int, IEnumerable<int>, List<int>> calcComboTicks = (startTick, stepTicks) =>
+            List<int> calcComboTicks(int startTick, IEnumerable<int> stepTicks)
             {
                 var tickList = new List<int>();
                 var sortedStepTicks = stepTicks.OrderBy(p => p).ToList();
@@ -73,12 +73,12 @@ namespace Ched.Plugins
                 }
 
                 return tickList;
-            };
-            Func<IEnumerable<int>, int, int, IEnumerable<int>> removeLostTicks = (ticks, startTick, duration) =>
+            }
+            IEnumerable<int> removeLostTicks(IEnumerable<int> ticks, int startTick, int duration)
             {
                 int interval = barTick / comboDivider(getTailBpmAt(startTick + duration));
                 return ticks.Where(p => p <= duration - interval).ToList();
-            };
+            }
 
             foreach (var hold in score.Notes.Holds)
             {

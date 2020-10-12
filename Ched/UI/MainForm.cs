@@ -103,13 +103,13 @@ namespace Ched.UI
                 SmallChange = NoteView.UnitBeatTick
             };
 
-            Action<ScrollBar> processScrollBarRangeExtension = s =>
+            void processScrollBarRangeExtension(ScrollBar s)
             {
                 if (NoteViewScrollBar.Value < NoteViewScrollBar.Minimum * 0.9f)
                 {
                     NoteViewScrollBar.Minimum = (int)(NoteViewScrollBar.Minimum * 1.2);
                 }
-            };
+            }
 
             NoteView.Resize += (s, e) => UpdateThumbHeight();
 
@@ -421,7 +421,7 @@ namespace Ched.UI
             {
                 int minTick = noteView.SelectedRange.StartTick + (noteView.SelectedRange.Duration < 0 ? noteView.SelectedRange.Duration : 0);
                 int maxTick = noteView.SelectedRange.StartTick + (noteView.SelectedRange.Duration < 0 ? 0 : noteView.SelectedRange.Duration);
-                Func<EventBase, bool> isContained = p => p.Tick != 0 && minTick <= p.Tick && maxTick >= p.Tick;
+                bool isContained(EventBase p) => p.Tick != 0 && minTick <= p.Tick && maxTick >= p.Tick;
                 var events = ScoreBook.Score.Events;
 
                 var bpmOp = events.BPMChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
@@ -460,7 +460,7 @@ namespace Ched.UI
             var pluginItems = PluginManager.ScorePlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
             {
                 CommitChanges();
-                Action<Score> updateScore = newScore =>
+                void updateScore(Score newScore)
                 {
                     var op = new UpdateScoreOperation(ScoreBook.Score, newScore, score =>
                     {
@@ -469,7 +469,7 @@ namespace Ched.UI
                     });
                     OperationManager.Push(op);
                     op.Redo();
-                };
+                }
 
                 try
                 {
@@ -646,14 +646,13 @@ namespace Ched.UI
                 }
 
                 int startTick = noteView.CurrentTick;
-                EventHandler lambda = null;
-                lambda = (p, q) =>
+                void lambda(object p, EventArgs q)
                 {
                     isAbortAtLastNoteItem.Enabled = true;
                     PreviewManager.Finished -= lambda;
                     noteView.CurrentTick = startTick;
                     noteView.Editable = CanEdit;
-                };
+                }
 
                 try
                 {
