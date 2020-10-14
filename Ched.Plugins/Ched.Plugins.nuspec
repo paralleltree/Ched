@@ -7,7 +7,7 @@
     <authors>$author$</authors>
 
     <projectUrl>https://github.com/paralleltree/Ched</projectUrl>
-    <licenseUrl>https://github.com/paralleltree/Ched/blob/develop/LICENSE</licenseUrl>
+    <license type="expression">MIT</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
   </metadata>
 </package>
