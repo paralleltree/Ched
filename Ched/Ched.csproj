@@ -217,6 +217,8 @@
     <Compile Include="UI\NoteView.Designer.cs">
       <DependentUpon>NoteView.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\NoteView.Drawing.cs" />
+    <Compile Include="UI\NoteView.Handlers.cs" />
     <Compile Include="UI\Operations\CompositeOperation.cs" />
     <Compile Include="UI\Operations\EditNoteOperation.cs" />
     <Compile Include="UI\Operations\EventCollectionOperation.cs" />
@@ -231,6 +233,7 @@
     <Compile Include="UI\Forms\ShiftTimeSelectionForm.Designer.cs">
       <DependentUpon>ShiftTimeSelectionForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\SelectionData.cs" />
     <Compile Include="UI\SoundManager.cs" />
     <Compile Include="UI\SoundPreviewManager.cs" />
     <Compile Include="UI\SoundSourceSelector.cs">
