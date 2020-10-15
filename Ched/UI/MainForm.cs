@@ -523,7 +523,7 @@ namespace Ched.UI
 
             void UpdateEvent<T>(List<T> list, T item) where T : EventBase
             {
-                var prev = list.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
+                var prev = list.SingleOrDefault(p => p.Tick == item.Tick);
 
                 var insertOp = new InsertEventOperation<T>(list, item);
                 if (prev == null)
@@ -548,7 +548,7 @@ namespace Ched.UI
 
                 var item = new BPMChangeEvent()
                 {
-                    Tick = noteView.SelectedRange.StartTick,
+                    Tick = noteView.CurrentTick,
                     BPM = form.BPM
                 };
                 UpdateEvent(noteView.ScoreEvents.BPMChangeEvents, item);
@@ -564,7 +564,7 @@ namespace Ched.UI
 
                 var item = new HighSpeedChangeEvent()
                 {
-                    Tick = noteView.SelectedRange.StartTick,
+                    Tick = noteView.CurrentTick,
                     SpeedRatio = form.SpeedRatio
                 };
                 UpdateEvent(noteView.ScoreEvents.HighSpeedChangeEvents, item);
@@ -577,7 +577,7 @@ namespace Ched.UI
 
                 var item = new TimeSignatureChangeEvent()
                 {
-                    Tick = noteView.SelectedRange.StartTick,
+                    Tick = noteView.CurrentTick,
                     Numerator = form.Numerator,
                     DenominatorExponent = form.DenominatorExponent
                 };
