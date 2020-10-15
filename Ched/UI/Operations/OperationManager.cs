@@ -62,6 +62,16 @@ namespace Ched.UI.Operations
         }
 
         /// <summary>
+        /// 操作を実行し、記録します。
+        /// </summary>
+        /// <param name="op">実行・記録する操作</param>
+        public void InvokeAndPush(IOperation op)
+        {
+            op.Redo();
+            Push(op);
+        }
+
+        /// <summary>
         /// 直前の操作を元に戻します。
         /// </summary>
         public void Undo()

@@ -467,8 +467,7 @@ namespace Ched.UI
                         ScoreBook.Score = score;
                         noteView.UpdateScore(score);
                     });
-                    OperationManager.Push(op);
-                    op.Redo();
+                    OperationManager.InvokeAndPush(op);
                 }
 
                 try
@@ -522,6 +521,23 @@ namespace Ched.UI
                 WidenLaneWidthMenuItem, NarrowLaneWidthMenuItem
             };
 
+            void UpdateEvent<T>(List<T> list, T item) where T : EventBase
+            {
+                var prev = list.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
+
+                var insertOp = new InsertEventOperation<T>(list, item);
+                if (prev == null)
+                {
+                    OperationManager.InvokeAndPush(insertOp);
+                }
+                else
+                {
+                    var removeOp = new RemoveEventOperation<T>(list, prev);
+                    OperationManager.InvokeAndPush(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
+                }
+                noteView.Invalidate();
+            }
+
             var insertBPMItem = new MenuItem("BPM", (s, e) =>
             {
                 var form = new BPMSelectionForm()
@@ -530,27 +546,12 @@ namespace Ched.UI
                 };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
-                var prev = noteView.ScoreEvents.BPMChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
                 var item = new BPMChangeEvent()
                 {
                     Tick = noteView.SelectedRange.StartTick,
                     BPM = form.BPM
                 };
-
-                var insertOp = new InsertEventOperation<BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, item);
-                if (prev == null)
-                {
-                    OperationManager.Push(insertOp);
-                }
-                else
-                {
-                    var removeOp = new RemoveEventOperation<BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, prev);
-                    noteView.ScoreEvents.BPMChangeEvents.Remove(prev);
-                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
-                }
-
-                noteView.ScoreEvents.BPMChangeEvents.Add(item);
-                noteView.Invalidate();
+                UpdateEvent(noteView.ScoreEvents.BPMChangeEvents, item);
             });
 
             var insertHighSpeedItem = new MenuItem(MainFormStrings.HighSpeed, (s, e) =>
@@ -561,27 +562,12 @@ namespace Ched.UI
                 };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
-                var prev = noteView.ScoreEvents.HighSpeedChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
                 var item = new HighSpeedChangeEvent()
                 {
                     Tick = noteView.SelectedRange.StartTick,
                     SpeedRatio = form.SpeedRatio
                 };
-
-                var insertOp = new InsertEventOperation<HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, item);
-                if (prev == null)
-                {
-                    OperationManager.Push(insertOp);
-                }
-                else
-                {
-                    var removeOp = new RemoveEventOperation<HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, prev);
-                    noteView.ScoreEvents.HighSpeedChangeEvents.Remove(prev);
-                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
-                }
-
-                noteView.ScoreEvents.HighSpeedChangeEvents.Add(item);
-                noteView.Invalidate();
+                UpdateEvent(noteView.ScoreEvents.HighSpeedChangeEvents, item);
             });
 
             var insertTimeSignatureItem = new MenuItem(MainFormStrings.TimeSignature, (s, e) =>
@@ -589,28 +575,13 @@ namespace Ched.UI
                 var form = new TimeSignatureSelectionForm();
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
-                var prev = noteView.ScoreEvents.TimeSignatureChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
                 var item = new TimeSignatureChangeEvent()
                 {
                     Tick = noteView.SelectedRange.StartTick,
                     Numerator = form.Numerator,
                     DenominatorExponent = form.DenominatorExponent
                 };
-
-                var insertOp = new InsertEventOperation<TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
-                if (prev != null)
-                {
-                    noteView.ScoreEvents.TimeSignatureChangeEvents.Remove(prev);
-                    var removeOp = new RemoveEventOperation<TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, prev);
-                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
-                }
-                else
-                {
-                    OperationManager.Push(insertOp);
-                }
-
-                noteView.ScoreEvents.TimeSignatureChangeEvents.Add(item);
-                noteView.Invalidate();
+                UpdateEvent(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
             });
 
             var insertMenuItems = new MenuItem[] { insertBPMItem, insertHighSpeedItem, insertTimeSignatureItem };
