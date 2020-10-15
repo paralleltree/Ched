@@ -81,7 +81,7 @@ namespace Ched.UI
 
             OperationManager = new OperationManager();
             OperationManager.OperationHistoryChanged += (s, e) => SetText(ScoreBook.Path);
-            OperationManager.ChangesCommited += (s, e) => SetText(ScoreBook.Path);
+            OperationManager.ChangesCommitted += (s, e) => SetText(ScoreBook.Path);
 
             NoteView = new NoteView(OperationManager)
             {

@@ -12,7 +12,7 @@ namespace Ched.UI.Operations
     public class OperationManager
     {
         public event EventHandler OperationHistoryChanged;
-        public event EventHandler ChangesCommited;
+        public event EventHandler ChangesCommitted;
 
         protected Stack<IOperation> UndoStack { get; } = new Stack<IOperation>();
         protected Stack<IOperation> RedoStack { get; } = new Stack<IOperation>();
@@ -110,7 +110,7 @@ namespace Ched.UI.Operations
         public void CommitChanges()
         {
             LastCommittedOperation = UndoStack.Count > 0 ? UndoStack.Peek() : null;
-            ChangesCommited?.Invoke(this, EventArgs.Empty);
+            ChangesCommitted?.Invoke(this, EventArgs.Empty);
         }
     }
 }
