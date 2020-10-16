@@ -51,7 +51,7 @@ namespace Ched.UI
         /// <remarks>ref: http://blackpawn.com/texts/pointinpoly/default.html</remarks>
         public static bool ContainsPoint(this PointF[] vertexes, PointF point)
         {
-            Func<PointF, PointF, PointF, PointF, bool> hitTriangle = (a, b, c, p) =>
+            bool hitTriangle(PointF a, PointF b, PointF c, PointF p)
             {
                 var ab = b.Subtract(a);
                 var ac = c.Subtract(a);
@@ -69,7 +69,7 @@ namespace Ched.UI
                 float v = (abab * acap - abac * abap) / denom;
 
                 return u >= 0 && v >= 0 && u + v < 1;
-            };
+            }
 
             for (int i = 1; i <= vertexes.Length - 2; i++)
             {

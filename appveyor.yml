@@ -1,5 +1,5 @@
 version: '{build}'
-os: Visual Studio 2015
+os: Visual Studio 2019
 configuration: Release
 platform: x86
 skip_tags: true
@@ -42,8 +42,7 @@ deploy:
   on:
     branch: master
 - provider: NuGet
-  api_key:
-    secure: hSC3efdRHF0rbtteQOM+tZhMrPB76fhSKLQ21hkY7DC20HfovL8069dZPBMnuGP2
+  api_key: $(NUGET_API_KEY)
   skip_symbols: false
   on:
     branch: master
