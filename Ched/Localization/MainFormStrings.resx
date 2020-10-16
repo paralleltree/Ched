@@ -267,4 +267,13 @@
   <data name="WidenLaneWidth" xml:space="preserve">
     <value>レーン幅を広げる</value>
   </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>すべて選択</value>
+  </data>
+  <data name="SelectToBeginning" xml:space="preserve">
+    <value>最初から現在位置まで選択</value>
+  </data>
+  <data name="SelectToEnd" xml:space="preserve">
+    <value>現在位置から最後まで選択</value>
+  </data>
 </root>

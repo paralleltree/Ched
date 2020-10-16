@@ -1930,6 +1930,39 @@ namespace Ched.UI
             return c;
         }
 
+        public void SelectAll()
+        {
+            SelectedRange = new SelectionRange()
+            {
+                StartTick = 0,
+                Duration = Notes.GetLastTick(),
+                StartLaneIndex = 0,
+                SelectedLanesCount = Constants.LanesCount
+            };
+        }
+
+        public void SelectToEnd()
+        {
+            SelectedRange = new SelectionRange()
+            {
+                StartTick = CurrentTick,
+                Duration = Notes.GetLastTick() - CurrentTick,
+                StartLaneIndex = 0,
+                SelectedLanesCount = Constants.LanesCount
+            };
+        }
+
+        public void SelectToBeginning()
+        {
+            SelectedRange = new SelectionRange()
+            {
+                StartTick = 0,
+                Duration = CurrentTick,
+                StartLaneIndex = 0,
+                SelectedLanesCount = Constants.LanesCount
+            };
+        }
+
         public void CutSelectedNotes()
         {
             CopySelectedNotes();

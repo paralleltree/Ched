@@ -414,6 +414,10 @@ namespace Ched.UI
             var pasteItem = new MenuItem(MainFormStrings.Paste, (s, e) => noteView.PasteNotes(), Shortcut.CtrlV);
             var pasteFlippedItem = new MenuItem(MainFormStrings.PasteFlipped, (s, e) => noteView.PasteFlippedNotes(), Shortcut.CtrlShiftV);
 
+            var selectAllItem = new MenuItem(MainFormStrings.SelectAll, (s, e) => noteView.SelectAll(), Shortcut.CtrlA);
+            var selectToEndItem = new MenuItem(MainFormStrings.SelectToEnd, (s, e) => noteView.SelectToEnd());
+            var selectoToBeginningItem = new MenuItem(MainFormStrings.SelectToBeginning, (s, e) => noteView.SelectToBeginning());
+
             var flipSelectedNotesItem = new MenuItem(MainFormStrings.FlipSelectedNotes, (s, e) => noteView.FlipSelectedNotes());
             var removeSelectedNotesItem = new MenuItem(MainFormStrings.RemoveSelectedNotes, (s, e) => noteView.RemoveSelectedNotes(), Shortcut.Del);
 
@@ -486,6 +490,7 @@ namespace Ched.UI
             {
                 undoItem, redoItem, new MenuItem("-"),
                 cutItem, copyItem, pasteItem, pasteFlippedItem, new MenuItem("-"),
+                selectAllItem, selectToEndItem, selectoToBeginningItem, new MenuItem("-"),
                 flipSelectedNotesItem, removeSelectedNotesItem, removeEventsItem, new MenuItem("-"),
                 insertAirWithAirActionItem, new MenuItem("-"),
                 pluginItem
