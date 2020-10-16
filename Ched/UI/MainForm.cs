@@ -81,7 +81,7 @@ namespace Ched.UI
 
             OperationManager = new OperationManager();
             OperationManager.OperationHistoryChanged += (s, e) => SetText(ScoreBook.Path);
-            OperationManager.ChangesCommited += (s, e) => SetText(ScoreBook.Path);
+            OperationManager.ChangesCommitted += (s, e) => SetText(ScoreBook.Path);
 
             NoteView = new NoteView(OperationManager)
             {
@@ -103,13 +103,13 @@ namespace Ched.UI
                 SmallChange = NoteView.UnitBeatTick
             };
 
-            Action<ScrollBar> processScrollBarRangeExtension = s =>
+            void processScrollBarRangeExtension(ScrollBar s)
             {
                 if (NoteViewScrollBar.Value < NoteViewScrollBar.Minimum * 0.9f)
                 {
                     NoteViewScrollBar.Minimum = (int)(NoteViewScrollBar.Minimum * 1.2);
                 }
-            };
+            }
 
             NoteView.Resize += (s, e) => UpdateThumbHeight();
 
@@ -414,6 +414,10 @@ namespace Ched.UI
             var pasteItem = new MenuItem(MainFormStrings.Paste, (s, e) => noteView.PasteNotes(), Shortcut.CtrlV);
             var pasteFlippedItem = new MenuItem(MainFormStrings.PasteFlipped, (s, e) => noteView.PasteFlippedNotes(), Shortcut.CtrlShiftV);
 
+            var selectAllItem = new MenuItem(MainFormStrings.SelectAll, (s, e) => noteView.SelectAll(), Shortcut.CtrlA);
+            var selectToEndItem = new MenuItem(MainFormStrings.SelectToEnd, (s, e) => noteView.SelectToEnd());
+            var selectoToBeginningItem = new MenuItem(MainFormStrings.SelectToBeginning, (s, e) => noteView.SelectToBeginning());
+
             var flipSelectedNotesItem = new MenuItem(MainFormStrings.FlipSelectedNotes, (s, e) => noteView.FlipSelectedNotes());
             var removeSelectedNotesItem = new MenuItem(MainFormStrings.RemoveSelectedNotes, (s, e) => noteView.RemoveSelectedNotes(), Shortcut.Del);
 
@@ -421,7 +425,7 @@ namespace Ched.UI
             {
                 int minTick = noteView.SelectedRange.StartTick + (noteView.SelectedRange.Duration < 0 ? noteView.SelectedRange.Duration : 0);
                 int maxTick = noteView.SelectedRange.StartTick + (noteView.SelectedRange.Duration < 0 ? 0 : noteView.SelectedRange.Duration);
-                Func<EventBase, bool> isContained = p => p.Tick != 0 && minTick <= p.Tick && maxTick >= p.Tick;
+                bool isContained(EventBase p) => p.Tick != 0 && minTick <= p.Tick && maxTick >= p.Tick;
                 var events = ScoreBook.Score.Events;
 
                 var bpmOp = events.BPMChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
@@ -460,16 +464,15 @@ namespace Ched.UI
             var pluginItems = PluginManager.ScorePlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
             {
                 CommitChanges();
-                Action<Score> updateScore = newScore =>
+                void updateScore(Score newScore)
                 {
                     var op = new UpdateScoreOperation(ScoreBook.Score, newScore, score =>
                     {
                         ScoreBook.Score = score;
                         noteView.UpdateScore(score);
                     });
-                    OperationManager.Push(op);
-                    op.Redo();
-                };
+                    OperationManager.InvokeAndPush(op);
+                }
 
                 try
                 {
@@ -487,6 +490,7 @@ namespace Ched.UI
             {
                 undoItem, redoItem, new MenuItem("-"),
                 cutItem, copyItem, pasteItem, pasteFlippedItem, new MenuItem("-"),
+                selectAllItem, selectToEndItem, selectoToBeginningItem, new MenuItem("-"),
                 flipSelectedNotesItem, removeSelectedNotesItem, removeEventsItem, new MenuItem("-"),
                 insertAirWithAirActionItem, new MenuItem("-"),
                 pluginItem
@@ -522,6 +526,23 @@ namespace Ched.UI
                 WidenLaneWidthMenuItem, NarrowLaneWidthMenuItem
             };
 
+            void UpdateEvent<T>(List<T> list, T item) where T : EventBase
+            {
+                var prev = list.SingleOrDefault(p => p.Tick == item.Tick);
+
+                var insertOp = new InsertEventOperation<T>(list, item);
+                if (prev == null)
+                {
+                    OperationManager.InvokeAndPush(insertOp);
+                }
+                else
+                {
+                    var removeOp = new RemoveEventOperation<T>(list, prev);
+                    OperationManager.InvokeAndPush(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
+                }
+                noteView.Invalidate();
+            }
+
             var insertBPMItem = new MenuItem("BPM", (s, e) =>
             {
                 var form = new BPMSelectionForm()
@@ -530,27 +551,12 @@ namespace Ched.UI
                 };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
-                var prev = noteView.ScoreEvents.BPMChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
                 var item = new BPMChangeEvent()
                 {
-                    Tick = noteView.SelectedRange.StartTick,
+                    Tick = noteView.CurrentTick,
                     BPM = form.BPM
                 };
-
-                var insertOp = new InsertEventOperation<BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, item);
-                if (prev == null)
-                {
-                    OperationManager.Push(insertOp);
-                }
-                else
-                {
-                    var removeOp = new RemoveEventOperation<BPMChangeEvent>(noteView.ScoreEvents.BPMChangeEvents, prev);
-                    noteView.ScoreEvents.BPMChangeEvents.Remove(prev);
-                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
-                }
-
-                noteView.ScoreEvents.BPMChangeEvents.Add(item);
-                noteView.Invalidate();
+                UpdateEvent(noteView.ScoreEvents.BPMChangeEvents, item);
             });
 
             var insertHighSpeedItem = new MenuItem(MainFormStrings.HighSpeed, (s, e) =>
@@ -561,27 +567,12 @@ namespace Ched.UI
                 };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
-                var prev = noteView.ScoreEvents.HighSpeedChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
                 var item = new HighSpeedChangeEvent()
                 {
-                    Tick = noteView.SelectedRange.StartTick,
+                    Tick = noteView.CurrentTick,
                     SpeedRatio = form.SpeedRatio
                 };
-
-                var insertOp = new InsertEventOperation<HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, item);
-                if (prev == null)
-                {
-                    OperationManager.Push(insertOp);
-                }
-                else
-                {
-                    var removeOp = new RemoveEventOperation<HighSpeedChangeEvent>(noteView.ScoreEvents.HighSpeedChangeEvents, prev);
-                    noteView.ScoreEvents.HighSpeedChangeEvents.Remove(prev);
-                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
-                }
-
-                noteView.ScoreEvents.HighSpeedChangeEvents.Add(item);
-                noteView.Invalidate();
+                UpdateEvent(noteView.ScoreEvents.HighSpeedChangeEvents, item);
             });
 
             var insertTimeSignatureItem = new MenuItem(MainFormStrings.TimeSignature, (s, e) =>
@@ -589,28 +580,13 @@ namespace Ched.UI
                 var form = new TimeSignatureSelectionForm();
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
-                var prev = noteView.ScoreEvents.TimeSignatureChangeEvents.SingleOrDefault(p => p.Tick == noteView.SelectedRange.StartTick);
                 var item = new TimeSignatureChangeEvent()
                 {
-                    Tick = noteView.SelectedRange.StartTick,
+                    Tick = noteView.CurrentTick,
                     Numerator = form.Numerator,
                     DenominatorExponent = form.DenominatorExponent
                 };
-
-                var insertOp = new InsertEventOperation<TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
-                if (prev != null)
-                {
-                    noteView.ScoreEvents.TimeSignatureChangeEvents.Remove(prev);
-                    var removeOp = new RemoveEventOperation<TimeSignatureChangeEvent>(noteView.ScoreEvents.TimeSignatureChangeEvents, prev);
-                    OperationManager.Push(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
-                }
-                else
-                {
-                    OperationManager.Push(insertOp);
-                }
-
-                noteView.ScoreEvents.TimeSignatureChangeEvents.Add(item);
-                noteView.Invalidate();
+                UpdateEvent(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
             });
 
             var insertMenuItems = new MenuItem[] { insertBPMItem, insertHighSpeedItem, insertTimeSignatureItem };
@@ -646,14 +622,13 @@ namespace Ched.UI
                 }
 
                 int startTick = noteView.CurrentTick;
-                EventHandler lambda = null;
-                lambda = (p, q) =>
+                void lambda(object p, EventArgs q)
                 {
                     isAbortAtLastNoteItem.Enabled = true;
                     PreviewManager.Finished -= lambda;
                     noteView.CurrentTick = startTick;
                     noteView.Editable = CanEdit;
-                };
+                }
 
                 try
                 {

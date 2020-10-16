@@ -372,6 +372,11 @@ namespace Ched.UI
                 AirStepColor = new GradientColor(Color.FromArgb(6, 180, 10), Color.FromArgb(80, 224, 64))
             };
 
+            InitializeHandlers();
+        }
+
+        private void InitializeHandlers()
+        {
             var mouseDown = this.MouseDownAsObservable();
             var mouseMove = this.MouseMoveAsObservable();
             var mouseUp = this.MouseUpAsObservable();
@@ -383,7 +388,7 @@ namespace Ched.UI
                 {
                     var pos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(p.Location);
                     int tailTick = TailTick;
-                    Func<int, bool> visibleTick = t => t >= HeadTick && t <= tailTick;
+                    bool visibleTick(int t) => t >= HeadTick && t <= tailTick;
 
                     var airActions = Notes.AirActions.Reverse()
                         .SelectMany(q => q.ActionNotes.Where(r => visibleTick(q.StartTick + r.Offset)))
@@ -472,7 +477,7 @@ namespace Ched.UI
                     RectangleF scoreRect = new RectangleF(0, GetYPositionFromTick(HeadTick), LaneWidth, GetYPositionFromTick(TailTick) - GetYPositionFromTick(HeadTick));
                     if (!scoreRect.Contains(scorePos)) return Observable.Empty<MouseEventArgs>();
 
-                    Func<AirAction.ActionNote, IObservable<MouseEventArgs>> actionNoteHandler = action =>
+                    IObservable<MouseEventArgs> actionNoteHandler(AirAction.ActionNote action)
                     {
                         var offsets = new HashSet<int>(action.ParentNote.ActionNotes.Select(q => q.Offset));
                         offsets.Remove(action.Offset);
@@ -486,7 +491,7 @@ namespace Ched.UI
                                 action.Offset = offset;
                                 Cursor.Current = Cursors.SizeNS;
                             }).Finally(() => Cursor.Current = Cursors.Default);
-                    };
+                    }
 
                     // AIR-ACTION
                     foreach (var note in Notes.AirActions.Reverse())
@@ -507,7 +512,7 @@ namespace Ched.UI
                         }
                     }
 
-                    Func<TappableBase, IObservable<MouseEventArgs>> moveTappableNoteHandler = note =>
+                    IObservable<MouseEventArgs> moveTappableNoteHandler(TappableBase note)
                     {
                         int beforeLaneIndex = note.LaneIndex;
                         return mouseMove
@@ -522,9 +527,9 @@ namespace Ched.UI
                                 Cursor.Current = Cursors.SizeAll;
                             })
                             .Finally(() => Cursor.Current = Cursors.Default);
-                    };
+                    }
 
-                    Func<TappableBase, IObservable<MouseEventArgs>> tappableNoteLeftThumbHandler = note =>
+                    IObservable<MouseEventArgs> tappableNoteLeftThumbHandler(TappableBase note)
                     {
                         var beforePos = new ChangeShortNoteWidthOperation.NotePosition(note.LaneIndex, note.Width);
                         return mouseMove
@@ -546,9 +551,9 @@ namespace Ched.UI
                                 Cursor.Current = Cursors.Default;
                                 LastWidth = note.Width;
                             });
-                    };
+                    }
 
-                    Func<TappableBase, IObservable<MouseEventArgs>> tappableNoteRightThumbHandler = note =>
+                    IObservable<MouseEventArgs> tappableNoteRightThumbHandler(TappableBase note)
                     {
                         int beforeWidth = note.Width;
                         return mouseMove
@@ -566,10 +571,10 @@ namespace Ched.UI
                                 Cursor.Current = Cursors.Default;
                                 LastWidth = note.Width;
                             });
-                    };
+                    }
 
 
-                    Func<TappableBase, IObservable<MouseEventArgs>> shortNoteHandler = note =>
+                    IObservable<MouseEventArgs> shortNoteHandler(TappableBase note)
                     {
                         RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                         // ノートの左側
@@ -612,9 +617,9 @@ namespace Ched.UI
                         }
 
                         return null;
-                    };
+                    }
 
-                    Func<Hold, IObservable<MouseEventArgs>> holdDurationHandler = hold =>
+                    IObservable<MouseEventArgs> holdDurationHandler(Hold hold)
                     {
                         return mouseMove.TakeUntil(mouseUp)
                             .Do(q =>
@@ -624,9 +629,9 @@ namespace Ched.UI
                                 Cursor.Current = Cursors.SizeNS;
                             })
                             .Finally(() => Cursor.Current = Cursors.Default);
-                    };
+                    }
 
-                    Func<Slide.StepTap, IObservable<MouseEventArgs>> leftSlideStepNoteHandler = step =>
+                    IObservable<MouseEventArgs> leftSlideStepNoteHandler(Slide.StepTap step)
                     {
                         var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
 
@@ -650,9 +655,9 @@ namespace Ched.UI
                                 if (beforeStepPos == afterPos) return;
                                 OperationManager.Push(new MoveSlideStepNoteOperation(step, beforeStepPos, afterPos));
                             });
-                    };
+                    }
 
-                    Func<Slide.StepTap, IObservable<MouseEventArgs>> rightSlideStepNoteHandler = step =>
+                    IObservable<MouseEventArgs> rightSlideStepNoteHandler(Slide.StepTap step)
                     {
                         var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
 
@@ -673,10 +678,10 @@ namespace Ched.UI
                                 if (beforeStepPos == afterPos) return;
                                 OperationManager.Push(new MoveSlideStepNoteOperation(step, beforeStepPos, afterPos));
                             });
-                    };
+                    }
 
                     // 挿入時のハンドラにも流用するのでFinallyつけられない
-                    Func<Slide.StepTap, IObservable<MouseEventArgs>> moveSlideStepNoteHandler = step =>
+                    IObservable<MouseEventArgs> moveSlideStepNoteHandler(Slide.StepTap step)
                     {
                         var beforeStepPos = new MoveSlideStepNoteOperation.NotePosition(step.TickOffset, step.LaneIndexOffset, step.WidthChange);
                         var offsets = new HashSet<int>(step.ParentNote.StepNotes.Select(q => q.TickOffset));
@@ -699,9 +704,9 @@ namespace Ched.UI
                                 step.TickOffset = offset;
                                 Cursor.Current = Cursors.SizeAll;
                             });
-                    };
+                    }
 
-                    Func<Slide, IObservable<MouseEventArgs>> slideHandler = slide =>
+                    IObservable<MouseEventArgs> slideHandler(Slide slide)
                     {
                         foreach (var step in slide.StepNotes.OrderByDescending(q => q.TickOffset))
                         {
@@ -815,9 +820,9 @@ namespace Ched.UI
                         }
 
                         return null;
-                    };
+                    }
 
-                    Func<Hold, IObservable<MouseEventArgs>> holdHandler = hold =>
+                    IObservable<MouseEventArgs> holdHandler(Hold hold)
                     {
                         // HOLD長さ変更
                         if (GetClickableRectFromNotePosition(hold.EndNote.Tick, hold.LaneIndex, hold.Width).Contains(scorePos))
@@ -906,9 +911,9 @@ namespace Ched.UI
                         }
 
                         return null;
-                    };
+                    }
 
-                    Func<IObservable<MouseEventArgs>> surfaceNotesHandler = () =>
+                    IObservable<MouseEventArgs> surfaceNotesHandler()
                     {
                         foreach (var note in Notes.Damages.Reverse().Where(q => q.Tick >= HeadTick && q.Tick <= tailTick))
                         {
@@ -947,7 +952,7 @@ namespace Ched.UI
                         }
 
                         return null;
-                    };
+                    }
 
                     // AIR系編集時
                     if ((NoteType.Air | NoteType.AirAction).HasFlag(NewNoteType))
@@ -960,7 +965,7 @@ namespace Ched.UI
                             .Concat(Notes.Slides.Reverse().Select(q => q.StepNotes.OrderByDescending(r => r.TickOffset).First()))
                             .Concat(Notes.Holds.Reverse().Select(q => q.EndNote));
 
-                        Func<IObservable<MouseEventArgs>> addAirHandler = () =>
+                        IObservable<MouseEventArgs> addAirHandler()
                         {
                             foreach (var note in airables)
                             {
@@ -989,9 +994,9 @@ namespace Ched.UI
                                 }
                             }
                             return null;
-                        };
+                        }
 
-                        Func<IObservable<MouseEventArgs>> addAirActionHandler = () =>
+                        IObservable<MouseEventArgs> addAirActionHandler()
                         {
                             foreach (var note in Notes.AirActions.Reverse())
                             {
@@ -1034,7 +1039,7 @@ namespace Ched.UI
                             }
 
                             return null;
-                        };
+                        }
 
                         switch (NewNoteType)
                         {
@@ -1175,7 +1180,7 @@ namespace Ched.UI
                     return Observable.Empty<MouseEventArgs>();
                 }).Subscribe(p => Invalidate());
 
-            Func<PointF, IObservable<MouseEventArgs>> rangeSelection = startPos =>
+            IObservable<MouseEventArgs> rangeSelection(PointF startPos)
             {
                 SelectedRange = new SelectionRange()
                 {
@@ -1204,7 +1209,7 @@ namespace Ched.UI
                             SelectedLanesCount = Math.Abs(endLaneIndex - startLaneIndex) + 1
                         };
                     });
-            };
+            }
 
             var eraseSubscription = mouseDown
                 .Where(p => Editable)
@@ -1231,7 +1236,7 @@ namespace Ched.UI
                     matrix.Invert();
                     PointF scorePos = matrix.TransformPoint(p.Pos);
 
-                    Func<IAirable, IEnumerable<IOperation>> removeReferencedAirs = airable =>
+                    IEnumerable<IOperation> removeReferencedAirs(IAirable airable)
                     {
                         var airs = Notes.GetReferencedAir(airable).ToList().Select(q =>
                         {
@@ -1245,7 +1250,7 @@ namespace Ched.UI
                         }).ToList();
 
                         return airs.Cast<IOperation>().Concat(airActions);
-                    };
+                    }
 
                     foreach (var note in Notes.Airs.Reverse())
                     {
@@ -1907,7 +1912,7 @@ namespace Ched.UI
 
             var c = new Core.NoteCollection();
 
-            Func<IAirable, bool> contained = p => p.Tick >= minTick && p.Tick <= maxTick & p.LaneIndex >= startLaneIndex && p.LaneIndex + p.Width <= endLaneIndex;
+            bool contained(IAirable p) => p.Tick >= minTick && p.Tick <= maxTick & p.LaneIndex >= startLaneIndex && p.LaneIndex + p.Width <= endLaneIndex;
             c.Taps.AddRange(Notes.Taps.Where(p => contained(p)));
             c.ExTaps.AddRange(Notes.ExTaps.Where(p => contained(p)));
             c.Flicks.AddRange(Notes.Flicks.Where(p => contained(p)));
@@ -1923,6 +1928,39 @@ namespace Ched.UI
             // AIR-ACTIONはとりあえず全コピー
             c.AirActions.AddRange(airables.SelectMany(p => Notes.GetReferencedAirAction(p)));
             return c;
+        }
+
+        public void SelectAll()
+        {
+            SelectedRange = new SelectionRange()
+            {
+                StartTick = 0,
+                Duration = Notes.GetLastTick(),
+                StartLaneIndex = 0,
+                SelectedLanesCount = Constants.LanesCount
+            };
+        }
+
+        public void SelectToEnd()
+        {
+            SelectedRange = new SelectionRange()
+            {
+                StartTick = CurrentTick,
+                Duration = Notes.GetLastTick() - CurrentTick,
+                StartLaneIndex = 0,
+                SelectedLanesCount = Constants.LanesCount
+            };
+        }
+
+        public void SelectToBeginning()
+        {
+            SelectedRange = new SelectionRange()
+            {
+                StartTick = 0,
+                Duration = CurrentTick,
+                StartLaneIndex = 0,
+                SelectedLanesCount = Constants.LanesCount
+            };
         }
 
         public void CutSelectedNotes()

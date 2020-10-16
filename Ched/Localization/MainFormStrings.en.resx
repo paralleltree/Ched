@@ -267,4 +267,13 @@
   <data name="WidenLaneWidth" xml:space="preserve">
     <value>Widen Lane Width</value>
   </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Select All</value>
+  </data>
+  <data name="SelectToBeginning" xml:space="preserve">
+    <value>Select to Beginning</value>
+  </data>
+  <data name="SelectToEnd" xml:space="preserve">
+    <value>Select to End</value>
+  </data>
 </root>
