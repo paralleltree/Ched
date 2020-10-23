@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Diagnostics.cs" />
+    <Compile Include="IScoreBookExportPlugin.cs" />
     <Compile Include="IScoreBookImportPlugin.cs" />
     <Compile Include="IPlugin.cs" />
     <Compile Include="IScorePlugin.cs" />
