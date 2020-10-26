@@ -152,13 +152,6 @@ namespace Ched.Core
             doc["version"] = JObject.FromObject(typeof(ScoreBook).Assembly.GetName().Version);
 
             var res = doc.ToObject<ScoreBook>(JsonSerializer.Create(SerializerSettings));
-            // 循環参照は復元できないねん……
-            foreach (var note in res.Score.Notes.AirActions)
-            {
-                var restored = new List<Notes.AirAction.ActionNote>(note.ActionNotes.Select(p => new Notes.AirAction.ActionNote(note) { Offset = p.Offset }));
-                note.ActionNotes.Clear();
-                note.ActionNotes.AddRange(restored);
-            }
 
             if (res.Score.Events.TimeSignatureChangeEvents.Count == 0)
             {
