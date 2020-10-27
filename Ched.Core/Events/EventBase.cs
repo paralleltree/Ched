@@ -15,11 +15,15 @@ namespace Ched.Core.Events
         [Newtonsoft.Json.JsonProperty]
         private int tick;
 
+        /// <summary>
+        /// このイベントの位置を表すTick値を取得、設定します。
+        /// </summary>
         public int Tick
         {
             get { return tick; }
             set
             {
+                if (value < 0) throw new ArgumentOutOfRangeException("value", "Tick must be greater than or equal to 0.");
                 tick = value;
             }
         }
