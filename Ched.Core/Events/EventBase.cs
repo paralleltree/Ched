@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace Ched.Core.Events
     /// 譜面におけるイベントを表すクラスです。
     /// </summary>
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
+    [DebuggerDisplay("Tick = {Tick}")]
     public abstract class EventBase
     {
         [Newtonsoft.Json.JsonProperty]
