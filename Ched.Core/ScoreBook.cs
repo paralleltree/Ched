@@ -17,6 +17,8 @@ namespace Ched.Core
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class ScoreBook
     {
+        protected static readonly Version CurrentVersion = typeof(ScoreBook).Assembly.GetName().Version;
+
         internal static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
@@ -26,7 +28,7 @@ namespace Ched.Core
         };
 
         [Newtonsoft.Json.JsonProperty]
-        private Version version = typeof(ScoreBook).Assembly.GetName().Version;
+        private Version version = CurrentVersion;
         [Newtonsoft.Json.JsonProperty]
         private string title = "";
         [Newtonsoft.Json.JsonProperty]
@@ -149,7 +151,7 @@ namespace Ched.Core
                 }
             }
 
-            doc["version"] = JObject.FromObject(typeof(ScoreBook).Assembly.GetName().Version);
+            doc["version"] = JObject.FromObject(CurrentVersion);
 
             var res = doc.ToObject<ScoreBook>(JsonSerializer.Create(SerializerSettings));
 
@@ -169,8 +171,7 @@ namespace Ched.Core
         /// <returns>互換性があればtrue, 互換性がなければfalse</returns>
         public static bool IsCompatible(string path)
         {
-            Version current = typeof(ScoreBook).Assembly.GetName().Version;
-            return GetFileVersion(path).Major <= current.Major;
+            return GetFileVersion(path).Major <= CurrentVersion.Major;
         }
 
         /// <summary>
@@ -180,8 +181,7 @@ namespace Ched.Core
         /// <returns>バージョンアップが必要であればtrue, 必要でないならばfalse</returns>
         public static bool IsUpgradeNeeded(string path)
         {
-            Version current = typeof(ScoreBook).Assembly.GetName().Version;
-            return GetFileVersion(path).Major < current.Major;
+            return GetFileVersion(path).Major < CurrentVersion.Major;
         }
 
         private static string GetDecompressedData(string path)
@@ -202,7 +202,6 @@ namespace Ched.Core
         private static Version GetFileVersion(string path)
         {
             var doc = JObject.Parse(GetDecompressedData(path));
-            Version current = typeof(ScoreBook).Assembly.GetName().Version;
             return doc["version"].ToObject<Version>();
         }
     }
