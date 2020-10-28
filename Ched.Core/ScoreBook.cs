@@ -177,11 +177,11 @@ namespace Ched.Core
         /// 指定のファイルに対してバージョンアップが必要かどうか調べます。
         /// </summary>
         /// <param name="path">ファイルへのパス</param>
-        /// <returns>読み込み可能であればtrue, 不可能であればfalse</returns>
+        /// <returns>バージョンアップが必要であればtrue, 必要でないならばfalse</returns>
         public static bool IsUpgradeNeeded(string path)
         {
             Version current = typeof(ScoreBook).Assembly.GetName().Version;
-            return GetFileVersion(path).Major == current.Major;
+            return GetFileVersion(path).Major < current.Major;
         }
 
         private static string GetDecompressedData(string path)
