@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace Ched.Core.Events
     /// 拍子の変更を表します。
     /// </summary>
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
+    [DebuggerDisplay("Tick = {Tick}, Value = {Numerator} / {Denominator}")]
     public class TimeSignatureChangeEvent : EventBase
     {
         [Newtonsoft.Json.JsonProperty]

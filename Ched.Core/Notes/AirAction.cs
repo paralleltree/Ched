@@ -18,6 +18,18 @@ namespace Ched.Core.Notes
         public IAirable ParentNote { get { return parentNote; } }
         public override int StartTick { get { return ParentNote.Tick; } }
 
+        /// <summary>
+        /// 親<see cref="IAirable"/>オブジェクトを持たない<see cref="AirAction"/>の新しいインスタンスを初期化します。
+        /// </summary>
+        /// <remarks>このコンストラクタはシリアライザ用に存在します。</remarks>
+        public AirAction()
+        {
+        }
+
+        /// <summary>
+        /// 指定の<see cref="IAirable"/>を親とする<see cref="AirAction"/>の新しいインスタンスを初期化します。
+        /// </summary>
+        /// <param name="parent">この<see cref="AirAction"/>の親となる<see cref="IAirable"/>オブジェクト</param>
         public AirAction(IAirable parent)
         {
             parentNote = parent;
@@ -49,6 +61,10 @@ namespace Ched.Core.Notes
                 }
             }
 
+            /// <summary>
+            /// 指定の<see cref="AirAction"/>を親とする<see cref="ActionNote"/>の新しいインスタンスを初期化します。
+            /// </summary>
+            /// <param name="parent">この<see cref="ActionNote"/>の親となる<see cref="AirAction"/>オブジェクト</param>
             public ActionNote(AirAction parent)
             {
                 parentNote = parent;
