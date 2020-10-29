@@ -140,6 +140,9 @@
 Select "Yes" to upgrade this file.
 (You will NOT be able to use this file on older versions.)</value>
   </data>
+  <data name="ImportComplete" xml:space="preserve">
+    <value>The import completed successfully.</value>
+  </data>
   <data name="ImportFailed" xml:space="preserve">
     <value>The import failed.</value>
   </data>

@@ -140,6 +140,9 @@
 バージョンアップしてよろしいですか？
 (以前のバージョンでは開けなくなります。)</value>
   </data>
+  <data name="ImportComplete" xml:space="preserve">
+    <value>インポートが完了しました。</value>
+  </data>
   <data name="ImportFailed" xml:space="preserve">
     <value>インポートに失敗しました。</value>
   </data>

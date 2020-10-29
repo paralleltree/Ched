@@ -126,6 +126,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to インポートが完了しました。.
+        /// </summary>
+        public static string ImportComplete {
+            get {
+                return ResourceManager.GetString("ImportComplete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to インポートに失敗しました。.
         /// </summary>
         public static string ImportFailed {

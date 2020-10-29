@@ -396,8 +396,26 @@ namespace Ched.UI
 
                 try
                 {
-                    using (var reader = new StreamReader(path))
-                        LoadBook(p.Import(reader));
+                    using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+                    {
+                        var args = new ScoreBookImportPluginArgs(stream);
+                        var book = p.Import(args);
+                        LoadBook(book);
+                        if (args.Diagnostics.Count > 0)
+                        {
+                            var vm = new DiagnosticsWindowViewModel()
+                            {
+                                Title = MainFormStrings.Import,
+                                Message = ErrorStrings.ImportComplete,
+                                Diagnostics = new System.Collections.ObjectModel.ObservableCollection<Diagnostic>(args.Diagnostics)
+                            };
+                            var window = new DiagnosticsWindow()
+                            {
+                                DataContext = vm
+                            };
+                            window.ShowDialog(this);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {

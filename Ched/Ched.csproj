@@ -168,6 +168,7 @@
     </Compile>
     <Compile Include="Plugins\ComboCalculator.cs" />
     <Compile Include="Plugins\PluginManager.cs" />
+    <Compile Include="Plugins\ScoreBookImportPluginArgs.cs" />
     <Compile Include="Plugins\ScorePluginArgs.cs" />
     <Compile Include="Plugins\ShiftEvent.cs" />
     <Compile Include="Plugins\SlideKnitter.cs" />
