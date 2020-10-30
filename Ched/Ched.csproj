@@ -162,6 +162,7 @@
     <Compile Include="Plugins\ComboCalculator.cs" />
     <Compile Include="Plugins\PluginManager.cs" />
     <Compile Include="Plugins\ScorePluginArgs.cs" />
+    <Compile Include="Plugins\ShiftEvent.cs" />
     <Compile Include="Plugins\SlideKnitter.cs" />
     <Compile Include="Plugins\SlideMerger.cs" />
     <Compile Include="Plugins\SlideReverser.cs" />
