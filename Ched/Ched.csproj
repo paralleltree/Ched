@@ -224,6 +224,12 @@
     <Compile Include="UI\Operations\OperationManager.cs" />
     <Compile Include="UI\Operations\ScoreOperation.cs" />
     <Compile Include="UI\PlaneExtensions.cs" />
+    <Compile Include="UI\ShiftTimeSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\ShiftTimeSelectionForm.Designer.cs">
+      <DependentUpon>ShiftTimeSelectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\SoundManager.cs" />
     <Compile Include="UI\SoundPreviewManager.cs" />
     <Compile Include="UI\SoundSourceSelector.cs">
@@ -312,6 +318,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\ShiftTimeSelectionForm.resx">
+      <DependentUpon>ShiftTimeSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\SoundSourceSelector.en.resx">
       <DependentUpon>SoundSourceSelector.cs</DependentUpon>
