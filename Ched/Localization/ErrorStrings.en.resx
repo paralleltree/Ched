@@ -140,6 +140,9 @@ Select "Yes" to upgrade this file.
   <data name="ImportFailed" xml:space="preserve">
     <value>The import failed.</value>
   </data>
+  <data name="InvalidTimeSignature" xml:space="preserve">
+    <value>The definition of time signature is invalid. Make sure that the event is aligned at beginning of the bar. (beat at {0})</value>
+  </data>
   <data name="MusicSourceNull" xml:space="preserve">
     <value>Please select an audio file in the Score Property.</value>
   </data>

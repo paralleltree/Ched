@@ -19,7 +19,7 @@ namespace Ched.Localization {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class ErrorStrings {
@@ -122,6 +122,15 @@ namespace Ched.Localization {
         internal static string ImportFailed {
             get {
                 return ResourceManager.GetString("ImportFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 拍子定義が無効です。イベントが小節の先頭に配置されていることを確認してください。(場所: 第{0}拍付近).
+        /// </summary>
+        internal static string InvalidTimeSignature {
+            get {
+                return ResourceManager.GetString("InvalidTimeSignature", resourceCulture);
             }
         }
         

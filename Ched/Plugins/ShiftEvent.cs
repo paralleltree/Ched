@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using Ched.Core;
+using Ched.Core.Events;
+using Ched.Localization;
 using Ched.UI;
 
 namespace Ched.Plugins
@@ -22,7 +24,17 @@ namespace Ched.Plugins
 
             var score = args.GetCurrentScore();
             int origin = args.GetSelectedRange().StartTick;
-            var barIndexCalculator = new BarIndexCalculator(score.TicksPerBeat, score.Events.TimeSignatureChangeEvents);
+            BarIndexCalculator barIndexCalculator;
+            try
+            {
+                barIndexCalculator = new BarIndexCalculator(score.TicksPerBeat, score.Events.TimeSignatureChangeEvents);
+            }
+            catch (InvalidTimeSignatureException ex)
+            {
+                int tick = ex.Tick / score.TicksPerBeat + 1;
+                MessageBox.Show(string.Format(ErrorStrings.InvalidTimeSignature, tick), DisplayName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             var barIndex = barIndexCalculator.GetBarPositionFromTick(origin).BarIndex;
             var sig = barIndexCalculator.GetTimeSignatureFromBarIndex(barIndex);
             int offset = 4 * score.TicksPerBeat * form.CountValue * (form.DurationType == DurationType.Bar ? sig.Numerator : 1) / sig.Denominator;

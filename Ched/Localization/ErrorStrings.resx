@@ -140,6 +140,9 @@
   <data name="ImportFailed" xml:space="preserve">
     <value>インポートに失敗しました。</value>
   </data>
+  <data name="InvalidTimeSignature" xml:space="preserve">
+    <value>拍子定義が無効です。イベントが小節の先頭に配置されていることを確認してください。(場所: 第{0}拍付近)</value>
+  </data>
   <data name="MusicSourceNull" xml:space="preserve">
     <value>譜面プロパティから音源ファイルを指定してください。</value>
   </data>
