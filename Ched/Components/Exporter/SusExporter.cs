@@ -15,10 +15,7 @@ namespace Ched.Components.Exporter
 {
     public class SusExporter : IExtendedExpoerter<SusArgs>
     {
-        public string FormatName
-        {
-            get { return "Seaurchin Score File(sus形式)"; }
-        }
+        public string FormatName => "Sliding Universal Score(sus形式)";
 
         public SusArgs CustomArgs { get; set; }
 

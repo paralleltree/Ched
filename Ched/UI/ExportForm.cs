@@ -17,7 +17,7 @@ namespace Ched.UI
     public partial class ExportForm : Form
     {
         private readonly string ArgsKey = "sus";
-        private readonly string Filter = "Seaurchin Score File(*.sus)|*.sus";
+        private readonly string Filter = "Sliding Universal Score(*.sus)|*.sus";
 
         private SusExporter exporter = new SusExporter();
 

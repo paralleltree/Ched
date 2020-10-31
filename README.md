@@ -13,7 +13,7 @@
   * 再生プレビュー
   * 譜面保管所風プレビュー
   * BPM, ハイスピード, 拍子変更
-  * [Seaurchin Score File(sus形式)](https://seaurchin.kb10uy.org)へのエクスポート
+  * [Sliding Universal Score(sus形式)](https://gist.github.com/kb10uy/c171c175ba913dc40a73c6ce69da9859)へのエクスポート
 
 ## ダウンロード
 
