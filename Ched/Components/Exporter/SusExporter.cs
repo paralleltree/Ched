@@ -5,11 +5,13 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 using ConcurrentPriorityQueue;
 using Ched.Core;
 using Ched.Core.Notes;
 using Ched.Core.Events;
+using Ched.Localization;
 
 namespace Ched.Components.Exporter
 {
@@ -44,7 +46,17 @@ namespace Ched.Components.Exporter
                 writer.WriteLine();
 
                 int barTick = book.Score.TicksPerBeat * 4;
-                var barIndexCalculator = new Core.BarIndexCalculator(book.Score.TicksPerBeat, book.Score.Events.TimeSignatureChangeEvents);
+                BarIndexCalculator barIndexCalculator = null;
+                try
+                {
+                    barIndexCalculator = new BarIndexCalculator(book.Score.TicksPerBeat, book.Score.Events.TimeSignatureChangeEvents);
+                }
+                catch (InvalidTimeSignatureException ex)
+                {
+                    int beatAt = ex.Tick / book.Score.TicksPerBeat + 1;
+                    MessageBox.Show(string.Format(ErrorStrings.InvalidTimeSignature, beatAt), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
                 foreach (var item in barIndexCalculator.TimeSignatures)
                 {

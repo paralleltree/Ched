@@ -31,8 +31,8 @@ namespace Ched.Plugins
             }
             catch (InvalidTimeSignatureException ex)
             {
-                int tick = ex.Tick / score.TicksPerBeat + 1;
-                MessageBox.Show(string.Format(ErrorStrings.InvalidTimeSignature, tick), DisplayName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                int beatAt = ex.Tick / score.TicksPerBeat + 1;
+                MessageBox.Show(string.Format(ErrorStrings.InvalidTimeSignature, beatAt), DisplayName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             var barIndex = barIndexCalculator.GetBarPositionFromTick(origin).BarIndex;
