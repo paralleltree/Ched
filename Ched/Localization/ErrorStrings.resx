@@ -161,6 +161,9 @@
   <data name="PluginLoadError" xml:space="preserve">
     <value>以下のプラグインの読み込みに失敗しました。DLLファイルがブロックされている可能性があります。</value>
   </data>
+  <data name="PluginNotSupported" xml:space="preserve">
+    <value>以下のプラグインは現在のバージョンに対応していない可能性があります。プラグイン機能は無効化されます。</value>
+  </data>
   <data name="PreviewException" xml:space="preserve">
     <value>プレビュー中にエラーが発生しました。</value>
   </data>

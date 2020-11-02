@@ -189,6 +189,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 以下のプラグインは現在のバージョンに対応していない可能性があります。プラグイン機能は無効化されます。.
+        /// </summary>
+        internal static string PluginNotSupported {
+            get {
+                return ResourceManager.GetString("PluginNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to プレビュー中にエラーが発生しました。.
         /// </summary>
         public static string PreviewException {

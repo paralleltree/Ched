@@ -161,6 +161,9 @@ Select "Yes" to upgrade this file.
   <data name="PluginLoadError" xml:space="preserve">
     <value>The following plugin(s) is (are) not loaded. It may be occured due to the dll file(s) is (are) blocked.</value>
   </data>
+  <data name="PluginNotSupported" xml:space="preserve">
+    <value>The following plugin(s) may not be supported in this version. All plugins will be disabled.</value>
+  </data>
   <data name="PreviewException" xml:space="preserve">
     <value>An error occured while previewing.</value>
   </data>
