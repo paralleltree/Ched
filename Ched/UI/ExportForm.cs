@@ -17,7 +17,7 @@ namespace Ched.UI
     public partial class ExportForm : Form
     {
         private readonly string ArgsKey = "sus";
-        private readonly string Filter = "Seaurchin Score File(*.sus)|*.sus";
+        private readonly string Filter = "Sliding Universal Score(*.sus)|*.sus";
 
         private SusExporter exporter = new SusExporter();
 
@@ -34,6 +34,7 @@ namespace Ched.UI
             InitializeComponent();
             Icon = Properties.Resources.MainIcon;
             ShowInTaskbar = false;
+            hasPaddingBarBox.Visible = false;
 
             levelDropDown.Items.AddRange(Enumerable.Range(1, 14).SelectMany(p => new string[] { p.ToString(), p + "+" }).ToArray());
             difficultyDropDown.Items.AddRange(new string[] { "BASIC", "ADVANCED", "EXPERT", "MASTER", "WORLD'S END" });
@@ -54,7 +55,6 @@ namespace Ched.UI
             soundFileBox.Text = args.SoundFileName;
             soundOffsetBox.Value = args.SoundOffset;
             jacketFileBox.Text = args.JacketFilePath;
-            hasPaddingBarBox.Checked = args.HasPaddingBar;
 
             browseButton.Click += (s, e) =>
             {
@@ -85,7 +85,6 @@ namespace Ched.UI
                 args.SoundFileName = soundFileBox.Text;
                 args.SoundOffset = soundOffsetBox.Value;
                 args.JacketFilePath = jacketFileBox.Text;
-                args.HasPaddingBar = hasPaddingBarBox.Checked;
 
                 try
                 {

@@ -11,13 +11,11 @@ namespace Ched.Configuration
 {
     internal sealed class SoundSettings : SettingsBase
     {
-        private static SoundSettings defaultInstance = (SoundSettings)Synchronized(new SoundSettings());
+        public static SoundSettings Default { get; } = (SoundSettings)Synchronized(new SoundSettings());
 
         private SoundSettings()
         {
         }
-
-        public static SoundSettings Default => defaultInstance;
 
         // ref: https://stackoverflow.com/a/12807699
         [UserScopedSetting]

@@ -5,20 +5,19 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 using ConcurrentPriorityQueue;
 using Ched.Core;
 using Ched.Core.Notes;
 using Ched.Core.Events;
+using Ched.Localization;
 
 namespace Ched.Components.Exporter
 {
     public class SusExporter : IExtendedExpoerter<SusArgs>
     {
-        public string FormatName
-        {
-            get { return "Seaurchin Score File(sus形式)"; }
-        }
+        public string FormatName => "Sliding Universal Score(sus形式)";
 
         public SusArgs CustomArgs { get; set; }
 
@@ -47,11 +46,21 @@ namespace Ched.Components.Exporter
                 writer.WriteLine();
 
                 int barTick = book.Score.TicksPerBeat * 4;
-                var barIndexCalculator = new BarIndexCalculator(barTick, book.Score.Events.TimeSignatureChangeEvents, args.HasPaddingBar);
+                BarIndexCalculator barIndexCalculator = null;
+                try
+                {
+                    barIndexCalculator = new BarIndexCalculator(book.Score.TicksPerBeat, book.Score.Events.TimeSignatureChangeEvents);
+                }
+                catch (InvalidTimeSignatureException ex)
+                {
+                    int beatAt = ex.Tick / book.Score.TicksPerBeat + 1;
+                    MessageBox.Show(string.Format(ErrorStrings.InvalidTimeSignature, beatAt), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
                 foreach (var item in barIndexCalculator.TimeSignatures)
                 {
-                    writer.WriteLine("#{0:000}02: {1}", item.StartBarIndex + (args.HasPaddingBar && item.StartBarIndex == 1 ? -1 : 0), 4f * item.TimeSignature.Numerator / item.TimeSignature.Denominator);
+                    writer.WriteLine("#{0:000}02: {1}", item.StartBarIndex, 4f * item.TimeSignature.Numerator / item.TimeSignature.Denominator);
                 }
 
                 writer.WriteLine();
@@ -68,9 +77,6 @@ namespace Ched.Components.Exporter
                 {
                     writer.WriteLine("#BPM{0}: {1}", bpmIdentifiers[item.Index], item.Value.BPM);
                 }
-
-                if (args.HasPaddingBar)
-                    writer.WriteLine("#{0:000}08: {1:x2}", 0, bpmIdentifiers[bpmlist.OrderBy(p => p.Value.Tick).First().Index]);
 
                 foreach (var eventInBar in bpmlist.GroupBy(p => p.BarPosition.BarIndex))
                 {
@@ -91,7 +97,7 @@ namespace Ched.Components.Exporter
                 var speeds = book.Score.Events.HighSpeedChangeEvents.Select(p =>
                 {
                     var barPos = barIndexCalculator.GetBarPositionFromTick(p.Tick);
-                    return string.Format("{0}'{1}:{2}", args.HasPaddingBar && barPos.BarIndex == 1 && barPos.TickOffset == 0 ? 0 : barPos.BarIndex, barPos.TickOffset, p.SpeedRatio);
+                    return string.Format("{0}'{1}:{2}", barPos.BarIndex, barPos.TickOffset, p.SpeedRatio);
                 });
                 writer.WriteLine("#TIL00: \"{0}\"", string.Join(", ", speeds));
                 writer.WriteLine("#HISPEED 00");
@@ -413,99 +419,6 @@ namespace Ched.Components.Exporter
                 return c;
             }
         }
-
-        public class BarIndexCalculator
-        {
-            private bool hasPaddingBar;
-            private int barTick;
-            private SortedDictionary<int, TimeSignatureItem> timeSignatures;
-
-            /// <summary>
-            /// 時間順にソートされた有効な拍子変更イベントのコレクションを取得します。
-            /// </summary>
-            public IEnumerable<TimeSignatureItem> TimeSignatures
-            {
-                get { return timeSignatures.Select(p => p.Value).Reverse(); }
-            }
-
-            public BarIndexCalculator(int barTick, IEnumerable<TimeSignatureChangeEvent> events, bool hasPaddingBar)
-            {
-                this.hasPaddingBar = hasPaddingBar;
-                this.barTick = barTick;
-                var ordered = events.OrderBy(p => p.Tick).ToList();
-                var dic = new SortedDictionary<int, TimeSignatureItem>();
-                int pos = 0;
-                int barIndex = hasPaddingBar ? 1 : 0;
-                for (int i = 0; i < ordered.Count; i++)
-                {
-                    var item = new TimeSignatureItem()
-                    {
-                        StartTick = pos,
-                        StartBarIndex = barIndex,
-                        TimeSignature = ordered[i]
-                    };
-
-                    // 時間逆順で追加
-                    if (dic.ContainsKey(-pos)) dic[-pos] = item;
-                    else dic.Add(-pos, item);
-
-                    if (i < ordered.Count - 1)
-                    {
-                        int barLength = barTick * ordered[i].Numerator / ordered[i].Denominator;
-                        int duration = ordered[i + 1].Tick - pos;
-                        pos += duration / barLength * barLength;
-                        barIndex += duration / barLength;
-                    }
-                }
-
-                timeSignatures = dic;
-            }
-
-            public BarPosition GetBarPositionFromTick(int tick)
-            {
-                foreach (var item in timeSignatures)
-                {
-                    if (tick < item.Value.StartTick) continue;
-                    var sig = item.Value.TimeSignature;
-                    int barLength = barTick * sig.Numerator / sig.Denominator;
-                    int tickOffset = tick - item.Value.StartTick;
-                    int barOffset = tickOffset / barLength;
-                    return new BarPosition()
-                    {
-                        BarIndex = item.Value.StartBarIndex + barOffset,
-                        TickOffset = tickOffset - barOffset * barLength,
-                        TimeSignature = item.Value.TimeSignature
-                    };
-                }
-
-                throw new InvalidOperationException();
-            }
-
-            public TimeSignatureChangeEvent GetTimeSignatureFromBarIndex(int barIndex)
-            {
-                foreach (var item in timeSignatures)
-                {
-                    if (barIndex < item.Value.StartBarIndex) continue;
-                    return item.Value.TimeSignature;
-                }
-
-                throw new InvalidOperationException();
-            }
-
-            public struct BarPosition
-            {
-                public int BarIndex { get; set; }
-                public int TickOffset { get; set; }
-                public TimeSignatureChangeEvent TimeSignature { get; set; }
-            }
-
-            public class TimeSignatureItem
-            {
-                public int StartTick { get; set; }
-                public int StartBarIndex { get; set; }
-                public TimeSignatureChangeEvent TimeSignature { get; set; }
-            }
-        }
     }
 
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
@@ -568,12 +481,6 @@ namespace Ched.Components.Exporter
         {
             get { return jacketFilePath; }
             set { jacketFilePath = value; }
-        }
-
-        public bool HasPaddingBar
-        {
-            get { return hasPaddingBar; }
-            set { hasPaddingBar = value; }
         }
 
         public enum Difficulty
