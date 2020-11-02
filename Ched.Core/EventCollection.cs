@@ -39,6 +39,11 @@ namespace Ched.Core
             set { highSpeedChangeEvents = value; }
         }
 
+        public IEnumerable<EventBase> AllEvents =>
+            BPMChangeEvents.Cast<EventBase>()
+            .Concat(TimeSignatureChangeEvents)
+            .Concat(HighSpeedChangeEvents);
+
         public void UpdateTicksPerBeat(double factor)
         {
             var events = BPMChangeEvents.Cast<EventBase>()

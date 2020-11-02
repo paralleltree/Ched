@@ -209,7 +209,7 @@ namespace Ched.UI
                     MessageBox.Show(this, ErrorStrings.FileNotCompatible, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                if (!ScoreBook.IsUpgradeNeeded(filePath))
+                if (ScoreBook.IsUpgradeNeeded(filePath))
                 {
                     if (MessageBox.Show(this, ErrorStrings.FileUpgradeNeeded, Program.ApplicationName, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
                         return;

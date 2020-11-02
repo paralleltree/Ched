@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace Ched.Core.Events
     /// ハイスピードの変更を表すクラスです。
     /// </summary>
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
+    [DebuggerDisplay("Tick = {Tick}, Value = {SpeedRatio}")]
     public class HighSpeedChangeEvent : EventBase
     {
         [Newtonsoft.Json.JsonProperty]
