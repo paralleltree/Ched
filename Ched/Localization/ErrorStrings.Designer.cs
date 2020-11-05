@@ -162,6 +162,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to エクスポートが実行されていません。.
+        /// </summary>
+        public static string NotExported {
+            get {
+                return ResourceManager.GetString("NotExported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 出力先を指定してください。.
         /// </summary>
         public static string OutputPathRequired {
