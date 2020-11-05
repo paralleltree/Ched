@@ -13,17 +13,13 @@ using Ched.Core.Notes;
 
 namespace Ched.Components.Exporter
 {
-    public class SusExporter : IExtendedExpoerter<SusArgs>
+    public class SusExporter
     {
-        public string FormatName => "Sliding Universal Score(sus形式)";
-
         protected ScoreBook ScoreBook { get; set; }
         protected BarIndexCalculator BarIndexCalculator { get; set; }
         protected int StandardBarTick => ScoreBook.Score.TicksPerBeat * 4;
         protected int BarIndexOffset { get; set; } = 0;
         public SusArgs CustomArgs { get; set; }
-
-        public void Export(string path, ScoreBook book) => Export(book, new FileStream(path, FileMode.Create));
 
         public void Export(ScoreBook book, Stream stream)
         {
