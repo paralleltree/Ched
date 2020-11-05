@@ -175,6 +175,7 @@
     <Compile Include="Plugins\SlideMerger.cs" />
     <Compile Include="Plugins\SlideReverser.cs" />
     <Compile Include="Plugins\SlideSplitter.cs" />
+    <Compile Include="Plugins\SusExportPlugin.cs" />
     <Compile Include="UI\Helpers.cs" />
     <Compile Include="UI\Windows\Behaviors\InitialFocusBehavior.cs" />
     <Compile Include="UI\Windows\Behaviors\OpenFileBehavior.cs" />
