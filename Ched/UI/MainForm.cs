@@ -301,7 +301,6 @@ namespace Ched.UI
                 SaveAs();
                 return;
             }
-            CommitChanges();
             ScoreBook.Save();
             if (CurrentMusicSource != null)
             {
@@ -313,18 +312,11 @@ namespace Ched.UI
 
         protected void ExportFile()
         {
-            CommitChanges();
             var dialog = new ExportForm(ScoreBook);
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
                 LastExportData = new ExportData() { OutputPath = dialog.OutputPath, Exporter = dialog.Exporter };
             }
-        }
-
-        protected void CommitChanges()
-        {
-            ScoreBook.Score.Notes = NoteView.Notes.Reposit();
-            // Eventsは参照渡ししてますよん
         }
 
         protected void ClearFile()
@@ -463,7 +455,6 @@ namespace Ched.UI
 
             var pluginItems = PluginManager.ScorePlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
             {
-                CommitChanges();
                 void updateScore(Score newScore)
                 {
                     var op = new UpdateScoreOperation(ScoreBook.Score, newScore, score =>
@@ -700,7 +691,6 @@ namespace Ched.UI
                     return;
                 }
 
-                CommitChanges();
                 try
                 {
                     LastExportData.Exporter.Export(LastExportData.OutputPath, ScoreBook);

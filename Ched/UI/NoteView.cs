@@ -2207,7 +2207,7 @@ namespace Ched.UI
         {
             public event EventHandler NoteChanged;
 
-            private Core.NoteCollection source = new Core.NoteCollection();
+            private Core.NoteCollection source;
 
             private Dictionary<IAirable, HashSet<Air>> AirDictionary { get; } = new Dictionary<IAirable, HashSet<Air>>();
             private Dictionary<IAirable, HashSet<AirAction>> AirActionDictionary { get; } = new Dictionary<IAirable, HashSet<AirAction>>();
@@ -2223,7 +2223,7 @@ namespace Ched.UI
 
             public NoteCollection(Core.NoteCollection src)
             {
-                Load(src);
+                source = src;
             }
 
             public void Add(Tap note)
@@ -2352,30 +2352,6 @@ namespace Ched.UI
                 return Math.Max(lastShortNoteTick, lastLongNoteTick);
             }
 
-
-            public void Load(Core.NoteCollection collection)
-            {
-                Clear();
-
-                foreach (var note in collection.Taps) Add(note);
-                foreach (var note in collection.ExTaps) Add(note);
-                foreach (var note in collection.Holds) Add(note);
-                foreach (var note in collection.Slides) Add(note);
-                foreach (var note in collection.Airs) Add(note);
-                foreach (var note in collection.AirActions) Add(note);
-                foreach (var note in collection.Flicks) Add(note);
-                foreach (var note in collection.Damages) Add(note);
-            }
-
-            public void Clear()
-            {
-                source = new Core.NoteCollection();
-
-                AirDictionary.Clear();
-                AirActionDictionary.Clear();
-
-                NoteChanged?.Invoke(this, EventArgs.Empty);
-            }
 
             public void UpdateTicksPerBeat(double factor)
             {
@@ -2510,23 +2486,6 @@ namespace Ched.UI
                 this.ticksPerBeat = ticksPerBeat;
                 selectedNotes = notes;
             }
-        }
-    }
-
-    internal static class UIExtensions
-    {
-        public static Core.NoteCollection Reposit(this NoteView.NoteCollection collection)
-        {
-            var res = new NoteCollection();
-            res.Taps = collection.Taps.ToList();
-            res.ExTaps = collection.ExTaps.ToList();
-            res.Holds = collection.Holds.ToList();
-            res.Slides = collection.Slides.ToList();
-            res.Airs = collection.Airs.ToList();
-            res.AirActions = collection.AirActions.ToList();
-            res.Flicks = collection.Flicks.ToList();
-            res.Damages = collection.Damages.ToList();
-            return res;
         }
     }
 }
