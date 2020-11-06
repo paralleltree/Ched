@@ -754,6 +754,8 @@ namespace Ched.UI
         public void UpdateScore(Score score)
         {
             UnitBeatTick = score.TicksPerBeat;
+            // Core.NoteCollectionとは別のコレクションと共にNoteView.NoteCollectionでラップする場合は
+            // 異なるNoteView.NoteCollectionを生成すると要素の追加/削除時に整合性を失う
             if (NoteCollectionCache.ContainsKey(score))
             {
                 Notes = NoteCollectionCache[score];
