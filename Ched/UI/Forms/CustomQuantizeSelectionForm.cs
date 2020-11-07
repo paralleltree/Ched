@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Ched.UI
+namespace Ched.UI.Forms
 {
     public partial class CustomQuantizeSelectionForm : Form
     {

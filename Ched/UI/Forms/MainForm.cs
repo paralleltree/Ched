@@ -18,7 +18,7 @@ using Ched.Plugins;
 using Ched.Properties;
 using Ched.UI.Operations;
 
-namespace Ched.UI
+namespace Ched.UI.Forms
 {
     public partial class MainForm : Form
     {

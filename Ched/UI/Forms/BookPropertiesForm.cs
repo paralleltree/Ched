@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 using Ched.Core;
 
-namespace Ched.UI
+namespace Ched.UI.Forms
 {
     public partial class BookPropertiesForm : Form
     {

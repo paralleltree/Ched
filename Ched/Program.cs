@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using Ched.Configuration;
+using Ched.UI.Forms;
 
 namespace Ched
 {
@@ -38,7 +39,7 @@ namespace Ched
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(args.Length == 0 ? new UI.MainForm() : new UI.MainForm(args[0]));
+            Application.Run(args.Length == 0 ? new MainForm() : new MainForm(args[0]));
         }
 
         public static void DumpExceptionTo(Exception ex, string filename)

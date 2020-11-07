@@ -12,7 +12,7 @@ using Ched.Core;
 using Ched.Components.Exporter;
 using Ched.Localization;
 
-namespace Ched.UI
+namespace Ched.UI.Forms
 {
     public partial class ExportForm : Form
     {

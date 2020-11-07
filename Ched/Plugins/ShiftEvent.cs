@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using Ched.Core;
 using Ched.Core.Events;
 using Ched.Localization;
-using Ched.UI;
+using Ched.UI.Forms;
 
 namespace Ched.Plugins
 {

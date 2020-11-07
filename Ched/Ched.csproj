@@ -167,46 +167,46 @@
     <Compile Include="Plugins\SlideMerger.cs" />
     <Compile Include="Plugins\SlideReverser.cs" />
     <Compile Include="Plugins\SlideSplitter.cs" />
-    <Compile Include="UI\BookPropertiesForm.cs">
+    <Compile Include="UI\Forms\BookPropertiesForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\BookPropertiesForm.Designer.cs">
+    <Compile Include="UI\Forms\BookPropertiesForm.Designer.cs">
       <DependentUpon>BookPropertiesForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\BPMSelectionForm.cs">
+    <Compile Include="UI\Forms\BPMSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\BPMSelectionForm.Designer.cs">
+    <Compile Include="UI\Forms\BPMSelectionForm.Designer.cs">
       <DependentUpon>BPMSelectionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\CheckableToolStripSplitButton.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="UI\ControlExtensions.cs" />
-    <Compile Include="UI\CustomQuantizeSelectionForm.cs">
+    <Compile Include="UI\Forms\CustomQuantizeSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\CustomQuantizeSelectionForm.Designer.cs">
+    <Compile Include="UI\Forms\CustomQuantizeSelectionForm.Designer.cs">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\ExportForm.cs">
+    <Compile Include="UI\Forms\ExportForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\ExportForm.Designer.cs">
+    <Compile Include="UI\Forms\ExportForm.Designer.cs">
       <DependentUpon>ExportForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\FormExtensions.cs" />
     <Compile Include="UI\GraphicsExtensions.cs" />
-    <Compile Include="UI\HighSpeedSelectionForm.cs">
+    <Compile Include="UI\Forms\HighSpeedSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\HighSpeedSelectionForm.Designer.cs">
+    <Compile Include="UI\Forms\HighSpeedSelectionForm.Designer.cs">
       <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\MainForm.cs">
+    <Compile Include="UI\Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\MainForm.Designer.cs">
+    <Compile Include="UI\Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
@@ -225,10 +225,10 @@
     <Compile Include="UI\Operations\OperationManager.cs" />
     <Compile Include="UI\Operations\ScoreOperation.cs" />
     <Compile Include="UI\PlaneExtensions.cs" />
-    <Compile Include="UI\ShiftTimeSelectionForm.cs">
+    <Compile Include="UI\Forms\ShiftTimeSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\ShiftTimeSelectionForm.Designer.cs">
+    <Compile Include="UI\Forms\ShiftTimeSelectionForm.Designer.cs">
       <DependentUpon>ShiftTimeSelectionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\SoundManager.cs" />
@@ -239,16 +239,16 @@
     <Compile Include="UI\SoundSourceSelector.Designer.cs">
       <DependentUpon>SoundSourceSelector.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\TimeSignatureSelectionForm.cs">
+    <Compile Include="UI\Forms\TimeSignatureSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\TimeSignatureSelectionForm.Designer.cs">
+    <Compile Include="UI\Forms\TimeSignatureSelectionForm.Designer.cs">
       <DependentUpon>TimeSignatureSelectionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\VersionInfoForm.cs">
+    <Compile Include="UI\Forms\VersionInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\VersionInfoForm.Designer.cs">
+    <Compile Include="UI\Forms\VersionInfoForm.Designer.cs">
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Localization\ErrorStrings.en.resx" />
@@ -287,40 +287,40 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UI\BookPropertiesForm.en.resx">
+    <EmbeddedResource Include="UI\Forms\BookPropertiesForm.en.resx">
       <DependentUpon>BookPropertiesForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\BookPropertiesForm.resx">
+    <EmbeddedResource Include="UI\Forms\BookPropertiesForm.resx">
       <DependentUpon>BookPropertiesForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\BPMSelectionForm.en.resx">
+    <EmbeddedResource Include="UI\Forms\BPMSelectionForm.en.resx">
       <DependentUpon>BPMSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\BPMSelectionForm.resx">
+    <EmbeddedResource Include="UI\Forms\BPMSelectionForm.resx">
       <DependentUpon>BPMSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\CustomQuantizeSelectionForm.en.resx">
+    <EmbeddedResource Include="UI\Forms\CustomQuantizeSelectionForm.en.resx">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\CustomQuantizeSelectionForm.resx">
+    <EmbeddedResource Include="UI\Forms\CustomQuantizeSelectionForm.resx">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\ExportForm.en.resx">
+    <EmbeddedResource Include="UI\Forms\ExportForm.en.resx">
       <DependentUpon>ExportForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\ExportForm.resx">
+    <EmbeddedResource Include="UI\Forms\ExportForm.resx">
       <DependentUpon>ExportForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\HighSpeedSelectionForm.en.resx">
+    <EmbeddedResource Include="UI\Forms\HighSpeedSelectionForm.en.resx">
       <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\HighSpeedSelectionForm.resx">
+    <EmbeddedResource Include="UI\Forms\HighSpeedSelectionForm.resx">
       <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\MainForm.resx">
+    <EmbeddedResource Include="UI\Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\ShiftTimeSelectionForm.resx">
+    <EmbeddedResource Include="UI\Forms\ShiftTimeSelectionForm.resx">
       <DependentUpon>ShiftTimeSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\SoundSourceSelector.en.resx">
@@ -329,16 +329,16 @@
     <EmbeddedResource Include="UI\SoundSourceSelector.resx">
       <DependentUpon>SoundSourceSelector.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\TimeSignatureSelectionForm.en.resx">
+    <EmbeddedResource Include="UI\Forms\TimeSignatureSelectionForm.en.resx">
       <DependentUpon>TimeSignatureSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\TimeSignatureSelectionForm.resx">
+    <EmbeddedResource Include="UI\Forms\TimeSignatureSelectionForm.resx">
       <DependentUpon>TimeSignatureSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\VersionInfoForm.en.resx">
+    <EmbeddedResource Include="UI\Forms\VersionInfoForm.en.resx">
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\VersionInfoForm.resx">
+    <EmbeddedResource Include="UI\Forms\VersionInfoForm.resx">
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />

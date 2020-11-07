@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using System.Reflection;
 using Ched.Properties;
 
-namespace Ched.UI
+namespace Ched.UI.Forms
 {
     public partial class VersionInfoForm : Form
     {

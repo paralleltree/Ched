@@ -1,6 +1,6 @@
-﻿namespace Ched.UI
+﻿namespace Ched.UI.Forms
 {
-    partial class HighSpeedSelectionForm
+    partial class CustomQuantizeSelectionForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,12 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HighSpeedSelectionForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CustomQuantizeSelectionForm));
             this.label1 = new System.Windows.Forms.Label();
-            this.speedRatioBox = new System.Windows.Forms.NumericUpDown();
+            this.label2 = new System.Windows.Forms.Label();
+            this.noteLengthBox = new System.Windows.Forms.ComboBox();
+            this.noteDivisionBox = new System.Windows.Forms.NumericUpDown();
             this.buttonOK = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.speedRatioBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.noteDivisionBox)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -41,10 +43,22 @@
             resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
             // 
-            // speedRatioBox
+            // label2
             // 
-            resources.ApplyResources(this.speedRatioBox, "speedRatioBox");
-            this.speedRatioBox.Name = "speedRatioBox";
+            resources.ApplyResources(this.label2, "label2");
+            this.label2.Name = "label2";
+            // 
+            // noteLengthBox
+            // 
+            this.noteLengthBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.noteLengthBox.FormattingEnabled = true;
+            resources.ApplyResources(this.noteLengthBox, "noteLengthBox");
+            this.noteLengthBox.Name = "noteLengthBox";
+            // 
+            // noteDivisionBox
+            // 
+            resources.ApplyResources(this.noteDivisionBox, "noteDivisionBox");
+            this.noteDivisionBox.Name = "noteDivisionBox";
             // 
             // buttonOK
             // 
@@ -58,19 +72,21 @@
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             // 
-            // HighSpeedSelectionForm
+            // CustomQuantizeSelectionForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOK);
-            this.Controls.Add(this.speedRatioBox);
+            this.Controls.Add(this.noteDivisionBox);
+            this.Controls.Add(this.noteLengthBox);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "HighSpeedSelectionForm";
-            ((System.ComponentModel.ISupportInitialize)(this.speedRatioBox)).EndInit();
+            this.Name = "CustomQuantizeSelectionForm";
+            ((System.ComponentModel.ISupportInitialize)(this.noteDivisionBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -79,7 +95,9 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.NumericUpDown speedRatioBox;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox noteLengthBox;
+        private System.Windows.Forms.NumericUpDown noteDivisionBox;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }

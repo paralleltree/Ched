@@ -1,4 +1,4 @@
-﻿namespace Ched.UI
+﻿namespace Ched.UI.Forms
 {
     partial class VersionInfoForm
     {

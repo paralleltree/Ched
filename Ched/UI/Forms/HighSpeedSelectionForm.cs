@@ -8,21 +8,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Ched.UI
+namespace Ched.UI.Forms
 {
-    public partial class BPMSelectionForm : Form
+    public partial class HighSpeedSelectionForm : Form
     {
-        public decimal BPM
+        public decimal SpeedRatio
         {
-            get { return bpmBox.Value; }
+            get { return speedRatioBox.Value; }
             set
             {
-                bpmBox.Value = value;
-                bpmBox.SelectAll();
+                speedRatioBox.Value = value;
+                speedRatioBox.SelectAll();
             }
         }
 
-        public BPMSelectionForm()
+        public HighSpeedSelectionForm()
         {
             InitializeComponent();
             AcceptButton = buttonOK;
@@ -30,11 +30,11 @@ namespace Ched.UI
             buttonOK.DialogResult = DialogResult.OK;
             buttonCancel.DialogResult = DialogResult.Cancel;
 
-            bpmBox.DecimalPlaces = 0;
-            bpmBox.Increment = 1;
-            bpmBox.Maximum = 10000;
-            bpmBox.Minimum = 10;
-            bpmBox.Value = 120;
+            speedRatioBox.Minimum = -10000m;
+            speedRatioBox.Maximum = 10000m;
+            speedRatioBox.Increment = 0.01m;
+            speedRatioBox.DecimalPlaces = 2;
+            speedRatioBox.Value = 1;
         }
     }
 }
