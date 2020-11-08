@@ -775,8 +775,8 @@ namespace Ched.UI
 
             private Core.NoteCollection source;
 
-            private Dictionary<IAirable, HashSet<Air>> AirDictionary { get; } = new Dictionary<IAirable, HashSet<Air>>();
-            private Dictionary<IAirable, HashSet<AirAction>> AirActionDictionary { get; } = new Dictionary<IAirable, HashSet<AirAction>>();
+            private Dictionary<IAirable, Air> AirDictionary { get; } = new Dictionary<IAirable, Air>();
+            private Dictionary<IAirable, AirAction> AirActionDictionary { get; } = new Dictionary<IAirable, AirAction>();
 
             public IReadOnlyCollection<Tap> Taps { get { return source.Taps; } }
             public IReadOnlyCollection<ExTap> ExTaps { get { return source.ExTaps; } }
@@ -792,11 +792,11 @@ namespace Ched.UI
                 source = src;
                 foreach (var air in src.Airs)
                 {
-                    AirDictionary.Add(air.ParentNote, new HashSet<Air>() { air });
+                    AirDictionary.Add(air.ParentNote, air);
                 }
                 foreach (var airAction in src.AirActions)
                 {
-                    AirActionDictionary.Add(airAction.ParentNote, new HashSet<AirAction>() { airAction });
+                    AirActionDictionary.Add(airAction.ParentNote, airAction);
                 }
             }
 
@@ -827,18 +827,14 @@ namespace Ched.UI
             public void Add(Air note)
             {
                 source.Airs.Add(note);
-                if (!AirDictionary.ContainsKey(note.ParentNote))
-                    AirDictionary.Add(note.ParentNote, new HashSet<Air>());
-                AirDictionary[note.ParentNote].Add(note);
+                AirDictionary.Add(note.ParentNote, note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Add(AirAction note)
             {
                 source.AirActions.Add(note);
-                if (!AirActionDictionary.ContainsKey(note.ParentNote))
-                    AirActionDictionary.Add(note.ParentNote, new HashSet<AirAction>());
-                AirActionDictionary[note.ParentNote].Add(note);
+                AirActionDictionary.Add(note.ParentNote, note);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
@@ -882,14 +878,14 @@ namespace Ched.UI
             public void Remove(Air note)
             {
                 source.Airs.Remove(note);
-                AirDictionary[note.ParentNote].Remove(note);
+                AirDictionary.Remove(note.ParentNote);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
             public void Remove(AirAction note)
             {
                 source.AirActions.Remove(note);
-                AirActionDictionary[note.ParentNote].Remove(note);
+                AirActionDictionary.Remove(note.ParentNote);
                 NoteChanged?.Invoke(this, EventArgs.Empty);
             }
 
@@ -907,14 +903,14 @@ namespace Ched.UI
 
             public IEnumerable<Air> GetReferencedAir(IAirable note)
             {
-                if (!AirDictionary.ContainsKey(note)) return Enumerable.Empty<Air>();
-                return AirDictionary[note];
+                if (AirDictionary.ContainsKey(note))
+                    yield return AirDictionary[note];
             }
 
             public IEnumerable<AirAction> GetReferencedAirAction(IAirable note)
             {
-                if (!AirActionDictionary.ContainsKey(note)) return Enumerable.Empty<AirAction>();
-                return AirActionDictionary[note];
+                if (AirActionDictionary.ContainsKey(note))
+                    yield return AirActionDictionary[note];
             }
 
             public int GetLastTick()
