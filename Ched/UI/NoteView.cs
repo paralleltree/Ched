@@ -370,6 +370,9 @@ namespace Ched.UI
                 AirStepColor = new GradientColor(Color.FromArgb(6, 180, 10), Color.FromArgb(80, 224, 64))
             };
 
+            mouseDown = this.MouseDownAsObservable();
+            mouseMove = this.MouseMoveAsObservable();
+            mouseUp = this.MouseUpAsObservable();
             InitializeHandlers();
         }
 
