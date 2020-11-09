@@ -315,6 +315,14 @@ namespace Ched.UI
             SoundSettings.Default.Save();
         }
 
+        protected void ExportAs(IScoreBookExportPlugin exportPlugin)
+        {
+            var dialog = new SaveFileDialog() { Filter = exportPlugin.FileFilter };
+            if (dialog.ShowDialog(this) != DialogResult.OK) return;
+
+            HandleExport(ScoreBook, ExportManager.PrepareExport(exportPlugin, dialog.FileName));
+        }
+
         private void HandleExport(ScoreBook book, ExportContext context)
         {
             CommitChanges();
@@ -438,10 +446,7 @@ namespace Ched.UI
 
             var exportPluginItems = PluginManager.ScoreBookExportPlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
             {
-                var dialog = new SaveFileDialog() { Filter = p.FileFilter };
-                if (dialog.ShowDialog(this) != DialogResult.OK) return;
-
-                HandleExport(ScoreBook, ExportManager.PrepareExport(p, dialog.FileName));
+                ExportAs(p);
             })).ToArray();
 
             var bookPropertiesMenuItem = new MenuItem(MainFormStrings.BookProperty, (s, e) =>
@@ -767,6 +772,11 @@ namespace Ched.UI
             {
                 if (!ExportManager.CanReExport)
                 {
+                    if (PluginManager.ScoreBookExportPlugins.Count() == 1)
+                    {
+                        ExportAs(PluginManager.ScoreBookExportPlugins.Single());
+                        return;
+                    }
                     MessageBox.Show(this, ErrorStrings.NotExported, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
