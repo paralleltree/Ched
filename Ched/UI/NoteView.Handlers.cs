@@ -86,7 +86,7 @@ namespace Ched.UI
                     Matrix startMatrix = GetDrawingMatrix(new Matrix());
                     startMatrix.Invert();
                     PointF startScorePos = startMatrix.TransformPoint(p.Location);
-                    return rangeSelection(startScorePos)
+                    return HandleRangeSelection(startScorePos)
                         .Count()
                         .Zip(mouseUp, (q, r) => new { Pos = r.Location, Count = q });
                 })
@@ -106,7 +106,7 @@ namespace Ched.UI
             Subscriptions.Add(selectSubscription);
         }
 
-        protected IObservable<MouseEventArgs> rangeSelection(PointF startPos)
+        protected IObservable<MouseEventArgs> HandleRangeSelection(PointF startPos)
         {
             SelectedRange = new SelectionRange()
             {
@@ -1195,7 +1195,7 @@ namespace Ched.UI
             {
                 // 範囲選択
                 CurrentTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(startScorePos.Y)), 0);
-                return rangeSelection(startScorePos);
+                return HandleRangeSelection(startScorePos);
             }
         }
     }
