@@ -324,7 +324,7 @@ namespace Ched.UI
                 Filter = "Sliding Universal Score(*.sus)|*.sus"
             };
             if (dialog.ShowDialog(this) != DialogResult.OK) return;
-            var susArgs = ScoreBook.ExporterArgs.ContainsKey("sus") ? ScoreBook.ExporterArgs["sus"] as Components.Exporter.SusArgs : new Components.Exporter.SusArgs();
+            var susArgs = Newtonsoft.Json.JsonConvert.DeserializeObject<Components.Exporter.SusArgs>(ScoreBook.ExportArgs.ContainsKey("sus") ? ScoreBook.ExportArgs["sus"] : "") ?? new Components.Exporter.SusArgs();
             var vm = new SusExportWindowViewModel(ScoreBook, susArgs);
             var window = new SusExportWindow() { DataContext = vm };
             var result = window.ShowDialog(this);
@@ -333,7 +333,7 @@ namespace Ched.UI
             var exporter = new Components.Exporter.SusExporter() { CustomArgs = susArgs };
             var exportData = new ExportData() { OutputPath = dialog.FileName, Exporter = exporter };
             HandleExport(exportData);
-            if (!ScoreBook.ExporterArgs.ContainsKey("sus")) ScoreBook.ExporterArgs["sus"] = susArgs;
+            ScoreBook.ExportArgs["sus"] = Newtonsoft.Json.JsonConvert.SerializeObject(susArgs);
             LastExportData = exportData;
         }
 

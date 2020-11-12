@@ -38,7 +38,7 @@ namespace Ched.Core
         [Newtonsoft.Json.JsonProperty]
         private Score score = new Score();
         [Newtonsoft.Json.JsonProperty]
-        private Dictionary<string, object> exporterArgs = new Dictionary<string, object>();
+        private Dictionary<string, string> exportArgs = new Dictionary<string, string>();
 
         public string Path { get; set; }
 
@@ -90,10 +90,10 @@ namespace Ched.Core
         /// <summary>
         /// エクスポート用の設定を格納します。
         /// </summary>
-        public Dictionary<string, object> ExporterArgs
+        public Dictionary<string, string> ExportArgs
         {
-            get { return exporterArgs; }
-            set { exporterArgs = value; }
+            get { return exportArgs; }
+            set { exportArgs = value; }
         }
 
         public void Save(string path)
@@ -115,6 +115,8 @@ namespace Ched.Core
                 }
             }
         }
+
+        public ScoreBook Clone() => JsonConvert.DeserializeObject<ScoreBook>(JsonConvert.SerializeObject(this, SerializerSettings));
 
         /// <summary>
         /// 指定のファイルから<see cref="ScoreBook"/>のインスタンスを生成します。
@@ -149,6 +151,12 @@ namespace Ched.Core
                     type = System.Text.RegularExpressions.Regex.Replace(type, "Ched$", "Ched.Core").Replace("Components", "Core");
                     obj["$type"] = type;
                 }
+
+                var susExportArgs = doc["exporterArgs"]["sus"];
+                var exportArgs = new JObject();
+                if (susExportArgs != null) exportArgs.Add("Ched.Plugins.SusExportPlugin", susExportArgs.ToString());
+                doc.Remove("exporterArgs");
+                doc.Add("exportArgs", exportArgs);
             }
 
             doc["version"] = JObject.FromObject(CurrentVersion);
