@@ -251,6 +251,10 @@
     <Compile Include="UI\VersionInfoForm.Designer.cs">
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Windows\Converters\BitmapImageSourceConverter.cs" />
+    <Compile Include="UI\Windows\DiagnosticsWindow.xaml.cs">
+      <DependentUpon>DiagnosticsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\Windows\EnumSourceProvider.cs" />
     <Compile Include="UI\Windows\SusExportWindow.xaml.cs">
       <DependentUpon>SusExportWindow.xaml</DependentUpon>
@@ -450,6 +454,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\Windows\CommonStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Windows\DiagnosticsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
