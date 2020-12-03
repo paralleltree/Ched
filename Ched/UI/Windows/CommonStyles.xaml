@@ -7,9 +7,11 @@
     <sys:Double x:Key="ContainerMarginValue">14</sys:Double>
     <Thickness x:Key="WindowContainerMargin" Top="{StaticResource ContainerMarginValue}" Left="{StaticResource ContainerMarginValue}" Right="{StaticResource ContainerMarginValue}" />
     <Thickness x:Key="ContainerMargin" Bottom="{StaticResource ContainerMarginValue}" />
+    <Thickness x:Key="RowMargin" Bottom="5" />
     <Thickness x:Key="ButtonMargin" Left="8" />
 
-    <Style TargetType="Window" x:Key="WindowStyle">
+    <Style TargetType="Window" x:Key="DialogWindowStyle">
+        <Setter Property="ShowInTaskbar" Value="False" />
         <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
     </Style>
 
@@ -17,6 +19,10 @@
         <Setter Property="MinWidth" Value="80px" />
         <Setter Property="Padding" Value="4px" />
         <Setter Property="Margin" Value="{StaticResource ButtonMargin}" />
+    </Style>
+
+    <Style TargetType="TextBox">
+        <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <Style TargetType="local:BindableNumericUpDown">

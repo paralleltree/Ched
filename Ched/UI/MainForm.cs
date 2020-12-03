@@ -17,6 +17,7 @@ using Ched.Localization;
 using Ched.Plugins;
 using Ched.Properties;
 using Ched.UI.Operations;
+using Ched.UI.Windows;
 
 namespace Ched.UI
 {
@@ -240,13 +241,11 @@ namespace Ched.UI
             UpdateThumbHeight();
             SetText(book.Path);
             LastExportData = null;
+            CurrentMusicSource = new SoundSource();
             if (!string.IsNullOrEmpty(book.Path))
             {
-                SoundSettings.Default.ScoreSound.TryGetValue(book.Path, out CurrentMusicSource);
-            }
-            else
-            {
-                CurrentMusicSource = null;
+                SoundSettings.Default.ScoreSound.TryGetValue(book.Path, out SoundSource src);
+                if (src != null) CurrentMusicSource = src;
             }
         }
 
@@ -303,12 +302,10 @@ namespace Ched.UI
             }
             CommitChanges();
             ScoreBook.Save();
-            if (CurrentMusicSource != null)
-            {
-                SoundSettings.Default.ScoreSound[ScoreBook.Path] = CurrentMusicSource;
-                SoundSettings.Default.Save();
-            }
             OperationManager.CommitChanges();
+
+            SoundSettings.Default.ScoreSound[ScoreBook.Path] = CurrentMusicSource;
+            SoundSettings.Default.Save();
         }
 
         protected void ExportFile()
@@ -373,14 +370,12 @@ namespace Ched.UI
 
             var bookPropertiesMenuItem = new MenuItem(MainFormStrings.bookProperty, (s, e) =>
             {
-                var form = new BookPropertiesForm(ScoreBook, CurrentMusicSource);
-                if (form.ShowDialog(this) == DialogResult.OK)
+                var vm = new BookPropertiesWindowViewModel(ScoreBook, CurrentMusicSource);
+                var window = new BookPropertiesWindow()
                 {
-                    CurrentMusicSource = form.MusicSource;
-                    if (string.IsNullOrEmpty(ScoreBook.Path)) return;
-                    SoundSettings.Default.ScoreSound[ScoreBook.Path] = CurrentMusicSource;
-                    SoundSettings.Default.Save();
-                }
+                    DataContext = vm
+                };
+                window.ShowDialog(this);
             });
 
             var fileMenuItems = new MenuItem[]
@@ -604,7 +599,7 @@ namespace Ched.UI
 
             var playItem = new MenuItem(MainFormStrings.Play, (s, e) =>
             {
-                if (CurrentMusicSource == null)
+                if (string.IsNullOrEmpty(CurrentMusicSource?.FilePath))
                 {
                     MessageBox.Show(this, ErrorStrings.MusicSourceNull, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;

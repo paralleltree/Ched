@@ -180,9 +180,13 @@
     <Compile Include="UI\BookPropertiesForm.Designer.cs">
       <DependentUpon>BookPropertiesForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Helpers.cs" />
     <Compile Include="UI\Windows\Behaviors\OpenFileBehavior.cs" />
     <Compile Include="UI\Windows\BindableNumericUpDown.xaml.cs">
       <DependentUpon>BindableNumericUpDown.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Windows\BookPropertiesWindow.xaml.cs">
+      <DependentUpon>BookPropertiesWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\BPMSelectionForm.cs">
       <SubType>Form</SubType>
@@ -467,6 +471,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="UI\Windows\BindableNumericUpDown.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Windows\BookPropertiesWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
