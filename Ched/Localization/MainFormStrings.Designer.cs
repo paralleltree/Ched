@@ -22,7 +22,7 @@ namespace Ched.Localization {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class MainFormStrings {
+    public class MainFormStrings {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Ched.Localization {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Ched.Localization.MainFormStrings", typeof(MainFormStrings).Assembly);
@@ -51,7 +51,7 @@ namespace Ched.Localization {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 最終ノートで停止.
         /// </summary>
-        internal static string AbortAtLastNote {
+        public static string AbortAtLastNote {
             get {
                 return ResourceManager.GetString("AbortAtLastNote", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 振り下げAIR.
         /// </summary>
-        internal static string AirDown {
+        public static string AirDown {
             get {
                 return ResourceManager.GetString("AirDown", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 振り下げ左AIR.
         /// </summary>
-        internal static string AirLeftDown {
+        public static string AirLeftDown {
             get {
                 return ResourceManager.GetString("AirLeftDown", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 振り上げ左AIR.
         /// </summary>
-        internal static string AirLeftUp {
+        public static string AirLeftUp {
             get {
                 return ResourceManager.GetString("AirLeftUp", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 振り下げ右AIR.
         /// </summary>
-        internal static string AirRightDown {
+        public static string AirRightDown {
             get {
                 return ResourceManager.GetString("AirRightDown", resourceCulture);
             }
@@ -108,7 +108,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 振り上げ右AIR.
         /// </summary>
-        internal static string AirRightUp {
+        public static string AirRightUp {
             get {
                 return ResourceManager.GetString("AirRightUp", resourceCulture);
             }
@@ -117,7 +117,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 振り上げAIR.
         /// </summary>
-        internal static string AirUp {
+        public static string AirUp {
             get {
                 return ResourceManager.GetString("AirUp", resourceCulture);
             }
@@ -126,7 +126,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 譜面プロパティ.
         /// </summary>
-        internal static string bookProperty {
+        public static string bookProperty {
             get {
                 return ResourceManager.GetString("bookProperty", resourceCulture);
             }
@@ -135,7 +135,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to コピー.
         /// </summary>
-        internal static string Copy {
+        public static string Copy {
             get {
                 return ResourceManager.GetString("Copy", resourceCulture);
             }
@@ -144,7 +144,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to カスタム.
         /// </summary>
-        internal static string Custom {
+        public static string Custom {
             get {
                 return ResourceManager.GetString("Custom", resourceCulture);
             }
@@ -153,7 +153,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 切り取り.
         /// </summary>
-        internal static string Cut {
+        public static string Cut {
             get {
                 return ResourceManager.GetString("Cut", resourceCulture);
             }
@@ -162,7 +162,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to イベント削除.
         /// </summary>
-        internal static string DeleteEvent {
+        public static string DeleteEvent {
             get {
                 return ResourceManager.GetString("DeleteEvent", resourceCulture);
             }
@@ -171,7 +171,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 分.
         /// </summary>
-        internal static string Division {
+        public static string Division {
             get {
                 return ResourceManager.GetString("Division", resourceCulture);
             }
@@ -180,7 +180,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 編集(&amp;E).
         /// </summary>
-        internal static string EditMenu {
+        public static string EditMenu {
             get {
                 return ResourceManager.GetString("EditMenu", resourceCulture);
             }
@@ -189,7 +189,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 消しゴム.
         /// </summary>
-        internal static string Eraser {
+        public static string Eraser {
             get {
                 return ResourceManager.GetString("Eraser", resourceCulture);
             }
@@ -198,7 +198,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 終了.
         /// </summary>
-        internal static string Exit {
+        public static string Exit {
             get {
                 return ResourceManager.GetString("Exit", resourceCulture);
             }
@@ -207,7 +207,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to エクスポート.
         /// </summary>
-        internal static string Export {
+        public static string Export {
             get {
                 return ResourceManager.GetString("Export", resourceCulture);
             }
@@ -216,7 +216,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to ファイル(&amp;F).
         /// </summary>
-        internal static string FileMenu {
+        public static string FileMenu {
             get {
                 return ResourceManager.GetString("FileMenu", resourceCulture);
             }
@@ -225,7 +225,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 選択範囲内ノーツを反転.
         /// </summary>
-        internal static string FlipSelectedNotes {
+        public static string FlipSelectedNotes {
             get {
                 return ResourceManager.GetString("FlipSelectedNotes", resourceCulture);
             }
@@ -234,7 +234,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to ヘルプを開く.
         /// </summary>
-        internal static string Help {
+        public static string Help {
             get {
                 return ResourceManager.GetString("Help", resourceCulture);
             }
@@ -243,7 +243,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to ヘルプ(&amp;H).
         /// </summary>
-        internal static string HelpMenu {
+        public static string HelpMenu {
             get {
                 return ResourceManager.GetString("HelpMenu", resourceCulture);
             }
@@ -252,7 +252,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to ハイスピード.
         /// </summary>
-        internal static string HighSpeed {
+        public static string HighSpeed {
             get {
                 return ResourceManager.GetString("HighSpeed", resourceCulture);
             }
@@ -261,7 +261,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to インポート.
         /// </summary>
-        internal static string Import {
+        public static string Import {
             get {
                 return ResourceManager.GetString("Import", resourceCulture);
             }
@@ -270,7 +270,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to AIR-ACTIONとAIRを同時に追加する.
         /// </summary>
-        internal static string InsertAirWithAirAction {
+        public static string InsertAirWithAirAction {
             get {
                 return ResourceManager.GetString("InsertAirWithAirAction", resourceCulture);
             }
@@ -279,7 +279,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 挿入(&amp;I).
         /// </summary>
-        internal static string InsertMenu {
+        public static string InsertMenu {
             get {
                 return ResourceManager.GetString("InsertMenu", resourceCulture);
             }
@@ -288,7 +288,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to レーン幅を狭める.
         /// </summary>
-        internal static string NarrowLaneWidth {
+        public static string NarrowLaneWidth {
             get {
                 return ResourceManager.GetString("NarrowLaneWidth", resourceCulture);
             }
@@ -297,7 +297,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 新規作成.
         /// </summary>
-        internal static string NewFile {
+        public static string NewFile {
             get {
                 return ResourceManager.GetString("NewFile", resourceCulture);
             }
@@ -306,7 +306,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 開く.
         /// </summary>
-        internal static string OpenFile {
+        public static string OpenFile {
             get {
                 return ResourceManager.GetString("OpenFile", resourceCulture);
             }
@@ -315,7 +315,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 貼り付け.
         /// </summary>
-        internal static string Paste {
+        public static string Paste {
             get {
                 return ResourceManager.GetString("Paste", resourceCulture);
             }
@@ -324,7 +324,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 反転貼り付け.
         /// </summary>
-        internal static string PasteFlipped {
+        public static string PasteFlipped {
             get {
                 return ResourceManager.GetString("PasteFlipped", resourceCulture);
             }
@@ -333,7 +333,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to ペン.
         /// </summary>
-        internal static string Pen {
+        public static string Pen {
             get {
                 return ResourceManager.GetString("Pen", resourceCulture);
             }
@@ -342,7 +342,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 再生/停止.
         /// </summary>
-        internal static string Play {
+        public static string Play {
             get {
                 return ResourceManager.GetString("Play", resourceCulture);
             }
@@ -351,7 +351,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 再生(&amp;P).
         /// </summary>
-        internal static string PlayMenu {
+        public static string PlayMenu {
             get {
                 return ResourceManager.GetString("PlayMenu", resourceCulture);
             }
@@ -360,7 +360,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to プラグイン.
         /// </summary>
-        internal static string Plugin {
+        public static string Plugin {
             get {
                 return ResourceManager.GetString("Plugin", resourceCulture);
             }
@@ -369,7 +369,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to やり直す.
         /// </summary>
-        internal static string Redo {
+        public static string Redo {
             get {
                 return ResourceManager.GetString("Redo", resourceCulture);
             }
@@ -378,7 +378,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 選択範囲内イベントを削除.
         /// </summary>
-        internal static string RemoveEvents {
+        public static string RemoveEvents {
             get {
                 return ResourceManager.GetString("RemoveEvents", resourceCulture);
             }
@@ -387,7 +387,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 選択範囲内ノーツを削除.
         /// </summary>
-        internal static string RemoveSelectedNotes {
+        public static string RemoveSelectedNotes {
             get {
                 return ResourceManager.GetString("RemoveSelectedNotes", resourceCulture);
             }
@@ -396,7 +396,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 名前を付けて保存.
         /// </summary>
-        internal static string SaveAs {
+        public static string SaveAs {
             get {
                 return ResourceManager.GetString("SaveAs", resourceCulture);
             }
@@ -405,7 +405,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 上書き保存.
         /// </summary>
-        internal static string SaveFile {
+        public static string SaveFile {
             get {
                 return ResourceManager.GetString("SaveFile", resourceCulture);
             }
@@ -414,7 +414,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 譜面プレビュー.
         /// </summary>
-        internal static string ScorePreview {
+        public static string ScorePreview {
             get {
                 return ResourceManager.GetString("ScorePreview", resourceCulture);
             }
@@ -423,7 +423,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to すべて選択.
         /// </summary>
-        internal static string SelectAll {
+        public static string SelectAll {
             get {
                 return ResourceManager.GetString("SelectAll", resourceCulture);
             }
@@ -432,7 +432,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 選択.
         /// </summary>
-        internal static string Selection {
+        public static string Selection {
             get {
                 return ResourceManager.GetString("Selection", resourceCulture);
             }
@@ -441,7 +441,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 最初から現在位置まで選択.
         /// </summary>
-        internal static string SelectToBeginning {
+        public static string SelectToBeginning {
             get {
                 return ResourceManager.GetString("SelectToBeginning", resourceCulture);
             }
@@ -450,7 +450,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 現在位置から最後まで選択.
         /// </summary>
-        internal static string SelectToEnd {
+        public static string SelectToEnd {
             get {
                 return ResourceManager.GetString("SelectToEnd", resourceCulture);
             }
@@ -459,7 +459,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to SLIDE(中継点).
         /// </summary>
-        internal static string SlideStep {
+        public static string SlideStep {
             get {
                 return ResourceManager.GetString("SlideStep", resourceCulture);
             }
@@ -468,7 +468,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 停止.
         /// </summary>
-        internal static string Stop {
+        public static string Stop {
             get {
                 return ResourceManager.GetString("Stop", resourceCulture);
             }
@@ -477,7 +477,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 拍子.
         /// </summary>
-        internal static string TimeSignature {
+        public static string TimeSignature {
             get {
                 return ResourceManager.GetString("TimeSignature", resourceCulture);
             }
@@ -486,7 +486,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 元に戻す.
         /// </summary>
-        internal static string Undo {
+        public static string Undo {
             get {
                 return ResourceManager.GetString("Undo", resourceCulture);
             }
@@ -495,7 +495,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to バージョン情報.
         /// </summary>
-        internal static string VersionInfo {
+        public static string VersionInfo {
             get {
                 return ResourceManager.GetString("VersionInfo", resourceCulture);
             }
@@ -504,7 +504,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 表示(&amp;V).
         /// </summary>
-        internal static string ViewMenu {
+        public static string ViewMenu {
             get {
                 return ResourceManager.GetString("ViewMenu", resourceCulture);
             }
@@ -513,7 +513,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to レーン幅を広げる.
         /// </summary>
-        internal static string WidenLaneWidth {
+        public static string WidenLaneWidth {
             get {
                 return ResourceManager.GetString("WidenLaneWidth", resourceCulture);
             }
@@ -522,7 +522,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 拡大.
         /// </summary>
-        internal static string ZoomIn {
+        public static string ZoomIn {
             get {
                 return ResourceManager.GetString("ZoomIn", resourceCulture);
             }
@@ -531,7 +531,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 縮小.
         /// </summary>
-        internal static string ZoomOut {
+        public static string ZoomOut {
             get {
                 return ResourceManager.GetString("ZoomOut", resourceCulture);
             }

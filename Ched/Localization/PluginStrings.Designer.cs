@@ -19,10 +19,10 @@ namespace Ched.Localization {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class PluginStrings {
+    public class PluginStrings {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Ched.Localization {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Ched.Localization.PluginStrings", typeof(PluginStrings).Assembly);
@@ -51,7 +51,7 @@ namespace Ched.Localization {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to コンボ計算.
         /// </summary>
-        internal static string ComboCalculator {
+        public static string ComboCalculator {
             get {
                 return ResourceManager.GetString("ComboCalculator", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to スライド編み込み.
         /// </summary>
-        internal static string SlideKnitter {
+        public static string SlideKnitter {
             get {
                 return ResourceManager.GetString("SlideKnitter", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to スライド結合.
         /// </summary>
-        internal static string SlideMerger {
+        public static string SlideMerger {
             get {
                 return ResourceManager.GetString("SlideMerger", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to スライド時間軸反転.
         /// </summary>
-        internal static string SlideReverser {
+        public static string SlideReverser {
             get {
                 return ResourceManager.GetString("SlideReverser", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to スライド分割.
         /// </summary>
-        internal static string SlideSplitter {
+        public static string SlideSplitter {
             get {
                 return ResourceManager.GetString("SlideSplitter", resourceCulture);
             }
