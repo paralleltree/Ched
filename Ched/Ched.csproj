@@ -128,6 +128,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\Exporter\IExporter.cs" />
@@ -178,6 +179,9 @@
     </Compile>
     <Compile Include="UI\BookPropertiesForm.Designer.cs">
       <DependentUpon>BookPropertiesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Windows\BindableNumericUpDown.xaml.cs">
+      <DependentUpon>BindableNumericUpDown.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\BPMSelectionForm.cs">
       <SubType>Form</SubType>
@@ -461,6 +465,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="UI\Windows\BindableNumericUpDown.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\Windows\CommonStyles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
