@@ -124,11 +124,47 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to アーティスト.
+        /// </summary>
+        public static string Artist {
+            get {
+                return ResourceManager.GetString("Artist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 基本情報.
+        /// </summary>
+        public static string BasicInformation {
+            get {
+                return ResourceManager.GetString("BasicInformation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 譜面プロパティ.
         /// </summary>
-        public static string bookProperty {
+        public static string BookProperty {
             get {
-                return ResourceManager.GetString("bookProperty", resourceCulture);
+                return ResourceManager.GetString("BookProperty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 参照.
+        /// </summary>
+        public static string Browse {
+            get {
+                return ResourceManager.GetString("Browse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to キャンセル.
+        /// </summary>
+        public static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
             }
         }
         
@@ -286,6 +322,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 音源情報.
+        /// </summary>
+        public static string MusicInformation {
+            get {
+                return ResourceManager.GetString("MusicInformation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to レーン幅を狭める.
         /// </summary>
         public static string NarrowLaneWidth {
@@ -300,6 +345,24 @@ namespace Ched.Localization {
         public static string NewFile {
             get {
                 return ResourceManager.GetString("NewFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ノーツデザイナー.
+        /// </summary>
+        public static string NotesDesigner {
+            get {
+                return ResourceManager.GetString("NotesDesigner", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to オフセット.
+        /// </summary>
+        public static string Offset {
+            get {
+                return ResourceManager.GetString("Offset", resourceCulture);
             }
         }
         
@@ -466,6 +529,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 音源ファイル.
+        /// </summary>
+        public static string SoundFile {
+            get {
+                return ResourceManager.GetString("SoundFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 停止.
         /// </summary>
         public static string Stop {
@@ -480,6 +552,15 @@ namespace Ched.Localization {
         public static string TimeSignature {
             get {
                 return ResourceManager.GetString("TimeSignature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to タイトル.
+        /// </summary>
+        public static string Title {
+            get {
+                return ResourceManager.GetString("Title", resourceCulture);
             }
         }
         

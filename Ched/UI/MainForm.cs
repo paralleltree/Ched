@@ -368,7 +368,7 @@ namespace Ched.UI
                 });
             })).ToArray();
 
-            var bookPropertiesMenuItem = new MenuItem(MainFormStrings.bookProperty, (s, e) =>
+            var bookPropertiesMenuItem = new MenuItem(MainFormStrings.BookProperty, (s, e) =>
             {
                 var vm = new BookPropertiesWindowViewModel(ScoreBook, CurrentMusicSource);
                 var window = new BookPropertiesWindow()

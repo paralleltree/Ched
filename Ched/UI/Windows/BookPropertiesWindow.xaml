@@ -6,9 +6,11 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:b="clr-namespace:Ched.UI.Windows.Behaviors"
         xmlns:local="clr-namespace:Ched.UI.Windows"
+        xmlns:localization="clr-namespace:Ched.Localization"
         ResizeMode="NoResize"
         SizeToContent="Height"
         Width="600"
+        Title="{x:Static localization:MainFormStrings.BookProperty}"
         Style="{DynamicResource DialogWindowStyle}"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:BookPropertiesWindowViewModel}">
@@ -43,7 +45,7 @@
 
     <Grid Margin="{StaticResource WindowContainerMargin}">
         <StackPanel Orientation="Vertical">
-            <GroupBox Header="基本情報" Margin="{StaticResource ContainerMargin}">
+            <GroupBox Header="{x:Static localization:MainFormStrings.BasicInformation}" Margin="{StaticResource ContainerMargin}">
                 <StackPanel Orientation="Vertical" Grid.IsSharedSizeScope="True">
                     <Grid Style="{StaticResource ResourceKey=InputFieldRow}">
                         <Grid.ColumnDefinitions>
@@ -51,7 +53,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Label Grid.Column="0" Content="タイトル" />
+                        <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.Title}" />
                         <TextBox Grid.Column="1" Text="{Binding Title}" />
                     </Grid>
 
@@ -61,7 +63,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Label Grid.Column="0" Content="アーティスト" />
+                        <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.Artist}" />
                         <TextBox Grid.Column="1" Text="{Binding Artist}" />
                     </Grid>
 
@@ -71,15 +73,15 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Label Grid.Column="0" Content="ノーツデザイナー" />
+                        <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.NotesDesigner}" />
                         <TextBox Grid.Column="1" Text="{Binding NotesDesigner}" />
                     </Grid>
                 </StackPanel>
             </GroupBox>
 
-            <GroupBox Header="音源情報" Margin="{StaticResource ContainerMargin}">
+            <GroupBox Header="{x:Static localization:MainFormStrings.MusicInformation}" Margin="{StaticResource ContainerMargin}">
                 <StackPanel Orientation="Vertical" Grid.IsSharedSizeScope="True">
-                    <Label Content="音源ファイル" />
+                    <Label Content="{x:Static localization:MainFormStrings.SoundFile}" />
                     <Grid Margin="{StaticResource RowMargin}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -87,7 +89,7 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBox Grid.Column="0" Text="{Binding MusicSourcePath}" VerticalContentAlignment="Center" />
-                        <Button Grid.Column="1" Content="参照">
+                        <Button Grid.Column="1" Content="{x:Static localization:MainFormStrings.Browse}">
                             <i:Interaction.Behaviors>
                                 <b:OpenFileBehavior Filter="{Binding SoundSourceFilter}" CallbackAction="{Binding SetMusicSourceFileAction}" />
                             </i:Interaction.Behaviors>
@@ -100,7 +102,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <Label Grid.Column="0" Content="オフセット" />
+                        <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.Offset}" />
                         <local:BindableNumericUpDown Grid.Column="1" Value="{Binding MusicSourceLatency}" DecimalPlaces="3" Minimum="-100" Maximum="100" Increment="0.01" />
                         <Label Grid.Column="2" Content="[s]" />
                     </Grid>
@@ -117,7 +119,7 @@
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </Button>
-                <Button Content="Cancel" IsCancel="True">
+                <Button Content="{x:Static localization:MainFormStrings.Cancel}" IsCancel="True">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
                             <i:ChangePropertyAction TargetObject="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" PropertyName="DialogResult" Value="False" />
