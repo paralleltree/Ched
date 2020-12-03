@@ -77,5 +77,14 @@ namespace Ched.Localization {
                 return ResourceManager.GetString("ChedFilter", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 画像ファイル.
+        /// </summary>
+        public static string ImageFilter {
+            get {
+                return ResourceManager.GetString("ImageFilter", resourceCulture);
+            }
+        }
     }
 }

@@ -254,6 +254,10 @@
     <Compile Include="UI\VersionInfoForm.Designer.cs">
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Windows\EnumSourceProvider.cs" />
+    <Compile Include="UI\Windows\SusExportWindow.xaml.cs">
+      <DependentUpon>SusExportWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\Windows\WpfExtensions.cs" />
     <EmbeddedResource Include="Localization\ErrorStrings.en.resx" />
     <EmbeddedResource Include="Localization\ErrorStrings.resx">
@@ -455,6 +459,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\Windows\CommonStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Windows\SusExportWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

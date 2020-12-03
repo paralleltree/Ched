@@ -311,10 +311,22 @@ namespace Ched.UI
         protected void ExportFile()
         {
             CommitChanges();
-            var dialog = new ExportForm(ScoreBook);
-            if (dialog.ShowDialog(this) == DialogResult.OK)
+            var dialog = new SaveFileDialog()
             {
-                LastExportData = new ExportData() { OutputPath = dialog.OutputPath, Exporter = dialog.Exporter };
+                Title = MainFormStrings.Export,
+                Filter = "Sliding Universal Score(*.sus)|*.sus"
+            };
+            if (dialog.ShowDialog(this) != DialogResult.OK) return;
+            var susArgs = ScoreBook.ExporterArgs.ContainsKey("sus") ? ScoreBook.ExporterArgs["sus"] as Components.Exporter.SusArgs : new Components.Exporter.SusArgs();
+            var vm = new SusExportWindowViewModel(ScoreBook, susArgs);
+            var window = new SusExportWindow() { DataContext = vm };
+            var result = window.ShowDialog(this);
+            if (result.HasValue && result.Value)
+            {
+                var exporter = new Components.Exporter.SusExporter() { CustomArgs = susArgs };
+                exporter.Export(dialog.FileName, ScoreBook);
+                ScoreBook.ExporterArgs["sus"] = susArgs;
+                LastExportData = new ExportData() { OutputPath = dialog.FileName, Exporter = exporter };
             }
         }
 

@@ -1,0 +1,191 @@
+﻿<Window x:Class="Ched.UI.Windows.SusExportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:b="clr-namespace:Ched.UI.Windows.Behaviors"
+        xmlns:local="clr-namespace:Ched.UI.Windows"
+        xmlns:localization="clr-namespace:Ched.Localization"
+        ResizeMode="NoResize"
+        SizeToContent="Height"
+        Width="600"
+        Title="{x:Static localization:MainFormStrings.Export}"
+        Style="{DynamicResource DialogWindowStyle}"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance local:SusExportWindowViewModel}">
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="ContentRendered">
+            <i:CallMethodAction TargetObject="{Binding}" MethodName="BeginEdit" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CommonStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="InputFieldRow" TargetType="Grid">
+                <Setter Property="Margin" Value="{StaticResource RowMargin}" />
+                <Style.Resources>
+                    <Style TargetType="Label">
+                        <Setter Property="HorizontalAlignment" Value="Right" />
+                        <Setter Property="Margin" Value="0,0,8px,0" />
+                    </Style>
+                </Style.Resources>
+            </Style>
+
+            <Style TargetType="ComboBox">
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+
+            <sys:Double x:Key="SelectionBoxWidth">140</sys:Double>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="{StaticResource WindowContainerMargin}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Margin="{StaticResource ContainerMargin}" Grid.IsSharedSizeScope="True">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Vertical">
+                <Grid Style="{StaticResource InputFieldRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.Title}" />
+                    <TextBox Grid.Column="1" IsReadOnly="True" Text="{Binding Title, Mode=OneWay}" />
+                </Grid>
+
+                <Grid Style="{StaticResource InputFieldRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.Artist}" />
+                    <TextBox Grid.Column="1" IsReadOnly="True" Text="{Binding Artist, Mode=OneWay}" />
+                </Grid>
+
+                <Grid Style="{StaticResource InputFieldRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.NotesDesigner}" />
+                    <TextBox Grid.Column="1" IsReadOnly="True" Text="{Binding NotesDesigner, Mode=OneWay}" />
+                </Grid>
+
+                <Grid Style="{StaticResource InputFieldRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.Difficulty}" />
+                    <ComboBox Grid.Column="1" Width="{StaticResource SelectionBoxWidth}" HorizontalAlignment="Left"
+                              SelectedValuePath="Code" DisplayMemberPath="Name"
+                              SelectedValue="{Binding Difficulty}"
+                              ItemsSource="{Binding Source, Source={local:SusDifficultySourceProvider}}"/>
+                </Grid>
+
+                <Grid Style="{StaticResource InputFieldRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.Level}" />
+                    <ComboBox Grid.Column="1" IsEditable="True" Width="{StaticResource SelectionBoxWidth}" HorizontalAlignment="Left"
+                              Text="{Binding Level}" ItemsSource="{Binding Levels}" />
+                </Grid>
+
+                <Grid Style="{StaticResource InputFieldRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="SONGID" />
+                    <TextBox Grid.Column="1" Text="{Binding SongId}" />
+                </Grid>
+
+                <Grid Style="{StaticResource InputFieldRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.SoundFile}" />
+                    <TextBox Grid.Column="1" Text="{Binding SoundFileName}" />
+                    <Button Grid.Column="2" Content="{x:Static localization:MainFormStrings.Browse}">
+                        <i:Interaction.Behaviors>
+                            <b:OpenFileBehavior Filter="{Binding MusicFilter}" CallbackAction="{Binding SetSoundFileNameAction}" />
+                        </i:Interaction.Behaviors>
+                    </Button>
+                </Grid>
+
+                <Grid Style="{StaticResource InputFieldRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.Offset}" />
+                    <local:BindableNumericUpDown Grid.Column="1" Minimum="-100" Maximum="100" Increment="0.01" DecimalPlaces="3" Value="{Binding SoundOffset}" HorizontalAlignment="Left" />
+                    <Label Grid.Column="2" Content="[s]" />
+                </Grid>
+
+                <Grid Style="{StaticResource InputFieldRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.JacketFile}" />
+                    <TextBox Grid.Column="1" Text="{Binding JacketFileName}" />
+                    <Button Grid.Column="2" Content="{x:Static localization:MainFormStrings.Browse}">
+                        <i:Interaction.Behaviors>
+                            <b:OpenFileBehavior Filter="{Binding ImageFilter}" CallbackAction="{Binding SetJacketFileNameAction}" />
+                        </i:Interaction.Behaviors>
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="{StaticResource ContainerMargin}" HorizontalAlignment="Right">
+            <Button Content="OK" IsDefault="True">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <i:CallMethodAction TargetObject="{Binding}" MethodName="CommitEdit" />
+                        <i:ChangePropertyAction TargetObject="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" PropertyName="DialogResult" Value="True" />
+                        <i:CallMethodAction TargetObject="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" MethodName="Close" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+            <Button Content="{x:Static localization:MainFormStrings.Cancel}" IsCancel="True">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <i:ChangePropertyAction TargetObject="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" PropertyName="DialogResult" Value="False" />
+                        <i:CallMethodAction TargetObject="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" MethodName="Close" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

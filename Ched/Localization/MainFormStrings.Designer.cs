@@ -205,6 +205,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 難易度.
+        /// </summary>
+        public static string Difficulty {
+            get {
+                return ResourceManager.GetString("Difficulty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 分.
         /// </summary>
         public static string Division {
@@ -318,6 +327,24 @@ namespace Ched.Localization {
         public static string InsertMenu {
             get {
                 return ResourceManager.GetString("InsertMenu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ジャケットファイル.
+        /// </summary>
+        public static string JacketFile {
+            get {
+                return ResourceManager.GetString("JacketFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to レベル.
+        /// </summary>
+        public static string Level {
+            get {
+                return ResourceManager.GetString("Level", resourceCulture);
             }
         }
         

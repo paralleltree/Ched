@@ -23,6 +23,16 @@
 
     <Style TargetType="TextBox">
         <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Style.Triggers>
+            <Trigger Property="IsReadOnly" Value="True">
+                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}" />
+            </Trigger>
+            <Trigger Property="AcceptsReturn" Value="True">
+                <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+                <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+                <Setter Property="VerticalContentAlignment" Value="Top" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="local:BindableNumericUpDown">
