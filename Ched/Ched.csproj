@@ -174,12 +174,6 @@
     <Compile Include="Plugins\SlideMerger.cs" />
     <Compile Include="Plugins\SlideReverser.cs" />
     <Compile Include="Plugins\SlideSplitter.cs" />
-    <Compile Include="UI\BookPropertiesForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\BookPropertiesForm.Designer.cs">
-      <DependentUpon>BookPropertiesForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="UI\Helpers.cs" />
     <Compile Include="UI\Windows\Behaviors\OpenFileBehavior.cs" />
     <Compile Include="UI\Windows\BindableNumericUpDown.xaml.cs">
@@ -248,12 +242,6 @@
     </Compile>
     <Compile Include="UI\SoundManager.cs" />
     <Compile Include="UI\SoundPreviewManager.cs" />
-    <Compile Include="UI\SoundSourceSelector.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\SoundSourceSelector.Designer.cs">
-      <DependentUpon>SoundSourceSelector.cs</DependentUpon>
-    </Compile>
     <Compile Include="UI\TimeSignatureSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -303,12 +291,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UI\BookPropertiesForm.en.resx">
-      <DependentUpon>BookPropertiesForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\BookPropertiesForm.resx">
-      <DependentUpon>BookPropertiesForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UI\BPMSelectionForm.en.resx">
       <DependentUpon>BPMSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -338,12 +320,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\ShiftTimeSelectionForm.resx">
       <DependentUpon>ShiftTimeSelectionForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\SoundSourceSelector.en.resx">
-      <DependentUpon>SoundSourceSelector.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\SoundSourceSelector.resx">
-      <DependentUpon>SoundSourceSelector.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\TimeSignatureSelectionForm.en.resx">
       <DependentUpon>TimeSignatureSelectionForm.cs</DependentUpon>
