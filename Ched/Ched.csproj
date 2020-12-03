@@ -180,6 +180,7 @@
     <Compile Include="UI\BookPropertiesForm.Designer.cs">
       <DependentUpon>BookPropertiesForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Windows\Behaviors\OpenFileBehavior.cs" />
     <Compile Include="UI\Windows\BindableNumericUpDown.xaml.cs">
       <DependentUpon>BindableNumericUpDown.xaml</DependentUpon>
     </Compile>
