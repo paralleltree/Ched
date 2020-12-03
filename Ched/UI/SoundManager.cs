@@ -142,13 +142,19 @@ namespace Ched.UI
     [Serializable]
     public class SoundSource
     {
+        public static readonly IReadOnlyCollection<string> SupportedExtensions = new string[] { ".wav", ".mp3", ".ogg" };
+
         /// <summary>
         /// この音源における遅延時間を取得します。
         /// この値は、タイミングよく音声が出力されるまでの秒数です。
         /// </summary>
-        public double Latency { get; }
+        public double Latency { get; set; }
 
-        public string FilePath { get; }
+        public string FilePath { get; set; }
+
+        public SoundSource()
+        {
+        }
 
         public SoundSource(string path, double latency)
         {
