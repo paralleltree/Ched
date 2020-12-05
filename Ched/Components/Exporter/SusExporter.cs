@@ -42,6 +42,10 @@ namespace Ched.Components.Exporter
 
                 writer.WriteLine();
 
+                writer.WriteLine(args.AdditionalData);
+
+                writer.WriteLine();
+
                 writer.WriteLine("#REQUEST \"ticks_per_beat {0}\"", book.Score.TicksPerBeat);
 
                 writer.WriteLine();
@@ -441,6 +445,8 @@ namespace Ched.Components.Exporter
         private string jacketFilePath;
         [Newtonsoft.Json.JsonProperty]
         private bool hasPaddingBar;
+        [Newtonsoft.Json.JsonProperty]
+        private string additionalData;
 
         public string PlayLevel
         {
@@ -482,6 +488,12 @@ namespace Ched.Components.Exporter
         {
             get { return jacketFilePath; }
             set { jacketFilePath = value; }
+        }
+
+        public string AdditionalData
+        {
+            get => additionalData;
+            set => additionalData = value;
         }
 
         public enum Difficulty
