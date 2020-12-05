@@ -198,12 +198,6 @@
     <Compile Include="UI\CustomQuantizeSelectionForm.Designer.cs">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\ExportForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\ExportForm.Designer.cs">
-      <DependentUpon>ExportForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="UI\FormExtensions.cs" />
     <Compile Include="UI\GraphicsExtensions.cs" />
     <Compile Include="UI\HighSpeedSelectionForm.cs">
@@ -306,12 +300,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\CustomQuantizeSelectionForm.resx">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\ExportForm.en.resx">
-      <DependentUpon>ExportForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\ExportForm.resx">
-      <DependentUpon>ExportForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\HighSpeedSelectionForm.en.resx">
       <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
