@@ -167,6 +167,7 @@
       <DependentUpon>PluginStrings.resx</DependentUpon>
     </Compile>
     <Compile Include="Plugins\ComboCalculator.cs" />
+    <Compile Include="Plugins\ExportManager.cs" />
     <Compile Include="Plugins\PluginManager.cs" />
     <Compile Include="Plugins\ScoreBookExportPluginArgs.cs" />
     <Compile Include="Plugins\ScoreBookImportPluginArgs.cs" />
