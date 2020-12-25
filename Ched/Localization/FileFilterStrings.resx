@@ -123,4 +123,7 @@
   <data name="ChedFilter" xml:space="preserve">
     <value>Ched専用形式</value>
   </data>
+  <data name="ImageFilter" xml:space="preserve">
+    <value>画像ファイル</value>
+  </data>
 </root>

@@ -22,7 +22,7 @@ namespace Ched.Localization {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class ErrorStrings {
+    public class ErrorStrings {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Ched.Localization {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Ched.Localization.ErrorStrings", typeof(ErrorStrings).Assembly);
@@ -51,7 +51,7 @@ namespace Ched.Localization {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to エクスポートに失敗しました。.
         /// </summary>
-        internal static string ExportFailed {
+        public static string ExportFailed {
             get {
                 return ResourceManager.GetString("ExportFailed", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 編集中のデータは破棄されますがよろしいですか？.
         /// </summary>
-        internal static string FileDiscardConfirmation {
+        public static string FileDiscardConfirmation {
             get {
                 return ResourceManager.GetString("FileDiscardConfirmation", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to ファイルの読み込み中にエラーが発生しました。.
         /// </summary>
-        internal static string FileLoadError {
+        public static string FileLoadError {
             get {
                 return ResourceManager.GetString("FileLoadError", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to ファイルにアクセスできません。.
         /// </summary>
-        internal static string FileNotAccessible {
+        public static string FileNotAccessible {
             get {
                 return ResourceManager.GetString("FileNotAccessible", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 現在のバージョンでは開けないファイルです。.
         /// </summary>
-        internal static string FileNotCompatible {
+        public static string FileNotCompatible {
             get {
                 return ResourceManager.GetString("FileNotCompatible", resourceCulture);
             }
@@ -110,7 +110,7 @@ namespace Ched.Localization {
         ///バージョンアップしてよろしいですか？
         ///(以前のバージョンでは開けなくなります。).
         /// </summary>
-        internal static string FileUpgradeNeeded {
+        public static string FileUpgradeNeeded {
             get {
                 return ResourceManager.GetString("FileUpgradeNeeded", resourceCulture);
             }
@@ -119,7 +119,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to インポートに失敗しました。.
         /// </summary>
-        internal static string ImportFailed {
+        public static string ImportFailed {
             get {
                 return ResourceManager.GetString("ImportFailed", resourceCulture);
             }
@@ -128,7 +128,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 拍子定義が無効です。イベントが小節の先頭に配置されていることを確認してください。(場所: 第{0}拍付近).
         /// </summary>
-        internal static string InvalidTimeSignature {
+        public static string InvalidTimeSignature {
             get {
                 return ResourceManager.GetString("InvalidTimeSignature", resourceCulture);
             }
@@ -137,7 +137,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 譜面プロパティから音源ファイルを指定してください。.
         /// </summary>
-        internal static string MusicSourceNull {
+        public static string MusicSourceNull {
             get {
                 return ResourceManager.GetString("MusicSourceNull", resourceCulture);
             }
@@ -146,7 +146,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 出力先を指定してください。.
         /// </summary>
-        internal static string OutputPathRequired {
+        public static string OutputPathRequired {
             get {
                 return ResourceManager.GetString("OutputPathRequired", resourceCulture);
             }
@@ -155,7 +155,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to プラグインの実行中にエラーが発生しました。.
         /// </summary>
-        internal static string PluginException {
+        public static string PluginException {
             get {
                 return ResourceManager.GetString("PluginException", resourceCulture);
             }
@@ -164,7 +164,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 以下のプラグインの読み込みに失敗しました。DLLファイルがブロックされている可能性があります。.
         /// </summary>
-        internal static string PluginLoadError {
+        public static string PluginLoadError {
             get {
                 return ResourceManager.GetString("PluginLoadError", resourceCulture);
             }
@@ -173,7 +173,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to プレビュー中にエラーが発生しました。.
         /// </summary>
-        internal static string PreviewException {
+        public static string PreviewException {
             get {
                 return ResourceManager.GetString("PreviewException", resourceCulture);
             }
@@ -182,7 +182,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 簡易プレビューが利用できない環境です。.
         /// </summary>
-        internal static string PreviewNotSupported {
+        public static string PreviewNotSupported {
             get {
                 return ResourceManager.GetString("PreviewNotSupported", resourceCulture);
             }
@@ -191,7 +191,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 再エクスポートが完了しました。.
         /// </summary>
-        internal static string ReExportComplete {
+        public static string ReExportComplete {
             get {
                 return ResourceManager.GetString("ReExportComplete", resourceCulture);
             }
@@ -200,7 +200,7 @@ namespace Ched.Localization {
         /// <summary>
         ///   Looks up a localized string similar to 音源ファイルが見つかりません。.
         /// </summary>
-        internal static string SourceFileNotFound {
+        public static string SourceFileNotFound {
             get {
                 return ResourceManager.GetString("SourceFileNotFound", resourceCulture);
             }

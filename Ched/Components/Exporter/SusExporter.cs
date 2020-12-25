@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.IO;
 using System.Text;
@@ -38,6 +39,10 @@ namespace Ched.Components.Exporter
                 writer.WriteLine("#WAVE \"{0}\"", args.SoundFileName);
                 writer.WriteLine("#WAVEOFFSET {0}", args.SoundOffset);
                 writer.WriteLine("#JACKET \"{0}\"", args.JacketFilePath);
+
+                writer.WriteLine();
+
+                writer.WriteLine(args.AdditionalData);
 
                 writer.WriteLine();
 
@@ -440,6 +445,8 @@ namespace Ched.Components.Exporter
         private string jacketFilePath;
         [Newtonsoft.Json.JsonProperty]
         private bool hasPaddingBar;
+        [Newtonsoft.Json.JsonProperty]
+        private string additionalData;
 
         public string PlayLevel
         {
@@ -483,12 +490,23 @@ namespace Ched.Components.Exporter
             set { jacketFilePath = value; }
         }
 
+        public string AdditionalData
+        {
+            get => additionalData;
+            set => additionalData = value;
+        }
+
         public enum Difficulty
         {
+            [Description("BASIC")]
             Basic,
+            [Description("ADVANCED")]
             Advanced,
+            [Description("EXPERT")]
             Expert,
+            [Description("MASTER")]
             Master,
+            [Description("WORLD'S END")]
             WorldsEnd
         }
     }
