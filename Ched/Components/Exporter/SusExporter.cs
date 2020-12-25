@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.IO;
 using System.Text;
@@ -485,10 +486,15 @@ namespace Ched.Components.Exporter
 
         public enum Difficulty
         {
+            [Description("BASIC")]
             Basic,
+            [Description("ADVANCED")]
             Advanced,
+            [Description("EXPERT")]
             Expert,
+            [Description("MASTER")]
             Master,
+            [Description("WORLD'S END")]
             WorldsEnd
         }
     }

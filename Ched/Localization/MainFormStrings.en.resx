@@ -120,7 +120,7 @@
   <data name="AbortAtLastNote" xml:space="preserve">
     <value>Stop At Last Note</value>
   </data>
-  <data name="bookProperty" xml:space="preserve">
+  <data name="BookProperty" xml:space="preserve">
     <value>Score Properties</value>
   </data>
   <data name="Copy" xml:space="preserve">
@@ -275,5 +275,41 @@
   </data>
   <data name="SelectToEnd" xml:space="preserve">
     <value>Select to End</value>
+  </data>
+  <data name="Artist" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="BasicInformation" xml:space="preserve">
+    <value>Basic Information</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="MusicInformation" xml:space="preserve">
+    <value>Music Information</value>
+  </data>
+  <data name="NotesDesigner" xml:space="preserve">
+    <value>Note Designer</value>
+  </data>
+  <data name="Offset" xml:space="preserve">
+    <value>Offset</value>
+  </data>
+  <data name="SoundFile" xml:space="preserve">
+    <value>Sound File</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="Difficulty" xml:space="preserve">
+    <value>Difficulty</value>
+  </data>
+  <data name="JacketFile" xml:space="preserve">
+    <value>Jacket File</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>Level</value>
   </data>
 </root>

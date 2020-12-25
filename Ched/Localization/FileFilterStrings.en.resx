@@ -123,4 +123,7 @@
   <data name="ChedFilter" xml:space="preserve">
     <value>Ched File Format</value>
   </data>
+  <data name="ImageFilter" xml:space="preserve">
+    <value>Image File</value>
+  </data>
 </root>
