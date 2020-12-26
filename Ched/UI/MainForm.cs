@@ -91,7 +91,7 @@ namespace Ched.UI
                 InsertAirWithAirAction = ApplicationSettings.Default.InsertAirWithAirAction
             };
 
-            PreviewManager = new SoundPreviewManager(NoteView);
+            PreviewManager = new SoundPreviewManager(this);
             PreviewManager.IsStopAtLastNote = ApplicationSettings.Default.IsPreviewAbortAtLastNote;
             PreviewManager.TickUpdated += (s, e) => NoteView.CurrentTick = e.Tick;
             PreviewManager.ExceptionThrown += (s, e) => MessageBox.Show(this, ErrorStrings.PreviewException, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -708,7 +708,8 @@ namespace Ched.UI
 
                 try
                 {
-                    if (!PreviewManager.Start(CurrentMusicSource, startTick)) return;
+                    var context = new SoundPreviewContext(ScoreBook.Score, CurrentMusicSource);
+                    if (!PreviewManager.Start(context, startTick)) return;
                     isAbortAtLastNoteItem.Enabled = false;
                     PreviewManager.Finished += lambda;
                     noteView.Editable = CanEdit;
