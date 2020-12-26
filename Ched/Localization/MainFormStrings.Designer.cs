@@ -70,6 +70,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 自由記述欄.
+        /// </summary>
+        public static string AdditionalData {
+            get {
+                return ResourceManager.GetString("AdditionalData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 振り下げAIR.
         /// </summary>
         public static string AirDown {

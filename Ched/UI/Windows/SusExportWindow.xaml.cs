@@ -110,6 +110,18 @@ namespace Ched.UI.Windows
             }
         }
 
+        private string additionalData;
+        public string AdditionalData
+        {
+            get => additionalData;
+            set
+            {
+                if (value == additionalData) return;
+                additionalData = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AdditionalData)));
+            }
+        }
+
         public Action<string> SetSoundFileNameAction => path => SoundFileName = System.IO.Path.GetFileName(path);
         public Action<string> SetJacketFileNameAction => path => JacketFileName = System.IO.Path.GetFileName(path);
 
@@ -131,6 +143,7 @@ namespace Ched.UI.Windows
             SoundFileName = SusArgs.SoundFileName;
             SoundOffset = (double)SusArgs.SoundOffset;
             JacketFileName = SusArgs.JacketFilePath;
+            AdditionalData = SusArgs.AdditionalData;
         }
 
         public void CommitEdit()
@@ -141,6 +154,7 @@ namespace Ched.UI.Windows
             SusArgs.SoundFileName = SoundFileName;
             SusArgs.SoundOffset = (decimal)SoundOffset;
             SusArgs.JacketFilePath = JacketFileName;
+            SusArgs.AdditionalData = AdditionalData;
         }
     }
 
