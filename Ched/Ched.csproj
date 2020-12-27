@@ -201,7 +201,6 @@
     <Compile Include="UI\CustomQuantizeSelectionForm.Designer.cs">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\FormExtensions.cs" />
     <Compile Include="UI\GraphicsExtensions.cs" />
     <Compile Include="UI\HighSpeedSelectionForm.cs">
       <SubType>Form</SubType>
