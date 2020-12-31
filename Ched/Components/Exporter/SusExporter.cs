@@ -45,9 +45,11 @@ namespace Ched.Components.Exporter
                 writer.WriteLine("#JACKET \"{0}\"", args.JacketFilePath);
                 writer.WriteLine();
 
-                writer.WriteLine(args.AdditionalData);
-
-                writer.WriteLine();
+                if (!string.IsNullOrEmpty(args.AdditionalData))
+                {
+                    writer.WriteLine(args.AdditionalData);
+                    writer.WriteLine();
+                }
 
                 writer.WriteLine("#REQUEST \"ticks_per_beat {0}\"", book.Score.TicksPerBeat);
                 writer.WriteLine();
