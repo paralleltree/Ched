@@ -61,6 +61,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to エクスポートが完了しました。.
+        /// </summary>
+        public static string ExportComplete {
+            get {
+                return ResourceManager.GetString("ExportComplete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to エクスポートに失敗しました。.
         /// </summary>
         public static string ExportFailed {
@@ -185,15 +194,6 @@ namespace Ched.Localization {
         public static string PreviewNotSupported {
             get {
                 return ResourceManager.GetString("PreviewNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 再エクスポートが完了しました。.
-        /// </summary>
-        public static string ReExportComplete {
-            get {
-                return ResourceManager.GetString("ReExportComplete", resourceCulture);
             }
         }
         

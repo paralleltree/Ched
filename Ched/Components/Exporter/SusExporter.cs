@@ -6,13 +6,10 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 using ConcurrentPriorityQueue;
 using Ched.Core;
 using Ched.Core.Notes;
-using Ched.Core.Events;
-using Ched.Localization;
 
 namespace Ched.Components.Exporter
 {
@@ -20,11 +17,20 @@ namespace Ched.Components.Exporter
     {
         public string FormatName => "Sliding Universal Score(sus形式)";
 
+        protected ScoreBook ScoreBook { get; set; }
+        protected BarIndexCalculator BarIndexCalculator { get; set; }
+        protected int StandardBarTick => ScoreBook.Score.TicksPerBeat * 4;
+        protected int BarIndexOffset { get; set; } = 0;
         public SusArgs CustomArgs { get; set; }
 
         public void Export(string path, ScoreBook book)
         {
+            // TODO: コンストラクタに移してreadonlyにする
+            ScoreBook = book;
+            BarIndexCalculator = new BarIndexCalculator(book.Score.TicksPerBeat, book.Score.Events.TimeSignatureChangeEvents);
+
             SusArgs args = CustomArgs;
+            BarIndexOffset = args.HasPaddingBar ? 1 : 0;
             var notes = book.Score.Notes;
             using (var writer = new StreamWriter(path))
             {
@@ -39,40 +45,24 @@ namespace Ched.Components.Exporter
                 writer.WriteLine("#WAVE \"{0}\"", args.SoundFileName);
                 writer.WriteLine("#WAVEOFFSET {0}", args.SoundOffset);
                 writer.WriteLine("#JACKET \"{0}\"", args.JacketFilePath);
-
                 writer.WriteLine();
 
-                writer.WriteLine(args.AdditionalData);
-
-                writer.WriteLine();
+                if (!string.IsNullOrEmpty(args.AdditionalData))
+                {
+                    writer.WriteLine(args.AdditionalData);
+                    writer.WriteLine();
+                }
 
                 writer.WriteLine("#REQUEST \"ticks_per_beat {0}\"", book.Score.TicksPerBeat);
-
                 writer.WriteLine();
 
-                int barTick = book.Score.TicksPerBeat * 4;
-                BarIndexCalculator barIndexCalculator = null;
-                try
-                {
-                    barIndexCalculator = new BarIndexCalculator(book.Score.TicksPerBeat, book.Score.Events.TimeSignatureChangeEvents);
-                }
-                catch (InvalidTimeSignatureException ex)
-                {
-                    int beatAt = ex.Tick / book.Score.TicksPerBeat + 1;
-                    MessageBox.Show(string.Format(ErrorStrings.InvalidTimeSignature, beatAt), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                foreach (var item in barIndexCalculator.TimeSignatures)
-                {
-                    writer.WriteLine("#{0:000}02: {1}", item.StartBarIndex, 4f * item.TimeSignature.Numerator / item.TimeSignature.Denominator);
-                }
-
+                var timeSignatures = BarIndexCalculator.TimeSignatures.Select(p => new SusDataLine(p.StartBarIndex, barIndex => string.Format("#{0:000}02: {1}", barIndex, 4f * p.TimeSignature.Numerator / p.TimeSignature.Denominator), p.StartBarIndex == 0));
+                WriteLinesWithOffset(writer, timeSignatures);
                 writer.WriteLine();
 
                 var bpmlist = book.Score.Events.BPMChangeEvents
                     .GroupBy(p => p.BPM)
-                    .SelectMany((p, i) => p.Select(q => new { Index = i, Value = q, BarPosition = barIndexCalculator.GetBarPositionFromTick(q.Tick) }))
+                    .SelectMany((p, i) => p.Select(q => new { Index = i, Value = q, BarPosition = BarIndexCalculator.GetBarPositionFromTick(q.Tick) }))
                     .ToList();
 
                 if (bpmlist.Count >= 36 * 36) throw new ArgumentException("BPM定義数が上限を超えました。");
@@ -83,68 +73,34 @@ namespace Ched.Components.Exporter
                     writer.WriteLine("#BPM{0}: {1}", bpmIdentifiers[item.Index], item.Value.BPM);
                 }
 
-                foreach (var eventInBar in bpmlist.GroupBy(p => p.BarPosition.BarIndex))
+                // 小節オフセット追加用に初期BPM定義だけ1行に分離
+                var bpmChanges = bpmlist.GroupBy(p => p.Value.Tick == 0).SelectMany(p => p.GroupBy(q => q.BarPosition.BarIndex).Select(eventInBar =>
                 {
-                    var sig = barIndexCalculator.GetTimeSignatureFromBarIndex(eventInBar.Key);
-                    int barLength = barTick * sig.Numerator / sig.Denominator;
-                    var dic = eventInBar.ToDictionary(p => p.BarPosition.TickOffset, p => p);
-                    int gcd = eventInBar.Select(p => p.BarPosition.TickOffset).Aggregate(barLength, (p, q) => GetGcd(p, q));
-                    writer.Write("#{0:000}08: ", eventInBar.Key);
-                    for (int i = 0; i * gcd < barLength; i++)
-                    {
-                        int tickOffset = i * gcd;
-                        writer.Write(dic.ContainsKey(tickOffset) ? bpmIdentifiers[dic[tickOffset].Index] : "00");
-                    }
-                    writer.WriteLine();
-                }
-
+                    var sig = BarIndexCalculator.GetTimeSignatureFromBarIndex(eventInBar.Key);
+                    int barLength = StandardBarTick * sig.Numerator / sig.Denominator;
+                    var items = eventInBar.Select(q => (q.BarPosition.TickOffset, bpmIdentifiers[q.Index]));
+                    return new SusDataLine(eventInBar.Key, barIndex => string.Format("#{0:000}08: {1}", barIndex, GenerateLineData(barLength, items)), p.Key);
+                }));
+                WriteLinesWithOffset(writer, bpmChanges);
                 writer.WriteLine();
+
                 var speeds = book.Score.Events.HighSpeedChangeEvents.Select(p =>
                 {
-                    var barPos = barIndexCalculator.GetBarPositionFromTick(p.Tick);
-                    return string.Format("{0}'{1}:{2}", barPos.BarIndex, barPos.TickOffset, p.SpeedRatio);
+                    var barPos = BarIndexCalculator.GetBarPositionFromTick(p.Tick);
+                    return string.Format("{0}'{1}:{2}", barPos.BarIndex + (p.Tick == 0 ? 0 : BarIndexOffset), barPos.TickOffset, p.SpeedRatio);
                 });
                 writer.WriteLine("#TIL00: \"{0}\"", string.Join(", ", speeds));
                 writer.WriteLine("#HISPEED 00");
                 writer.WriteLine("#MEASUREHS 00");
-
                 writer.WriteLine();
 
                 var shortNotes = notes.Taps.Cast<TappableBase>().Select(p => new { Type = '1', Note = p })
                     .Concat(notes.ExTaps.Cast<TappableBase>().Select(p => new { Type = '2', Note = p }))
                     .Concat(notes.Flicks.Cast<TappableBase>().Select(p => new { Type = '3', Note = p }))
                     .Concat(notes.Damages.Cast<TappableBase>().Select(p => new { Type = '4', Note = p }))
-                    .Select(p => new
-                    {
-                        BarPosition = barIndexCalculator.GetBarPositionFromTick(p.Note.Tick),
-                        LaneIndex = p.Note.LaneIndex,
-                        Width = p.Note.Width,
-                        Type = p.Type
-                    });
-
-                foreach (var notesInBar in shortNotes.GroupBy(p => p.BarPosition.BarIndex))
-                {
-                    foreach (var notesInLane in notesInBar.GroupBy(p => p.LaneIndex))
-                    {
-                        var sig = barIndexCalculator.GetTimeSignatureFromBarIndex(notesInBar.Key);
-                        int barLength = barTick * sig.Numerator / sig.Denominator;
-
-                        var offsetList = notesInLane.GroupBy(p => p.BarPosition.TickOffset).Select(p => p.ToList());
-                        var separatedNotes = Enumerable.Range(0, offsetList.Max(p => p.Count)).Select(p => offsetList.Where(q => q.Count >= p + 1).Select(q => q[p]));
-
-                        foreach (var dic in separatedNotes.Select(p => p.ToDictionary(q => q.BarPosition.TickOffset, q => q)))
-                        {
-                            int gcd = dic.Values.Select(p => p.BarPosition.TickOffset).Aggregate(barLength, (p, q) => GetGcd(p, q));
-                            writer.Write("#{0:000}1{1}:", notesInBar.Key, notesInLane.Key.ToString("x"));
-                            for (int i = 0; i * gcd < barLength; i++)
-                            {
-                                int tickOffset = i * gcd;
-                                writer.Write(dic.ContainsKey(tickOffset) ? dic[tickOffset].Type + ToLaneWidthString(dic[tickOffset].Width) : "00");
-                            }
-                            writer.WriteLine();
-                        }
-                    }
-                }
+                    .Select(p => (p.Note.Tick, p.Note.LaneIndex, p.Type + ToLaneWidthString(p.Note.Width)));
+                WriteLinesWithOffset(writer, GetShortNoteLines("1", shortNotes));
+                writer.WriteLine();
 
                 var airs = notes.Airs.Select(p =>
                 {
@@ -164,37 +120,10 @@ namespace Ched.Components.Exporter
                             break;
                     }
 
-                    return new
-                    {
-                        BarPosition = barIndexCalculator.GetBarPositionFromTick(p.Tick),
-                        LaneIndex = p.LaneIndex,
-                        Type = type,
-                        Width = p.Width
-                    };
+                    return (p.Tick, p.LaneIndex, type + ToLaneWidthString(p.Width));
                 });
-
-                foreach (var airsInBar in airs.GroupBy(p => p.BarPosition.BarIndex))
-                {
-                    foreach (var airsInLane in airsInBar.GroupBy(p => p.LaneIndex))
-                    {
-                        var sig = barIndexCalculator.GetTimeSignatureFromBarIndex(airsInBar.Key);
-                        int barLength = barTick * sig.Numerator / sig.Denominator;
-
-                        var offsetList = airsInLane.GroupBy(p => p.BarPosition.TickOffset).Select(p => p.ToList());
-                        var separatedNotes = Enumerable.Range(0, offsetList.Max(p => p.Count)).Select(p => offsetList.Where(q => q.Count >= p + 1).Select(q => q[p]));
-                        foreach (var dic in separatedNotes.Select(p => p.ToDictionary(q => q.BarPosition.TickOffset, q => q)))
-                        {
-                            int gcd = dic.Values.Select(p => p.BarPosition.TickOffset).Aggregate(barLength, (p, q) => GetGcd(p, q));
-                            writer.Write("#{0:000}5{1}:", airsInBar.Key, airsInLane.Key.ToString("x"));
-                            for (int i = 0; i * gcd < barLength; i++)
-                            {
-                                int tickOffset = i * gcd;
-                                writer.Write(dic.ContainsKey(tickOffset) ? dic[tickOffset].Type + ToLaneWidthString(dic[tickOffset].Width) : "00");
-                            }
-                            writer.WriteLine();
-                        }
-                    }
-                }
+                WriteLinesWithOffset(writer, GetShortNoteLines("5", airs));
+                writer.WriteLine();
 
                 var identifier = new IdentifierAllocationManager();
 
@@ -207,55 +136,18 @@ namespace Ched.Components.Exporter
                         EndTick = p.StartTick + p.Duration,
                         Width = p.Width,
                         LaneIndex = p.LaneIndex
+                    })
+                    .SelectMany(hold =>
+                    {
+                        var items = new[]
+                        {
+                            (hold.StartTick, hold.LaneIndex, "1" + ToLaneWidthString(hold.Width)),
+                            (hold.EndTick, hold.LaneIndex, "2" + ToLaneWidthString(hold.Width))
+                        };
+                        return GetLongNoteLines("2", hold.Identifier.ToString(), items);
                     });
-
-                foreach (var hold in holds)
-                {
-                    var startBarPosition = barIndexCalculator.GetBarPositionFromTick(hold.StartTick);
-                    var endBarPosition = barIndexCalculator.GetBarPositionFromTick(hold.EndTick);
-                    if (startBarPosition.BarIndex == endBarPosition.BarIndex)
-                    {
-                        var sig = barIndexCalculator.GetTimeSignatureFromBarIndex(startBarPosition.BarIndex);
-                        int barLength = barTick * sig.Numerator / sig.Denominator;
-                        writer.Write("#{0:000}2{1}{2}:", startBarPosition.BarIndex, hold.LaneIndex.ToString("x"), hold.Identifier);
-                        int gcd = GetGcd(GetGcd(startBarPosition.TickOffset, endBarPosition.TickOffset), barLength);
-                        for (int i = 0; i * gcd < barLength; i++)
-                        {
-                            int tickOffset = i * gcd;
-                            if (startBarPosition.TickOffset == tickOffset) writer.Write("1" + ToLaneWidthString(hold.Width));
-                            else if (endBarPosition.TickOffset == tickOffset) writer.Write("2" + ToLaneWidthString(hold.Width));
-                            else writer.Write("00");
-                        }
-                        writer.WriteLine();
-                    }
-                    else
-                    {
-                        var startSig = barIndexCalculator.GetTimeSignatureFromBarIndex(startBarPosition.BarIndex);
-                        int startBarLength = barTick * startSig.Numerator / startSig.Denominator;
-                        writer.Write("#{0:000}2{1}{2}:", startBarPosition.BarIndex, hold.LaneIndex.ToString("x"), hold.Identifier);
-                        int gcd = GetGcd(startBarPosition.TickOffset, startBarLength);
-                        for (int i = 0; i * gcd < startBarLength; i++)
-                        {
-                            int tickOffset = i * gcd;
-                            if (startBarPosition.TickOffset == tickOffset) writer.Write("1" + ToLaneWidthString(hold.Width));
-                            else writer.Write("00");
-                        }
-                        writer.WriteLine();
-
-                        var endSig = barIndexCalculator.GetTimeSignatureFromBarIndex(endBarPosition.BarIndex);
-                        int endBarLength = barTick * endSig.Numerator / endSig.Denominator;
-                        writer.Write("#{0:000}2{1}{2}:", endBarPosition.BarIndex, hold.LaneIndex.ToString("x"), hold.Identifier);
-                        gcd = GetGcd(endBarPosition.TickOffset, endBarLength);
-                        for (int i = 0; i * gcd < endBarLength; i++)
-                        {
-                            int tickOffset = i * gcd;
-                            if (endBarPosition.TickOffset == tickOffset) writer.Write("2" + ToLaneWidthString(hold.Width));
-                            else writer.Write("00");
-                        }
-                        writer.WriteLine();
-                    }
-                }
-
+                WriteLinesWithOffset(writer, holds);
+                writer.WriteLine();
                 identifier.Clear();
 
                 var slides = notes.Slides
@@ -264,55 +156,37 @@ namespace Ched.Components.Exporter
                     {
                         Identifier = identifier.Allocate(p.StartTick, p.GetDuration()),
                         Note = p
-                    });
-
-                foreach (var slide in slides)
-                {
-                    var start = new[] { new
+                    })
+                    .SelectMany(slide =>
                     {
-                        TickOffset = 0,
-                        BarPosition = barIndexCalculator.GetBarPositionFromTick(slide.Note.StartTick),
-                        LaneIndex = slide.Note.StartLaneIndex,
-                        Width = slide.Note.StartWidth,
-                        Type = "1"
-                    } };
-                    var steps = slide.Note.StepNotes.OrderBy(p => p.TickOffset).Select(p => new
-                    {
-                        TickOffset = p.TickOffset,
-                        BarPosition = barIndexCalculator.GetBarPositionFromTick(p.Tick),
-                        LaneIndex = p.LaneIndex,
-                        Width = p.Width,
-                        Type = p.IsVisible ? "3" : "5"
-                    }).Take(slide.Note.StepNotes.Count - 1);
-                    var endNote = slide.Note.StepNotes.OrderBy(p => p.TickOffset).Last();
-                    var end = new[] { new
-                    {
-                        TickOffset = endNote.TickOffset,
-                        BarPosition= barIndexCalculator.GetBarPositionFromTick(endNote.Tick),
-                        LaneIndex = endNote.LaneIndex,
-                        Width = endNote.Width,
-                        Type = "2"
-                    } };
-                    var slideNotes = start.Concat(steps).Concat(end);
-                    foreach (var notesInBar in slideNotes.GroupBy(p => p.BarPosition.BarIndex))
-                    {
-                        foreach (var notesInLane in notesInBar.GroupBy(p => p.LaneIndex))
+                        var start = new[] { new
                         {
-                            var sig = barIndexCalculator.GetTimeSignatureFromBarIndex(notesInBar.Key);
-                            int barLength = barTick * sig.Numerator / sig.Denominator;
-                            int gcd = notesInLane.Select(p => p.BarPosition.TickOffset).Aggregate(barLength, (p, q) => GetGcd(p, q));
-                            var dic = notesInLane.ToDictionary(p => p.BarPosition.TickOffset, p => p);
-                            writer.Write("#{0:000}3{1}{2}:", notesInBar.Key, notesInLane.Key.ToString("x"), slide.Identifier);
-                            for (int i = 0; i * gcd < barLength; i++)
-                            {
-                                int tickOffset = i * gcd;
-                                writer.Write(dic.ContainsKey(tickOffset) ? dic[tickOffset].Type + ToLaneWidthString(dic[tickOffset].Width) : "00");
-                            }
-                            writer.WriteLine();
-                        }
-                    }
-                }
-
+                            Tick = slide.Note.StartTick,
+                            LaneIndex = slide.Note.StartLaneIndex,
+                            Width = slide.Note.StartWidth,
+                            Type = "1"
+                        } };
+                        var steps = slide.Note.StepNotes.OrderBy(p => p.TickOffset).Select(p => new
+                        {
+                            Tick = p.Tick,
+                            LaneIndex = p.LaneIndex,
+                            Width = p.Width,
+                            Type = p.IsVisible ? "3" : "5"
+                        }).Take(slide.Note.StepNotes.Count - 1);
+                        var endNote = slide.Note.StepNotes.OrderBy(p => p.TickOffset).Last();
+                        var end = new[] { new
+                        {
+                            Tick = endNote.Tick,
+                            LaneIndex = endNote.LaneIndex,
+                            Width = endNote.Width,
+                            Type = "2"
+                        } };
+                        var slideNotes = start.Concat(steps).Concat(end);
+                        var items = slideNotes.Select(p => (p.Tick, p.LaneIndex, p.Type + ToLaneWidthString(p.Width)));
+                        return GetLongNoteLines("3", slide.Identifier.ToString(), items);
+                    });
+                WriteLinesWithOffset(writer, slides);
+                writer.WriteLine();
                 identifier.Clear();
 
                 var airActions = notes.AirActions
@@ -321,47 +195,104 @@ namespace Ched.Components.Exporter
                     {
                         Identifier = identifier.Allocate(p.StartTick, p.GetDuration()),
                         Note = p
-                    });
-
-                foreach (var airAction in airActions)
-                {
-                    var start = new[] { new
+                    })
+                    .SelectMany(airAction =>
                     {
-                        TickOffset = 0,
-                        BarPosition = barIndexCalculator.GetBarPositionFromTick(airAction.Note.StartTick),
-                        Type = "1"
-                    } };
-                    var actions = airAction.Note.ActionNotes.OrderBy(p => p.Offset).Select(p => new
-                    {
-                        TickOffset = p.Offset,
-                        BarPosition = barIndexCalculator.GetBarPositionFromTick(p.ParentNote.StartTick + p.Offset),
-                        Type = "3"
-                    }).Take(airAction.Note.ActionNotes.Count - 1);
-                    var endNote = airAction.Note.ActionNotes.OrderBy(p => p.Offset).Last();
-                    var end = new[] { new
-                    {
-                        TickOffset = endNote.Offset,
-                        BarPosition = barIndexCalculator.GetBarPositionFromTick(airAction.Note.StartTick + endNote.Offset),
-                        Type = "2"
-                    } };
-                    var actionNotes = start.Concat(actions).Concat(end);
-                    foreach (var airActionsInBar in actionNotes.GroupBy(p => p.BarPosition.BarIndex))
-                    {
-                        var sig = barIndexCalculator.GetTimeSignatureFromBarIndex(airActionsInBar.Key);
-                        int barLength = barTick * sig.Numerator / sig.Denominator;
-                        writer.Write("#{0:000}4{1}{2}:", airActionsInBar.Key, airAction.Note.ParentNote.LaneIndex.ToString("x"), airAction.Identifier);
-                        int gcd = airActionsInBar.Select(p => p.BarPosition.TickOffset).Aggregate(barLength, (p, q) => GetGcd(p, q));
-                        var dic = airActionsInBar.ToDictionary(p => p.BarPosition.TickOffset, p => p);
-                        for (int i = 0; i * gcd < barLength; i++)
+                        var start = new[] { new
                         {
-                            int tickOffset = i * gcd;
-                            if (dic.ContainsKey(tickOffset)) writer.Write("{0}{1}", dic[tickOffset].Type, ToLaneWidthString(airAction.Note.ParentNote.Width));
-                            else writer.Write("00");
-                        }
-                        writer.WriteLine();
+                            Tick = airAction.Note.StartTick,
+                            Type = "1"
+                        } };
+                        var actions = airAction.Note.ActionNotes.OrderBy(p => p.Offset).Select(p => new
+                        {
+                            Tick = p.ParentNote.StartTick + p.Offset,
+                            Type = "3"
+                        }).Take(airAction.Note.ActionNotes.Count - 1);
+                        var endNote = airAction.Note.ActionNotes.OrderBy(p => p.Offset).Last();
+                        var end = new[] { new
+                        {
+                            Tick = airAction.Note.StartTick + endNote.Offset,
+                            Type = "2"
+                        } };
+                        var actionNotes = start.Concat(actions).Concat(end);
+                        var items = actionNotes.Select(p => (p.Tick, airAction.Note.ParentNote.LaneIndex, p.Type + ToLaneWidthString(airAction.Note.ParentNote.Width)));
+                        return GetLongNoteLines("4", airAction.Identifier.ToString(), items);
+                    });
+                WriteLinesWithOffset(writer, airActions);
+            }
+        }
+
+        protected void WriteLinesWithOffset(TextWriter writer, IEnumerable<SusDataLine> items)
+        {
+            int GetActualBarIndex(SusDataLine line) => line.BarIndex + (line.IsInitialEvent ? 0 : BarIndexOffset);
+            var grouped = items.GroupBy(p => GetActualBarIndex(p) / 1000).OrderBy(p => p.Key);
+            bool shifted = false;
+            foreach (var chunk in grouped)
+            {
+                if (chunk.Key > 0)
+                {
+                    shifted = true;
+                    writer.WriteLine($"#MEASUREBS {chunk.Key * 1000}");
+                }
+
+                foreach (var item in chunk) writer.WriteLine(item.ResolveWithBarIndex(GetActualBarIndex(item) % 1000));
+            }
+            if (shifted)
+            {
+                writer.WriteLine("#MEASUREBS 0");
+            }
+        }
+
+        IEnumerable<SusDataLine> GetShortNoteLines(string type, IEnumerable<(int Tick, int LaneIndex, string Data)> items)
+        {
+            foreach (var itemsInBar in items.Select(p => new { BarPosition = BarIndexCalculator.GetBarPositionFromTick(p.Tick), Item = p }).GroupBy(p => p.BarPosition.BarIndex))
+            {
+                foreach (var itemsInLane in itemsInBar.GroupBy(p => p.Item.LaneIndex))
+                {
+                    var sig = BarIndexCalculator.GetTimeSignatureFromBarIndex(itemsInBar.Key);
+                    int barLength = StandardBarTick * sig.Numerator / sig.Denominator;
+
+                    var offsetGroups = itemsInLane.GroupBy(p => p.BarPosition.TickOffset).Select(p => p.ToList()).ToList();
+                    var separatedItemList = Enumerable.Range(0, offsetGroups.Max(p => p.Count)).Select(p => offsetGroups.Where(q => q.Count >= p + 1).Select(q => q[p]));
+
+                    foreach (var separatedItems in separatedItemList)
+                    {
+                        var lineItems = separatedItems.Select(p => (p.BarPosition.TickOffset, p.Item.Data));
+                        yield return new SusDataLine(itemsInBar.Key, barIndex => string.Format("#{0:000}{1}{2}: {3}", barIndex, type, itemsInLane.Key.ToString("x"), GenerateLineData(barLength, lineItems)));
                     }
                 }
             }
+        }
+
+        IEnumerable<SusDataLine> GetLongNoteLines(string type, string key, IEnumerable<(int Tick, int LaneIndex, string Data)> elements)
+        {
+            foreach (var itemsInBar in elements.Select(p => new { BarPosition = BarIndexCalculator.GetBarPositionFromTick(p.Tick), Item = p }).GroupBy(p => p.BarPosition.BarIndex))
+            {
+                foreach (var itemsInLane in itemsInBar.GroupBy(p => p.Item.LaneIndex))
+                {
+                    var sig = BarIndexCalculator.GetTimeSignatureFromBarIndex(itemsInBar.Key);
+                    int barLength = StandardBarTick * sig.Numerator / sig.Denominator;
+                    var lineItems = itemsInLane.Select(p => (p.BarPosition.TickOffset, p.Item.Data));
+                    yield return new SusDataLine(itemsInBar.Key, barIndex => string.Format("#{0:000}{1}{2}{3}: {4}", barIndex, type, itemsInLane.Key.ToString("x"), key, GenerateLineData(barLength, lineItems)));
+                }
+            }
+        }
+
+        protected string GenerateLineData(int barTick, IEnumerable<(int TickOffset, string Data)> items)
+        {
+            if (items.Any(p => p.TickOffset < 0 || p.TickOffset >= barTick)) throw new ArgumentException("Invalid TickOffset");
+            if (items.Any(p => p.Data.Length != 2)) throw new ArgumentException("The data string length is not equal to 2.");
+
+            int gcd = items.Select(p => p.TickOffset).Aggregate(barTick, (p, q) => GetGcd(p, q));
+            var data = items.ToDictionary(p => p.TickOffset, p => p.Data);
+            var sb = new StringBuilder();
+            for (int i = 0; i * gcd < barTick; i++)
+            {
+                int tickOffset = i * gcd;
+                if (data.ContainsKey(tickOffset)) sb.Append(data[tickOffset]);
+                else sb.Append("00");
+            }
+            return sb.ToString();
         }
 
         public static int GetGcd(int a, int b)
@@ -390,6 +321,31 @@ namespace Ched.Components.Exporter
             if (digits < 1) throw new ArgumentOutOfRangeException("digits");
             if (digits == 1) return seq;
             return EnumerateIdentifiers(digits - 1, seq).SelectMany(p => seq.Select(q => p + q));
+        }
+
+        public class SusDataLine
+        {
+            private readonly Func<int, string> resolver;
+
+            public int BarIndex { get; }
+            public bool IsInitialEvent { get; }
+
+            public string ResolveWithBarIndex(int barIndex)
+            {
+                if (barIndex < 0 || barIndex > 1000) throw new ArgumentOutOfRangeException("barIndex", "Invalid bar index");
+                return resolver(barIndex);
+            }
+
+            public SusDataLine(int barIndex, Func<int, string> resolver) : this(barIndex, resolver, false)
+            {
+            }
+
+            public SusDataLine(int barIndex, Func<int, string> resolver, bool isInitialEvent)
+            {
+                BarIndex = barIndex;
+                this.resolver = resolver;
+                IsInitialEvent = isInitialEvent;
+            }
         }
 
         public class IdentifierAllocationManager
@@ -488,6 +444,12 @@ namespace Ched.Components.Exporter
         {
             get { return jacketFilePath; }
             set { jacketFilePath = value; }
+        }
+
+        public bool HasPaddingBar
+        {
+            get => hasPaddingBar;
+            set => hasPaddingBar = value;
         }
 
         public string AdditionalData

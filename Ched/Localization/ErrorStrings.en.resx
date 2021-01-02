@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ExportComplete" xml:space="preserve">
+    <value>The export completed successfully.</value>
+  </data>
   <data name="ExportFailed" xml:space="preserve">
     <value>The export failed.</value>
   </data>
@@ -160,9 +163,6 @@ Select "Yes" to upgrade this file.
   </data>
   <data name="PreviewNotSupported" xml:space="preserve">
     <value>Preview cannot be used.</value>
-  </data>
-  <data name="ReExportComplete" xml:space="preserve">
-    <value>Re-export completed successfully.</value>
   </data>
   <data name="SourceFileNotFound" xml:space="preserve">
     <value>The audio file was not found.</value>

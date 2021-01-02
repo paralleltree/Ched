@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ExportComplete" xml:space="preserve">
+    <value>エクスポートが完了しました。</value>
+  </data>
   <data name="ExportFailed" xml:space="preserve">
     <value>エクスポートに失敗しました。</value>
   </data>
@@ -160,9 +163,6 @@
   </data>
   <data name="PreviewNotSupported" xml:space="preserve">
     <value>簡易プレビューが利用できない環境です。</value>
-  </data>
-  <data name="ReExportComplete" xml:space="preserve">
-    <value>再エクスポートが完了しました。</value>
   </data>
   <data name="SourceFileNotFound" xml:space="preserve">
     <value>音源ファイルが見つかりません。</value>

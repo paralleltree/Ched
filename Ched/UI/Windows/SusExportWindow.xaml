@@ -165,6 +165,15 @@
                         </i:Interaction.Behaviors>
                     </Button>
                 </Grid>
+
+                <Grid Style="{StaticResource InputFieldRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <CheckBox Grid.Column="1" Content="{x:Static localization:MainFormStrings.InsertSingleBlankAtBeginning}" IsChecked="{Binding HasPaddingBar}" />
+                </Grid>
             </StackPanel>
 
             <Grid Grid.Row="1" Margin="0" Style="{StaticResource InputFieldRow}">

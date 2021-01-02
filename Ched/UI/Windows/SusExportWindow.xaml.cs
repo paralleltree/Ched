@@ -110,6 +110,18 @@ namespace Ched.UI.Windows
             }
         }
 
+        private bool hasPaddingBar;
+        public bool HasPaddingBar
+        {
+            get => hasPaddingBar;
+            set
+            {
+                if (value == hasPaddingBar) return;
+                hasPaddingBar = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasPaddingBar)));
+            }
+        }
+
         private string additionalData;
         public string AdditionalData
         {
@@ -143,6 +155,7 @@ namespace Ched.UI.Windows
             SoundFileName = SusArgs.SoundFileName;
             SoundOffset = (double)SusArgs.SoundOffset;
             JacketFileName = SusArgs.JacketFilePath;
+            HasPaddingBar = SusArgs.HasPaddingBar;
             AdditionalData = SusArgs.AdditionalData;
         }
 
@@ -154,6 +167,7 @@ namespace Ched.UI.Windows
             SusArgs.SoundFileName = SoundFileName;
             SusArgs.SoundOffset = (decimal)SoundOffset;
             SusArgs.JacketFilePath = JacketFileName;
+            SusArgs.HasPaddingBar = HasPaddingBar;
             SusArgs.AdditionalData = AdditionalData;
         }
     }
