@@ -325,6 +325,7 @@ namespace Ched.UI
             var exporter = new Components.Exporter.SusExporter() { CustomArgs = susArgs };
             var exportData = new ExportData() { OutputPath = dialog.FileName, Exporter = exporter };
             HandleExport(exportData);
+            if (!ScoreBook.ExporterArgs.ContainsKey("sus")) ScoreBook.ExporterArgs["sus"] = susArgs;
             LastExportData = exportData;
         }
 
