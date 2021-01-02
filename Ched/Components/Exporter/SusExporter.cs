@@ -20,6 +20,7 @@ namespace Ched.Components.Exporter
         protected ScoreBook ScoreBook { get; set; }
         protected BarIndexCalculator BarIndexCalculator { get; set; }
         protected int StandardBarTick => ScoreBook.Score.TicksPerBeat * 4;
+        protected int BarIndexOffset { get; set; } = 0;
         public SusArgs CustomArgs { get; set; }
 
         public void Export(string path, ScoreBook book)
@@ -29,6 +30,7 @@ namespace Ched.Components.Exporter
             BarIndexCalculator = new BarIndexCalculator(book.Score.TicksPerBeat, book.Score.Events.TimeSignatureChangeEvents);
 
             SusArgs args = CustomArgs;
+            BarIndexOffset = args.HasPaddingBar ? 1 : 0;
             var notes = book.Score.Notes;
             using (var writer = new StreamWriter(path))
             {
@@ -54,7 +56,7 @@ namespace Ched.Components.Exporter
                 writer.WriteLine("#REQUEST \"ticks_per_beat {0}\"", book.Score.TicksPerBeat);
                 writer.WriteLine();
 
-                var timeSignatures = BarIndexCalculator.TimeSignatures.Select(p => new SusDataLine(p.StartBarIndex, barIndex => string.Format("#{0:000}02: {1}", barIndex, 4f * p.TimeSignature.Numerator / p.TimeSignature.Denominator)));
+                var timeSignatures = BarIndexCalculator.TimeSignatures.Select(p => new SusDataLine(p.StartBarIndex, barIndex => string.Format("#{0:000}02: {1}", barIndex, 4f * p.TimeSignature.Numerator / p.TimeSignature.Denominator), p.StartBarIndex == 0));
                 WriteLinesWithOffset(writer, timeSignatures);
                 writer.WriteLine();
 
@@ -71,20 +73,21 @@ namespace Ched.Components.Exporter
                     writer.WriteLine("#BPM{0}: {1}", bpmIdentifiers[item.Index], item.Value.BPM);
                 }
 
-                var bpmChanges = bpmlist.GroupBy(p => p.BarPosition.BarIndex).Select(eventInBar =>
+                // 小節オフセット追加用に初期BPM定義だけ1行に分離
+                var bpmChanges = bpmlist.GroupBy(p => p.Value.Tick == 0).SelectMany(p => p.GroupBy(q => q.BarPosition.BarIndex).Select(eventInBar =>
                 {
                     var sig = BarIndexCalculator.GetTimeSignatureFromBarIndex(eventInBar.Key);
                     int barLength = StandardBarTick * sig.Numerator / sig.Denominator;
-                    var items = eventInBar.Select(p => (p.BarPosition.TickOffset, bpmIdentifiers[p.Index]));
-                    return new SusDataLine(eventInBar.Key, barIndex => string.Format("#{0:000}08: {1}", barIndex, GenerateLineData(barLength, items)));
-                });
+                    var items = eventInBar.Select(q => (q.BarPosition.TickOffset, bpmIdentifiers[q.Index]));
+                    return new SusDataLine(eventInBar.Key, barIndex => string.Format("#{0:000}08: {1}", barIndex, GenerateLineData(barLength, items)), p.Key);
+                }));
                 WriteLinesWithOffset(writer, bpmChanges);
                 writer.WriteLine();
 
                 var speeds = book.Score.Events.HighSpeedChangeEvents.Select(p =>
                 {
                     var barPos = BarIndexCalculator.GetBarPositionFromTick(p.Tick);
-                    return string.Format("{0}'{1}:{2}", barPos.BarIndex, barPos.TickOffset, p.SpeedRatio);
+                    return string.Format("{0}'{1}:{2}", barPos.BarIndex + (p.Tick == 0 ? 0 : BarIndexOffset), barPos.TickOffset, p.SpeedRatio);
                 });
                 writer.WriteLine("#TIL00: \"{0}\"", string.Join(", ", speeds));
                 writer.WriteLine("#HISPEED 00");
@@ -221,7 +224,8 @@ namespace Ched.Components.Exporter
 
         protected void WriteLinesWithOffset(TextWriter writer, IEnumerable<SusDataLine> items)
         {
-            var grouped = items.GroupBy(p => p.BarIndex / 1000).OrderBy(p => p.Key);
+            int GetActualBarIndex(SusDataLine line) => line.BarIndex + (line.IsInitialEvent ? 0 : BarIndexOffset);
+            var grouped = items.GroupBy(p => GetActualBarIndex(p) / 1000).OrderBy(p => p.Key);
             bool shifted = false;
             foreach (var chunk in grouped)
             {
@@ -231,7 +235,7 @@ namespace Ched.Components.Exporter
                     writer.WriteLine($"#MEASUREBS {chunk.Key * 1000}");
                 }
 
-                foreach (var item in chunk) writer.WriteLine(item.ResolveWithBarIndex(item.BarIndex % 1000));
+                foreach (var item in chunk) writer.WriteLine(item.ResolveWithBarIndex(GetActualBarIndex(item) % 1000));
             }
             if (shifted)
             {
@@ -324,16 +328,23 @@ namespace Ched.Components.Exporter
             private readonly Func<int, string> resolver;
 
             public int BarIndex { get; }
+            public bool IsInitialEvent { get; }
+
             public string ResolveWithBarIndex(int barIndex)
             {
                 if (barIndex < 0 || barIndex > 1000) throw new ArgumentOutOfRangeException("barIndex", "Invalid bar index");
                 return resolver(barIndex);
             }
 
-            public SusDataLine(int barIndex, Func<int, string> resolver)
+            public SusDataLine(int barIndex, Func<int, string> resolver) : this(barIndex, resolver, false)
+            {
+            }
+
+            public SusDataLine(int barIndex, Func<int, string> resolver, bool isInitialEvent)
             {
                 BarIndex = barIndex;
                 this.resolver = resolver;
+                IsInitialEvent = isInitialEvent;
             }
         }
 
