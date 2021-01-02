@@ -315,4 +315,7 @@
   <data name="Level" xml:space="preserve">
     <value>Level</value>
   </data>
+  <data name="InsertSingleBlankAtBeginning" xml:space="preserve">
+    <value>Insert a single blank space at the beginning</value>
+  </data>
 </root>

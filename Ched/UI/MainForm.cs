@@ -310,7 +310,6 @@ namespace Ched.UI
 
         protected void ExportFile()
         {
-            CommitChanges();
             var dialog = new SaveFileDialog()
             {
                 Title = MainFormStrings.Export,
@@ -321,12 +320,32 @@ namespace Ched.UI
             var vm = new SusExportWindowViewModel(ScoreBook, susArgs);
             var window = new SusExportWindow() { DataContext = vm };
             var result = window.ShowDialog(this);
-            if (result.HasValue && result.Value)
+            if (!result.HasValue || !result.Value) return;
+
+            var exporter = new Components.Exporter.SusExporter() { CustomArgs = susArgs };
+            var exportData = new ExportData() { OutputPath = dialog.FileName, Exporter = exporter };
+            HandleExport(exportData);
+            if (!ScoreBook.ExporterArgs.ContainsKey("sus")) ScoreBook.ExporterArgs["sus"] = susArgs;
+            LastExportData = exportData;
+        }
+
+        protected void HandleExport(ExportData exportData)
+        {
+            CommitChanges();
+            try
             {
-                var exporter = new Components.Exporter.SusExporter() { CustomArgs = susArgs };
-                exporter.Export(dialog.FileName, ScoreBook);
-                ScoreBook.ExporterArgs["sus"] = susArgs;
-                LastExportData = new ExportData() { OutputPath = dialog.FileName, Exporter = exporter };
+                exportData.Exporter.Export(exportData.OutputPath, ScoreBook);
+                MessageBox.Show(this, ErrorStrings.ExportComplete, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (InvalidTimeSignatureException ex)
+            {
+                int beatAt = ex.Tick / ScoreBook.Score.TicksPerBeat + 1;
+                MessageBox.Show(string.Format(ErrorStrings.InvalidTimeSignature, beatAt), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                Program.DumpExceptionTo(ex, "export_exception.json");
+                MessageBox.Show(ErrorStrings.ExportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -707,17 +726,7 @@ namespace Ched.UI
                     return;
                 }
 
-                CommitChanges();
-                try
-                {
-                    LastExportData.Exporter.Export(LastExportData.OutputPath, ScoreBook);
-                    MessageBox.Show(this, ErrorStrings.ReExportComplete, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(this, ErrorStrings.ExportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Program.DumpException(ex);
-                }
+                HandleExport(LastExportData);
             })
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
@@ -945,7 +954,7 @@ namespace Ched.UI
         }
     }
 
-    internal class ExportData
+    public class ExportData
     {
         public string OutputPath { get; set; }
         public Components.Exporter.IExporter Exporter { get; set; }
