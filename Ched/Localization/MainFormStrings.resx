@@ -315,4 +315,7 @@
   <data name="Level" xml:space="preserve">
     <value>レベル</value>
   </data>
+  <data name="InsertSingleBlankAtBeginning" xml:space="preserve">
+    <value>先頭に1小節の空白を挿入する</value>
+  </data>
 </root>

@@ -446,6 +446,12 @@ namespace Ched.Components.Exporter
             set { jacketFilePath = value; }
         }
 
+        public bool HasPaddingBar
+        {
+            get => hasPaddingBar;
+            set => hasPaddingBar = value;
+        }
+
         public string AdditionalData
         {
             get => additionalData;

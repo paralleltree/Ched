@@ -340,6 +340,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 先頭に1小節の空白を挿入する.
+        /// </summary>
+        public static string InsertSingleBlankAtBeginning {
+            get {
+                return ResourceManager.GetString("InsertSingleBlankAtBeginning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ジャケットファイル.
         /// </summary>
         public static string JacketFile {
