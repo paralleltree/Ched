@@ -30,8 +30,8 @@ namespace Ched.Plugins
                 args.SetCustomData(JsonConvert.SerializeObject(susArgs));
             }
 
-            var exporter = new SusExporter() { CustomArgs = susArgs };
-            exporter.Export(args.GetScoreBook(), args.Stream);
+            var exporter = new SusExporter(book, susArgs);
+            exporter.Export(args.Stream);
         }
     }
 }

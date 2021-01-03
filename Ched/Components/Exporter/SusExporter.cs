@@ -15,20 +15,23 @@ namespace Ched.Components.Exporter
 {
     public class SusExporter
     {
-        protected ScoreBook ScoreBook { get; set; }
-        protected BarIndexCalculator BarIndexCalculator { get; set; }
+        protected ScoreBook ScoreBook { get; }
+        protected BarIndexCalculator BarIndexCalculator { get; }
         protected int StandardBarTick => ScoreBook.Score.TicksPerBeat * 4;
-        protected int BarIndexOffset { get; set; } = 0;
-        public SusArgs CustomArgs { get; set; }
+        protected int BarIndexOffset => CustomArgs.HasPaddingBar ? 1 : 0;
+        public SusArgs CustomArgs { get; }
 
-        public void Export(ScoreBook book, Stream stream)
+        public SusExporter(ScoreBook book, SusArgs susArgs)
         {
-            // TODO: コンストラクタに移してreadonlyにする
             ScoreBook = book;
+            CustomArgs = susArgs;
             BarIndexCalculator = new BarIndexCalculator(book.Score.TicksPerBeat, book.Score.Events.TimeSignatureChangeEvents);
+        }
 
+        public void Export(Stream stream)
+        {
+            var book = ScoreBook;
             SusArgs args = CustomArgs;
-            BarIndexOffset = args.HasPaddingBar ? 1 : 0;
             var notes = book.Score.Notes;
             using (var writer = new StreamWriter(stream))
             {
