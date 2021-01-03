@@ -28,9 +28,9 @@ namespace Ched.UI
         [DllImport("gdi32.dll")]
         private static extern IntPtr GetStockObject(int brStyle);
 
-        private static int NULL_BRUSH = 5;
-        private static int BLACK_PEN = 0;
-        private static int R2_XORPEN = 7;
+        private const int NULL_BRUSH = 5;
+        private const int BLACK_PEN = 0;
+        private const int R2_XORPEN = 7;
 
         // ref: https://www.codeproject.com/Articles/4958/Combining-GDI-and-GDI-to-Draw-Rubber-Band-Rectangl
         public static void DrawXorRectangle(this Graphics g, PenStyles style, int x1, int y1, int x2, int y2)
