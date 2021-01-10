@@ -32,6 +32,13 @@
 
     <Style TargetType="TextBox">
         <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="b:StyleBehaviorCollection.StyleBehaviors">
+            <Setter.Value>
+                <b:StyleBehaviorCollection>
+                    <b:UpdateTextOnEnterPressBehavior />
+                </b:StyleBehaviorCollection>
+            </Setter.Value>
+        </Setter>
         <Style.Triggers>
             <Trigger Property="IsReadOnly" Value="True">
                 <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}" />
@@ -46,5 +53,12 @@
 
     <Style TargetType="local:BindableNumericUpDown">
         <Setter Property="MinWidth" Value="80px" />
+        <Setter Property="b:StyleBehaviorCollection.StyleBehaviors">
+            <Setter.Value>
+                <b:StyleBehaviorCollection>
+                    <b:UpdateNumericUpDownValueOnEnterPressBehavior />
+                </b:StyleBehaviorCollection>
+            </Setter.Value>
+        </Setter>
     </Style>
 </ResourceDictionary>
