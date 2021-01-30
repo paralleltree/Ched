@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Ched.Core.Notes
 {
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
-    public class Air : ShortNoteBase, IAirable
+    public class Air
     {
         [Newtonsoft.Json.JsonProperty]
         private IAirable parentNote;

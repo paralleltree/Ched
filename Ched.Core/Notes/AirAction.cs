@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Ched.Core.Notes
 {
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
-    public class AirAction : LongNoteBase
+    public class AirAction : ILongNote
     {
         [Newtonsoft.Json.JsonProperty]
         private IAirable parentNote;
@@ -16,7 +16,7 @@ namespace Ched.Core.Notes
 
         public List<ActionNote> ActionNotes { get { return actionNotes; } }
         public IAirable ParentNote { get { return parentNote; } }
-        public override int StartTick { get { return ParentNote.Tick; } }
+        public int StartTick => ParentNote.Tick;
 
         /// <summary>
         /// 親<see cref="IAirable"/>オブジェクトを持たない<see cref="AirAction"/>の新しいインスタンスを初期化します。
@@ -35,14 +35,14 @@ namespace Ched.Core.Notes
             parentNote = parent;
         }
 
-        public override int GetDuration()
+        public int GetDuration()
         {
             return ActionNotes.Max(p => p.Offset);
         }
 
 
         [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
-        public class ActionNote : ShortNoteBase
+        public class ActionNote
         {
             [Newtonsoft.Json.JsonProperty]
             private int offset;
