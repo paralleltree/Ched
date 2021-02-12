@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Ched.Core;
 using Ched.Core.Events;
 using Ched.Core.Notes;
 
@@ -57,11 +58,12 @@ namespace Ched.UI
             SoundManager.Register(ClapSource.FilePath);
             SoundManager.Register(context.MusicSource.FilePath);
 
+            var timeCalculator = new TimeCalculator(context.TicksPerBeat, context.BpmDefinitions);
             var ticks = new SortedSet<int>(context.GetGuideTicks()).ToList();
             TickElement = new LinkedList<int?>(ticks.Where(p => p >= startTick).OrderBy(p => p).Select(p => new int?(p))).First;
             BpmElement = new LinkedList<BpmChangeEvent>(context.BpmDefinitions.OrderBy(p => p.Tick)).First;
 
-            EndTick = IsStopAtLastNote ? ticks[ticks.Count - 1] : GetTickFromTime(SoundManager.GetDuration(context.MusicSource.FilePath), context.BpmDefinitions);
+            EndTick = IsStopAtLastNote ? ticks[ticks.Count - 1] : timeCalculator.GetTickFromTime(SoundManager.GetDuration(context.MusicSource.FilePath));
             if (EndTick < startTick) return false;
 
             // スタート時まで進める
@@ -73,8 +75,8 @@ namespace Ched.UI
             CurrentTick = InitialTick;
             StartTick = startTick;
 
-            TimeSpan startTime = GetTimeFromTick(startTick, context.BpmDefinitions);
-            TimeSpan headGap = TimeSpan.FromSeconds(-context.MusicSource.Latency) - startTime;
+            double startTime = timeCalculator.GetTimeFromTick(startTick);
+            double headGap = -context.MusicSource.Latency - startTime;
             elapsedTick = 0;
             Task.Run(() =>
             {
@@ -82,12 +84,12 @@ namespace Ched.UI
                 SyncControl.Invoke((MethodInvoker)(() => Timer.Start()));
 
                 System.Threading.Thread.Sleep(TimeSpan.FromSeconds(Math.Max(ClapSource.Latency, 0)));
-                if (headGap.TotalSeconds > 0)
+                if (headGap > 0)
                 {
-                    System.Threading.Thread.Sleep(headGap);
+                    System.Threading.Thread.Sleep(TimeSpan.FromSeconds(headGap));
                 }
                 if (!Playing) return;
-                SoundManager.Play(context.MusicSource.FilePath, startTime + TimeSpan.FromSeconds(context.MusicSource.Latency));
+                SoundManager.Play(context.MusicSource.FilePath, startTime + context.MusicSource.Latency);
             })
             .ContinueWith(p =>
             {
@@ -142,43 +144,6 @@ namespace Ched.UI
         {
             return (int)(PreviewContext.TicksPerBeat * latency * bpm / 60);
         }
-
-        private TimeSpan GetLatencyTime(int tick, double bpm)
-        {
-            return TimeSpan.FromSeconds((double)tick * 60 / PreviewContext.TicksPerBeat / bpm);
-        }
-
-        private TimeSpan GetTimeFromTick(int tick, IEnumerable<BpmChangeEvent> bpmEvents)
-        {
-            var bpm = new LinkedList<BpmChangeEvent>(bpmEvents.OrderBy(p => p.Tick)).First;
-            if (bpm.Value.Tick != 0) throw new ArgumentException("Initial BPM change event not found");
-
-            var time = new TimeSpan();
-            while (bpm.Next != null)
-            {
-                if (tick < bpm.Next.Value.Tick) break; // 現在のBPMで到達
-                time += GetLatencyTime(bpm.Next.Value.Tick - bpm.Value.Tick, bpm.Value.Bpm);
-                bpm = bpm.Next;
-            }
-            return time + GetLatencyTime(tick - bpm.Value.Tick, bpm.Value.Bpm);
-        }
-
-        private int GetTickFromTime(TimeSpan time, IEnumerable<BpmChangeEvent> bpmEvents)
-        {
-            var bpm = new LinkedList<BpmChangeEvent>(bpmEvents.OrderBy(p => p.Tick)).First;
-            if (bpm.Value.Tick != 0) throw new ArgumentException("Initial BPM change event not found");
-
-            TimeSpan sum = new TimeSpan();
-            while (bpm.Next != null)
-            {
-                TimeSpan section = GetLatencyTime(bpm.Next.Value.Tick - bpm.Value.Tick, bpm.Value.Bpm);
-                if (time < sum + section) break;
-                sum += section;
-                bpm = bpm.Next;
-            }
-            return bpm.Value.Tick + GetLatencyTick((time - sum).TotalSeconds, bpm.Value.Bpm);
-        }
-
 
         public void Dispose()
         {
