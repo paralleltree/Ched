@@ -357,6 +357,49 @@ namespace Ched.UI
             }
         }
 
+        protected void HandleImport(IScoreBookImportPlugin plugin, ScoreBookImportPluginArgs args)
+        {
+            string message;
+            bool hasError = true;
+            try
+            {
+                var book = plugin.Import(args);
+                LoadBook(book);
+                message = ErrorStrings.ImportComplete;
+                hasError = false;
+            }
+            catch (Exception ex)
+            {
+                Program.DumpExceptionTo(ex, "import_exception.json");
+                LoadEmptyBook();
+                message = ErrorStrings.ImportFailed + Environment.NewLine + ex.Message;
+            }
+
+            ShowDiagnosticsResult(MainFormStrings.Import, message, hasError, args.Diagnostics);
+        }
+
+        protected void ShowDiagnosticsResult(string title, string message, bool hasError, IReadOnlyCollection<Diagnostic> diagnostics)
+        {
+            if (diagnostics.Count > 0)
+            {
+                var vm = new DiagnosticsWindowViewModel()
+                {
+                    Title = title,
+                    Message = message,
+                    Diagnostics = new System.Collections.ObjectModel.ObservableCollection<Diagnostic>(diagnostics)
+                };
+                var window = new DiagnosticsWindow()
+                {
+                    DataContext = vm
+                };
+                window.ShowDialog(this);
+            }
+            else
+            {
+                MessageBox.Show(this, message, title, MessageBoxButtons.OK, hasError ? MessageBoxIcon.Error : MessageBoxIcon.Information);
+            }
+        }
+
         protected void CommitChanges()
         {
             ScoreBook.Score.Notes = NoteView.Notes.Reposit();
@@ -398,34 +441,10 @@ namespace Ched.UI
                 if (!ConfirmDiscardChanges()) return;
                 if (!TrySelectOpeningFile(p.FileFilter, out string path)) return;
 
-                try
+                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
-                    using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
-                    {
-                        var args = new ScoreBookImportPluginArgs(stream);
-                        var book = p.Import(args);
-                        LoadBook(book);
-                        if (args.Diagnostics.Count > 0)
-                        {
-                            var vm = new DiagnosticsWindowViewModel()
-                            {
-                                Title = MainFormStrings.Import,
-                                Message = ErrorStrings.ImportComplete,
-                                Diagnostics = new System.Collections.ObjectModel.ObservableCollection<Diagnostic>(args.Diagnostics)
-                            };
-                            var window = new DiagnosticsWindow()
-                            {
-                                DataContext = vm
-                            };
-                            window.ShowDialog(this);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(this, ErrorStrings.ImportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Program.DumpExceptionTo(ex, "import_exception.json");
-                    LoadEmptyBook();
+                    var args = new ScoreBookImportPluginArgs(stream);
+                    HandleImport(p, args);
                 }
             })).ToArray();
 
