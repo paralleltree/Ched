@@ -61,8 +61,8 @@ namespace Ched.Components.Exporter
                 WriteLinesWithOffset(writer, timeSignatures);
                 writer.WriteLine();
 
-                var bpmlist = book.Score.Events.BPMChangeEvents
-                    .GroupBy(p => p.BPM)
+                var bpmlist = book.Score.Events.BpmChangeEvents
+                    .GroupBy(p => p.Bpm)
                     .SelectMany((p, i) => p.Select(q => new { Index = i, Value = q, BarPosition = BarIndexCalculator.GetBarPositionFromTick(q.Tick) }))
                     .ToList();
 
@@ -71,7 +71,7 @@ namespace Ched.Components.Exporter
                 var bpmIdentifiers = EnumerateIdentifiers(2).Skip(1).Take(bpmlist.Count).ToList();
                 foreach (var item in bpmlist.GroupBy(p => p.Index).Select(p => p.First()))
                 {
-                    writer.WriteLine("#BPM{0}: {1}", bpmIdentifiers[item.Index], item.Value.BPM);
+                    writer.WriteLine("#BPM{0}: {1}", bpmIdentifiers[item.Index], item.Value.Bpm);
                 }
 
                 // 小節オフセット追加用に初期BPM定義だけ1行に分離

@@ -188,11 +188,11 @@
     <Compile Include="UI\Windows\BookPropertiesWindow.xaml.cs">
       <DependentUpon>BookPropertiesWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\BPMSelectionForm.cs">
+    <Compile Include="UI\BpmSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\BPMSelectionForm.Designer.cs">
-      <DependentUpon>BPMSelectionForm.cs</DependentUpon>
+    <Compile Include="UI\BpmSelectionForm.Designer.cs">
+      <DependentUpon>BpmSelectionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\CheckableToolStripSplitButton.cs">
       <SubType>Component</SubType>
@@ -298,11 +298,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UI\BPMSelectionForm.en.resx">
-      <DependentUpon>BPMSelectionForm.cs</DependentUpon>
+    <EmbeddedResource Include="UI\BpmSelectionForm.en.resx">
+      <DependentUpon>BpmSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\BPMSelectionForm.resx">
-      <DependentUpon>BPMSelectionForm.cs</DependentUpon>
+    <EmbeddedResource Include="UI\BpmSelectionForm.resx">
+      <DependentUpon>BpmSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\CustomQuantizeSelectionForm.en.resx">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>

@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace Ched.UI
 {
-    public partial class BPMSelectionForm : Form
+    public partial class BpmSelectionForm : Form
     {
-        public decimal BPM
+        public decimal Bpm
         {
             get { return bpmBox.Value; }
             set
@@ -22,7 +22,7 @@ namespace Ched.UI
             }
         }
 
-        public BPMSelectionForm()
+        public BpmSelectionForm()
         {
             InitializeComponent();
             AcceptButton = buttonOK;

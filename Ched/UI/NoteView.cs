@@ -1780,10 +1780,10 @@ namespace Ched.UI
                 // BPM描画
                 using (var bpmBrush = new SolidBrush(Color.FromArgb(0, 192, 0)))
                 {
-                    foreach (var item in ScoreEvents.BPMChangeEvents.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
+                    foreach (var item in ScoreEvents.BpmChangeEvents.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
                     {
                         var point = new PointF(rightBase, -GetYPositionFromTick(item.Tick) - strSize.Height);
-                        pe.Graphics.DrawString(Regex.Replace(item.BPM.ToString(), @"\.0$", "").PadLeft(3), font, Brushes.Lime, point);
+                        pe.Graphics.DrawString(Regex.Replace(item.Bpm.ToString(), @"\.0$", "").PadLeft(3), font, Brushes.Lime, point);
                     }
                 }
 

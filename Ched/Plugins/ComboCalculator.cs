@@ -46,10 +46,10 @@ namespace Ched.Plugins
             combo.Air += score.Notes.Airs.Count;
 
             int barTick = 4 * score.TicksPerBeat;
-            var bpmEvents = score.Events.BPMChangeEvents.OrderBy(p => p.Tick).ToList();
+            var bpmEvents = score.Events.BpmChangeEvents.OrderBy(p => p.Tick).ToList();
             var airList = new HashSet<IAirable>(score.Notes.Airs.Select(p => p.ParentNote));
-            decimal getHeadBpmAt(int tick) => (bpmEvents.LastOrDefault(p => p.Tick <= tick) ?? bpmEvents[0]).BPM;
-            decimal getTailBpmAt(int tick) => (bpmEvents.LastOrDefault(p => p.Tick < tick) ?? bpmEvents[0]).BPM;
+            decimal getHeadBpmAt(int tick) => (bpmEvents.LastOrDefault(p => p.Tick <= tick) ?? bpmEvents[0]).Bpm;
+            decimal getTailBpmAt(int tick) => (bpmEvents.LastOrDefault(p => p.Tick < tick) ?? bpmEvents[0]).Bpm;
             int comboDivider(decimal bpm) => bpm < 120 ? 16 : (bpm < 240 ? 8 : 4);
 
             // コンボとしてカウントされるstartTickからのオフセットを求める
@@ -65,7 +65,7 @@ namespace Ched.Plugins
                 while (head < duration)
                 {
                     while (bpmIndex + 1 < bpmEvents.Count && startTick + head >= bpmEvents[bpmIndex + 1].Tick) bpmIndex++;
-                    int interval = barTick / comboDivider(bpmEvents[bpmIndex].BPM);
+                    int interval = barTick / comboDivider(bpmEvents[bpmIndex].Bpm);
                     int diff = Math.Min(interval, sortedStepTicks[stepIndex] - head);
                     head += diff;
                     tickList.Add(head);

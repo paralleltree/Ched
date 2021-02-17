@@ -256,7 +256,7 @@ namespace Ched.UI
         {
             var book = new ScoreBook();
             var events = book.Score.Events;
-            events.BPMChangeEvents.Add(new BPMChangeEvent() { Tick = 0, BPM = 120 });
+            events.BpmChangeEvents.Add(new BpmChangeEvent() { Tick = 0, Bpm = 120 });
             events.TimeSignatureChangeEvents.Add(new TimeSignatureChangeEvent() { Tick = 0, Numerator = 4, DenominatorExponent = 2 });
             LoadBook(book);
         }
@@ -504,10 +504,10 @@ namespace Ched.UI
                 bool isContained(EventBase p) => p.Tick != 0 && minTick <= p.Tick && maxTick >= p.Tick;
                 var events = ScoreBook.Score.Events;
 
-                var bpmOp = events.BPMChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
+                var bpmOp = events.BpmChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
                 {
-                    ScoreBook.Score.Events.BPMChangeEvents.Remove(p);
-                    return new RemoveEventOperation<BPMChangeEvent>(events.BPMChangeEvents, p);
+                    ScoreBook.Score.Events.BpmChangeEvents.Remove(p);
+                    return new RemoveEventOperation<BpmChangeEvent>(events.BpmChangeEvents, p);
                 }).ToList();
 
                 var speedOp = events.HighSpeedChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
@@ -619,20 +619,20 @@ namespace Ched.UI
                 noteView.Invalidate();
             }
 
-            var insertBPMItem = new MenuItem("BPM", (s, e) =>
+            var insertBpmItem = new MenuItem("BPM", (s, e) =>
             {
-                var form = new BPMSelectionForm()
+                var form = new BpmSelectionForm()
                 {
-                    BPM = noteView.ScoreEvents.BPMChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.BPM ?? 120m
+                    Bpm = noteView.ScoreEvents.BpmChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.Bpm ?? 120m
                 };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
-                var item = new BPMChangeEvent()
+                var item = new BpmChangeEvent()
                 {
                     Tick = noteView.CurrentTick,
-                    BPM = form.BPM
+                    Bpm = form.Bpm
                 };
-                UpdateEvent(noteView.ScoreEvents.BPMChangeEvents, item);
+                UpdateEvent(noteView.ScoreEvents.BpmChangeEvents, item);
             });
 
             var insertHighSpeedItem = new MenuItem(MainFormStrings.HighSpeed, (s, e) =>
@@ -665,7 +665,7 @@ namespace Ched.UI
                 UpdateEvent(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
             });
 
-            var insertMenuItems = new MenuItem[] { insertBPMItem, insertHighSpeedItem, insertTimeSignatureItem };
+            var insertMenuItems = new MenuItem[] { insertBpmItem, insertHighSpeedItem, insertTimeSignatureItem };
 
             var isAbortAtLastNoteItem = new MenuItem(MainFormStrings.AbortAtLastNote, (s, e) =>
             {
