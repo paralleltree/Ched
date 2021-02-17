@@ -14,7 +14,27 @@ namespace Ched.Plugins
     /// </summary>
     public interface IScoreBookImportPlugin : IPlugin
     {
+        /// <summary>
+        /// ファイル選択時に利用するフィルタ文字列を取得します。
+        /// </summary>
         string FileFilter { get; }
-        ScoreBook Import(TextReader reader);
+
+        /// <summary>
+        /// 譜面データのインポート処理を行います。
+        /// </summary>
+        /// <param name="args">インポート時に渡される情報を表す<see cref="IScoreBookImportPluginArgs"/></param>
+        /// <returns>インポートされる譜面を表す<see cref="ScoreBook"/></returns>
+        ScoreBook Import(IScoreBookImportPluginArgs args);
+    }
+
+    /// <summary>
+    /// 譜面データのインポート時に渡される情報を表します。
+    /// </summary>
+    public interface IScoreBookImportPluginArgs : IDiagnosable
+    {
+        /// <summary>
+        /// データを読み取るストリームを取得します。
+        /// </summary>
+        Stream Stream { get; }
     }
 }

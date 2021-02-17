@@ -157,13 +157,13 @@ namespace Ched.UI
             DragDrop += (s, e) =>
             {
                 string path = ((string[])e.Data.GetData(DataFormats.FileDrop)).Single();
-                if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) return;
+                if (!ConfirmDiscardChanges()) return;
                 LoadFile(path);
             };
 
             FormClosing += (s, e) =>
             {
-                if (OperationManager.IsChanged && !this.ConfirmDiscardChanges())
+                if (!ConfirmDiscardChanges())
                 {
                     e.Cancel = true;
                     return;
@@ -193,6 +193,10 @@ namespace Ched.UI
             if (PluginManager.FailedFiles.Count > 0)
             {
                 MessageBox.Show(this, string.Join("\n", new[] { ErrorStrings.PluginLoadError }.Concat(PluginManager.FailedFiles)), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            if (PluginManager.InvalidFiles.Count > 0)
+            {
+                MessageBox.Show(this, string.Join("\n", new[] { ErrorStrings.PluginNotSupported }.Concat(PluginManager.InvalidFiles)), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -260,12 +264,14 @@ namespace Ched.UI
 
         protected void OpenFile()
         {
-            OpenFile(FileTypeFilter, p => LoadFile(p));
+            if (!ConfirmDiscardChanges()) return;
+            if (!TrySelectOpeningFile(FileTypeFilter, out string path)) return;
+            LoadFile(path);
         }
 
-        protected void OpenFile(string filter, Action<string> loadAction)
+        protected bool TrySelectOpeningFile(string filter, out string path)
         {
-            if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) return;
+            path = null;
 
             var dialog = new OpenFileDialog()
             {
@@ -274,8 +280,10 @@ namespace Ched.UI
 
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
-                loadAction(dialog.FileName);
+                path = dialog.FileName;
+                return true;
             }
+            return false;
         }
 
         protected void SaveAs()
@@ -349,6 +357,49 @@ namespace Ched.UI
             }
         }
 
+        protected void HandleImport(IScoreBookImportPlugin plugin, ScoreBookImportPluginArgs args)
+        {
+            string message;
+            bool hasError = true;
+            try
+            {
+                var book = plugin.Import(args);
+                LoadBook(book);
+                message = ErrorStrings.ImportComplete;
+                hasError = false;
+            }
+            catch (Exception ex)
+            {
+                Program.DumpExceptionTo(ex, "import_exception.json");
+                LoadEmptyBook();
+                message = ErrorStrings.ImportFailed + Environment.NewLine + ex.Message;
+            }
+
+            ShowDiagnosticsResult(MainFormStrings.Import, message, hasError, args.Diagnostics);
+        }
+
+        protected void ShowDiagnosticsResult(string title, string message, bool hasError, IReadOnlyCollection<Diagnostic> diagnostics)
+        {
+            if (diagnostics.Count > 0)
+            {
+                var vm = new DiagnosticsWindowViewModel()
+                {
+                    Title = title,
+                    Message = message,
+                    Diagnostics = new System.Collections.ObjectModel.ObservableCollection<Diagnostic>(diagnostics)
+                };
+                var window = new DiagnosticsWindow()
+                {
+                    DataContext = vm
+                };
+                window.ShowDialog(this);
+            }
+            else
+            {
+                MessageBox.Show(this, message, title, MessageBoxButtons.OK, hasError ? MessageBoxIcon.Error : MessageBoxIcon.Information);
+            }
+        }
+
         protected void CommitChanges()
         {
             ScoreBook.Score.Notes = NoteView.Notes.Reposit();
@@ -357,10 +408,14 @@ namespace Ched.UI
 
         protected void ClearFile()
         {
-            if (!OperationManager.IsChanged || this.ConfirmDiscardChanges())
-            {
-                LoadEmptyBook();
-            }
+            if (!ConfirmDiscardChanges()) return;
+            LoadEmptyBook();
+        }
+
+        protected bool ConfirmDiscardChanges()
+        {
+            if (!OperationManager.IsChanged) return true;
+            return MessageBox.Show(this, ErrorStrings.FileDiscardConfirmation, Program.ApplicationName, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.OK;
         }
 
         protected void SetText()
@@ -383,20 +438,14 @@ namespace Ched.UI
         {
             var importPluginItems = PluginManager.ScoreBookImportPlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
             {
-                OpenFile(p.FileFilter, q =>
+                if (!ConfirmDiscardChanges()) return;
+                if (!TrySelectOpeningFile(p.FileFilter, out string path)) return;
+
+                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
-                    try
-                    {
-                        using (var reader = new StreamReader(q))
-                            LoadBook(p.Import(reader));
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(this, ErrorStrings.ImportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        Program.DumpExceptionTo(ex, "import_exception.json");
-                        LoadEmptyBook();
-                    }
-                });
+                    var args = new ScoreBookImportPluginArgs(stream);
+                    HandleImport(p, args);
+                }
             })).ToArray();
 
             var bookPropertiesMenuItem = new MenuItem(MainFormStrings.BookProperty, (s, e) =>

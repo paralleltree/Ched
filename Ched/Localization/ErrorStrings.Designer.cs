@@ -126,6 +126,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to インポートが完了しました。.
+        /// </summary>
+        public static string ImportComplete {
+            get {
+                return ResourceManager.GetString("ImportComplete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to インポートに失敗しました。.
         /// </summary>
         public static string ImportFailed {
@@ -176,6 +185,15 @@ namespace Ched.Localization {
         public static string PluginLoadError {
             get {
                 return ResourceManager.GetString("PluginLoadError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 以下のプラグインは現在のバージョンに対応していない可能性があります。プラグイン機能は無効化されます。.
+        /// </summary>
+        internal static string PluginNotSupported {
+            get {
+                return ResourceManager.GetString("PluginNotSupported", resourceCulture);
             }
         }
         
