@@ -131,7 +131,6 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\Exporter\IExporter.cs" />
     <Compile Include="Components\Exporter\SusExporter.cs" />
     <Compile Include="Configuration\ApplicationSettings.cs" />
     <Compile Include="Configuration\SettingsBase.cs" />
@@ -167,7 +166,9 @@
       <DependentUpon>PluginStrings.resx</DependentUpon>
     </Compile>
     <Compile Include="Plugins\ComboCalculator.cs" />
+    <Compile Include="Plugins\ExportManager.cs" />
     <Compile Include="Plugins\PluginManager.cs" />
+    <Compile Include="Plugins\ScoreBookExportPluginArgs.cs" />
     <Compile Include="Plugins\ScoreBookImportPluginArgs.cs" />
     <Compile Include="Plugins\ScorePluginArgs.cs" />
     <Compile Include="Plugins\ShiftEvent.cs" />
@@ -175,6 +176,7 @@
     <Compile Include="Plugins\SlideMerger.cs" />
     <Compile Include="Plugins\SlideReverser.cs" />
     <Compile Include="Plugins\SlideSplitter.cs" />
+    <Compile Include="Plugins\SusExportPlugin.cs" />
     <Compile Include="UI\Helpers.cs" />
     <Compile Include="UI\Windows\Behaviors\InitialFocusBehavior.cs" />
     <Compile Include="UI\Windows\Behaviors\OpenFileBehavior.cs" />

@@ -152,6 +152,9 @@
   <data name="MusicSourceNull" xml:space="preserve">
     <value>譜面プロパティから音源ファイルを指定してください。</value>
   </data>
+  <data name="NotExported" xml:space="preserve">
+    <value>エクスポートが実行されていません。</value>
+  </data>
   <data name="OutputPathRequired" xml:space="preserve">
     <value>出力先を指定してください。</value>
   </data>

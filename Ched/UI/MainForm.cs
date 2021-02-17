@@ -39,11 +39,10 @@ namespace Ched.UI
         private MenuItem WidenLaneWidthMenuItem;
         private MenuItem NarrowLaneWidthMenuItem;
 
-        private ExportData LastExportData { get; set; }
-
         private SoundPreviewManager PreviewManager { get; }
         private SoundSource CurrentMusicSource;
 
+        private ExportManager ExportManager { get; } = new ExportManager();
         private Plugins.PluginManager PluginManager { get; } = Plugins.PluginManager.GetInstance();
 
         private bool IsPreviewMode
@@ -238,13 +237,13 @@ namespace Ched.UI
         {
             ScoreBook = book;
             OperationManager.Clear();
+            ExportManager.Load(book);
             NoteView.Initialize(book.Score);
             NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             NoteViewScrollBar.SmallChange = NoteView.UnitBeatTick;
             UpdateThumbHeight();
             SetText(book.Path);
-            LastExportData = null;
             CurrentMusicSource = new SoundSource();
             if (!string.IsNullOrEmpty(book.Path))
             {
@@ -316,45 +315,42 @@ namespace Ched.UI
             SoundSettings.Default.Save();
         }
 
-        protected void ExportFile()
+        protected void ExportAs(IScoreBookExportPlugin exportPlugin)
         {
-            var dialog = new SaveFileDialog()
-            {
-                Title = MainFormStrings.Export,
-                Filter = "Sliding Universal Score(*.sus)|*.sus"
-            };
+            var dialog = new SaveFileDialog() { Filter = exportPlugin.FileFilter };
             if (dialog.ShowDialog(this) != DialogResult.OK) return;
-            var susArgs = ScoreBook.ExporterArgs.ContainsKey("sus") ? ScoreBook.ExporterArgs["sus"] as Components.Exporter.SusArgs : new Components.Exporter.SusArgs();
-            var vm = new SusExportWindowViewModel(ScoreBook, susArgs);
-            var window = new SusExportWindow() { DataContext = vm };
-            var result = window.ShowDialog(this);
-            if (!result.HasValue || !result.Value) return;
 
-            var exporter = new Components.Exporter.SusExporter() { CustomArgs = susArgs };
-            var exportData = new ExportData() { OutputPath = dialog.FileName, Exporter = exporter };
-            HandleExport(exportData);
-            if (!ScoreBook.ExporterArgs.ContainsKey("sus")) ScoreBook.ExporterArgs["sus"] = susArgs;
-            LastExportData = exportData;
+            HandleExport(ScoreBook, ExportManager.PrepareExport(exportPlugin, dialog.FileName));
         }
 
-        protected void HandleExport(ExportData exportData)
+        private void HandleExport(ScoreBook book, ExportContext context)
         {
             CommitChanges();
+            string message;
+            bool hasError = true;
             try
             {
-                exportData.Exporter.Export(exportData.OutputPath, ScoreBook);
-                MessageBox.Show(this, ErrorStrings.ExportComplete, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                context.Export(book);
+                message = ErrorStrings.ExportComplete;
+                hasError = false;
+            }
+            catch (UserCancelledException)
+            {
+                // Do nothing
+                return;
             }
             catch (InvalidTimeSignatureException ex)
             {
                 int beatAt = ex.Tick / ScoreBook.Score.TicksPerBeat + 1;
-                MessageBox.Show(string.Format(ErrorStrings.InvalidTimeSignature, beatAt), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                message = string.Format(ErrorStrings.InvalidTimeSignature, beatAt);
             }
             catch (Exception ex)
             {
                 Program.DumpExceptionTo(ex, "export_exception.json");
-                MessageBox.Show(ErrorStrings.ExportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                message = ErrorStrings.ExportFailed + Environment.NewLine + ex.Message;
             }
+
+            ShowDiagnosticsResult(MainFormStrings.Export, message, hasError, context.Diagnostics);
         }
 
         protected void HandleImport(IScoreBookImportPlugin plugin, ScoreBookImportPluginArgs args)
@@ -448,6 +444,11 @@ namespace Ched.UI
                 }
             })).ToArray();
 
+            var exportPluginItems = PluginManager.ScoreBookExportPlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
+            {
+                ExportAs(p);
+            })).ToArray();
+
             var bookPropertiesMenuItem = new MenuItem(MainFormStrings.BookProperty, (s, e) =>
             {
                 var vm = new BookPropertiesWindowViewModel(ScoreBook, CurrentMusicSource);
@@ -466,7 +467,7 @@ namespace Ched.UI
                 new MenuItem(MainFormStrings.SaveAs + "(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
                 new MenuItem("-"),
                 new MenuItem(MainFormStrings.Import, importPluginItems),
-                new MenuItem(MainFormStrings.Export, (s, e) => ExportFile()),
+                new MenuItem(MainFormStrings.Export, exportPluginItems),
                 new MenuItem("-"),
                 bookPropertiesMenuItem,
                 new MenuItem("-"),
@@ -769,13 +770,18 @@ namespace Ched.UI
             };
             var exportButton = new ToolStripButton(MainFormStrings.Export, Resources.ExportIcon, (s, e) =>
             {
-                if (LastExportData == null)
+                if (!ExportManager.CanReExport)
                 {
-                    ExportFile();
+                    if (PluginManager.ScoreBookExportPlugins.Count() == 1)
+                    {
+                        ExportAs(PluginManager.ScoreBookExportPlugins.Single());
+                        return;
+                    }
+                    MessageBox.Show(this, ErrorStrings.NotExported, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                HandleExport(LastExportData);
+                HandleExport(ScoreBook, ExportManager.PrepareReExport());
             })
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
@@ -1001,11 +1007,5 @@ namespace Ched.UI
                 quantizeComboBox
             });
         }
-    }
-
-    public class ExportData
-    {
-        public string OutputPath { get; set; }
-        public Components.Exporter.IExporter Exporter { get; set; }
     }
 }

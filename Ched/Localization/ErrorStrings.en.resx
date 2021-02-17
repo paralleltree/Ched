@@ -152,6 +152,9 @@ Select "Yes" to upgrade this file.
   <data name="MusicSourceNull" xml:space="preserve">
     <value>Please select an audio file in the Score Property.</value>
   </data>
+  <data name="NotExported" xml:space="preserve">
+    <value>You can re-export after the first export.</value>
+  </data>
   <data name="OutputPathRequired" xml:space="preserve">
     <value>Please select an output path.</value>
   </data>
