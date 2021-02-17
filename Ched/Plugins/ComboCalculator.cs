@@ -48,9 +48,9 @@ namespace Ched.Plugins
             int barTick = 4 * score.TicksPerBeat;
             var bpmEvents = score.Events.BpmChangeEvents.OrderBy(p => p.Tick).ToList();
             var airList = new HashSet<IAirable>(score.Notes.Airs.Select(p => p.ParentNote));
-            decimal getHeadBpmAt(int tick) => (bpmEvents.LastOrDefault(p => p.Tick <= tick) ?? bpmEvents[0]).Bpm;
-            decimal getTailBpmAt(int tick) => (bpmEvents.LastOrDefault(p => p.Tick < tick) ?? bpmEvents[0]).Bpm;
-            int comboDivider(decimal bpm) => bpm < 120 ? 16 : (bpm < 240 ? 8 : 4);
+            double getHeadBpmAt(int tick) => (bpmEvents.LastOrDefault(p => p.Tick <= tick) ?? bpmEvents[0]).Bpm;
+            double getTailBpmAt(int tick) => (bpmEvents.LastOrDefault(p => p.Tick < tick) ?? bpmEvents[0]).Bpm;
+            int comboDivider(double bpm) => bpm < 120 ? 16 : (bpm < 240 ? 8 : 4);
 
             // コンボとしてカウントされるstartTickからのオフセットを求める
             List<int> calcComboTicks(int startTick, IEnumerable<int> stepTicks)

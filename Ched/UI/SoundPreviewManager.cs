@@ -78,7 +78,7 @@ namespace Ched.UI
             while (TickElement != null && TickElement.Value < startTick) TickElement = TickElement.Next;
             while (BpmElement.Next != null && BpmElement.Next.Value.Tick <= startTick) BpmElement = BpmElement.Next;
 
-            int clapLatencyTick = GetLatencyTick(ClapSource.Latency, (double)BpmElement.Value.Bpm);
+            int clapLatencyTick = GetLatencyTick(ClapSource.Latency, BpmElement.Value.Bpm);
             InitialTick = startTick - clapLatencyTick;
             CurrentTick = InitialTick;
             StartTick = startTick;
@@ -126,7 +126,7 @@ namespace Ched.UI
             int elapsed = now - LastSystemTick;
             LastSystemTick = now;
 
-            elapsedTick += NoteView.UnitBeatTick * (double)BpmElement.Value.Bpm * elapsed / 60 / 1000;
+            elapsedTick += NoteView.UnitBeatTick * BpmElement.Value.Bpm * elapsed / 60 / 1000;
             CurrentTick = (int)(InitialTick + elapsedTick);
             if (CurrentTick >= StartTick)
                 TickUpdated?.Invoke(this, new TickUpdatedEventArgs(Math.Max(CurrentTick, 0)));
@@ -138,7 +138,7 @@ namespace Ched.UI
                 Stop();
             }
 
-            int latencyTick = GetLatencyTick(ClapSource.Latency, (double)BpmElement.Value.Bpm);
+            int latencyTick = GetLatencyTick(ClapSource.Latency, BpmElement.Value.Bpm);
             if (TickElement == null || TickElement.Value - latencyTick > CurrentTick) return;
             while (TickElement != null && TickElement.Value - latencyTick <= CurrentTick)
             {
@@ -167,10 +167,10 @@ namespace Ched.UI
             while (bpm.Next != null)
             {
                 if (tick < bpm.Next.Value.Tick) break; // 現在のBPMで到達
-                time += GetLatencyTime(bpm.Next.Value.Tick - bpm.Value.Tick, (double)bpm.Value.Bpm);
+                time += GetLatencyTime(bpm.Next.Value.Tick - bpm.Value.Tick, bpm.Value.Bpm);
                 bpm = bpm.Next;
             }
-            return time + GetLatencyTime(tick - bpm.Value.Tick, (double)bpm.Value.Bpm);
+            return time + GetLatencyTime(tick - bpm.Value.Tick, bpm.Value.Bpm);
         }
 
         private int GetTickFromTime(TimeSpan time, IEnumerable<BpmChangeEvent> bpmEvents)
@@ -181,12 +181,12 @@ namespace Ched.UI
             TimeSpan sum = new TimeSpan();
             while (bpm.Next != null)
             {
-                TimeSpan section = GetLatencyTime(bpm.Next.Value.Tick - bpm.Value.Tick, (double)bpm.Value.Bpm);
+                TimeSpan section = GetLatencyTime(bpm.Next.Value.Tick - bpm.Value.Tick, bpm.Value.Bpm);
                 if (time < sum + section) break;
                 sum += section;
                 bpm = bpm.Next;
             }
-            return bpm.Value.Tick + GetLatencyTick((time - sum).TotalSeconds, (double)bpm.Value.Bpm);
+            return bpm.Value.Tick + GetLatencyTick((time - sum).TotalSeconds, bpm.Value.Bpm);
         }
 
 

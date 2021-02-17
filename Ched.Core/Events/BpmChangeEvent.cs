@@ -15,9 +15,9 @@ namespace Ched.Core.Events
     public class BpmChangeEvent : EventBase
     {
         [Newtonsoft.Json.JsonProperty]
-        private decimal bpm;
+        private double bpm;
 
-        public decimal Bpm
+        public double Bpm
         {
             get { return bpm; }
             set { bpm = value; }

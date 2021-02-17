@@ -623,7 +623,7 @@ namespace Ched.UI
             {
                 var form = new BpmSelectionForm()
                 {
-                    Bpm = noteView.ScoreEvents.BpmChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.Bpm ?? 120m
+                    Bpm = noteView.ScoreEvents.BpmChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.Bpm ?? 120
                 };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 

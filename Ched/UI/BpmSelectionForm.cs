@@ -12,12 +12,12 @@ namespace Ched.UI
 {
     public partial class BpmSelectionForm : Form
     {
-        public decimal Bpm
+        public double Bpm
         {
-            get { return bpmBox.Value; }
+            get => (double)bpmBox.Value;
             set
             {
-                bpmBox.Value = value;
+                bpmBox.Value = (decimal)value;
                 bpmBox.SelectAll();
             }
         }
