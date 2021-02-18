@@ -470,8 +470,8 @@ namespace Ched.UI
                 new MenuItem(MainFormStrings.SaveFile + "(&S)", (s, e) => SaveFile()) { Shortcut = Shortcut.CtrlS },
                 new MenuItem(MainFormStrings.SaveAs + "(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
                 new MenuItem("-"),
-                new MenuItem(MainFormStrings.Import, importPluginItems),
-                new MenuItem(MainFormStrings.Export, exportPluginItems),
+                new MenuItem(MainFormStrings.Import, importPluginItems) { Enabled = importPluginItems.Length > 0 },
+                new MenuItem(MainFormStrings.Export, exportPluginItems) { Enabled = exportPluginItems.Length > 0 },
                 new MenuItem("-"),
                 bookPropertiesMenuItem,
                 new MenuItem("-"),
@@ -564,7 +564,7 @@ namespace Ched.UI
                     MessageBox.Show(this, ErrorStrings.PluginException, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             })).ToArray();
-            var pluginItem = new MenuItem(MainFormStrings.Plugin, pluginItems);
+            var pluginItem = new MenuItem(MainFormStrings.Plugin, pluginItems) { Enabled = pluginItems.Length > 0 };
 
             var editMenuItems = new MenuItem[]
             {
