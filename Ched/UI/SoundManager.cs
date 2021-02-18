@@ -13,7 +13,7 @@ namespace Ched.UI
         readonly HashSet<int> playing = new HashSet<int>();
         readonly HashSet<SYNCPROC> syncProcs = new HashSet<SYNCPROC>();
         readonly Dictionary<string, Queue<int>> handles = new Dictionary<string, Queue<int>>();
-        readonly Dictionary<string, TimeSpan> durations = new Dictionary<string, TimeSpan>();
+        readonly Dictionary<string, double> durations = new Dictionary<string, double>();
 
         public bool IsSupported { get; private set; } = true;
 
@@ -46,7 +46,7 @@ namespace Ched.UI
                 int handle = GetHandle(path);
                 long len = Bass.BASS_ChannelGetLength(handle);
                 handles.Add(path, new Queue<int>());
-                lock (durations) durations.Add(path, TimeSpan.FromSeconds(Bass.BASS_ChannelBytes2Seconds(handle, len)));
+                lock (durations) durations.Add(path, Bass.BASS_ChannelBytes2Seconds(handle, len));
             }
         }
 
@@ -59,10 +59,10 @@ namespace Ched.UI
 
         public void Play(string path)
         {
-            Play(path, TimeSpan.Zero);
+            Play(path, 0);
         }
 
-        public void Play(string path, TimeSpan offset)
+        public void Play(string path, double offset)
         {
             CheckSupported();
             Task.Run(() => PlayInternal(path, offset))
@@ -76,7 +76,7 @@ namespace Ched.UI
                 });
         }
 
-        private void PlayInternal(string path, TimeSpan offset)
+        private void PlayInternal(string path, double offset)
         {
             Queue<int> freelist;
             lock (handles)
@@ -106,7 +106,7 @@ namespace Ched.UI
             }
 
             lock (playing) playing.Add(handle);
-            Bass.BASS_ChannelSetPosition(handle, offset.TotalSeconds);
+            Bass.BASS_ChannelSetPosition(handle, offset);
             Bass.BASS_ChannelPlay(handle, false);
         }
 
@@ -123,7 +123,7 @@ namespace Ched.UI
             }
         }
 
-        public TimeSpan GetDuration(string path)
+        public double GetDuration(string path)
         {
             Register(path);
             lock (durations) return durations[path];
