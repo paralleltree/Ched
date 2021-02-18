@@ -131,7 +131,6 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\Exporter\IExporter.cs" />
     <Compile Include="Components\Exporter\SusExporter.cs" />
     <Compile Include="Configuration\ApplicationSettings.cs" />
     <Compile Include="Configuration\SettingsBase.cs" />
@@ -167,13 +166,17 @@
       <DependentUpon>PluginStrings.resx</DependentUpon>
     </Compile>
     <Compile Include="Plugins\ComboCalculator.cs" />
+    <Compile Include="Plugins\ExportManager.cs" />
     <Compile Include="Plugins\PluginManager.cs" />
+    <Compile Include="Plugins\ScoreBookExportPluginArgs.cs" />
+    <Compile Include="Plugins\ScoreBookImportPluginArgs.cs" />
     <Compile Include="Plugins\ScorePluginArgs.cs" />
     <Compile Include="Plugins\ShiftEvent.cs" />
     <Compile Include="Plugins\SlideKnitter.cs" />
     <Compile Include="Plugins\SlideMerger.cs" />
     <Compile Include="Plugins\SlideReverser.cs" />
     <Compile Include="Plugins\SlideSplitter.cs" />
+    <Compile Include="Plugins\SusExportPlugin.cs" />
     <Compile Include="UI\Helpers.cs" />
     <Compile Include="UI\Windows\Behaviors\InitialFocusBehavior.cs" />
     <Compile Include="UI\Windows\Behaviors\OpenFileBehavior.cs" />
@@ -185,11 +188,11 @@
     <Compile Include="UI\Windows\BookPropertiesWindow.xaml.cs">
       <DependentUpon>BookPropertiesWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\BPMSelectionForm.cs">
+    <Compile Include="UI\BpmSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\BPMSelectionForm.Designer.cs">
-      <DependentUpon>BPMSelectionForm.cs</DependentUpon>
+    <Compile Include="UI\BpmSelectionForm.Designer.cs">
+      <DependentUpon>BpmSelectionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\CheckableToolStripSplitButton.cs">
       <SubType>Component</SubType>
@@ -201,7 +204,6 @@
     <Compile Include="UI\CustomQuantizeSelectionForm.Designer.cs">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\FormExtensions.cs" />
     <Compile Include="UI\GraphicsExtensions.cs" />
     <Compile Include="UI\HighSpeedSelectionForm.cs">
       <SubType>Form</SubType>
@@ -251,6 +253,10 @@
     <Compile Include="UI\VersionInfoForm.Designer.cs">
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Windows\Converters\BitmapImageSourceConverter.cs" />
+    <Compile Include="UI\Windows\DiagnosticsWindow.xaml.cs">
+      <DependentUpon>DiagnosticsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\Windows\EnumSourceProvider.cs" />
     <Compile Include="UI\Windows\SusExportWindow.xaml.cs">
       <DependentUpon>SusExportWindow.xaml</DependentUpon>
@@ -292,11 +298,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UI\BPMSelectionForm.en.resx">
-      <DependentUpon>BPMSelectionForm.cs</DependentUpon>
+    <EmbeddedResource Include="UI\BpmSelectionForm.en.resx">
+      <DependentUpon>BpmSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\BPMSelectionForm.resx">
-      <DependentUpon>BPMSelectionForm.cs</DependentUpon>
+    <EmbeddedResource Include="UI\BpmSelectionForm.resx">
+      <DependentUpon>BpmSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\CustomQuantizeSelectionForm.en.resx">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
@@ -453,10 +459,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UI\Windows\DiagnosticsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\Windows\SusExportWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cross-circle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\exclamation.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\information.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\BASS.Native.2.4.12.2\build\BASS.Native.targets" Condition="Exists('..\packages\BASS.Native.2.4.12.2\build\BASS.Native.targets')" />

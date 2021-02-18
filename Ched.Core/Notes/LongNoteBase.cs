@@ -8,25 +8,19 @@ namespace Ched.Core.Notes
 {
     public interface ILongNote
     {
-        int StartTick { get; }
-        int GetDuration();
-    }
-
-    public abstract class LongNoteBase : NoteBase, ILongNote
-    {
         /// <summary>
         /// ノートの開始位置を表すTickを設定します。
         /// </summary>
-        public abstract int StartTick { get; }
+        int StartTick { get; }
 
         /// <summary>
         /// ノートの長さを表すTickを取得します。
         /// </summary>
-        public abstract int GetDuration();
+        int GetDuration();
     }
 
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
-    public abstract class MovableLongNoteBase : NoteBase, ILongNote
+    public abstract class MovableLongNoteBase : ILongNote
     {
         [Newtonsoft.Json.JsonProperty]
         private int startTick;
@@ -51,7 +45,7 @@ namespace Ched.Core.Notes
         public abstract int GetDuration();
     }
 
-    public abstract class LongNoteTapBase : TapBase, IAirable
+    public abstract class LongNoteTapBase : IAirable
     {
         public abstract bool IsTap { get; }
         public abstract int LaneIndex { get; }
