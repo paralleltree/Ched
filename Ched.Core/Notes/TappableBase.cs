@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace Ched.Core.Notes
 {
-    public abstract class TapBase : ShortNoteBase
-    {
-    }
-
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
-    public abstract class TappableBase : TapBase, IAirable
+    public abstract class TappableBase : IAirable
     {
         [Newtonsoft.Json.JsonProperty]
         private int tick;

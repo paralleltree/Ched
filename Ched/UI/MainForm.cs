@@ -39,11 +39,10 @@ namespace Ched.UI
         private MenuItem WidenLaneWidthMenuItem;
         private MenuItem NarrowLaneWidthMenuItem;
 
-        private ExportData LastExportData { get; set; }
-
         private SoundPreviewManager PreviewManager { get; }
         private SoundSource CurrentMusicSource;
 
+        private ExportManager ExportManager { get; } = new ExportManager();
         private Plugins.PluginManager PluginManager { get; } = Plugins.PluginManager.GetInstance();
 
         private bool IsPreviewMode
@@ -81,7 +80,11 @@ namespace Ched.UI
             ToolStripManager.RenderMode = ToolStripManagerRenderMode.System;
 
             OperationManager = new OperationManager();
-            OperationManager.OperationHistoryChanged += (s, e) => SetText(ScoreBook.Path);
+            OperationManager.OperationHistoryChanged += (s, e) =>
+            {
+                SetText(ScoreBook.Path);
+                NoteView.Invalidate();
+            };
             OperationManager.ChangesCommitted += (s, e) => SetText(ScoreBook.Path);
 
             NoteView = new NoteView(OperationManager)
@@ -92,7 +95,7 @@ namespace Ched.UI
                 InsertAirWithAirAction = ApplicationSettings.Default.InsertAirWithAirAction
             };
 
-            PreviewManager = new SoundPreviewManager(NoteView);
+            PreviewManager = new SoundPreviewManager(this);
             PreviewManager.IsStopAtLastNote = ApplicationSettings.Default.IsPreviewAbortAtLastNote;
             PreviewManager.TickUpdated += (s, e) => NoteView.CurrentTick = e.Tick;
             PreviewManager.ExceptionThrown += (s, e) => MessageBox.Show(this, ErrorStrings.PreviewException, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -157,13 +160,13 @@ namespace Ched.UI
             DragDrop += (s, e) =>
             {
                 string path = ((string[])e.Data.GetData(DataFormats.FileDrop)).Single();
-                if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) return;
+                if (!ConfirmDiscardChanges()) return;
                 LoadFile(path);
             };
 
             FormClosing += (s, e) =>
             {
-                if (OperationManager.IsChanged && !this.ConfirmDiscardChanges())
+                if (!ConfirmDiscardChanges())
                 {
                     e.Cancel = true;
                     return;
@@ -193,6 +196,10 @@ namespace Ched.UI
             if (PluginManager.FailedFiles.Count > 0)
             {
                 MessageBox.Show(this, string.Join("\n", new[] { ErrorStrings.PluginLoadError }.Concat(PluginManager.FailedFiles)), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            if (PluginManager.InvalidFiles.Count > 0)
+            {
+                MessageBox.Show(this, string.Join("\n", new[] { ErrorStrings.PluginNotSupported }.Concat(PluginManager.InvalidFiles)), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -234,13 +241,13 @@ namespace Ched.UI
         {
             ScoreBook = book;
             OperationManager.Clear();
+            ExportManager.Load(book);
             NoteView.Initialize(book.Score);
             NoteViewScrollBar.Value = NoteViewScrollBar.GetMaximumValue();
             NoteViewScrollBar.Minimum = -Math.Max(NoteView.UnitBeatTick * 4 * 20, NoteView.Notes.GetLastTick());
             NoteViewScrollBar.SmallChange = NoteView.UnitBeatTick;
             UpdateThumbHeight();
             SetText(book.Path);
-            LastExportData = null;
             CurrentMusicSource = new SoundSource();
             if (!string.IsNullOrEmpty(book.Path))
             {
@@ -253,19 +260,21 @@ namespace Ched.UI
         {
             var book = new ScoreBook();
             var events = book.Score.Events;
-            events.BPMChangeEvents.Add(new BPMChangeEvent() { Tick = 0, BPM = 120 });
+            events.BpmChangeEvents.Add(new BpmChangeEvent() { Tick = 0, Bpm = 120 });
             events.TimeSignatureChangeEvents.Add(new TimeSignatureChangeEvent() { Tick = 0, Numerator = 4, DenominatorExponent = 2 });
             LoadBook(book);
         }
 
         protected void OpenFile()
         {
-            OpenFile(FileTypeFilter, p => LoadFile(p));
+            if (!ConfirmDiscardChanges()) return;
+            if (!TrySelectOpeningFile(FileTypeFilter, out string path)) return;
+            LoadFile(path);
         }
 
-        protected void OpenFile(string filter, Action<string> loadAction)
+        protected bool TrySelectOpeningFile(string filter, out string path)
         {
-            if (OperationManager.IsChanged && !this.ConfirmDiscardChanges()) return;
+            path = null;
 
             var dialog = new OpenFileDialog()
             {
@@ -274,8 +283,10 @@ namespace Ched.UI
 
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
-                loadAction(dialog.FileName);
+                path = dialog.FileName;
+                return true;
             }
+            return false;
         }
 
         protected void SaveAs()
@@ -308,44 +319,85 @@ namespace Ched.UI
             SoundSettings.Default.Save();
         }
 
-        protected void ExportFile()
+        protected void ExportAs(IScoreBookExportPlugin exportPlugin)
         {
-            var dialog = new SaveFileDialog()
-            {
-                Title = MainFormStrings.Export,
-                Filter = "Sliding Universal Score(*.sus)|*.sus"
-            };
+            var dialog = new SaveFileDialog() { Filter = exportPlugin.FileFilter };
             if (dialog.ShowDialog(this) != DialogResult.OK) return;
-            var susArgs = ScoreBook.ExporterArgs.ContainsKey("sus") ? ScoreBook.ExporterArgs["sus"] as Components.Exporter.SusArgs : new Components.Exporter.SusArgs();
-            var vm = new SusExportWindowViewModel(ScoreBook, susArgs);
-            var window = new SusExportWindow() { DataContext = vm };
-            var result = window.ShowDialog(this);
-            if (!result.HasValue || !result.Value) return;
 
-            var exporter = new Components.Exporter.SusExporter() { CustomArgs = susArgs };
-            var exportData = new ExportData() { OutputPath = dialog.FileName, Exporter = exporter };
-            HandleExport(exportData);
-            if (!ScoreBook.ExporterArgs.ContainsKey("sus")) ScoreBook.ExporterArgs["sus"] = susArgs;
-            LastExportData = exportData;
+            HandleExport(ScoreBook, ExportManager.PrepareExport(exportPlugin, dialog.FileName));
         }
 
-        protected void HandleExport(ExportData exportData)
+        private void HandleExport(ScoreBook book, ExportContext context)
         {
             CommitChanges();
+            string message;
+            bool hasError = true;
             try
             {
-                exportData.Exporter.Export(exportData.OutputPath, ScoreBook);
-                MessageBox.Show(this, ErrorStrings.ExportComplete, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                context.Export(book);
+                message = ErrorStrings.ExportComplete;
+                hasError = false;
+                ExportManager.CommitExported(context);
+            }
+            catch (UserCancelledException)
+            {
+                // Do nothing
+                return;
             }
             catch (InvalidTimeSignatureException ex)
             {
                 int beatAt = ex.Tick / ScoreBook.Score.TicksPerBeat + 1;
-                MessageBox.Show(string.Format(ErrorStrings.InvalidTimeSignature, beatAt), Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                message = string.Format(ErrorStrings.InvalidTimeSignature, beatAt);
             }
             catch (Exception ex)
             {
                 Program.DumpExceptionTo(ex, "export_exception.json");
-                MessageBox.Show(ErrorStrings.ExportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                message = ErrorStrings.ExportFailed + Environment.NewLine + ex.Message;
+            }
+
+            ShowDiagnosticsResult(MainFormStrings.Export, message, hasError, context.Diagnostics);
+        }
+
+        protected void HandleImport(IScoreBookImportPlugin plugin, ScoreBookImportPluginArgs args)
+        {
+            string message;
+            bool hasError = true;
+            try
+            {
+                var book = plugin.Import(args);
+                LoadBook(book);
+                message = ErrorStrings.ImportComplete;
+                hasError = false;
+            }
+            catch (Exception ex)
+            {
+                Program.DumpExceptionTo(ex, "import_exception.json");
+                LoadEmptyBook();
+                message = ErrorStrings.ImportFailed + Environment.NewLine + ex.Message;
+            }
+
+            ShowDiagnosticsResult(MainFormStrings.Import, message, hasError, args.Diagnostics);
+        }
+
+        protected void ShowDiagnosticsResult(string title, string message, bool hasError, IReadOnlyCollection<Diagnostic> diagnostics)
+        {
+            if (diagnostics.Count > 0)
+            {
+                var vm = new DiagnosticsWindowViewModel()
+                {
+                    Title = title,
+                    Message = message,
+                    Diagnostics = new System.Collections.ObjectModel.ObservableCollection<Diagnostic>(diagnostics)
+                };
+                var window = new DiagnosticsWindow()
+                {
+                    DataContext = vm
+                };
+                window.ShowDialog(this);
+            }
+            else
+            {
+                MessageBox.Show(this, message, title, MessageBoxButtons.OK, hasError ? MessageBoxIcon.Error : MessageBoxIcon.Information);
             }
         }
 
@@ -357,10 +409,14 @@ namespace Ched.UI
 
         protected void ClearFile()
         {
-            if (!OperationManager.IsChanged || this.ConfirmDiscardChanges())
-            {
-                LoadEmptyBook();
-            }
+            if (!ConfirmDiscardChanges()) return;
+            LoadEmptyBook();
+        }
+
+        protected bool ConfirmDiscardChanges()
+        {
+            if (!OperationManager.IsChanged) return true;
+            return MessageBox.Show(this, ErrorStrings.FileDiscardConfirmation, Program.ApplicationName, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.OK;
         }
 
         protected void SetText()
@@ -383,20 +439,19 @@ namespace Ched.UI
         {
             var importPluginItems = PluginManager.ScoreBookImportPlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
             {
-                OpenFile(p.FileFilter, q =>
+                if (!ConfirmDiscardChanges()) return;
+                if (!TrySelectOpeningFile(p.FileFilter, out string path)) return;
+
+                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
-                    try
-                    {
-                        using (var reader = new StreamReader(q))
-                            LoadBook(p.Import(reader));
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(this, ErrorStrings.ImportFailed, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        Program.DumpExceptionTo(ex, "import_exception.json");
-                        LoadEmptyBook();
-                    }
-                });
+                    var args = new ScoreBookImportPluginArgs(stream);
+                    HandleImport(p, args);
+                }
+            })).ToArray();
+
+            var exportPluginItems = PluginManager.ScoreBookExportPlugins.Select(p => new MenuItem(p.DisplayName, (s, e) =>
+            {
+                ExportAs(p);
             })).ToArray();
 
             var bookPropertiesMenuItem = new MenuItem(MainFormStrings.BookProperty, (s, e) =>
@@ -416,20 +471,20 @@ namespace Ched.UI
                 new MenuItem(MainFormStrings.SaveFile + "(&S)", (s, e) => SaveFile()) { Shortcut = Shortcut.CtrlS },
                 new MenuItem(MainFormStrings.SaveAs + "(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
                 new MenuItem("-"),
-                new MenuItem(MainFormStrings.Import, importPluginItems),
-                new MenuItem(MainFormStrings.Export, (s, e) => ExportFile()),
+                new MenuItem(MainFormStrings.Import, importPluginItems) { Enabled = importPluginItems.Length > 0 },
+                new MenuItem(MainFormStrings.Export, exportPluginItems) { Enabled = exportPluginItems.Length > 0 },
                 new MenuItem("-"),
                 bookPropertiesMenuItem,
                 new MenuItem("-"),
                 new MenuItem(MainFormStrings.Exit + "(&X)", (s, e) => this.Close())
             };
 
-            var undoItem = new MenuItem(MainFormStrings.Undo, (s, e) => noteView.Undo())
+            var undoItem = new MenuItem(MainFormStrings.Undo, (s, e) => OperationManager.Undo())
             {
                 Shortcut = Shortcut.CtrlZ,
                 Enabled = false
             };
-            var redoItem = new MenuItem(MainFormStrings.Redo, (s, e) => noteView.Redo())
+            var redoItem = new MenuItem(MainFormStrings.Redo, (s, e) => OperationManager.Redo())
             {
                 Shortcut = Shortcut.CtrlY,
                 Enabled = false
@@ -454,10 +509,10 @@ namespace Ched.UI
                 bool isContained(EventBase p) => p.Tick != 0 && minTick <= p.Tick && maxTick >= p.Tick;
                 var events = ScoreBook.Score.Events;
 
-                var bpmOp = events.BPMChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
+                var bpmOp = events.BpmChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
                 {
-                    ScoreBook.Score.Events.BPMChangeEvents.Remove(p);
-                    return new RemoveEventOperation<BPMChangeEvent>(events.BPMChangeEvents, p);
+                    ScoreBook.Score.Events.BpmChangeEvents.Remove(p);
+                    return new RemoveEventOperation<BpmChangeEvent>(events.BpmChangeEvents, p);
                 }).ToList();
 
                 var speedOp = events.HighSpeedChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
@@ -510,7 +565,7 @@ namespace Ched.UI
                     MessageBox.Show(this, ErrorStrings.PluginException, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             })).ToArray();
-            var pluginItem = new MenuItem(MainFormStrings.Plugin, pluginItems);
+            var pluginItem = new MenuItem(MainFormStrings.Plugin, pluginItems) { Enabled = pluginItems.Length > 0 };
 
             var editMenuItems = new MenuItem[]
             {
@@ -569,20 +624,20 @@ namespace Ched.UI
                 noteView.Invalidate();
             }
 
-            var insertBPMItem = new MenuItem("BPM", (s, e) =>
+            var insertBpmItem = new MenuItem("BPM", (s, e) =>
             {
-                var form = new BPMSelectionForm()
+                var form = new BpmSelectionForm()
                 {
-                    BPM = noteView.ScoreEvents.BPMChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.BPM ?? 120m
+                    Bpm = noteView.ScoreEvents.BpmChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.Bpm ?? 120
                 };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
-                var item = new BPMChangeEvent()
+                var item = new BpmChangeEvent()
                 {
                     Tick = noteView.CurrentTick,
-                    BPM = form.BPM
+                    Bpm = form.Bpm
                 };
-                UpdateEvent(noteView.ScoreEvents.BPMChangeEvents, item);
+                UpdateEvent(noteView.ScoreEvents.BpmChangeEvents, item);
             });
 
             var insertHighSpeedItem = new MenuItem(MainFormStrings.HighSpeed, (s, e) =>
@@ -615,7 +670,7 @@ namespace Ched.UI
                 UpdateEvent(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
             });
 
-            var insertMenuItems = new MenuItem[] { insertBPMItem, insertHighSpeedItem, insertTimeSignatureItem };
+            var insertMenuItems = new MenuItem[] { insertBpmItem, insertHighSpeedItem, insertTimeSignatureItem };
 
             var isAbortAtLastNoteItem = new MenuItem(MainFormStrings.AbortAtLastNote, (s, e) =>
             {
@@ -658,7 +713,8 @@ namespace Ched.UI
 
                 try
                 {
-                    if (!PreviewManager.Start(CurrentMusicSource, startTick)) return;
+                    var context = new SoundPreviewContext(ScoreBook.Score, CurrentMusicSource);
+                    if (!PreviewManager.Start(context, startTick)) return;
                     isAbortAtLastNoteItem.Enabled = false;
                     PreviewManager.Finished += lambda;
                     noteView.Editable = CanEdit;
@@ -688,8 +744,8 @@ namespace Ched.UI
 
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
-                redoItem.Enabled = noteView.CanRedo;
-                undoItem.Enabled = noteView.CanUndo;
+                redoItem.Enabled = OperationManager.CanRedo;
+                undoItem.Enabled = OperationManager.CanUndo;
             };
 
             return new MainMenu(new MenuItem[]
@@ -720,13 +776,18 @@ namespace Ched.UI
             };
             var exportButton = new ToolStripButton(MainFormStrings.Export, Resources.ExportIcon, (s, e) =>
             {
-                if (LastExportData == null)
+                if (!ExportManager.CanReExport)
                 {
-                    ExportFile();
+                    if (PluginManager.ScoreBookExportPlugins.Count() == 1)
+                    {
+                        ExportAs(PluginManager.ScoreBookExportPlugins.Single());
+                        return;
+                    }
+                    MessageBox.Show(this, ErrorStrings.NotExported, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                HandleExport(LastExportData);
+                HandleExport(ScoreBook, ExportManager.PrepareReExport());
             })
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image
@@ -745,12 +806,12 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
-            var undoButton = new ToolStripButton(MainFormStrings.Undo, Resources.UndoIcon, (s, e) => noteView.Undo())
+            var undoButton = new ToolStripButton(MainFormStrings.Undo, Resources.UndoIcon, (s, e) => OperationManager.Undo())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 Enabled = false
             };
-            var redoButton = new ToolStripButton(MainFormStrings.Redo, Resources.RedoIcon, (s, e) => noteView.Redo())
+            var redoButton = new ToolStripButton(MainFormStrings.Redo, Resources.RedoIcon, (s, e) => OperationManager.Redo())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 Enabled = false
@@ -803,8 +864,8 @@ namespace Ched.UI
 
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
-                undoButton.Enabled = noteView.CanUndo;
-                redoButton.Enabled = noteView.CanRedo;
+                undoButton.Enabled = OperationManager.CanUndo;
+                redoButton.Enabled = OperationManager.CanRedo;
             };
 
             noteView.EditModeChanged += (s, e) =>
@@ -952,11 +1013,5 @@ namespace Ched.UI
                 quantizeComboBox
             });
         }
-    }
-
-    public class ExportData
-    {
-        public string OutputPath { get; set; }
-        public Components.Exporter.IExporter Exporter { get; set; }
     }
 }

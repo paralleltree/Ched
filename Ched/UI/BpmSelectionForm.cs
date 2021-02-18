@@ -10,19 +10,19 @@ using System.Windows.Forms;
 
 namespace Ched.UI
 {
-    public partial class BPMSelectionForm : Form
+    public partial class BpmSelectionForm : Form
     {
-        public decimal BPM
+        public double Bpm
         {
-            get { return bpmBox.Value; }
+            get => (double)bpmBox.Value;
             set
             {
-                bpmBox.Value = value;
+                bpmBox.Value = (decimal)value;
                 bpmBox.SelectAll();
             }
         }
 
-        public BPMSelectionForm()
+        public BpmSelectionForm()
         {
             InitializeComponent();
             AcceptButton = buttonOK;

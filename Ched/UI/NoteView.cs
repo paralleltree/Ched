@@ -327,10 +327,6 @@ namespace Ched.UI
 
         protected int LastWidth { get; set; } = 4;
 
-        public bool CanUndo { get { return OperationManager.CanUndo; } }
-
-        public bool CanRedo { get { return OperationManager.CanRedo; } }
-
         public NoteCollection Notes { get; private set; } = new NoteCollection(new Core.NoteCollection());
 
         public EventCollection ScoreEvents { get; set; } = new EventCollection();
@@ -1780,10 +1776,10 @@ namespace Ched.UI
                 // BPM描画
                 using (var bpmBrush = new SolidBrush(Color.FromArgb(0, 192, 0)))
                 {
-                    foreach (var item in ScoreEvents.BPMChangeEvents.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
+                    foreach (var item in ScoreEvents.BpmChangeEvents.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
                     {
                         var point = new PointF(rightBase, -GetYPositionFromTick(item.Tick) - strSize.Height);
-                        pe.Graphics.DrawString(Regex.Replace(item.BPM.ToString(), @"\.0$", "").PadLeft(3), font, Brushes.Lime, point);
+                        pe.Graphics.DrawString(Regex.Replace(item.Bpm.ToString(), @"\.0$", "").PadLeft(3), font, Brushes.Lime, point);
                     }
                 }
 
@@ -2157,20 +2153,6 @@ namespace Ched.UI
 
             var opList = opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).Concat(opAirs).ToList();
             return opList.Count == 0 ? null : new CompositeOperation("ノーツの反転", opList);
-        }
-
-        public void Undo()
-        {
-            if (!OperationManager.CanUndo) return;
-            OperationManager.Undo();
-            Invalidate();
-        }
-
-        public void Redo()
-        {
-            if (!OperationManager.CanRedo) return;
-            OperationManager.Redo();
-            Invalidate();
         }
 
 

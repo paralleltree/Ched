@@ -15,13 +15,13 @@ namespace Ched.Core
     public class EventCollection
     {
         [Newtonsoft.Json.JsonProperty]
-        private List<BPMChangeEvent> bpmChangeEvents = new List<BPMChangeEvent>();
+        private List<BpmChangeEvent> bpmChangeEvents = new List<BpmChangeEvent>();
         [Newtonsoft.Json.JsonProperty]
         private List<TimeSignatureChangeEvent> timeSignatureChangeEvents = new List<TimeSignatureChangeEvent>();
         [Newtonsoft.Json.JsonProperty]
         private List<HighSpeedChangeEvent> highSpeedChangeEvents = new List<HighSpeedChangeEvent>();
 
-        public List<BPMChangeEvent> BPMChangeEvents
+        public List<BpmChangeEvent> BpmChangeEvents
         {
             get { return bpmChangeEvents; }
             set { bpmChangeEvents = value; }
@@ -40,13 +40,13 @@ namespace Ched.Core
         }
 
         public IEnumerable<EventBase> AllEvents =>
-            BPMChangeEvents.Cast<EventBase>()
+            BpmChangeEvents.Cast<EventBase>()
             .Concat(TimeSignatureChangeEvents)
             .Concat(HighSpeedChangeEvents);
 
         public void UpdateTicksPerBeat(double factor)
         {
-            var events = BPMChangeEvents.Cast<EventBase>()
+            var events = BpmChangeEvents.Cast<EventBase>()
                  .Concat(TimeSignatureChangeEvents)
                  .Concat(HighSpeedChangeEvents);
             foreach (var e in events)

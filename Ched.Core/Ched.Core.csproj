@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Ched.Core</RootNamespace>
     <AssemblyName>Ched.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -66,7 +66,7 @@
     <Compile Include="BarIndexCalculator.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="EventCollection.cs" />
-    <Compile Include="Events\BPMChangeEvent.cs" />
+    <Compile Include="Events\BpmChangeEvent.cs" />
     <Compile Include="Events\EventBase.cs" />
     <Compile Include="Events\HighSpeedChangeEvent.cs" />
     <Compile Include="Events\InvalidTimeSignatureException.cs" />
@@ -79,14 +79,13 @@
     <Compile Include="Notes\Flick.cs" />
     <Compile Include="Notes\Hold.cs" />
     <Compile Include="Notes\LongNoteBase.cs" />
-    <Compile Include="Notes\NoteBase.cs" />
-    <Compile Include="Notes\ShortNoteBase.cs" />
     <Compile Include="Notes\Slide.cs" />
     <Compile Include="Notes\Tap.cs" />
     <Compile Include="Notes\TappableBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Score.cs" />
     <Compile Include="ScoreBook.cs" />
+    <Compile Include="TimeCalculator.cs" />
     <Compile Include="UI\SelectionRange.cs" />
   </ItemGroup>
   <ItemGroup>

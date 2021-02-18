@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Registration;
+using System.Reflection;
 
 namespace Ched.Plugins
 {
@@ -19,11 +20,15 @@ namespace Ched.Plugins
         IEnumerable<IScorePlugin> scorePlugins = Enumerable.Empty<IScorePlugin>();
         [ImportMany]
         IEnumerable<IScoreBookImportPlugin> bookImportPlugins = Enumerable.Empty<IScoreBookImportPlugin>();
+        [ImportMany]
+        IEnumerable<IScoreBookExportPlugin> bookExportPlugins = Enumerable.Empty<IScoreBookExportPlugin>();
 
-        public List<string> FailedFiles { get; private set; } = new List<string>();
+        public IReadOnlyCollection<string> FailedFiles { get; private set; } = new List<string>();
+        public IReadOnlyCollection<string> InvalidFiles { get; private set; } = new List<string>();
 
         public IEnumerable<IScorePlugin> ScorePlugins => scorePlugins;
         public IEnumerable<IScoreBookImportPlugin> ScoreBookImportPlugins => bookImportPlugins;
+        public IEnumerable<IScoreBookExportPlugin> ScoreBookExportPlugins => bookExportPlugins;
 
         private PluginManager()
         {
@@ -35,7 +40,7 @@ namespace Ched.Plugins
             builder.ForTypesDerivedFrom<IPlugin>().ExportInterfaces();
             builder.ForType<PluginManager>().Export<PluginManager>();
 
-            var failed = new List<string>();
+            var failedFiles = new List<string>();
             var self = new AssemblyCatalog(typeof(PluginManager).Assembly, builder);
             var catalog = new AggregateCatalog(self);
 
@@ -50,15 +55,29 @@ namespace Ched.Plugins
                     }
                     catch (Exception ex) when (ex is NotSupportedException || ex is BadImageFormatException)
                     {
-                        failed.Add(Uri.UnescapeDataString(new Uri(Path.GetFullPath(PluginPath)).MakeRelativeUri(new Uri(path)).ToString().Replace('/', Path.DirectorySeparatorChar)));
+                        failedFiles.Add(GetRelativePluginPath(path));
                     }
                 }
             }
 
             var container = new CompositionContainer(catalog);
-            var manager = container.GetExportedValue<PluginManager>();
-            manager.FailedFiles = failed;
+            PluginManager manager = null;
+            try
+            {
+                manager = container.GetExportedValue<PluginManager>();
+            }
+            catch (ReflectionTypeLoadException ex) when (ex.LoaderExceptions.Any(p => p is TypeLoadException))
+            {
+                return new PluginManager()
+                {
+                    FailedFiles = failedFiles,
+                    InvalidFiles = ex.Types.Where(p => p != null).Select(p => GetRelativePluginPath(p.Assembly.Location)).Distinct().ToList()
+                };
+            }
+            manager.FailedFiles = failedFiles;
             return manager;
         }
+
+        private static string GetRelativePluginPath(string path) => Uri.UnescapeDataString(new Uri(Path.GetFullPath(PluginPath)).MakeRelativeUri(new Uri(path)).ToString().Replace('/', Path.DirectorySeparatorChar));
     }
 }

@@ -29,7 +29,7 @@ namespace Ched.Plugins
 
         public void UpdateScore(Score score)
         {
-            CheckEventDuplicate(score.Events.BPMChangeEvents);
+            CheckEventDuplicate(score.Events.BpmChangeEvents);
             CheckEventDuplicate(score.Events.TimeSignatureChangeEvents);
             CheckEventDuplicate(score.Events.HighSpeedChangeEvents);
             updateScoreAction(score);

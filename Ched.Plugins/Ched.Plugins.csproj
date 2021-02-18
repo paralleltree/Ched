@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Ched.Plugins</RootNamespace>
     <AssemblyName>Ched.Plugins</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -54,10 +54,13 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Diagnostics.cs" />
+    <Compile Include="IScoreBookExportPlugin.cs" />
     <Compile Include="IScoreBookImportPlugin.cs" />
     <Compile Include="IPlugin.cs" />
     <Compile Include="IScorePlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserCancelledException.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ched.Core\Ched.Core.csproj">

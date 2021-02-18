@@ -11,13 +11,13 @@ namespace Ched.Core.Events
     /// BPMの変更イベントを表すクラスです。
     /// </summary>
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
-    [DebuggerDisplay("Tick = {Tick}, Value = {BPM}")]
-    public class BPMChangeEvent : EventBase
+    [DebuggerDisplay("Tick = {Tick}, Value = {Bpm}")]
+    public class BpmChangeEvent : EventBase
     {
         [Newtonsoft.Json.JsonProperty]
-        private decimal bpm;
+        private double bpm;
 
-        public decimal BPM
+        public double Bpm
         {
             get { return bpm; }
             set { bpm = value; }
