@@ -337,6 +337,7 @@ namespace Ched.UI
                 context.Export(book);
                 message = ErrorStrings.ExportComplete;
                 hasError = false;
+                ExportManager.CommitExported(context);
             }
             catch (UserCancelledException)
             {

@@ -11,15 +11,14 @@ namespace Ched.Plugins
 {
     internal class ExportManager
     {
-        private IScoreBookExportPlugin LastUsedPlugin { get; set; }
-        private string LastOutputPath { get; set; }
+        private ExportContext LastUsedContext { get; set; }
         private Dictionary<string, string> CustomDataCache { get; set; }
 
-        public bool CanReExport => LastUsedPlugin != null;
+        public bool CanReExport => LastUsedContext != null;
 
         protected void Initialize()
         {
-            LastUsedPlugin = null;
+            LastUsedContext = null;
             CustomDataCache = null;
         }
 
@@ -37,25 +36,29 @@ namespace Ched.Plugins
         public ExportContext PrepareReExport()
         {
             if (!CanReExport) throw new InvalidOperationException();
-            return PrepareExport(LastUsedPlugin, LastOutputPath, true);
+            return PrepareExport(LastUsedContext.ExportPlugin, LastUsedContext.OutputPath, true);
         }
 
         protected ExportContext PrepareExport(IScoreBookExportPlugin plugin, string dest, bool isQuick)
         {
             string name = ResolvePluginName(plugin);
-            LastOutputPath = dest;
-            LastUsedPlugin = plugin;
             return new ExportContext(plugin, dest, isQuick, () => CustomDataCache.ContainsKey(name) ? CustomDataCache[name] : "", data => CustomDataCache[name] = data);
         }
+
+        /// <summary>
+        /// エクスポートが正常に完了したことをこの<see cref="ExportManager"/>へ通知します。
+        /// </summary>
+        /// <param name="context">エクスポートを行った<see cref="ExportContext"/></param>
+        public void CommitExported(ExportContext context) => LastUsedContext = context;
 
         protected string ResolvePluginName(IScoreBookExportPlugin plugin) => plugin.GetType().FullName;
     }
 
     internal class ExportContext
     {
-        protected IScoreBookExportPlugin ExportPlugin { get; }
+        public IScoreBookExportPlugin ExportPlugin { get; }
         protected bool IsQuick { get; }
-        protected string OutputPath { get; }
+        public string OutputPath { get; }
         protected readonly Func<string> GetCustomData;
         protected readonly Action<string> SetCustomData;
         public IReadOnlyCollection<Diagnostic> Diagnostics { get; private set; }
