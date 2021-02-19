@@ -68,7 +68,7 @@ namespace Ched.Components.Exporter
 
                 if (bpmlist.Count >= 36 * 36) throw new ArgumentException("BPM定義数が上限を超えました。");
 
-                var bpmIdentifiers = EnumerateIdentifiers(2).Skip(1).Take(bpmlist.Count).ToList();
+                var bpmIdentifiers = EnumerateIdentifiers(2, NumChars.Concat(AlphaChars)).Skip(1).Take(bpmlist.Count).ToList();
                 foreach (var item in bpmlist.GroupBy(p => p.Index).Select(p => p.First()))
                 {
                     writer.WriteLine("#BPM{0}: {1}", bpmIdentifiers[item.Index], item.Value.Bpm);
@@ -308,16 +308,10 @@ namespace Ched.Components.Exporter
             return width == 16 ? "g" : width.ToString("x");
         }
 
-        public static IEnumerable<string> EnumerateIdentifiers(int digits)
-        {
-            var num = Enumerable.Range(0, 10).Select(p => (char)('0' + p));
-            var alpha = Enumerable.Range(0, 26).Select(p => (char)('A' + p));
-            var seq = num.Concat(alpha).Select(p => p.ToString()).ToList();
+        public static readonly IEnumerable<string> NumChars = Enumerable.Range(0, 10).Select(p => ((char)('0' + p)).ToString());
+        public static readonly IEnumerable<string> AlphaChars = Enumerable.Range(0, 26).Select(p => ((char)('A' + p)).ToString());
 
-            return EnumerateIdentifiers(digits, seq);
-        }
-
-        private static IEnumerable<string> EnumerateIdentifiers(int digits, List<string> seq)
+        private static IEnumerable<string> EnumerateIdentifiers(int digits, IEnumerable<string> seq)
         {
             if (digits < 1) throw new ArgumentOutOfRangeException("digits");
             if (digits == 1) return seq;
@@ -363,7 +357,7 @@ namespace Ched.Components.Exporter
             public void Clear()
             {
                 lastStartTick = 0;
-                IdentifierStack = new Stack<char>(EnumerateIdentifiers(1).Select(p => p.Single()).Reverse());
+                IdentifierStack = new Stack<char>(EnumerateIdentifiers(1, AlphaChars.Concat(NumChars)).Select(p => p.Single()).Reverse());
                 UsedIdentifiers = new ConcurrentPriorityQueue<Tuple<int, char>, int>();
             }
 

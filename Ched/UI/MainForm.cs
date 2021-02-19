@@ -80,7 +80,11 @@ namespace Ched.UI
             ToolStripManager.RenderMode = ToolStripManagerRenderMode.System;
 
             OperationManager = new OperationManager();
-            OperationManager.OperationHistoryChanged += (s, e) => SetText(ScoreBook.Path);
+            OperationManager.OperationHistoryChanged += (s, e) =>
+            {
+                SetText(ScoreBook.Path);
+                NoteView.Invalidate();
+            };
             OperationManager.ChangesCommitted += (s, e) => SetText(ScoreBook.Path);
 
             NoteView = new NoteView(OperationManager)
@@ -333,6 +337,7 @@ namespace Ched.UI
                 context.Export(book);
                 message = ErrorStrings.ExportComplete;
                 hasError = false;
+                ExportManager.CommitExported(context);
             }
             catch (UserCancelledException)
             {
@@ -466,20 +471,20 @@ namespace Ched.UI
                 new MenuItem(MainFormStrings.SaveFile + "(&S)", (s, e) => SaveFile()) { Shortcut = Shortcut.CtrlS },
                 new MenuItem(MainFormStrings.SaveAs + "(&A)", (s, e) => SaveAs()) { Shortcut = Shortcut.CtrlShiftS },
                 new MenuItem("-"),
-                new MenuItem(MainFormStrings.Import, importPluginItems),
-                new MenuItem(MainFormStrings.Export, exportPluginItems),
+                new MenuItem(MainFormStrings.Import, importPluginItems) { Enabled = importPluginItems.Length > 0 },
+                new MenuItem(MainFormStrings.Export, exportPluginItems) { Enabled = exportPluginItems.Length > 0 },
                 new MenuItem("-"),
                 bookPropertiesMenuItem,
                 new MenuItem("-"),
                 new MenuItem(MainFormStrings.Exit + "(&X)", (s, e) => this.Close())
             };
 
-            var undoItem = new MenuItem(MainFormStrings.Undo, (s, e) => noteView.Undo())
+            var undoItem = new MenuItem(MainFormStrings.Undo, (s, e) => OperationManager.Undo())
             {
                 Shortcut = Shortcut.CtrlZ,
                 Enabled = false
             };
-            var redoItem = new MenuItem(MainFormStrings.Redo, (s, e) => noteView.Redo())
+            var redoItem = new MenuItem(MainFormStrings.Redo, (s, e) => OperationManager.Redo())
             {
                 Shortcut = Shortcut.CtrlY,
                 Enabled = false
@@ -560,7 +565,7 @@ namespace Ched.UI
                     MessageBox.Show(this, ErrorStrings.PluginException, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             })).ToArray();
-            var pluginItem = new MenuItem(MainFormStrings.Plugin, pluginItems);
+            var pluginItem = new MenuItem(MainFormStrings.Plugin, pluginItems) { Enabled = pluginItems.Length > 0 };
 
             var editMenuItems = new MenuItem[]
             {
@@ -739,8 +744,8 @@ namespace Ched.UI
 
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
-                redoItem.Enabled = noteView.CanRedo;
-                undoItem.Enabled = noteView.CanUndo;
+                redoItem.Enabled = OperationManager.CanRedo;
+                undoItem.Enabled = OperationManager.CanUndo;
             };
 
             return new MainMenu(new MenuItem[]
@@ -801,12 +806,12 @@ namespace Ched.UI
                 DisplayStyle = ToolStripItemDisplayStyle.Image
             };
 
-            var undoButton = new ToolStripButton(MainFormStrings.Undo, Resources.UndoIcon, (s, e) => noteView.Undo())
+            var undoButton = new ToolStripButton(MainFormStrings.Undo, Resources.UndoIcon, (s, e) => OperationManager.Undo())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 Enabled = false
             };
-            var redoButton = new ToolStripButton(MainFormStrings.Redo, Resources.RedoIcon, (s, e) => noteView.Redo())
+            var redoButton = new ToolStripButton(MainFormStrings.Redo, Resources.RedoIcon, (s, e) => OperationManager.Redo())
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 Enabled = false
@@ -859,8 +864,8 @@ namespace Ched.UI
 
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
-                undoButton.Enabled = noteView.CanUndo;
-                redoButton.Enabled = noteView.CanRedo;
+                undoButton.Enabled = OperationManager.CanUndo;
+                redoButton.Enabled = OperationManager.CanRedo;
             };
 
             noteView.EditModeChanged += (s, e) =>

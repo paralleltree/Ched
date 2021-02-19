@@ -327,10 +327,6 @@ namespace Ched.UI
 
         protected int LastWidth { get; set; } = 4;
 
-        public bool CanUndo { get { return OperationManager.CanUndo; } }
-
-        public bool CanRedo { get { return OperationManager.CanRedo; } }
-
         public NoteCollection Notes { get; private set; } = new NoteCollection(new Core.NoteCollection());
 
         public EventCollection ScoreEvents { get; set; } = new EventCollection();
@@ -2157,20 +2153,6 @@ namespace Ched.UI
 
             var opList = opShortNotes.Cast<IOperation>().Concat(opHolds).Concat(opSlides).Concat(opAirs).ToList();
             return opList.Count == 0 ? null : new CompositeOperation("ノーツの反転", opList);
-        }
-
-        public void Undo()
-        {
-            if (!OperationManager.CanUndo) return;
-            OperationManager.Undo();
-            Invalidate();
-        }
-
-        public void Redo()
-        {
-            if (!OperationManager.CanRedo) return;
-            OperationManager.Redo();
-            Invalidate();
         }
 
 

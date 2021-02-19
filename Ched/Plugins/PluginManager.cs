@@ -23,8 +23,8 @@ namespace Ched.Plugins
         [ImportMany]
         IEnumerable<IScoreBookExportPlugin> bookExportPlugins = Enumerable.Empty<IScoreBookExportPlugin>();
 
-        public List<string> FailedFiles { get; private set; } = new List<string>();
-        public List<string> InvalidFiles { get; private set; } = new List<string>();
+        public IReadOnlyCollection<string> FailedFiles { get; private set; } = new List<string>();
+        public IReadOnlyCollection<string> InvalidFiles { get; private set; } = new List<string>();
 
         public IEnumerable<IScorePlugin> ScorePlugins => scorePlugins;
         public IEnumerable<IScoreBookImportPlugin> ScoreBookImportPlugins => bookImportPlugins;
