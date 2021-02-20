@@ -713,6 +713,7 @@ namespace Ched.UI
 
                 try
                 {
+                    CommitChanges();
                     var context = new SoundPreviewContext(ScoreBook.Score, CurrentMusicSource);
                     if (!PreviewManager.Start(context, startTick)) return;
                     isAbortAtLastNoteItem.Enabled = false;
