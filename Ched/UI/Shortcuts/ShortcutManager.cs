@@ -9,6 +9,8 @@ namespace Ched.UI.Shortcuts
 {
     public class ShortcutManager
     {
+        public event EventHandler ShortcutUpdated;
+
         public IShortcutCommandSource CommandSource { get; set; } = new NullShortcutCommandSource();
         public IShortcutKeySource DefaultKeySource { get; set; } = new NullShortcutKeySource();
         public IShortcutKeySource UserKeySource { get; set; } = new NullShortcutKeySource();
@@ -32,5 +34,7 @@ namespace Ched.UI.Shortcuts
         {
             return UserKeySource.ResolveShortcutKey(command, out key) || DefaultKeySource.ResolveShortcutKey(command, out key);
         }
+
+        public void NotifyUpdateShortcut() => ShortcutUpdated?.Invoke(this, EventArgs.Empty);
     }
 }

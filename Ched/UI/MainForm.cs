@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -16,6 +15,7 @@ using Ched.Configuration;
 using Ched.Localization;
 using Ched.Plugins;
 using Ched.Properties;
+using Ched.UI.Shortcuts;
 using Ched.UI.Operations;
 using Ched.UI.Windows;
 
@@ -23,6 +23,8 @@ namespace Ched.UI
 {
     public partial class MainForm : Form
     {
+        private event EventHandler PreviewModeChanged;
+
         private readonly string FileExtension = ".chs";
         private string FileTypeFilter => FileFilterStrings.ChedFilter + string.Format("({0})|{1}", "*" + FileExtension, "*" + FileExtension);
 
@@ -42,6 +44,7 @@ namespace Ched.UI
         private SoundPreviewManager PreviewManager { get; }
         private SoundSource CurrentMusicSource;
 
+        private ShortcutManager ShortcutManager { get; }
         private ExportManager ExportManager { get; } = new ExportManager();
         private Plugins.PluginManager PluginManager { get; } = Plugins.PluginManager.GetInstance();
 
@@ -62,6 +65,7 @@ namespace Ched.UI
                 ZoomOutButton.Enabled = CanZoomOut;
                 WidenLaneWidthMenuItem.Enabled = CanWidenLaneWidth;
                 NarrowLaneWidthMenuItem.Enabled = CanNarrowLaneWidth;
+                PreviewModeChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -99,6 +103,14 @@ namespace Ched.UI
             PreviewManager.IsStopAtLastNote = ApplicationSettings.Default.IsPreviewAbortAtLastNote;
             PreviewManager.TickUpdated += (s, e) => NoteView.CurrentTick = e.Tick;
             PreviewManager.ExceptionThrown += (s, e) => MessageBox.Show(this, ErrorStrings.PreviewException, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            var commandSource = new ShortcutCommandSource();
+            SetupCommands(commandSource);
+            ShortcutManager = new ShortcutManager()
+            {
+                DefaultKeySource = new DefaultShortcutKeySource(),
+                CommandSource = commandSource
+            };
 
             NoteViewScrollBar = new VScrollBar()
             {
@@ -189,6 +201,7 @@ namespace Ched.UI
             NoteView.EditMode = EditMode.Edit;
 
             LoadEmptyBook();
+            ShortcutManager.NotifyUpdateShortcut();
             SetText();
 
             if (!PreviewManager.IsSupported)
@@ -207,6 +220,12 @@ namespace Ched.UI
         public MainForm(string filePath) : this()
         {
             LoadFile(filePath);
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (ShortcutManager.ExecuteCommand(keyData)) return true;
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         protected void LoadFile(string filePath)
@@ -436,8 +455,77 @@ namespace Ched.UI
             NoteViewScrollBar.Maximum = NoteViewScrollBar.LargeChange + NoteView.PaddingHeadTick;
         }
 
+        private void PlayPreview()
+        {
+            if (string.IsNullOrEmpty(CurrentMusicSource?.FilePath))
+            {
+                MessageBox.Show(this, ErrorStrings.MusicSourceNull, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            if (!File.Exists(CurrentMusicSource.FilePath))
+            {
+                MessageBox.Show(this, ErrorStrings.SourceFileNotFound, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (PreviewManager.Playing)
+            {
+                PreviewManager.Stop();
+                return;
+            }
+
+            int startTick = NoteView.CurrentTick;
+            void lambda(object p, EventArgs q)
+            {
+                PreviewManager.Finished -= lambda;
+                NoteView.CurrentTick = startTick;
+                NoteView.Editable = CanEdit;
+            }
+
+            try
+            {
+                CommitChanges();
+                var context = new SoundPreviewContext(ScoreBook.Score, CurrentMusicSource);
+                if (!PreviewManager.Start(context, startTick)) return;
+                PreviewManager.Finished += lambda;
+                NoteView.Editable = CanEdit;
+            }
+            catch (Exception ex)
+            {
+                Program.DumpExceptionTo(ex, "sound_exception.json");
+            }
+        }
+
+        private void SetupCommands(ShortcutCommandSource commandSource)
+        {
+            commandSource.RegisterCommand(Commands.NewFile, MainFormStrings.NewFile, ClearFile);
+            commandSource.RegisterCommand(Commands.OpenFile, MainFormStrings.OpenFile, OpenFile);
+            commandSource.RegisterCommand(Commands.Save, MainFormStrings.SaveFile, SaveFile);
+            commandSource.RegisterCommand(Commands.SaveAs, MainFormStrings.SaveAs, SaveAs);
+
+            commandSource.RegisterCommand(Commands.Undo, MainFormStrings.Undo, () => { if (OperationManager.CanUndo) OperationManager.Undo(); });
+            commandSource.RegisterCommand(Commands.Redo, MainFormStrings.Redo, () => { if (OperationManager.CanRedo) OperationManager.Redo(); });
+
+            commandSource.RegisterCommand(Commands.Cut, MainFormStrings.Cut, () => NoteView.CutSelectedNotes());
+            commandSource.RegisterCommand(Commands.Copy, MainFormStrings.Copy, () => NoteView.CopySelectedNotes());
+            commandSource.RegisterCommand(Commands.Paste, MainFormStrings.Paste, () => NoteView.PasteNotes());
+            commandSource.RegisterCommand(Commands.PasteFlip, MainFormStrings.PasteFlipped, () => NoteView.PasteFlippedNotes());
+
+            commandSource.RegisterCommand(Commands.SelectAll, MainFormStrings.SelectAll, () => NoteView.SelectAll());
+
+            commandSource.RegisterCommand(Commands.RemoveSelectedNotes, MainFormStrings.RemoveSelectedNotes, () => NoteView.RemoveSelectedNotes());
+
+            commandSource.RegisterCommand(Commands.SwitchScorePreviewMode, MainFormStrings.ScorePreview, () => IsPreviewMode = !IsPreviewMode);
+
+            commandSource.RegisterCommand(Commands.PlayPreview, MainFormStrings.Play, () => PlayPreview());
+
+            commandSource.RegisterCommand(Commands.ShowHelp, MainFormStrings.Help, () => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched/wiki"));
+        }
+
         private MenuStrip CreateMainMenu(NoteView noteView)
         {
+            var shortcutItemBuilder = new ToolStripMenuItemBuilder(ShortcutManager);
+
             var importPluginItems = PluginManager.ScoreBookImportPlugins.Select(p => new ToolStripMenuItem(p.DisplayName, null, (s, e) =>
             {
                 if (!ConfirmDiscardChanges()) return;
@@ -467,10 +555,10 @@ namespace Ched.UI
 
             var fileMenuItems = new ToolStripItem[]
             {
-                new ToolStripMenuItem(MainFormStrings.NewFile + "(&N)", null, (s, e) => ClearFile(), Keys.Control | Keys.N),
-                new ToolStripMenuItem(MainFormStrings.OpenFile + "(&O)", null, (s, e) => OpenFile(), Keys.Control | Keys.O),
-                new ToolStripMenuItem(MainFormStrings.SaveFile + "(&S)", null, (s, e) => SaveFile(), Keys.Control | Keys.S),
-                new ToolStripMenuItem(MainFormStrings.SaveAs + "(&A)", null, (s, e) => SaveAs(), Keys.Control | Keys.Shift | Keys.S),
+                shortcutItemBuilder.BuildItem(Commands.NewFile, MainFormStrings.NewFile + "(&N)"),
+                shortcutItemBuilder.BuildItem(Commands.OpenFile, MainFormStrings.OpenFile + "(&O)"),
+                shortcutItemBuilder.BuildItem(Commands.Save, MainFormStrings.SaveFile + "(&S)"),
+                shortcutItemBuilder.BuildItem(Commands.SaveAs, MainFormStrings.SaveAs + "(&A)"),
                 new ToolStripSeparator(),
                 new ToolStripMenuItem(MainFormStrings.Import, null, importPluginItems) { Enabled = importPluginItems.Length > 0 },
                 new ToolStripMenuItem(MainFormStrings.Export, null, exportPluginItems) { Enabled = exportPluginItems.Length > 0 },
@@ -480,26 +568,23 @@ namespace Ched.UI
                 new ToolStripMenuItem(MainFormStrings.Exit + "(&X)", null, (s, e) => this.Close())
             };
 
-            var undoItem = new ToolStripMenuItem(MainFormStrings.Undo, null, (s, e) => OperationManager.Undo(), Keys.Control | Keys.Z)
-            {
-                Enabled = false
-            };
-            var redoItem = new ToolStripMenuItem(MainFormStrings.Redo, null, (s, e) => OperationManager.Redo(), Keys.Control | Keys.Y)
-            {
-                Enabled = false
-            };
+            var undoItem = shortcutItemBuilder.BuildItem(Commands.Undo, MainFormStrings.Undo);
+            undoItem.Enabled = false;
 
-            var cutItem = new ToolStripMenuItem(MainFormStrings.Cut, null, (s, e) => noteView.CutSelectedNotes(), Keys.Control | Keys.X);
-            var copyItem = new ToolStripMenuItem(MainFormStrings.Copy, null, (s, e) => noteView.CopySelectedNotes(), Keys.Control | Keys.C);
-            var pasteItem = new ToolStripMenuItem(MainFormStrings.Paste, null, (s, e) => noteView.PasteNotes(), Keys.Control | Keys.V);
-            var pasteFlippedItem = new ToolStripMenuItem(MainFormStrings.PasteFlipped, null, (s, e) => noteView.PasteFlippedNotes(), Keys.Control | Keys.Shift | Keys.V);
+            var redoItem = shortcutItemBuilder.BuildItem(Commands.Redo, MainFormStrings.Redo);
+            redoItem.Enabled = false;
 
-            var selectAllItem = new ToolStripMenuItem(MainFormStrings.SelectAll, null, (s, e) => noteView.SelectAll(), Keys.Control | Keys.A);
+            var cutItem = shortcutItemBuilder.BuildItem(Commands.Cut, MainFormStrings.Cut);
+            var copyItem = shortcutItemBuilder.BuildItem(Commands.Copy, MainFormStrings.Copy);
+            var pasteItem = shortcutItemBuilder.BuildItem(Commands.Paste, MainFormStrings.Paste);
+            var pasteFlippedItem = shortcutItemBuilder.BuildItem(Commands.PasteFlip, MainFormStrings.PasteFlipped);
+
+            var selectAllItem = shortcutItemBuilder.BuildItem(Commands.SelectAll, MainFormStrings.SelectAll);
             var selectToEndItem = new ToolStripMenuItem(MainFormStrings.SelectToEnd, null, (s, e) => noteView.SelectToEnd());
             var selectoToBeginningItem = new ToolStripMenuItem(MainFormStrings.SelectToBeginning, null, (s, e) => noteView.SelectToBeginning());
 
             var flipSelectedNotesItem = new ToolStripMenuItem(MainFormStrings.FlipSelectedNotes, null, (s, e) => noteView.FlipSelectedNotes());
-            var removeSelectedNotesItem = new ToolStripMenuItem(MainFormStrings.RemoveSelectedNotes, null, (s, e) => noteView.RemoveSelectedNotes(), Keys.Delete);
+            var removeSelectedNotesItem = shortcutItemBuilder.BuildItem(Commands.RemoveSelectedNotes, MainFormStrings.RemoveSelectedNotes);
 
             var removeEventsItem = new ToolStripMenuItem(MainFormStrings.RemoveEvents, null, (s, e) =>
             {
@@ -576,11 +661,8 @@ namespace Ched.UI
                 pluginItem
             };
 
-            var viewModeItem = new ToolStripMenuItem(MainFormStrings.ScorePreview, null, (s, e) =>
-            {
-                IsPreviewMode = !IsPreviewMode;
-                ((ToolStripMenuItem)s).Checked = IsPreviewMode;
-            }, Keys.Control | Keys.P);
+            var viewModeItem = shortcutItemBuilder.BuildItem(Commands.SwitchScorePreviewMode, MainFormStrings.ScorePreview);
+            PreviewModeChanged += (s, e) => viewModeItem.Checked = IsPreviewMode;
 
             WidenLaneWidthMenuItem = new ToolStripMenuItem(MainFormStrings.WidenLaneWidth);
             NarrowLaneWidthMenuItem = new ToolStripMenuItem(MainFormStrings.NarrowLaneWidth);
@@ -681,49 +763,10 @@ namespace Ched.UI
             {
                 Checked = ApplicationSettings.Default.IsPreviewAbortAtLastNote
             };
+            PreviewManager.Started += (s, e) => isAbortAtLastNoteItem.Enabled = false;
+            PreviewManager.Finished += (s, e) => isAbortAtLastNoteItem.Enabled = true;
 
-            var playItem = new ToolStripMenuItem(MainFormStrings.Play, null, (s, e) =>
-            {
-                if (string.IsNullOrEmpty(CurrentMusicSource?.FilePath))
-                {
-                    MessageBox.Show(this, ErrorStrings.MusicSourceNull, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-                if (!File.Exists(CurrentMusicSource.FilePath))
-                {
-                    MessageBox.Show(this, ErrorStrings.SourceFileNotFound, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (PreviewManager.Playing)
-                {
-                    PreviewManager.Stop();
-                    return;
-                }
-
-                int startTick = noteView.CurrentTick;
-                void lambda(object p, EventArgs q)
-                {
-                    isAbortAtLastNoteItem.Enabled = true;
-                    PreviewManager.Finished -= lambda;
-                    noteView.CurrentTick = startTick;
-                    noteView.Editable = CanEdit;
-                }
-
-                try
-                {
-                    CommitChanges();
-                    var context = new SoundPreviewContext(ScoreBook.Score, CurrentMusicSource);
-                    if (!PreviewManager.Start(context, startTick)) return;
-                    isAbortAtLastNoteItem.Enabled = false;
-                    PreviewManager.Finished += lambda;
-                    noteView.Editable = CanEdit;
-                }
-                catch (Exception ex)
-                {
-                    Program.DumpExceptionTo(ex, "sound_exception.json");
-                }
-            }, Keys.Control | Keys.Space); // throws exception
+            var playItem = shortcutItemBuilder.BuildItem(Commands.PlayPreview, MainFormStrings.Play);
 
             var stopItem = new ToolStripMenuItem(MainFormStrings.Stop, null, (s, e) =>
             {
@@ -738,7 +781,7 @@ namespace Ched.UI
 
             var helpMenuItems = new ToolStripItem[]
             {
-                new ToolStripMenuItem(MainFormStrings.Help, null, (s, e) => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched/wiki"), Keys.F1),
+                shortcutItemBuilder.BuildItem(Commands.ShowHelp, MainFormStrings.Help),
                 new ToolStripMenuItem(MainFormStrings.VersionInfo, null, (s, e) => new VersionInfoForm().ShowDialog(this))
             };
 

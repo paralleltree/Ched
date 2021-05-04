@@ -83,4 +83,34 @@ namespace Ched.UI.Shortcuts
             return false;
         }
     }
+
+    public class DefaultShortcutKeySource : ShortcutKeySource
+    {
+        public DefaultShortcutKeySource()
+        {
+            RegisterShortcut(Commands.NewFile, Keys.Control | Keys.N);
+            RegisterShortcut(Commands.OpenFile, Keys.Control | Keys.O);
+            RegisterShortcut(Commands.Save, Keys.Control | Keys.S);
+            RegisterShortcut(Commands.SaveAs, Keys.Control | Keys.Shift | Keys.S);
+
+            RegisterShortcut(Commands.Undo, Keys.Control | Keys.Z);
+            RegisterShortcut(Commands.Redo, Keys.Control | Keys.Y);
+            RegisterShortcut(Commands.Redo, Keys.Control | Keys.Shift | Keys.Z);
+
+            RegisterShortcut(Commands.Cut, Keys.Control | Keys.X);
+            RegisterShortcut(Commands.Copy, Keys.Control | Keys.C);
+            RegisterShortcut(Commands.Paste, Keys.Control | Keys.V);
+            RegisterShortcut(Commands.PasteFlip, Keys.Control | Keys.Shift | Keys.V);
+
+            RegisterShortcut(Commands.SelectAll, Keys.Control | Keys.A);
+
+            RegisterShortcut(Commands.RemoveSelectedNotes, Keys.Delete);
+
+            RegisterShortcut(Commands.SwitchScorePreviewMode, Keys.Control | Keys.P);
+
+            RegisterShortcut(Commands.PlayPreview, Keys.Space);
+
+            RegisterShortcut(Commands.ShowHelp, Keys.F1);
+        }
+    }
 }
