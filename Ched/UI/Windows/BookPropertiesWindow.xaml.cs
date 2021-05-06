@@ -22,10 +22,8 @@ namespace Ched.UI.Windows
         }
     }
 
-    public class BookPropertiesWindowViewModel : INotifyPropertyChanged
+    public class BookPropertiesWindowViewModel : ViewModel
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private ScoreBook ScoreBook { get; } = new ScoreBook();
         private SoundSource MusicSource { get; set; } = new SoundSource();
 
@@ -40,7 +38,7 @@ namespace Ched.UI.Windows
             {
                 if (value == title) return;
                 title = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Title)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -52,7 +50,7 @@ namespace Ched.UI.Windows
             {
                 if (value == artist) return;
                 artist = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Artist)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -64,7 +62,7 @@ namespace Ched.UI.Windows
             {
                 if (value == notesDesigner) return;
                 notesDesigner = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NotesDesigner)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -76,7 +74,7 @@ namespace Ched.UI.Windows
             {
                 if (value == musicSourcePath) return;
                 musicSourcePath = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MusicSourcePath)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -88,7 +86,7 @@ namespace Ched.UI.Windows
             {
                 if (value == musicSourceLatency) return;
                 musicSourceLatency = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MusicSourceLatency)));
+                NotifyPropertyChanged();
             }
         }
 

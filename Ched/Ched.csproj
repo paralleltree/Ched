@@ -256,6 +256,7 @@
     <Compile Include="UI\Windows\SusExportWindow.xaml.cs">
       <DependentUpon>SusExportWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\Windows\ViewModel.cs" />
     <Compile Include="UI\Windows\WpfExtensions.cs" />
     <EmbeddedResource Include="Localization\ErrorStrings.en.resx" />
     <EmbeddedResource Include="Localization\ErrorStrings.resx">
