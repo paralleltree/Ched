@@ -37,4 +37,28 @@ namespace Ched.UI.Shortcuts
 
         public void NotifyUpdateShortcut() => ShortcutUpdated?.Invoke(this, EventArgs.Empty);
     }
+
+    public class ShortcutManagerHost
+    {
+        private ShortcutManager shortcutManager;
+        private UserShortcutKeySource userShortcutKeySource;
+
+        public ShortcutManager ShortcutManager => shortcutManager;
+
+        public UserShortcutKeySource UserShortcutKeySource
+        {
+            get => userShortcutKeySource;
+            set
+            {
+                userShortcutKeySource = value;
+                ShortcutManager.UserKeySource = value;
+                ShortcutManager.NotifyUpdateShortcut();
+            }
+        }
+
+        public ShortcutManagerHost(ShortcutManager shortcutManager)
+        {
+            this.shortcutManager = shortcutManager;
+        }
+    }
 }

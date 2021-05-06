@@ -84,6 +84,43 @@ namespace Ched.UI.Shortcuts
         }
     }
 
+    public class UserShortcutKeySource : ShortcutKeySource
+    {
+        public UserShortcutKeySource()
+        {
+        }
+
+        public UserShortcutKeySource(string jsonText)
+        {
+            var shortcuts = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ShortcutDefinition>>(jsonText);
+            foreach (var item in shortcuts)
+            {
+                RegisterShortcut(item.Command, item.ShortcutKey);
+            }
+        }
+
+        public UserShortcutKeySource(UserShortcutKeySource other) : base(other)
+        {
+        }
+
+        public new void RegisterShortcut(string command, Keys key)
+        {
+            base.RegisterShortcut(command, key);
+        }
+
+        public string DumpShortcutKeys()
+        {
+            var binds = ShortcutKeys.Select(p =>
+            {
+                if (!ResolveCommand(p, out string command)) throw new InvalidOperationException();
+                return new ShortcutDefinition(command, p);
+            });
+            return Newtonsoft.Json.JsonConvert.SerializeObject(binds, Newtonsoft.Json.Formatting.Indented);
+        }
+
+        public UserShortcutKeySource Clone() => new UserShortcutKeySource(this);
+    }
+
     public class DefaultShortcutKeySource : ShortcutKeySource
     {
         public DefaultShortcutKeySource()
@@ -111,6 +148,24 @@ namespace Ched.UI.Shortcuts
             RegisterShortcut(Commands.PlayPreview, Keys.Space);
 
             RegisterShortcut(Commands.ShowHelp, Keys.F1);
+        }
+    }
+
+    public class ShortcutDefinition
+    {
+        [Newtonsoft.Json.JsonProperty("command")]
+        private string command;
+
+        [Newtonsoft.Json.JsonProperty("key")]
+        private Keys shortcutKey;
+
+        public string Command => command;
+        public Keys ShortcutKey => shortcutKey;
+
+        public ShortcutDefinition(string command, Keys key)
+        {
+            this.command = command;
+            this.shortcutKey = key;
         }
     }
 }

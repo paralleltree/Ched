@@ -25,6 +25,7 @@ namespace Ched.UI
     {
         private event EventHandler PreviewModeChanged;
 
+        private readonly string UserShortcutKeySourcePath = "keybindings.json";
         private readonly string FileExtension = ".chs";
         private string FileTypeFilter => FileFilterStrings.ChedFilter + string.Format("({0})|{1}", "*" + FileExtension, "*" + FileExtension);
 
@@ -44,7 +45,9 @@ namespace Ched.UI
         private SoundPreviewManager PreviewManager { get; }
         private SoundSource CurrentMusicSource;
 
-        private ShortcutManager ShortcutManager { get; }
+        private ShortcutManagerHost ShortcutManagerHost { get; }
+        private ShortcutManager ShortcutManager => ShortcutManagerHost.ShortcutManager;
+
         private ExportManager ExportManager { get; } = new ExportManager();
         private Plugins.PluginManager PluginManager { get; } = Plugins.PluginManager.GetInstance();
 
@@ -106,11 +109,13 @@ namespace Ched.UI
 
             var commandSource = new ShortcutCommandSource();
             SetupCommands(commandSource);
-            ShortcutManager = new ShortcutManager()
+            var shortcutManager = new ShortcutManager()
             {
                 DefaultKeySource = new DefaultShortcutKeySource(),
                 CommandSource = commandSource
             };
+            ShortcutManagerHost = new ShortcutManagerHost(shortcutManager);
+            ShortcutManagerHost.UserShortcutKeySource = LoadUserShortcutKeySource();
 
             NoteViewScrollBar = new VScrollBar()
             {
@@ -185,6 +190,7 @@ namespace Ched.UI
                 }
 
                 ApplicationSettings.Default.Save();
+                File.WriteAllText(UserShortcutKeySourcePath, ShortcutManagerHost.UserShortcutKeySource.DumpShortcutKeys());
             };
 
             using (var manager = this.WorkWithLayout())
@@ -494,6 +500,15 @@ namespace Ched.UI
             {
                 Program.DumpExceptionTo(ex, "sound_exception.json");
             }
+        }
+
+        private UserShortcutKeySource LoadUserShortcutKeySource()
+        {
+            if (File.Exists(UserShortcutKeySourcePath))
+            {
+                return new UserShortcutKeySource(File.ReadAllText(UserShortcutKeySourcePath));
+            }
+            return new UserShortcutKeySource();
         }
 
         private void SetupCommands(ShortcutCommandSource commandSource)
