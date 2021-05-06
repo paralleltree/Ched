@@ -9,6 +9,8 @@ namespace Ched.UI.Shortcuts
 {
     public interface IShortcutCommandSource
     {
+        IEnumerable<string> Commands { get; }
+
         /// <summary>
         /// 指定のコマンドを実行します。
         /// </summary>
@@ -21,6 +23,8 @@ namespace Ched.UI.Shortcuts
 
     public class NullShortcutCommandSource : IShortcutCommandSource
     {
+        public IEnumerable<string> Commands => Enumerable.Empty<string>();
+
         // Do nothing
         public bool ExecuteCommand(string command) => true;
 
@@ -34,6 +38,8 @@ namespace Ched.UI.Shortcuts
     public class ShortcutCommandSource : IShortcutCommandSource
     {
         private Dictionary<string, (string Name, Action Action)> commands { get; } = new Dictionary<string, (string, Action)>();
+
+        public IEnumerable<string> Commands => commands.Keys;
 
         public void RegisterCommand(string command, string name, Action action)
         {

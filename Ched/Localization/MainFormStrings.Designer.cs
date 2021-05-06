@@ -178,6 +178,24 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to クリア.
+        /// </summary>
+        public static string Clear {
+            get {
+                return ResourceManager.GetString("Clear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to コマンド.
+        /// </summary>
+        public static string Command {
+            get {
+                return ResourceManager.GetString("Command", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to コピー.
         /// </summary>
         public static string Copy {
@@ -358,6 +376,24 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ショートカット設定.
+        /// </summary>
+        public static string KeyboardShortcuts {
+            get {
+                return ResourceManager.GetString("KeyboardShortcuts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ショートカットキー.
+        /// </summary>
+        public static string KeyCombination {
+            get {
+                return ResourceManager.GetString("KeyCombination", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to レベル.
         /// </summary>
         public static string Level {
@@ -498,6 +534,15 @@ namespace Ched.Localization {
         public static string RemoveSelectedNotes {
             get {
                 return ResourceManager.GetString("RemoveSelectedNotes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 初期化.
+        /// </summary>
+        public static string ResetAll {
+            get {
+                return ResourceManager.GetString("ResetAll", resourceCulture);
             }
         }
         

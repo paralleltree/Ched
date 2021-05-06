@@ -69,6 +69,14 @@ namespace Ched.UI.Shortcuts
             CommandMap[command].Add(key);
         }
 
+        protected void UnregisterShortcut(Keys key)
+        {
+            if (!KeyMap.ContainsKey(key)) throw new InvalidOperationException("The shortcut key is not registered.");
+            string command = KeyMap[key];
+            KeyMap.Remove(key);
+            CommandMap[command].Remove(key);
+        }
+
         public bool ResolveCommand(Keys key, out string command) => KeyMap.TryGetValue(key, out command);
 
         public bool ResolveShortcutKey(string command, out Keys key)
@@ -106,6 +114,11 @@ namespace Ched.UI.Shortcuts
         public new void RegisterShortcut(string command, Keys key)
         {
             base.RegisterShortcut(command, key);
+        }
+
+        public new void UnregisterShortcut(Keys key)
+        {
+            base.UnregisterShortcut(key);
         }
 
         public string DumpShortcutKeys()
@@ -151,6 +164,7 @@ namespace Ched.UI.Shortcuts
         }
     }
 
+    [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
     public class ShortcutDefinition
     {
         [Newtonsoft.Json.JsonProperty("command")]

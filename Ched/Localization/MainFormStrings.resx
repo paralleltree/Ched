@@ -318,4 +318,19 @@
   <data name="InsertSingleBlankAtBeginning" xml:space="preserve">
     <value>先頭に1小節の空白を挿入する</value>
   </data>
+  <data name="KeyboardShortcuts" xml:space="preserve">
+    <value>ショートカット設定</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>クリア</value>
+  </data>
+  <data name="Command" xml:space="preserve">
+    <value>コマンド</value>
+  </data>
+  <data name="KeyCombination" xml:space="preserve">
+    <value>ショートカットキー</value>
+  </data>
+  <data name="ResetAll" xml:space="preserve">
+    <value>初期化</value>
+  </data>
 </root>

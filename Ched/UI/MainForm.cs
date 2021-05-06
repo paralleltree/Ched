@@ -537,6 +537,14 @@ namespace Ched.UI
             commandSource.RegisterCommand(Commands.ShowHelp, MainFormStrings.Help, () => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched/wiki"));
         }
 
+        private void ConfigureKeyboardShortcut()
+        {
+            var vm = new ShortcutSettingsWindowViewModel(ShortcutManagerHost);
+            var window = new ShortcutSettingsWindow() { DataContext = vm };
+            window.ShowDialog(this);
+            ShortcutManager.NotifyUpdateShortcut();
+        }
+
         private MenuStrip CreateMainMenu(NoteView noteView)
         {
             var shortcutItemBuilder = new ToolStripMenuItemBuilder(ShortcutManager);
@@ -579,6 +587,8 @@ namespace Ched.UI
                 new ToolStripMenuItem(MainFormStrings.Export, null, exportPluginItems) { Enabled = exportPluginItems.Length > 0 },
                 new ToolStripSeparator(),
                 bookPropertiesMenuItem,
+                new ToolStripSeparator(),
+                new ToolStripMenuItem(MainFormStrings.KeyboardShortcuts, null, (s, e) => ConfigureKeyboardShortcut()),
                 new ToolStripSeparator(),
                 new ToolStripMenuItem(MainFormStrings.Exit + "(&X)", null, (s, e) => this.Close())
             };

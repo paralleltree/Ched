@@ -318,4 +318,19 @@
   <data name="InsertSingleBlankAtBeginning" xml:space="preserve">
     <value>Insert a single blank space at the beginning</value>
   </data>
+  <data name="KeyboardShortcuts" xml:space="preserve">
+    <value>Keyboard Shortcuts</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Command" xml:space="preserve">
+    <value>Command</value>
+  </data>
+  <data name="KeyCombination" xml:space="preserve">
+    <value>Key Combination</value>
+  </data>
+  <data name="ResetAll" xml:space="preserve">
+    <value>Reset All</value>
+  </data>
 </root>
