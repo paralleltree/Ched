@@ -15,6 +15,7 @@ using System.Reactive.Disposables;
 
 using Ched.Core;
 using Ched.Core.Notes;
+using Ched.Core.Events;
 using Ched.Drawing;
 using Ched.UI.Operations;
 
@@ -2097,6 +2098,32 @@ namespace Ched.UI
 
             if (opList.Count == 0) return;
             OperationManager.Push(new CompositeOperation("選択範囲内ノーツ削除", opList));
+            Invalidate();
+        }
+
+        public void RemoveSelectedEvents()
+        {
+            int minTick = SelectedRange.StartTick + (SelectedRange.Duration < 0 ? SelectedRange.Duration : 0);
+            int maxTick = SelectedRange.StartTick + (SelectedRange.Duration < 0 ? 0 : SelectedRange.Duration);
+            bool isContained(EventBase p) => p.Tick != 0 && minTick <= p.Tick && maxTick >= p.Tick;
+            var events = ScoreEvents;
+
+            var bpmOp = events.BpmChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
+            {
+                return new RemoveEventOperation<BpmChangeEvent>(events.BpmChangeEvents, p);
+            });
+
+            var speedOp = events.HighSpeedChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
+            {
+                return new RemoveEventOperation<HighSpeedChangeEvent>(events.HighSpeedChangeEvents, p);
+            });
+
+            var signatureOp = events.TimeSignatureChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
+            {
+                return new RemoveEventOperation<TimeSignatureChangeEvent>(events.TimeSignatureChangeEvents, p);
+            });
+
+            OperationManager.InvokeAndPush(new CompositeOperation("イベント削除", bpmOp.Cast<IOperation>().Concat(speedOp).Concat(signatureOp).ToList()));
             Invalidate();
         }
 

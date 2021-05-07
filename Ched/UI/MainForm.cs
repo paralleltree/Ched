@@ -610,35 +610,7 @@ namespace Ched.UI
 
             var flipSelectedNotesItem = new ToolStripMenuItem(MainFormStrings.FlipSelectedNotes, null, (s, e) => noteView.FlipSelectedNotes());
             var removeSelectedNotesItem = shortcutItemBuilder.BuildItem(Commands.RemoveSelectedNotes, MainFormStrings.RemoveSelectedNotes);
-
-            var removeEventsItem = new ToolStripMenuItem(MainFormStrings.RemoveEvents, null, (s, e) =>
-            {
-                int minTick = noteView.SelectedRange.StartTick + (noteView.SelectedRange.Duration < 0 ? noteView.SelectedRange.Duration : 0);
-                int maxTick = noteView.SelectedRange.StartTick + (noteView.SelectedRange.Duration < 0 ? 0 : noteView.SelectedRange.Duration);
-                bool isContained(EventBase p) => p.Tick != 0 && minTick <= p.Tick && maxTick >= p.Tick;
-                var events = ScoreBook.Score.Events;
-
-                var bpmOp = events.BpmChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
-                {
-                    ScoreBook.Score.Events.BpmChangeEvents.Remove(p);
-                    return new RemoveEventOperation<BpmChangeEvent>(events.BpmChangeEvents, p);
-                }).ToList();
-
-                var speedOp = events.HighSpeedChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
-                {
-                    ScoreBook.Score.Events.HighSpeedChangeEvents.Remove(p);
-                    return new RemoveEventOperation<HighSpeedChangeEvent>(events.HighSpeedChangeEvents, p);
-                }).ToList();
-
-                var signatureOp = events.TimeSignatureChangeEvents.Where(p => isContained(p)).ToList().Select(p =>
-                {
-                    ScoreBook.Score.Events.TimeSignatureChangeEvents.Remove(p);
-                    return new RemoveEventOperation<TimeSignatureChangeEvent>(events.TimeSignatureChangeEvents, p);
-                }).ToList();
-
-                OperationManager.Push(new CompositeOperation("イベント削除", bpmOp.Cast<IOperation>().Concat(speedOp).Concat(signatureOp)));
-                noteView.Invalidate();
-            });
+            var removeEventsItem = new ToolStripMenuItem(MainFormStrings.RemoveEvents, null, (s, e) => noteView.RemoveSelectedEvents());
 
             var insertAirWithAirActionItem = new ToolStripMenuItem(MainFormStrings.InsertAirWithAirAction, null, (s, e) =>
             {
