@@ -17,6 +17,7 @@ namespace Ched.UI
     public class SoundPreviewManager : IDisposable
     {
         public event EventHandler<TickUpdatedEventArgs> TickUpdated;
+        public event EventHandler Started;
         public event EventHandler Finished;
         public event EventHandler ExceptionThrown;
 
@@ -101,6 +102,7 @@ namespace Ched.UI
             });
 
             Playing = true;
+            Started?.Invoke(this, EventArgs.Empty);
             return true;
         }
 

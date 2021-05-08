@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ namespace Ched.Components.Exporter
                 writer.WriteLine("#PLAYLEVEL {0}", args.PlayLevel);
                 writer.WriteLine("#SONGID \"{0}\"", args.SongId);
                 writer.WriteLine("#WAVE \"{0}\"", args.SoundFileName);
-                writer.WriteLine("#WAVEOFFSET {0}", args.SoundOffset);
+                writer.WriteLine("#WAVEOFFSET {0}", args.SoundOffset.ToString(CultureInfo.InvariantCulture));
                 writer.WriteLine("#JACKET \"{0}\"", args.JacketFilePath);
                 writer.WriteLine();
 
@@ -71,7 +72,7 @@ namespace Ched.Components.Exporter
                 var bpmIdentifiers = EnumerateIdentifiers(2, NumChars.Concat(AlphaChars)).Skip(1).Take(bpmlist.Count).ToList();
                 foreach (var item in bpmlist.GroupBy(p => p.Index).Select(p => p.First()))
                 {
-                    writer.WriteLine("#BPM{0}: {1}", bpmIdentifiers[item.Index], item.Value.Bpm);
+                    writer.WriteLine("#BPM{0}: {1}", bpmIdentifiers[item.Index], item.Value.Bpm.ToString(CultureInfo.InvariantCulture));
                 }
 
                 // 小節オフセット追加用に初期BPM定義だけ1行に分離
@@ -88,7 +89,7 @@ namespace Ched.Components.Exporter
                 var speeds = book.Score.Events.HighSpeedChangeEvents.Select(p =>
                 {
                     var barPos = BarIndexCalculator.GetBarPositionFromTick(p.Tick);
-                    return string.Format("{0}'{1}:{2}", barPos.BarIndex + (p.Tick == 0 ? 0 : BarIndexOffset), barPos.TickOffset, p.SpeedRatio);
+                    return string.Format("{0}'{1}:{2}", barPos.BarIndex + (p.Tick == 0 ? 0 : BarIndexOffset), barPos.TickOffset, p.SpeedRatio.ToString(CultureInfo.InvariantCulture));
                 });
                 writer.WriteLine("#TIL00: \"{0}\"", string.Join(", ", speeds));
                 writer.WriteLine("#HISPEED 00");
