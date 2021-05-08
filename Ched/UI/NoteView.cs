@@ -1886,7 +1886,7 @@ namespace Ched.UI
 
         private RectangleF GetClickableRectFromNotePosition(int tick, int laneIndex, int width)
         {
-            return GetRectFromNotePosition(tick, laneIndex, width).Expand(1);
+            return GetRectFromNotePosition(tick, laneIndex, width).Expand(1, 3);
         }
 
         private Rectangle GetSelectionRect()
