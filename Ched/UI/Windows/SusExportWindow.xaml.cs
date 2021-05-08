@@ -23,10 +23,8 @@ namespace Ched.UI.Windows
         }
     }
 
-    public class SusExportWindowViewModel : INotifyPropertyChanged
+    public class SusExportWindowViewModel : ViewModel
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private SusArgs SusArgs { get; }
         private ScoreBook ScoreBook { get; }
 
@@ -46,7 +44,7 @@ namespace Ched.UI.Windows
             {
                 if (value == difficulty) return;
                 difficulty = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Difficulty)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -58,7 +56,7 @@ namespace Ched.UI.Windows
             {
                 if (value == level) return;
                 level = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Level)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -70,7 +68,7 @@ namespace Ched.UI.Windows
             {
                 if (value == songId) return;
                 songId = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SongId)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -82,7 +80,7 @@ namespace Ched.UI.Windows
             {
                 if (value == soundFileName) return;
                 soundFileName = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SoundFileName)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -94,7 +92,7 @@ namespace Ched.UI.Windows
             {
                 if (value == soundOffset) return;
                 soundOffset = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SoundOffset)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -106,7 +104,7 @@ namespace Ched.UI.Windows
             {
                 if (value == jacketFileName) return;
                 jacketFileName = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(JacketFileName)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -118,7 +116,7 @@ namespace Ched.UI.Windows
             {
                 if (value == hasPaddingBar) return;
                 hasPaddingBar = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasPaddingBar)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -130,7 +128,7 @@ namespace Ched.UI.Windows
             {
                 if (value == additionalData) return;
                 additionalData = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AdditionalData)));
+                NotifyPropertyChanged();
             }
         }
 

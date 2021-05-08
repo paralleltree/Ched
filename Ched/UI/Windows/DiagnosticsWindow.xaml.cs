@@ -22,10 +22,8 @@ namespace Ched.UI.Windows
         }
     }
 
-    public class DiagnosticsWindowViewModel : INotifyPropertyChanged
+    public class DiagnosticsWindowViewModel : ViewModel
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private string title;
         private string message;
         private ObservableCollection<Diagnostic> diagnostics;
@@ -37,7 +35,7 @@ namespace Ched.UI.Windows
             {
                 if (value == title) return;
                 title = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Title)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -48,7 +46,7 @@ namespace Ched.UI.Windows
             {
                 if (value == message) return;
                 message = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Message)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -59,15 +57,13 @@ namespace Ched.UI.Windows
             {
                 if (value == diagnostics) return;
                 diagnostics = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Diagnostics)));
+                NotifyPropertyChanged();
             }
         }
     }
 
-    public class DiagnosticViewModel : INotifyPropertyChanged
+    public class DiagnosticViewModel : ViewModel
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private Diagnostic source;
 
         public DiagnosticViewModel(Diagnostic diagnostic)

@@ -1,0 +1,103 @@
+﻿<Window x:Class="Ched.UI.Windows.ShortcutSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:local="clr-namespace:Ched.UI.Windows"
+        xmlns:localization="clr-namespace:Ched.Localization"
+        xmlns:b="clr-namespace:Ched.UI.Windows.Behaviors"
+        xmlns:conv="clr-namespace:Ched.UI.Windows.Converters"
+        Width="540" Height="420"
+        Title="{x:Static localization:MainFormStrings.KeyboardShortcuts}"
+        Style="{DynamicResource DialogWindowStyle}"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance local:ShortcutSettingsWindow}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="CommonStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <conv:ShortcutKeyTextConverter x:Key="ShortcutKeyTextConveter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <i:Interaction.Behaviors>
+        <b:HideWindowCloseButtonBehavior />
+    </i:Interaction.Behaviors>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="PreviewKeyDown">
+            <i:InvokeCommandAction Command="{Binding SetShortcutKeyCommand}" PassEventArgsToCommand="True" />
+        </i:EventTrigger>
+        <i:KeyTrigger Modifiers="Alt" Key="F4">
+            <i:CallMethodAction TargetObject="{Binding}" MethodName="CancelEdit" />
+        </i:KeyTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid Margin="{StaticResource WindowContainerMargin}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ListView Grid.Row="0" Margin="{StaticResource RowMargin}" ItemsSource="{Binding ShortcutListView}" SelectedItem="{Binding SelectedShortcut}" SelectionMode="Single">
+            <ListView.Resources>
+            </ListView.Resources>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="{x:Static localization:MainFormStrings.Command}" DisplayMemberBinding="{Binding Name}" Width="200" />
+                    <GridViewColumn Header="{x:Static localization:MainFormStrings.KeyCombination}" DisplayMemberBinding="{Binding Key, Converter={StaticResource ResourceKey=ShortcutKeyTextConveter}}" Width="180" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <Grid Grid.Row="1" Margin="{StaticResource RowMargin}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.KeyCombination}" />
+            <TextBox Grid.Column="1" Text="{Binding SelectedShortcut.Key, Converter={StaticResource ResourceKey=ShortcutKeyTextConveter}}" HorizontalContentAlignment="Center" IsReadOnly="True" />
+            <Button Grid.Column="2" Content="{x:Static localization:MainFormStrings.Clear}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <i:CallMethodAction TargetObject="{Binding}" MethodName="ClearShortcut" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+            <Button Grid.Column="3" Content="{x:Static localization:MainFormStrings.ResetAll}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <i:CallMethodAction TargetObject="{Binding}" MethodName="ResetAllShortcut" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="{StaticResource ContainerMargin}" HorizontalAlignment="Right">
+            <Button Content="OK" IsDefault="True">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <i:ChangePropertyAction TargetObject="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" PropertyName="DialogResult" Value="True" />
+                        <i:CallMethodAction TargetObject="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" MethodName="Close" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+            <Button Content="{x:Static localization:MainFormStrings.Cancel}" IsCancel="True">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <i:CallMethodAction TargetObject="{Binding}" MethodName="CancelEdit" />
+                        <i:ChangePropertyAction TargetObject="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" PropertyName="DialogResult" Value="False" />
+                        <i:CallMethodAction TargetObject="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" MethodName="Close" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

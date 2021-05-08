@@ -167,6 +167,13 @@
     <Compile Include="Plugins\SlideSplitter.cs" />
     <Compile Include="Plugins\SusExportPlugin.cs" />
     <Compile Include="UI\Helpers.cs" />
+    <Compile Include="UI\Shortcuts\Commands.cs" />
+    <Compile Include="UI\Shortcuts\KeyExtensions.cs" />
+    <Compile Include="UI\Shortcuts\ShortcutCommandSource.cs" />
+    <Compile Include="UI\Shortcuts\ShortcutKeySource.cs" />
+    <Compile Include="UI\Shortcuts\ShortcutManager.cs" />
+    <Compile Include="UI\Shortcuts\ToolStripItemBuilder.cs" />
+    <Compile Include="UI\Windows\Behaviors\HideWindowCloseButtonBehavior.cs" />
     <Compile Include="UI\Windows\Behaviors\InitialFocusBehavior.cs" />
     <Compile Include="UI\Windows\Behaviors\OpenFileBehavior.cs" />
     <Compile Include="UI\Windows\Behaviors\StyleBehaviorCollection.cs" />
@@ -243,13 +250,18 @@
       <DependentUpon>VersionInfoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\Windows\Converters\BitmapImageSourceConverter.cs" />
+    <Compile Include="UI\Windows\Converters\ShortcutKeyTextConverter.cs" />
     <Compile Include="UI\Windows\DiagnosticsWindow.xaml.cs">
       <DependentUpon>DiagnosticsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\Windows\EnumSourceProvider.cs" />
+    <Compile Include="UI\Windows\ShortcutSettingsWindow.xaml.cs">
+      <DependentUpon>ShortcutSettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\Windows\SusExportWindow.xaml.cs">
       <DependentUpon>SusExportWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\Windows\ViewModel.cs" />
     <Compile Include="UI\Windows\WpfExtensions.cs" />
     <EmbeddedResource Include="Localization\ErrorStrings.en.resx" />
     <EmbeddedResource Include="Localization\ErrorStrings.resx">
@@ -449,6 +461,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\Windows\DiagnosticsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Windows\ShortcutSettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
