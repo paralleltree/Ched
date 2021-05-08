@@ -23,6 +23,8 @@ namespace Ched.UI
 {
     public partial class NoteView : Control
     {
+        public event EventHandler UnitLaneWidthChanged;
+        public event EventHandler UnitBeatHeightChanged;
         public event EventHandler HeadTickChanged;
         public event EventHandler EditModeChanged;
         public event EventHandler SelectedRangeChanged;
@@ -119,6 +121,7 @@ namespace Ched.UI
             {
                 unitLaneWidth = value;
                 Invalidate();
+                UnitLaneWidthChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -172,6 +175,7 @@ namespace Ched.UI
                 // 6の倍数でいい感じに描画してくれる
                 unitBeatHeight = value;
                 Invalidate();
+                UnitBeatHeightChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 

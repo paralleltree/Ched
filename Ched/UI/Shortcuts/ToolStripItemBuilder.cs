@@ -62,4 +62,29 @@ namespace Ched.UI.Shortcuts
             item.ShortcutKeyDisplayString = keyText;
         }
     }
+
+    internal class ToolStripButtonBuilder : ToolStripItemBuilder<ToolStripButton>
+    {
+        private Dictionary<ToolStripButton, string> commandNameMap = new Dictionary<ToolStripButton, string>();
+
+        public ToolStripButtonBuilder(ShortcutManager shortcutManager) : base(shortcutManager)
+        {
+        }
+
+        protected override ToolStripButton BuildItemInstance(string command, string commandName, Image image)
+        {
+            var button = new ToolStripButton(commandName, image, (s, e) => ShortcutManager.CommandSource.ExecuteCommand(command))
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+            commandNameMap.Add(button, commandName);
+            return button;
+        }
+
+        protected override void UpdateShortcutKey(ToolStripButton item, string keyText)
+        {
+            string commandName = commandNameMap[item];
+            item.Text = string.IsNullOrEmpty(keyText) ? commandName : $"{commandName} ({keyText})";
+        }
+    }
 }

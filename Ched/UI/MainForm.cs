@@ -37,11 +37,6 @@ namespace Ched.UI
         private ScrollBar NoteViewScrollBar { get; }
         private NoteView NoteView { get; }
 
-        private ToolStripButton ZoomInButton;
-        private ToolStripButton ZoomOutButton;
-        private ToolStripMenuItem WidenLaneWidthMenuItem;
-        private ToolStripMenuItem NarrowLaneWidthMenuItem;
-
         private SoundPreviewManager PreviewManager { get; }
         private SoundSource CurrentMusicSource;
 
@@ -64,10 +59,6 @@ namespace Ched.UI
                 NoteView.ShortNoteHeight = isPreviewMode ? 4 : 5;
                 NoteView.UnitBeatHeight = isPreviewMode ? 48 : ApplicationSettings.Default.UnitBeatHeight;
                 UpdateThumbHeight();
-                ZoomInButton.Enabled = CanZoomIn;
-                ZoomOutButton.Enabled = CanZoomOut;
-                WidenLaneWidthMenuItem.Enabled = CanWidenLaneWidth;
-                NarrowLaneWidthMenuItem.Enabled = CanNarrowLaneWidth;
                 PreviewModeChanged?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -517,6 +508,28 @@ namespace Ched.UI
             commandSource.RegisterCommand(Commands.OpenFile, MainFormStrings.OpenFile, OpenFile);
             commandSource.RegisterCommand(Commands.Save, MainFormStrings.SaveFile, SaveFile);
             commandSource.RegisterCommand(Commands.SaveAs, MainFormStrings.SaveAs, SaveAs);
+            commandSource.RegisterCommand(Commands.ReExport, MainFormStrings.Export, () =>
+            {
+                if (!ExportManager.CanReExport)
+                {
+                    if (PluginManager.ScoreBookExportPlugins.Count() == 1)
+                    {
+                        ExportAs(PluginManager.ScoreBookExportPlugins.Single());
+                        return;
+                    }
+                    MessageBox.Show(this, ErrorStrings.NotExported, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                HandleExport(ScoreBook, ExportManager.PrepareReExport());
+            });
+            commandSource.RegisterCommand(Commands.ShowScoreBookProperties, MainFormStrings.BookProperty, () =>
+            {
+                var vm = new BookPropertiesWindowViewModel(ScoreBook, CurrentMusicSource);
+                var window = new BookPropertiesWindow() { DataContext = vm };
+                window.ShowDialog(this);
+            });
+            commandSource.RegisterCommand(Commands.ShowShortcutSettings, MainFormStrings.KeyboardShortcuts, () => ConfigureKeyboardShortcut());
 
             commandSource.RegisterCommand(Commands.Undo, MainFormStrings.Undo, () => { if (OperationManager.CanUndo) OperationManager.Undo(); });
             commandSource.RegisterCommand(Commands.Redo, MainFormStrings.Redo, () => { if (OperationManager.CanRedo) OperationManager.Redo(); });
@@ -527,14 +540,176 @@ namespace Ched.UI
             commandSource.RegisterCommand(Commands.PasteFlip, MainFormStrings.PasteFlipped, () => NoteView.PasteFlippedNotes());
 
             commandSource.RegisterCommand(Commands.SelectAll, MainFormStrings.SelectAll, () => NoteView.SelectAll());
+            commandSource.RegisterCommand(Commands.SelectToBegin, MainFormStrings.SelectToBeginning, () => NoteView.SelectToBeginning());
+            commandSource.RegisterCommand(Commands.SelectToEnd, MainFormStrings.SelectToEnd, () => NoteView.SelectToEnd());
 
+            commandSource.RegisterCommand(Commands.FlipSelectedNotes, MainFormStrings.FlipSelectedNotes, () => NoteView.FlipSelectedNotes());
             commandSource.RegisterCommand(Commands.RemoveSelectedNotes, MainFormStrings.RemoveSelectedNotes, () => NoteView.RemoveSelectedNotes());
+            commandSource.RegisterCommand(Commands.RemoveSelectedEvents, MainFormStrings.RemoveEvents, () => NoteView.RemoveSelectedEvents());
 
             commandSource.RegisterCommand(Commands.SwitchScorePreviewMode, MainFormStrings.ScorePreview, () => IsPreviewMode = !IsPreviewMode);
+
+            commandSource.RegisterCommand(Commands.WidenLaneWidth, MainFormStrings.WidenLaneWidth, () =>
+            {
+                if (!CanWidenLaneWidth) return;
+                NoteView.UnitLaneWidth += 4;
+                ApplicationSettings.Default.UnitLaneWidth = NoteView.UnitLaneWidth;
+            });
+            commandSource.RegisterCommand(Commands.NarrowLaneWidth, MainFormStrings.NarrowLaneWidth, () =>
+            {
+                if (!CanNarrowLaneWidth) return;
+                NoteView.UnitLaneWidth -= 4;
+                ApplicationSettings.Default.UnitLaneWidth = NoteView.UnitLaneWidth;
+            });
+
+            commandSource.RegisterCommand(Commands.InsertBpmChange, "BPM", () =>
+            {
+                var form = new BpmSelectionForm()
+                {
+                    Bpm = NoteView.ScoreEvents.BpmChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= NoteView.CurrentTick)?.Bpm ?? 120
+                };
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var item = new BpmChangeEvent()
+                {
+                    Tick = NoteView.CurrentTick,
+                    Bpm = form.Bpm
+                };
+                UpdateEvent(NoteView.ScoreEvents.BpmChangeEvents, item);
+            });
+            commandSource.RegisterCommand(Commands.InsertHighSpeedChange, MainFormStrings.HighSpeed, () =>
+            {
+                var form = new HighSpeedSelectionForm()
+                {
+                    SpeedRatio = NoteView.ScoreEvents.HighSpeedChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= NoteView.CurrentTick)?.SpeedRatio ?? 1.0m
+                };
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var item = new HighSpeedChangeEvent()
+                {
+                    Tick = NoteView.CurrentTick,
+                    SpeedRatio = form.SpeedRatio
+                };
+                UpdateEvent(NoteView.ScoreEvents.HighSpeedChangeEvents, item);
+            });
+            commandSource.RegisterCommand(Commands.InsertTimeSignatureChange, MainFormStrings.TimeSignature, () =>
+            {
+                var form = new TimeSignatureSelectionForm();
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+
+                var item = new TimeSignatureChangeEvent()
+                {
+                    Tick = NoteView.CurrentTick,
+                    Numerator = form.Numerator,
+                    DenominatorExponent = form.DenominatorExponent
+                };
+                UpdateEvent(NoteView.ScoreEvents.TimeSignatureChangeEvents, item);
+            });
+
+            void UpdateEvent<T>(List<T> list, T item) where T : EventBase
+            {
+                var prev = list.SingleOrDefault(p => p.Tick == item.Tick);
+
+                var insertOp = new InsertEventOperation<T>(list, item);
+                if (prev == null)
+                {
+                    OperationManager.InvokeAndPush(insertOp);
+                }
+                else
+                {
+                    var removeOp = new RemoveEventOperation<T>(list, prev);
+                    OperationManager.InvokeAndPush(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
+                }
+                NoteView.Invalidate();
+            }
 
             commandSource.RegisterCommand(Commands.PlayPreview, MainFormStrings.Play, () => PlayPreview());
 
             commandSource.RegisterCommand(Commands.ShowHelp, MainFormStrings.Help, () => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched/wiki"));
+
+            commandSource.RegisterCommand(Commands.SelectPen, MainFormStrings.Pen, () => NoteView.EditMode = EditMode.Edit);
+            commandSource.RegisterCommand(Commands.SelectSelection, MainFormStrings.Selection, () => NoteView.EditMode = EditMode.Select);
+            commandSource.RegisterCommand(Commands.SelectEraser, MainFormStrings.Eraser, () => NoteView.EditMode = EditMode.Erase);
+
+            commandSource.RegisterCommand(Commands.ZoomIn, MainFormStrings.ZoomIn, () =>
+            {
+                if (!CanZoomIn) return;
+                NoteView.UnitBeatHeight *= 2;
+                ApplicationSettings.Default.UnitBeatHeight = (int)NoteView.UnitBeatHeight;
+                UpdateThumbHeight();
+            });
+            commandSource.RegisterCommand(Commands.ZoomOut, MainFormStrings.ZoomOut, () =>
+            {
+                if (!CanZoomOut) return;
+                NoteView.UnitBeatHeight /= 2;
+                ApplicationSettings.Default.UnitBeatHeight = (int)NoteView.UnitBeatHeight;
+                UpdateThumbHeight();
+            });
+
+            commandSource.RegisterCommand(Commands.SelectTap, "TAP", () => NoteView.NewNoteType = NoteType.Tap);
+            commandSource.RegisterCommand(Commands.SelectExTap, "ExTAP", () => NoteView.NewNoteType = NoteType.ExTap);
+            commandSource.RegisterCommand(Commands.SelectHold, "HOLD", () => NoteView.NewNoteType = NoteType.Hold);
+            commandSource.RegisterCommand(Commands.SelectSlide, "SLIDE", () =>
+            {
+                NoteView.NewNoteType = NoteType.Slide;
+                NoteView.IsNewSlideStepVisible = false;
+            });
+            commandSource.RegisterCommand(Commands.SelectSlideStep, MainFormStrings.SlideStep, () =>
+            {
+                NoteView.NewNoteType = NoteType.Slide;
+                NoteView.IsNewSlideStepVisible = true;
+            });
+            commandSource.RegisterCommand(Commands.SelectAir, "AIR", () =>
+            {
+                if (NoteView.NewNoteType != NoteType.Air)
+                {
+                    NoteView.NewNoteType = NoteType.Air;
+                    return;
+                }
+                if (NoteView.AirDirection.HorizontalDirection == HorizontalAirDirection.Left)
+                {
+                    NoteView.AirDirection = new AirDirection(
+                        NoteView.AirDirection.VerticalDirection == VerticalAirDirection.Up ? VerticalAirDirection.Down : VerticalAirDirection.Up,
+                        GetNextHorizontalDirection(NoteView.AirDirection.HorizontalDirection));
+                    return;
+                }
+                HandleHorizontalAirDirection(NoteView.AirDirection.VerticalDirection);
+            });
+            commandSource.RegisterCommand(Commands.SelectAirUp, MainFormStrings.AirUp, () => HandleHorizontalAirDirection(VerticalAirDirection.Up));
+            commandSource.RegisterCommand(Commands.SelectAirDown, MainFormStrings.AirDown, () => HandleHorizontalAirDirection(VerticalAirDirection.Down));
+            commandSource.RegisterCommand(Commands.SelectAirAction, "AIR-ACTION", () => NoteView.NewNoteType = NoteType.AirAction);
+            commandSource.RegisterCommand(Commands.SelectFlick, "FLICK", () => NoteView.NewNoteType = NoteType.Flick);
+            commandSource.RegisterCommand(Commands.SelectDamage, "DAMAGE", () => NoteView.NewNoteType = NoteType.Damage);
+
+            void HandleHorizontalAirDirection(VerticalAirDirection verticalDirection)
+            {
+                if (NoteView.NewNoteType != NoteType.Air)
+                {
+                    NoteView.NewNoteType = NoteType.Air;
+                    NoteView.AirDirection = new AirDirection(verticalDirection, NoteView.AirDirection.HorizontalDirection);
+                    return;
+                }
+                var horizontalDirection = NoteView.AirDirection.HorizontalDirection;
+                if (verticalDirection == NoteView.AirDirection.VerticalDirection)
+                    horizontalDirection = GetNextHorizontalDirection(horizontalDirection);
+                NoteView.AirDirection = new AirDirection(verticalDirection, horizontalDirection);
+            }
+
+            HorizontalAirDirection GetNextHorizontalDirection(HorizontalAirDirection direction)
+            {
+                switch (direction)
+                {
+                    case HorizontalAirDirection.Center:
+                        return HorizontalAirDirection.Right;
+
+                    case HorizontalAirDirection.Right:
+                        return HorizontalAirDirection.Left;
+
+                    case HorizontalAirDirection.Left:
+                        return HorizontalAirDirection.Center;
+                }
+                throw new ArgumentException();
+            }
         }
 
         private void ConfigureKeyboardShortcut()
@@ -566,15 +741,7 @@ namespace Ched.UI
                 ExportAs(p);
             })).ToArray();
 
-            var bookPropertiesMenuItem = new ToolStripMenuItem(MainFormStrings.BookProperty, null, (s, e) =>
-            {
-                var vm = new BookPropertiesWindowViewModel(ScoreBook, CurrentMusicSource);
-                var window = new BookPropertiesWindow()
-                {
-                    DataContext = vm
-                };
-                window.ShowDialog(this);
-            });
+            var bookPropertiesMenuItem = shortcutItemBuilder.BuildItem(Commands.ShowScoreBookProperties, MainFormStrings.BookProperty);
 
             var fileMenuItems = new ToolStripItem[]
             {
@@ -588,7 +755,7 @@ namespace Ched.UI
                 new ToolStripSeparator(),
                 bookPropertiesMenuItem,
                 new ToolStripSeparator(),
-                new ToolStripMenuItem(MainFormStrings.KeyboardShortcuts, null, (s, e) => ConfigureKeyboardShortcut()),
+                shortcutItemBuilder.BuildItem(Commands.ShowShortcutSettings, MainFormStrings.KeyboardShortcuts),
                 new ToolStripSeparator(),
                 new ToolStripMenuItem(MainFormStrings.Exit + "(&X)", null, (s, e) => this.Close())
             };
@@ -605,12 +772,12 @@ namespace Ched.UI
             var pasteFlippedItem = shortcutItemBuilder.BuildItem(Commands.PasteFlip, MainFormStrings.PasteFlipped);
 
             var selectAllItem = shortcutItemBuilder.BuildItem(Commands.SelectAll, MainFormStrings.SelectAll);
-            var selectToEndItem = new ToolStripMenuItem(MainFormStrings.SelectToEnd, null, (s, e) => noteView.SelectToEnd());
-            var selectoToBeginningItem = new ToolStripMenuItem(MainFormStrings.SelectToBeginning, null, (s, e) => noteView.SelectToBeginning());
+            var selectToEndItem = shortcutItemBuilder.BuildItem(Commands.SelectToEnd, MainFormStrings.SelectToEnd);
+            var selectoToBeginningItem = shortcutItemBuilder.BuildItem(Commands.SelectToBegin, MainFormStrings.SelectToBeginning);
 
-            var flipSelectedNotesItem = new ToolStripMenuItem(MainFormStrings.FlipSelectedNotes, null, (s, e) => noteView.FlipSelectedNotes());
+            var flipSelectedNotesItem = shortcutItemBuilder.BuildItem(Commands.FlipSelectedNotes, MainFormStrings.FlipSelectedNotes);
             var removeSelectedNotesItem = shortcutItemBuilder.BuildItem(Commands.RemoveSelectedNotes, MainFormStrings.RemoveSelectedNotes);
-            var removeEventsItem = new ToolStripMenuItem(MainFormStrings.RemoveEvents, null, (s, e) => noteView.RemoveSelectedEvents());
+            var removeEventsItem = shortcutItemBuilder.BuildItem(Commands.RemoveSelectedEvents, MainFormStrings.RemoveEvents);
 
             var insertAirWithAirActionItem = new ToolStripMenuItem(MainFormStrings.InsertAirWithAirAction, null, (s, e) =>
             {
@@ -661,92 +828,26 @@ namespace Ched.UI
             var viewModeItem = shortcutItemBuilder.BuildItem(Commands.SwitchScorePreviewMode, MainFormStrings.ScorePreview);
             PreviewModeChanged += (s, e) => viewModeItem.Checked = IsPreviewMode;
 
-            WidenLaneWidthMenuItem = new ToolStripMenuItem(MainFormStrings.WidenLaneWidth);
-            NarrowLaneWidthMenuItem = new ToolStripMenuItem(MainFormStrings.NarrowLaneWidth);
+            var widenLaneWidthMenuItem = shortcutItemBuilder.BuildItem(Commands.WidenLaneWidth, MainFormStrings.WidenLaneWidth);
+            var narrowLaneWidthMenuItem = shortcutItemBuilder.BuildItem(Commands.NarrowLaneWidth, MainFormStrings.NarrowLaneWidth);
 
-            WidenLaneWidthMenuItem.Click += (s, e) =>
+            NoteView.UnitLaneWidthChanged += (s, e) =>
             {
-                noteView.UnitLaneWidth += 4;
-                ApplicationSettings.Default.UnitLaneWidth = noteView.UnitLaneWidth;
-                WidenLaneWidthMenuItem.Enabled = CanWidenLaneWidth;
-                NarrowLaneWidthMenuItem.Enabled = CanNarrowLaneWidth;
-            };
-            NarrowLaneWidthMenuItem.Click += (s, e) =>
-            {
-                noteView.UnitLaneWidth -= 4;
-                ApplicationSettings.Default.UnitLaneWidth = noteView.UnitLaneWidth;
-                WidenLaneWidthMenuItem.Enabled = CanWidenLaneWidth;
-                NarrowLaneWidthMenuItem.Enabled = CanNarrowLaneWidth;
+                widenLaneWidthMenuItem.Enabled = CanWidenLaneWidth;
+                narrowLaneWidthMenuItem.Enabled = CanNarrowLaneWidth;
             };
 
-            var viewMenuItems = new ToolStripItem[] {
+            var viewMenuItems = new ToolStripItem[]
+            {
                 viewModeItem,
                 new ToolStripSeparator(),
-                WidenLaneWidthMenuItem, NarrowLaneWidthMenuItem
+                widenLaneWidthMenuItem, narrowLaneWidthMenuItem
             };
 
-            void UpdateEvent<T>(List<T> list, T item) where T : EventBase
-            {
-                var prev = list.SingleOrDefault(p => p.Tick == item.Tick);
 
-                var insertOp = new InsertEventOperation<T>(list, item);
-                if (prev == null)
-                {
-                    OperationManager.InvokeAndPush(insertOp);
-                }
-                else
-                {
-                    var removeOp = new RemoveEventOperation<T>(list, prev);
-                    OperationManager.InvokeAndPush(new CompositeOperation(insertOp.Description, new IOperation[] { removeOp, insertOp }));
-                }
-                noteView.Invalidate();
-            }
-
-            var insertBpmItem = new ToolStripMenuItem("BPM", null, (s, e) =>
-            {
-                var form = new BpmSelectionForm()
-                {
-                    Bpm = noteView.ScoreEvents.BpmChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.Bpm ?? 120
-                };
-                if (form.ShowDialog(this) != DialogResult.OK) return;
-
-                var item = new BpmChangeEvent()
-                {
-                    Tick = noteView.CurrentTick,
-                    Bpm = form.Bpm
-                };
-                UpdateEvent(noteView.ScoreEvents.BpmChangeEvents, item);
-            });
-
-            var insertHighSpeedItem = new ToolStripMenuItem(MainFormStrings.HighSpeed, null, (s, e) =>
-            {
-                var form = new HighSpeedSelectionForm()
-                {
-                    SpeedRatio = noteView.ScoreEvents.HighSpeedChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= noteView.CurrentTick)?.SpeedRatio ?? 1.0m
-                };
-                if (form.ShowDialog(this) != DialogResult.OK) return;
-
-                var item = new HighSpeedChangeEvent()
-                {
-                    Tick = noteView.CurrentTick,
-                    SpeedRatio = form.SpeedRatio
-                };
-                UpdateEvent(noteView.ScoreEvents.HighSpeedChangeEvents, item);
-            });
-
-            var insertTimeSignatureItem = new ToolStripMenuItem(MainFormStrings.TimeSignature, null, (s, e) =>
-            {
-                var form = new TimeSignatureSelectionForm();
-                if (form.ShowDialog(this) != DialogResult.OK) return;
-
-                var item = new TimeSignatureChangeEvent()
-                {
-                    Tick = noteView.CurrentTick,
-                    Numerator = form.Numerator,
-                    DenominatorExponent = form.DenominatorExponent
-                };
-                UpdateEvent(noteView.ScoreEvents.TimeSignatureChangeEvents, item);
-            });
+            var insertBpmItem = shortcutItemBuilder.BuildItem(Commands.InsertBpmChange, "BPM");
+            var insertHighSpeedItem = shortcutItemBuilder.BuildItem(Commands.InsertHighSpeedChange, MainFormStrings.HighSpeed);
+            var insertTimeSignatureItem = shortcutItemBuilder.BuildItem(Commands.InsertTimeSignatureChange, MainFormStrings.TimeSignature);
 
             var insertMenuItems = new ToolStripItem[] { insertBpmItem, insertHighSpeedItem, insertTimeSignatureItem };
 
@@ -808,105 +909,37 @@ namespace Ched.UI
 
         private ToolStrip CreateMainToolStrip(NoteView noteView)
         {
-            var newFileButton = new ToolStripButton(MainFormStrings.NewFile, Resources.NewFileIcon, (s, e) => ClearFile())
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var openFileButton = new ToolStripButton(MainFormStrings.OpenFile, Resources.OpenFileIcon, (s, e) => OpenFile())
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var saveFileButton = new ToolStripButton(MainFormStrings.SaveFile, Resources.SaveFileIcon, (s, e) => SaveFile())
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var exportButton = new ToolStripButton(MainFormStrings.Export, Resources.ExportIcon, (s, e) =>
-            {
-                if (!ExportManager.CanReExport)
-                {
-                    if (PluginManager.ScoreBookExportPlugins.Count() == 1)
-                    {
-                        ExportAs(PluginManager.ScoreBookExportPlugins.Single());
-                        return;
-                    }
-                    MessageBox.Show(this, ErrorStrings.NotExported, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
+            var shortcutItemBuilder = new ToolStripButtonBuilder(ShortcutManager);
 
-                HandleExport(ScoreBook, ExportManager.PrepareReExport());
-            })
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
+            var newFileButton = shortcutItemBuilder.BuildItem(Commands.NewFile, MainFormStrings.NewFile, Resources.NewFileIcon);
+            var openFileButton = shortcutItemBuilder.BuildItem(Commands.OpenFile, MainFormStrings.OpenFile, Resources.OpenFileIcon);
+            var saveFileButton = shortcutItemBuilder.BuildItem(Commands.Save, MainFormStrings.SaveFile, Resources.SaveFileIcon);
+            var exportButton = shortcutItemBuilder.BuildItem(Commands.ReExport, MainFormStrings.Export, Resources.ExportIcon);
 
-            var cutButton = new ToolStripButton(MainFormStrings.Cut, Resources.CutIcon, (s, e) => noteView.CutSelectedNotes())
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var copyButton = new ToolStripButton(MainFormStrings.Copy, Resources.CopyIcon, (s, e) => noteView.CopySelectedNotes())
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var pasteButton = new ToolStripButton(MainFormStrings.Paste, Resources.PasteIcon, (s, e) => noteView.PasteNotes())
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
+            var cutButton = shortcutItemBuilder.BuildItem(Commands.Cut, MainFormStrings.Cut, Resources.CutIcon);
+            var copyButton = shortcutItemBuilder.BuildItem(Commands.Copy, MainFormStrings.Copy, Resources.CopyIcon);
+            var pasteButton = shortcutItemBuilder.BuildItem(Commands.Paste, MainFormStrings.Paste, Resources.PasteIcon);
 
-            var undoButton = new ToolStripButton(MainFormStrings.Undo, Resources.UndoIcon, (s, e) => OperationManager.Undo())
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image,
-                Enabled = false
-            };
-            var redoButton = new ToolStripButton(MainFormStrings.Redo, Resources.RedoIcon, (s, e) => OperationManager.Redo())
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image,
-                Enabled = false
-            };
+            var undoButton = shortcutItemBuilder.BuildItem(Commands.Undo, MainFormStrings.Undo, Resources.UndoIcon);
+            undoButton.Enabled = false;
+            var redoButton = shortcutItemBuilder.BuildItem(Commands.Redo, MainFormStrings.Redo, Resources.RedoIcon);
+            redoButton.Enabled = false;
 
-            var penButton = new ToolStripButton(MainFormStrings.Pen, Resources.EditIcon, (s, e) => noteView.EditMode = EditMode.Edit)
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var selectionButton = new ToolStripButton(MainFormStrings.Selection, Resources.SelectionIcon, (s, e) => noteView.EditMode = EditMode.Select)
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var eraserButton = new ToolStripButton(MainFormStrings.Eraser, Resources.EraserIcon, (s, e) => noteView.EditMode = EditMode.Erase)
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
+            var penButton = shortcutItemBuilder.BuildItem(Commands.SelectPen, MainFormStrings.Pen, Resources.EditIcon);
+            var selectionButton = shortcutItemBuilder.BuildItem(Commands.SelectSelection, MainFormStrings.Selection, Resources.SelectionIcon);
+            var eraserButton = shortcutItemBuilder.BuildItem(Commands.SelectEraser, MainFormStrings.Eraser, Resources.EraserIcon);
 
-            var zoomInButton = new ToolStripButton(MainFormStrings.ZoomIn, Resources.ZoomInIcon)
-            {
-                Enabled = noteView.UnitBeatHeight < 1920,
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var zoomOutButton = new ToolStripButton(MainFormStrings.ZoomOut, Resources.ZoomOutIcon)
-            {
-                Enabled = noteView.UnitBeatHeight > 30,
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
+            var zoomInButton = shortcutItemBuilder.BuildItem(Commands.ZoomIn, MainFormStrings.ZoomIn, Resources.ZoomInIcon);
+            zoomInButton.Enabled = CanZoomIn;
 
-            zoomInButton.Click += (s, e) =>
+            var zoomOutButton = shortcutItemBuilder.BuildItem(Commands.ZoomOut, MainFormStrings.ZoomOut, Resources.ZoomOutIcon);
+            zoomOutButton.Enabled = CanZoomOut;
+
+            NoteView.UnitBeatHeightChanged += (s, e) =>
             {
-                noteView.UnitBeatHeight *= 2;
-                ApplicationSettings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
                 zoomOutButton.Enabled = CanZoomOut;
                 zoomInButton.Enabled = CanZoomIn;
-                UpdateThumbHeight();
             };
-
-            zoomOutButton.Click += (s, e) =>
-            {
-                noteView.UnitBeatHeight /= 2;
-                ApplicationSettings.Default.UnitBeatHeight = (int)noteView.UnitBeatHeight;
-                zoomInButton.Enabled = CanZoomIn;
-                zoomOutButton.Enabled = CanZoomOut;
-                UpdateThumbHeight();
-            };
-
-            ZoomInButton = zoomInButton;
-            ZoomOutButton = zoomOutButton;
 
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
@@ -933,46 +966,16 @@ namespace Ched.UI
 
         private ToolStrip CreateNewNoteTypeToolStrip(NoteView noteView)
         {
-            var tapButton = new ToolStripButton("TAP", Resources.TapIcon, (s, e) => noteView.NewNoteType = NoteType.Tap)
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var exTapButton = new ToolStripButton("ExTAP", Resources.ExTapIcon, (s, e) => noteView.NewNoteType = NoteType.ExTap)
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var holdButton = new ToolStripButton("HOLD", Resources.HoldIcon, (s, e) => noteView.NewNoteType = NoteType.Hold)
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var slideButton = new ToolStripButton("SLIDE", Resources.SlideIcon, (s, e) =>
-            {
-                noteView.NewNoteType = NoteType.Slide;
-                noteView.IsNewSlideStepVisible = false;
-            })
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var slideStepButton = new ToolStripButton(MainFormStrings.SlideStep, Resources.SlideStepIcon, (s, e) =>
-            {
-                noteView.NewNoteType = NoteType.Slide;
-                noteView.IsNewSlideStepVisible = true;
-            })
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var airActionButton = new ToolStripButton("AIR-ACTION", Resources.AirActionIcon, (s, e) => noteView.NewNoteType = NoteType.AirAction)
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var flickButton = new ToolStripButton("FLICK", Resources.FlickIcon, (s, e) => noteView.NewNoteType = NoteType.Flick)
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
-            var damageButton = new ToolStripButton("DAMAGE", Resources.DamgeIcon, (s, e) => noteView.NewNoteType = NoteType.Damage)
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Image
-            };
+            var shortcutItemBuilder = new ToolStripButtonBuilder(ShortcutManager);
+
+            var tapButton = shortcutItemBuilder.BuildItem(Commands.SelectTap, "TAP", Resources.TapIcon);
+            var exTapButton = shortcutItemBuilder.BuildItem(Commands.SelectExTap, "ExTAP", Resources.ExTapIcon);
+            var holdButton = shortcutItemBuilder.BuildItem(Commands.SelectHold, "HOLD", Resources.HoldIcon);
+            var slideButton = shortcutItemBuilder.BuildItem(Commands.SelectSlide, "SLIDE", Resources.SlideIcon);
+            var slideStepButton = shortcutItemBuilder.BuildItem(Commands.SelectSlideStep, MainFormStrings.SlideStep, Resources.SlideStepIcon);
+            var airActionButton = shortcutItemBuilder.BuildItem(Commands.SelectAirAction, "AIR-ACTION", Resources.AirActionIcon);
+            var flickButton = shortcutItemBuilder.BuildItem(Commands.SelectFlick, "FLICK", Resources.FlickIcon);
+            var damageButton = shortcutItemBuilder.BuildItem(Commands.SelectDamage, "DAMAGE", Resources.DamgeIcon);
 
             var airKind = new CheckableToolStripSplitButton()
             {
@@ -990,6 +993,15 @@ namespace Ched.UI
                 new ToolStripMenuItem(MainFormStrings.AirRightDown, Resources.AirRightDownIcon, (s, e) => noteView.AirDirection = new AirDirection(VerticalAirDirection.Down, HorizontalAirDirection.Right))
             });
             airKind.Image = Resources.AirUpIcon;
+            ShortcutManager.ShortcutUpdated += (s, e) =>
+            {
+                if (ShortcutManager.ResolveShortcutKey(Commands.SelectAir, out Keys key))
+                {
+                    airKind.Text = $"AIR ({key.ToShortcutChar()})";
+                    return;
+                }
+                airKind.Text = "AIR";
+            };
 
             var quantizeTicks = new int[]
             {
