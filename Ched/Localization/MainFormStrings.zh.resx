@@ -1,0 +1,336 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AbortAtLastNote" xml:space="preserve">
+    <value>在结尾Note停止</value>
+  </data>
+  <data name="BookProperty" xml:space="preserve">
+    <value>谱面属性</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="Cut" xml:space="preserve">
+    <value>剪切</value>
+  </data>
+  <data name="DeleteEvent" xml:space="preserve">
+    <value>删除Event</value>
+  </data>
+  <data name="EditMenu" xml:space="preserve">
+    <value>编辑(&amp;E)</value>
+  </data>
+  <data name="Eraser" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>退出</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>导出</value>
+  </data>
+  <data name="FileMenu" xml:space="preserve">
+    <value>文件(&amp;F)</value>
+  </data>
+  <data name="FlipSelectedNotes" xml:space="preserve">
+    <value>反转选中Note</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>打开在线帮助</value>
+  </data>
+  <data name="HelpMenu" xml:space="preserve">
+    <value>帮助(&amp;H)</value>
+  </data>
+  <data name="HighSpeed" xml:space="preserve">
+    <value>HiSpeed</value>
+  </data>
+  <data name="InsertMenu" xml:space="preserve">
+    <value>插入(&amp;I)</value>
+  </data>
+  <data name="NewFile" xml:space="preserve">
+    <value>新建</value>
+  </data>
+  <data name="OpenFile" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="Paste" xml:space="preserve">
+    <value>粘贴</value>
+  </data>
+  <data name="PasteFlipped" xml:space="preserve">
+    <value>翻转后粘贴</value>
+  </data>
+  <data name="Pen" xml:space="preserve">
+    <value>编辑</value>
+  </data>
+  <data name="Play" xml:space="preserve">
+    <value>播放/停止</value>
+  </data>
+  <data name="PlayMenu" xml:space="preserve">
+    <value>播放(&amp;P)</value>
+  </data>
+  <data name="Plugin" xml:space="preserve">
+    <value>插件</value>
+  </data>
+  <data name="Redo" xml:space="preserve">
+    <value>重做</value>
+  </data>
+  <data name="RemoveEvents" xml:space="preserve">
+    <value>删除选中Events</value>
+  </data>
+  <data name="RemoveSelectedNotes" xml:space="preserve">
+    <value>删除选中Notes</value>
+  </data>
+  <data name="SaveAs" xml:space="preserve">
+    <value>另存为</value>
+  </data>
+  <data name="SaveFile" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="ScorePreview" xml:space="preserve">
+    <value>谱面预览</value>
+  </data>
+  <data name="Selection" xml:space="preserve">
+    <value>选择</value>
+  </data>
+  <data name="Stop" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="TimeSignature" xml:space="preserve">
+    <value>节拍</value>
+  </data>
+  <data name="Undo" xml:space="preserve">
+    <value>撤销</value>
+  </data>
+  <data name="VersionInfo" xml:space="preserve">
+    <value>版本信息</value>
+  </data>
+  <data name="ViewMenu" xml:space="preserve">
+    <value>视图(&amp;V)</value>
+  </data>
+  <data name="ZoomIn" xml:space="preserve">
+    <value>放大</value>
+  </data>
+  <data name="ZoomOut" xml:space="preserve">
+    <value>缩小</value>
+  </data>
+  <data name="AirDown" xml:space="preserve">
+    <value>下AIR</value>
+  </data>
+  <data name="AirLeftDown" xml:space="preserve">
+    <value>左下AIR</value>
+  </data>
+  <data name="AirLeftUp" xml:space="preserve">
+    <value>左上AIR</value>
+  </data>
+  <data name="AirRightDown" xml:space="preserve">
+    <value>右下AIR</value>
+  </data>
+  <data name="AirRightUp" xml:space="preserve">
+    <value>右上AIR</value>
+  </data>
+  <data name="AirUp" xml:space="preserve">
+    <value>上AIR</value>
+  </data>
+  <data name="Custom" xml:space="preserve">
+    <value>自定义</value>
+  </data>
+  <data name="Division" xml:space="preserve">
+    <value>分</value>
+  </data>
+  <data name="SlideStep" xml:space="preserve">
+    <value>SLIDE(节点)</value>
+  </data>
+  <data name="InsertAirWithAirAction" xml:space="preserve">
+    <value>AIR-ACTION与AIR同时放置</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>导入</value>
+  </data>
+  <data name="NarrowLaneWidth" xml:space="preserve">
+    <value>缩小线宽</value>
+  </data>
+  <data name="WidenLaneWidth" xml:space="preserve">
+    <value>放大线宽</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>全选</value>
+  </data>
+  <data name="SelectToBeginning" xml:space="preserve">
+    <value>选择到开始位置</value>
+  </data>
+  <data name="SelectToEnd" xml:space="preserve">
+    <value>选择到最后</value>
+  </data>
+  <data name="Artist" xml:space="preserve">
+    <value>作曲</value>
+  </data>
+  <data name="BasicInformation" xml:space="preserve">
+    <value>基本信息</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>浏览</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="MusicInformation" xml:space="preserve">
+    <value>音源信息</value>
+  </data>
+  <data name="NotesDesigner" xml:space="preserve">
+    <value>Notes Designer</value>
+  </data>
+  <data name="Offset" xml:space="preserve">
+    <value>偏移</value>
+  </data>
+  <data name="SoundFile" xml:space="preserve">
+    <value>音源文件</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>标题</value>
+  </data>
+  <data name="AdditionalData" xml:space="preserve">
+    <value>描述</value>
+  </data>
+  <data name="Difficulty" xml:space="preserve">
+    <value>难度</value>
+  </data>
+  <data name="JacketFile" xml:space="preserve">
+    <value>封面</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>等级</value>
+  </data>
+  <data name="InsertSingleBlankAtBeginning" xml:space="preserve">
+    <value>在开头插入一小节空白</value>
+  </data>
+  <data name="KeyboardShortcuts" xml:space="preserve">
+    <value>快捷键设置</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>清空</value>
+  </data>
+  <data name="Command" xml:space="preserve">
+    <value>指令</value>
+  </data>
+  <data name="KeyCombination" xml:space="preserve">
+    <value>快捷键</value>
+  </data>
+  <data name="ResetAll" xml:space="preserve">
+    <value>重置</value>
+  </data>
+</root>
