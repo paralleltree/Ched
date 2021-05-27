@@ -26,7 +26,7 @@ namespace Ched.UI.Shortcuts
         public IEnumerable<string> Commands => Enumerable.Empty<string>();
 
         // Do nothing
-        public bool ExecuteCommand(string command) => true;
+        public bool ExecuteCommand(string command) => false;
 
         public bool ResolveCommandName(string command, out string name)
         {
