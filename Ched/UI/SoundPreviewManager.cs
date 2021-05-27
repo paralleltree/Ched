@@ -75,20 +75,16 @@ namespace Ched.UI
             StartTick = startTick;
 
             double startTime = timeCalculator.GetTimeFromTick(startTick);
-            double headGap = -context.MusicSource.Latency - startTime;
+            double headGap = Math.Max(-context.MusicSource.Latency - startTime, 0);
             elapsedTick = 0;
             Task.Run(() =>
             {
                 LastSystemTick = Environment.TickCount;
                 SyncControl.Invoke((MethodInvoker)(() => Timer.Start()));
 
-                System.Threading.Thread.Sleep(TimeSpan.FromSeconds(Math.Max(context.ClapSource.Latency, 0)));
-                if (headGap > 0)
-                {
-                    System.Threading.Thread.Sleep(TimeSpan.FromSeconds(headGap));
-                }
+                System.Threading.Thread.Sleep(TimeSpan.FromSeconds(Math.Max((context.ClapSource.Latency + headGap) / context.Speed, 0)));
                 if (!Playing) return;
-                SoundManager.Play(context.MusicSource.FilePath, startTime + context.MusicSource.Latency, context.MusicSource.Volume);
+                SoundManager.Play(context.MusicSource.FilePath, startTime + context.MusicSource.Latency, context.MusicSource.Volume, context.Speed);
             })
             .ContinueWith(p =>
             {
@@ -118,7 +114,7 @@ namespace Ched.UI
             int elapsed = now - LastSystemTick;
             LastSystemTick = now;
 
-            elapsedTick += PreviewContext.TicksPerBeat * BpmElement.Value.Bpm * elapsed / 60 / 1000;
+            elapsedTick += PreviewContext.TicksPerBeat * BpmElement.Value.Bpm * elapsed * PreviewContext.Speed / 60 / 1000;
             CurrentTick = (int)(InitialTick + elapsedTick);
             if (CurrentTick >= StartTick)
                 TickUpdated?.Invoke(this, new TickUpdatedEventArgs(Math.Max(CurrentTick, 0)));
@@ -137,7 +133,7 @@ namespace Ched.UI
                 TickElement = TickElement.Next;
             }
 
-            SoundManager.Play(PreviewContext.ClapSource.FilePath, 0, PreviewContext.ClapSource.Volume);
+            SoundManager.Play(PreviewContext.ClapSource.FilePath, 0, PreviewContext.ClapSource.Volume, PreviewContext.Speed);
         }
 
         private int GetLatencyTick(double latency, double bpm)
@@ -154,6 +150,7 @@ namespace Ched.UI
     public interface ISoundPreviewContext
     {
         int TicksPerBeat { get; }
+        double Speed { get; }
         IEnumerable<int> GetGuideTicks();
         IEnumerable<BpmChangeEvent> BpmDefinitions { get; }
         SoundSource MusicSource { get; }
@@ -165,6 +162,7 @@ namespace Ched.UI
         private Core.Score score;
 
         public int TicksPerBeat => score.TicksPerBeat;
+        public double Speed => 1.0;
         public IEnumerable<BpmChangeEvent> BpmDefinitions => score.Events.BpmChangeEvents;
         public SoundSource MusicSource { get; }
         public SoundSource ClapSource { get; }
