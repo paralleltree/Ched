@@ -26,6 +26,7 @@ namespace Ched.UI.Windows
     {
         private ScoreBook ScoreBook { get; } = new ScoreBook();
         private SoundSource MusicSource { get; set; } = new SoundSource();
+        private SoundSource GuideSource { get; set; } = Configuration.SoundSettings.Default.GuideSound;
 
         public string SoundSourceFilter { get; } = Helpers.GetFilterString(FileFilterStrings.AudioFilter, SoundSource.SupportedExtensions);
         public Action<string> SetMusicSourceFileAction => path => MusicSourcePath = path;
@@ -90,6 +91,28 @@ namespace Ched.UI.Windows
             }
         }
 
+        private double musicVolume;
+        public double MusicVolume
+        {
+            get => musicVolume;
+            set
+            {
+                musicVolume = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        private double guideVolume;
+        public double GuideVolume
+        {
+            get => guideVolume;
+            set
+            {
+                guideVolume = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         public BookPropertiesWindowViewModel()
         {
         }
@@ -108,6 +131,8 @@ namespace Ched.UI.Windows
 
             MusicSourcePath = MusicSource.FilePath;
             MusicSourceLatency = MusicSource.Latency;
+            MusicVolume = MusicSource.Volume;
+            GuideVolume = Configuration.SoundSettings.Default.GuideSound.Volume;
         }
 
         public void CommitEdit()
@@ -118,6 +143,11 @@ namespace Ched.UI.Windows
 
             MusicSource.FilePath = MusicSourcePath;
             MusicSource.Latency = MusicSourceLatency;
+            MusicSource.Volume = MusicVolume;
+            var guide = Configuration.SoundSettings.Default.GuideSound;
+            guide.Volume = GuideVolume;
+            Configuration.SoundSettings.Default.GuideSound = guide;
+            Configuration.SoundSettings.Default.Save();
         }
     }
 }

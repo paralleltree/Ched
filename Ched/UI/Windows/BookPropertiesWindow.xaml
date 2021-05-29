@@ -5,6 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:b="clr-namespace:Ched.UI.Windows.Behaviors"
+        xmlns:conv="clr-namespace:Ched.UI.Windows.Converters"
         xmlns:local="clr-namespace:Ched.UI.Windows"
         xmlns:localization="clr-namespace:Ched.Localization"
         ResizeMode="NoResize"
@@ -35,7 +36,7 @@
                 <Setter Property="Margin" Value="{StaticResource RowMargin}" />
                 <Style.Resources>
                     <Style TargetType="Label">
-                        <Setter Property="HorizontalAlignment" Value="Right" />
+                        <Setter Property="HorizontalAlignment" Value="Left" />
                         <Setter Property="Margin" Value="0,0,8px,0" />
                     </Style>
                 </Style.Resources>
@@ -105,6 +106,33 @@
                         <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.Offset}" />
                         <local:BindableNumericUpDown Grid.Column="1" Value="{Binding MusicSourceLatency}" DecimalPlaces="3" Minimum="-100" Maximum="100" Increment="0.01" />
                         <Label Grid.Column="2" Content="[s]" />
+                    </Grid>
+                    <Grid Style="{StaticResource InputFieldRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition MaxWidth="200" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid.Resources>
+                            <Style TargetType="Slider">
+                                <Setter Property="Minimum" Value="1" />
+                                <Setter Property="Maximum" Value="100" />
+                                <Setter Property="TickPlacement" Value="BottomRight" />
+                                <Setter Property="TickFrequency" Value="10" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                            </Style>
+                            <conv:VolumeConverter x:Key="VolumeConveter" />
+                        </Grid.Resources>
+
+                        <Label Grid.Row="0" Grid.Column="0" Content="{x:Static localization:MainFormStrings.MusicVolume}" />
+                        <Slider Grid.Row="0" Grid.Column="1" Value="{Binding MusicVolume, Converter={StaticResource VolumeConveter}}" />
+
+                        <Label Grid.Row="1" Grid.Column="0" Content="{x:Static localization:MainFormStrings.GuideVolume}" />
+                        <Slider Grid.Row="1" Grid.Column="1" Value="{Binding GuideVolume, Converter={StaticResource VolumeConveter}}" />
                     </Grid>
                 </StackPanel>
             </GroupBox>

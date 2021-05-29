@@ -333,4 +333,10 @@
   <data name="ResetAll" xml:space="preserve">
     <value>初期化</value>
   </data>
+  <data name="GuideVolume" xml:space="preserve">
+    <value>ガイド音音量(共通)</value>
+  </data>
+  <data name="MusicVolume" xml:space="preserve">
+    <value>楽曲音量</value>
+  </data>
 </root>

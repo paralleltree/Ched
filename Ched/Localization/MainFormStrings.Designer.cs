@@ -304,6 +304,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ガイド音音量(共通).
+        /// </summary>
+        public static string GuideVolume {
+            get {
+                return ResourceManager.GetString("GuideVolume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ヘルプを開く.
         /// </summary>
         public static string Help {
@@ -408,6 +417,15 @@ namespace Ched.Localization {
         public static string MusicInformation {
             get {
                 return ResourceManager.GetString("MusicInformation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 楽曲音量.
+        /// </summary>
+        public static string MusicVolume {
+            get {
+                return ResourceManager.GetString("MusicVolume", resourceCulture);
             }
         }
         
