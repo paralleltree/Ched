@@ -59,13 +59,13 @@ namespace Ched.UI
 
         public void Play(string path)
         {
-            Play(path, 0);
+            Play(path, 0, 1.0);
         }
 
-        public void Play(string path, double offset)
+        public void Play(string path, double offset, double volume)
         {
             CheckSupported();
-            Task.Run(() => PlayInternal(path, offset))
+            Task.Run(() => PlayInternal(path, offset, volume))
                 .ContinueWith(p =>
                 {
                     if (p.Exception != null)
@@ -76,7 +76,7 @@ namespace Ched.UI
                 });
         }
 
-        private void PlayInternal(string path, double offset)
+        private void PlayInternal(string path, double offset, double volume)
         {
             Queue<int> freelist;
             lock (handles)
@@ -107,6 +107,7 @@ namespace Ched.UI
 
             lock (playing) playing.Add(handle);
             Bass.BASS_ChannelSetPosition(handle, offset);
+            Bass.BASS_ChannelSetAttribute(handle, BASSAttribute.BASS_ATTRIB_VOL, (float)volume);
             Bass.BASS_ChannelPlay(handle, false);
         }
 
@@ -151,6 +152,18 @@ namespace Ched.UI
         public double Latency { get; set; }
 
         public string FilePath { get; set; }
+
+        private double volume = 1.0;
+        public double Volume
+        {
+            get => volume;
+            set
+            {
+                if (volume < 0 || volume > 1.0)
+                    throw new ArgumentOutOfRangeException("value");
+                volume = value;
+            }
+        }
 
         public SoundSource()
         {

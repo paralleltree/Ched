@@ -269,7 +269,11 @@ namespace Ched.UI
             if (!string.IsNullOrEmpty(book.Path))
             {
                 SoundSettings.Default.ScoreSound.TryGetValue(book.Path, out SoundSource src);
-                if (src != null) CurrentMusicSource = src;
+                if (src != null)
+                {
+                    if (src.Volume == 0) src.Volume = 1;
+                    CurrentMusicSource = src;
+                }
             }
         }
 
@@ -482,7 +486,7 @@ namespace Ched.UI
             try
             {
                 CommitChanges();
-                var context = new SoundPreviewContext(ScoreBook.Score, CurrentMusicSource);
+                var context = new SoundPreviewContext(ScoreBook.Score, CurrentMusicSource, SoundSettings.Default.GuideSound);
                 if (!PreviewManager.Start(context, startTick)) return;
                 PreviewManager.Finished += lambda;
                 NoteView.Editable = CanEdit;
