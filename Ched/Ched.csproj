@@ -251,6 +251,7 @@
     </Compile>
     <Compile Include="UI\Windows\Converters\BitmapImageSourceConverter.cs" />
     <Compile Include="UI\Windows\Converters\ShortcutKeyTextConverter.cs" />
+    <Compile Include="UI\Windows\Converters\VolumeConverter.cs" />
     <Compile Include="UI\Windows\DiagnosticsWindow.xaml.cs">
       <DependentUpon>DiagnosticsWindow.xaml</DependentUpon>
     </Compile>
