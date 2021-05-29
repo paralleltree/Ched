@@ -339,4 +339,7 @@
   <data name="MusicVolume" xml:space="preserve">
     <value>楽曲音量</value>
   </data>
+  <data name="SlowDownPreview" xml:space="preserve">
+    <value>スロー再生</value>
+  </data>
 </root>

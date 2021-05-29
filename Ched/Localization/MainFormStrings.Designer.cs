@@ -637,6 +637,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to スロー再生.
+        /// </summary>
+        public static string SlowDownPreview {
+            get {
+                return ResourceManager.GetString("SlowDownPreview", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 音源ファイル.
         /// </summary>
         public static string SoundFile {
