@@ -855,6 +855,20 @@ namespace Ched.UI
 
             var insertMenuItems = new ToolStripItem[] { insertBpmItem, insertHighSpeedItem, insertTimeSignatureItem };
 
+            var playItem = shortcutItemBuilder.BuildItem(Commands.PlayPreview, MainFormStrings.Play);
+
+            var stopItem = new ToolStripMenuItem(MainFormStrings.Stop, null, (s, e) => PreviewManager.Stop());
+
+            var slowDownPreviewItem = new ToolStripMenuItem(MainFormStrings.SlowDownPreview, null, (s, e) =>
+            {
+                var item = s as ToolStripMenuItem;
+                item.Checked = !item.Checked;
+                ApplicationSettings.Default.IsSlowDownPreviewEnabled = item.Checked;
+            })
+            {
+                Checked = ApplicationSettings.Default.IsSlowDownPreviewEnabled
+            };
+
             var isAbortAtLastNoteItem = new ToolStripMenuItem(MainFormStrings.AbortAtLastNote, null, (s, e) =>
             {
                 var item = s as ToolStripMenuItem;
@@ -868,17 +882,10 @@ namespace Ched.UI
             PreviewManager.Started += (s, e) => isAbortAtLastNoteItem.Enabled = false;
             PreviewManager.Finished += (s, e) => isAbortAtLastNoteItem.Enabled = true;
 
-            var playItem = shortcutItemBuilder.BuildItem(Commands.PlayPreview, MainFormStrings.Play);
-
-            var stopItem = new ToolStripMenuItem(MainFormStrings.Stop, null, (s, e) =>
-            {
-                PreviewManager.Stop();
-            });
-
             var playMenuItems = new ToolStripItem[]
             {
                 playItem, stopItem, new ToolStripSeparator(),
-                isAbortAtLastNoteItem
+                slowDownPreviewItem, isAbortAtLastNoteItem
             };
 
             var helpMenuItems = new ToolStripItem[]

@@ -162,7 +162,7 @@ namespace Ched.UI
         private Core.Score score;
 
         public int TicksPerBeat => score.TicksPerBeat;
-        public double Speed => 1.0;
+        public double Speed { get; private set; } = 1.0;
         public IEnumerable<BpmChangeEvent> BpmDefinitions => score.Events.BpmChangeEvents;
         public SoundSource MusicSource { get; }
         public SoundSource ClapSource { get; }
@@ -172,6 +172,7 @@ namespace Ched.UI
             this.score = score;
             MusicSource = musicSource;
             ClapSource = clapSource;
+            Speed = Configuration.ApplicationSettings.Default.IsSlowDownPreviewEnabled ? 0.5 : 1.0;
         }
 
         public IEnumerable<int> GetGuideTicks() => GetGuideTicks(score.Notes);

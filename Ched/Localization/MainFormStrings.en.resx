@@ -339,4 +339,7 @@
   <data name="MusicVolume" xml:space="preserve">
     <value>Music Volume</value>
   </data>
+  <data name="SlowDownPreview" xml:space="preserve">
+    <value>Slow Down Preview</value>
+  </data>
 </root>
