@@ -26,5 +26,12 @@ namespace Ched.Configuration
             get { return (Dictionary<string, SoundSource>)this["ScoreSound"]; }
             set { this["ScoreSound"] = value; }
         }
+
+        [UserScopedSetting]
+        public SoundSource GuideSound
+        {
+            get => (SoundSource)this["GuideSound"] ?? new SoundSource("guide.mp3", 0.036);
+            set => this["GuideSound"] = value;
+        }
     }
 }
