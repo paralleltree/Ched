@@ -1096,17 +1096,13 @@ namespace Ched.UI
                         }
                         newNote.Width = LastWidth;
                         newNote.Tick = Math.Max(GetQuantizedTick(GetTickFromYPosition(scorePos.Y)), 0);
-                        int newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - newNote.Width / 2;
-                        newNoteLaneIndex = Math.Min(Constants.LanesCount - newNote.Width, Math.Max(0, newNoteLaneIndex));
-                        newNote.LaneIndex = newNoteLaneIndex;
+                        newNote.LaneIndex = GetNewNoteLaneIndex(scorePos.X, newNote.Width);
                         Invalidate();
                         return moveTappableNoteHandler(newNote)
                             .Finally(() => OperationManager.Push(op));
                     }
                     else
                     {
-                        int newNoteLaneIndex;
-
                         switch (NewNoteType)
                         {
                             case NoteType.Hold:
@@ -1116,8 +1112,7 @@ namespace Ched.UI
                                     Width = LastWidth,
                                     Duration = (int)QuantizeTick
                                 };
-                                newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - hold.Width / 2;
-                                hold.LaneIndex = Math.Min(Constants.LanesCount - hold.Width, Math.Max(0, newNoteLaneIndex));
+                                hold.LaneIndex = GetNewNoteLaneIndex(scorePos.X, hold.Width);
                                 Notes.Add(hold);
                                 Invalidate();
                                 return holdDurationHandler(hold)
@@ -1168,8 +1163,7 @@ namespace Ched.UI
                                     StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(scorePos.Y)), 0),
                                     StartWidth = LastWidth
                                 };
-                                newNoteLaneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - slide.StartWidth / 2;
-                                slide.StartLaneIndex = Math.Min(Constants.LanesCount - slide.StartWidth, Math.Max(0, newNoteLaneIndex));
+                                slide.StartLaneIndex = GetNewNoteLaneIndex(scorePos.X, slide.StartWidth);
                                 var step = new Slide.StepTap(slide) { TickOffset = (int)QuantizeTick };
                                 slide.StepNotes.Add(step);
                                 Notes.Add(slide);
@@ -1887,6 +1881,12 @@ namespace Ched.UI
         private RectangleF GetClickableRectFromNotePosition(int tick, int laneIndex, int width)
         {
             return GetRectFromNotePosition(tick, laneIndex, width).Expand(1, 3);
+        }
+
+        private int GetNewNoteLaneIndex(float xpos, int width)
+        {
+            int newNoteLaneIndex = (int)Math.Round(xpos / (UnitLaneWidth + BorderThickness) - width / 2);
+            return Math.Min(Constants.LanesCount - width, Math.Max(0, newNoteLaneIndex));
         }
 
         private Rectangle GetSelectionRect()
