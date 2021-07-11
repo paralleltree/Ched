@@ -1001,7 +1001,7 @@ namespace Ched.UI
                         {
                             foreach (var note in Notes.AirActions.Reverse())
                             {
-                                var size = new SizeF(UnitLaneWidth / 2, GetYPositionFromTick(note.ActionNotes.Max(q => q.Offset)));
+                                var size = new SizeF(UnitLaneWidth / 2, GetYPositionFromTick(note.ActionNotes.Max(q => q.Offset)) - GetYPositionFromTick(0));
                                 var rect = new RectangleF(
                                     (UnitLaneWidth + BorderThickness) * (note.ParentNote.LaneIndex + note.ParentNote.Width / 2f) - size.Width / 2,
                                     GetYPositionFromTick(note.ParentNote.Tick),
@@ -1617,7 +1617,7 @@ namespace Ched.UI
                     (UnitLaneWidth + BorderThickness) * hold.LaneIndex + BorderThickness,
                     GetYPositionFromTick(hold.StartTick),
                     (UnitLaneWidth + BorderThickness) * hold.Width - BorderThickness,
-                    GetYPositionFromTick(hold.Duration)
+                    GetYPositionFromTick(hold.Duration) - GetYPositionFromTick(0)
                     ));
             }
 
@@ -1821,8 +1821,6 @@ namespace Ched.UI
             }
             // ずれたコントロール高さ分を補正
             matrix.Translate(0, ClientSize.Height - 1, MatrixOrder.Append);
-            // さらにずらして下端とHeadTickを合わせる
-            matrix.Translate(0, HeadTick * UnitBeatHeight / UnitBeatTick, MatrixOrder.Append);
             // 水平方向に対して中央に寄せる
             matrix.Translate((ClientSize.Width - LaneWidth) / 2, 0);
 
@@ -1831,12 +1829,12 @@ namespace Ched.UI
 
         private float GetYPositionFromTick(int tick)
         {
-            return tick * UnitBeatHeight / UnitBeatTick;
+            return (tick - HeadTick) * UnitBeatHeight / UnitBeatTick;
         }
 
         protected int GetTickFromYPosition(float y)
         {
-            return (int)(y * UnitBeatTick / UnitBeatHeight);
+            return (int)(y * UnitBeatTick / UnitBeatHeight) + HeadTick;
         }
 
         protected int GetQuantizedTick(int tick)
