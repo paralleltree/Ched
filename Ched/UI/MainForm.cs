@@ -269,7 +269,11 @@ namespace Ched.UI
             if (!string.IsNullOrEmpty(book.Path))
             {
                 SoundSettings.Default.ScoreSound.TryGetValue(book.Path, out SoundSource src);
-                if (src != null) CurrentMusicSource = src;
+                if (src != null)
+                {
+                    if (src.Volume == 0) src.Volume = 1;
+                    CurrentMusicSource = src;
+                }
             }
         }
 
@@ -482,7 +486,7 @@ namespace Ched.UI
             try
             {
                 CommitChanges();
-                var context = new SoundPreviewContext(ScoreBook.Score, CurrentMusicSource);
+                var context = new SoundPreviewContext(ScoreBook.Score, CurrentMusicSource, SoundSettings.Default.GuideSound);
                 if (!PreviewManager.Start(context, startTick)) return;
                 PreviewManager.Finished += lambda;
                 NoteView.Editable = CanEdit;
@@ -851,6 +855,20 @@ namespace Ched.UI
 
             var insertMenuItems = new ToolStripItem[] { insertBpmItem, insertHighSpeedItem, insertTimeSignatureItem };
 
+            var playItem = shortcutItemBuilder.BuildItem(Commands.PlayPreview, MainFormStrings.Play);
+
+            var stopItem = new ToolStripMenuItem(MainFormStrings.Stop, null, (s, e) => PreviewManager.Stop());
+
+            var slowDownPreviewItem = new ToolStripMenuItem(MainFormStrings.SlowDownPreview, null, (s, e) =>
+            {
+                var item = s as ToolStripMenuItem;
+                item.Checked = !item.Checked;
+                ApplicationSettings.Default.IsSlowDownPreviewEnabled = item.Checked;
+            })
+            {
+                Checked = ApplicationSettings.Default.IsSlowDownPreviewEnabled
+            };
+
             var isAbortAtLastNoteItem = new ToolStripMenuItem(MainFormStrings.AbortAtLastNote, null, (s, e) =>
             {
                 var item = s as ToolStripMenuItem;
@@ -864,17 +882,10 @@ namespace Ched.UI
             PreviewManager.Started += (s, e) => isAbortAtLastNoteItem.Enabled = false;
             PreviewManager.Finished += (s, e) => isAbortAtLastNoteItem.Enabled = true;
 
-            var playItem = shortcutItemBuilder.BuildItem(Commands.PlayPreview, MainFormStrings.Play);
-
-            var stopItem = new ToolStripMenuItem(MainFormStrings.Stop, null, (s, e) =>
-            {
-                PreviewManager.Stop();
-            });
-
             var playMenuItems = new ToolStripItem[]
             {
                 playItem, stopItem, new ToolStripSeparator(),
-                isAbortAtLastNoteItem
+                slowDownPreviewItem, isAbortAtLastNoteItem
             };
 
             var helpMenuItems = new ToolStripItem[]

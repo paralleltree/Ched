@@ -333,4 +333,13 @@
   <data name="ResetAll" xml:space="preserve">
     <value>Reset All</value>
   </data>
+  <data name="GuideVolume" xml:space="preserve">
+    <value>Guide Volume (Global)</value>
+  </data>
+  <data name="MusicVolume" xml:space="preserve">
+    <value>Music Volume</value>
+  </data>
+  <data name="SlowDownPreview" xml:space="preserve">
+    <value>Slow Down Preview</value>
+  </data>
 </root>
