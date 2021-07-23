@@ -97,7 +97,7 @@ namespace Ched.UI.Windows
             public void Execute(object parameter)
             {
                 var e = (System.Windows.Input.KeyEventArgs)parameter;
-                var key = ToWinFormsKey(e);
+                var key = ToWinFormsKey(e, System.Windows.Input.Keyboard.Modifiers);
                 var keyCode = key & System.Windows.Forms.Keys.KeyCode;
 
                 // Shift / Ctrl / Altのみは無効
@@ -132,9 +132,8 @@ namespace Ched.UI.Windows
                 e.Handled = true;
             }
 
-            private System.Windows.Forms.Keys ToWinFormsKey(System.Windows.Input.KeyEventArgs e)
+            private System.Windows.Forms.Keys ToWinFormsKey(System.Windows.Input.KeyEventArgs e, System.Windows.Input.ModifierKeys modifiers)
             {
-                var modifiers = System.Windows.Input.Keyboard.Modifiers;
                 var actualKey = e.Key == System.Windows.Input.Key.System ? e.SystemKey : e.Key;
                 var key = (System.Windows.Forms.Keys)System.Windows.Input.KeyInterop.VirtualKeyFromKey(actualKey);
                 if (modifiers.HasFlag(System.Windows.Input.ModifierKeys.Control)) key |= System.Windows.Forms.Keys.Control;

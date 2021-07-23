@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Un4seen.Bass;
+using Un4seen.Bass.AddOn.Fx;
 
 namespace Ched.UI
 {
@@ -52,20 +53,22 @@ namespace Ched.UI
 
         protected int GetHandle(string filepath)
         {
-            int handle = Bass.BASS_StreamCreateFile(filepath, 0, 0, BASSFlag.BASS_DEFAULT);
-            if (handle == 0) throw new ArgumentException("cannot create a stream.");
-            return handle;
+            int rawHandle = Bass.BASS_StreamCreateFile(filepath, 0, 0, BASSFlag.BASS_STREAM_DECODE);
+            if (rawHandle == 0) throw new ArgumentException("cannot create a stream.");
+            int tempoHandle = BassFx.BASS_FX_TempoCreate(rawHandle, BASSFlag.BASS_FX_FREESOURCE);
+            if (tempoHandle == 0) throw new ArgumentException("cannot create a stream.");
+            return tempoHandle;
         }
 
         public void Play(string path)
         {
-            Play(path, 0);
+            Play(path, 0, 1.0, 1.0);
         }
 
-        public void Play(string path, double offset)
+        public void Play(string path, double offset, double volume = 1.0, double speed = 1.0)
         {
             CheckSupported();
-            Task.Run(() => PlayInternal(path, offset))
+            Task.Run(() => PlayInternal(path, offset, volume, speed))
                 .ContinueWith(p =>
                 {
                     if (p.Exception != null)
@@ -76,7 +79,7 @@ namespace Ched.UI
                 });
         }
 
-        private void PlayInternal(string path, double offset)
+        private void PlayInternal(string path, double offset, double volume, double speed)
         {
             Queue<int> freelist;
             lock (handles)
@@ -107,6 +110,8 @@ namespace Ched.UI
 
             lock (playing) playing.Add(handle);
             Bass.BASS_ChannelSetPosition(handle, offset);
+            Bass.BASS_ChannelSetAttribute(handle, BASSAttribute.BASS_ATTRIB_VOL, (float)volume);
+            Bass.BASS_ChannelSetAttribute(handle, BASSAttribute.BASS_ATTRIB_TEMPO, (float)((speed - 1.0) * 100));
             Bass.BASS_ChannelPlay(handle, false);
         }
 
@@ -151,6 +156,18 @@ namespace Ched.UI
         public double Latency { get; set; }
 
         public string FilePath { get; set; }
+
+        private double volume = 1.0;
+        public double Volume
+        {
+            get => volume;
+            set
+            {
+                if (volume < 0 || volume > 1.0)
+                    throw new ArgumentOutOfRangeException("value");
+                volume = value;
+            }
+        }
 
         public SoundSource()
         {
