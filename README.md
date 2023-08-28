@@ -28,7 +28,7 @@
 ![preview](https://user-images.githubusercontent.com/7324519/36943885-93922e32-1fd4-11e8-9042-688d36288a03.png)
 
 ## フィードバックについて
-バグ報告などは[@paralleltree](https://twitter.com/paralleltree)までお願いします。
+バグ報告などは@yukkuriskye (Discord)までお願いします。
 
 ## ライセンス
 ChedはMITライセンスです。
