@@ -21,7 +21,7 @@
 
 ## 使い方
 
-[Wiki](https://github.com/paralleltree/Ched/wiki)を参照してください。
+[Wiki](https://github.com/myuuskye/Ched/wiki)を参照してください。
 
 ## スクリーンショット
 
