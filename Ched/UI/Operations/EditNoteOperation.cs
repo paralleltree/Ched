@@ -90,6 +90,9 @@ namespace Ched.UI.Operations
         protected NotePosition BeforePosition { get; }
         protected NotePosition AfterPosition { get; }
 
+        protected NotePosition BeforeChannel { get; }
+        protected NotePosition AfterChannel { get; }
+
         public ChangeShortNoteWidthOperation(TappableBase note, NotePosition before, NotePosition after) : base(note)
         {
             BeforePosition = before;
@@ -139,7 +142,69 @@ namespace Ched.UI.Operations
                 return !a.Equals(b);
             }
         }
+        
     }
+
+
+    public class ChangeShortNoteChannelOperation : EditShortNoteOperation
+    {
+        public override string Description { get { return "ノートチャンネルの変更"; } }
+
+
+        protected NoteChannel BeforeChannel { get; }
+        protected NoteChannel AfterChannel { get; }
+
+        public ChangeShortNoteChannelOperation(TappableBase note, NoteChannel before, NoteChannel after) : base(note)
+        {
+            BeforeChannel = before;
+            AfterChannel = after;
+        }
+
+        public override void Redo()
+        {
+            Note.SetChannel(AfterChannel.Channel);
+        }
+
+        public override void Undo()
+        {
+            Note.SetChannel(BeforeChannel.Channel);
+        }
+
+        public struct NoteChannel
+        {
+            public int Channel { get; }
+
+            public NoteChannel(int channel)
+            {
+                Channel = channel;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || !(obj is NoteChannel)) return false;
+                NoteChannel other = (NoteChannel)obj;
+                return Channel == other.Channel;
+            }
+
+            public override int GetHashCode()
+            {
+                return Channel * 2 ^ 2;
+            }
+
+            public static bool operator ==(NoteChannel a, NoteChannel b)
+            {
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(NoteChannel a, NoteChannel b)
+            {
+                return !a.Equals(b);
+            }
+        }
+
+    }
+
+    
 
     public class ChangeHoldDurationOperation : IOperation
     {
@@ -300,12 +365,20 @@ namespace Ched.UI.Operations
         public string Description { get { return "SLIDEの移動"; } }
 
         protected Slide Note;
+        protected Slide.StartTap Note2;
         protected NotePosition BeforePosition { get; }
         protected NotePosition AfterPosition { get; }
 
         public MoveSlideOperation(Slide note, NotePosition before, NotePosition after)
         {
             Note = note;
+            BeforePosition = before;
+            AfterPosition = after;
+        }
+
+        public MoveSlideOperation(Slide.StartTap note, NotePosition before, NotePosition after)
+        {
+            Note2 = note;
             BeforePosition = before;
             AfterPosition = after;
         }

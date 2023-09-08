@@ -133,6 +133,8 @@ namespace Ched.UI
                 TickElement = TickElement.Next;
             }
 
+
+            
             SoundManager.Play(PreviewContext.ClapSource.FilePath, 0, PreviewContext.ClapSource.Volume, PreviewContext.Speed);
         }
 

@@ -11,11 +11,13 @@ namespace Ched.Core.Events
     /// 譜面におけるイベントを表すクラスです。
     /// </summary>
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
-    [DebuggerDisplay("Tick = {Tick}")]
+    [DebuggerDisplay("Tick = {Tick}, Type = {Type}")]
     public abstract class EventBase
     {
         [Newtonsoft.Json.JsonProperty]
         private int tick;
+        [Newtonsoft.Json.JsonProperty]
+        private int type;
 
         /// <summary>
         /// このイベントの位置を表すTick値を取得、設定します。
@@ -27,6 +29,15 @@ namespace Ched.Core.Events
             {
                 if (value < 0) throw new ArgumentOutOfRangeException("value", "Tick must be greater than or equal to 0.");
                 tick = value;
+            }
+        }
+
+        public int Type
+        {
+            get { return type; }
+            set
+            {
+                type = value;
             }
         }
     }

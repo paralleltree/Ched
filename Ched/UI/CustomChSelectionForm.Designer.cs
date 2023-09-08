@@ -1,6 +1,6 @@
 ﻿namespace Ched.UI
 {
-    partial class HighSpeedSelectionForm
+    partial class CustomChSelectionForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,32 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HighSpeedSelectionForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CustomChSelectionForm));
             this.label1 = new System.Windows.Forms.Label();
-            this.speedChBox = new System.Windows.Forms.NumericUpDown();
-            this.speedRatioBox = new System.Windows.Forms.NumericUpDown();
             this.buttonOK = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
+            this.speedChBox = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.speedChBox)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.speedRatioBox)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
             // 
             resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
-            // 
-            // speedChBox
-            // 
-            resources.ApplyResources(this.speedChBox, "speedChBox");
-            this.speedChBox.Name = "speedChBox";
-            // 
-            // speedRatioBox
-            // 
-            resources.ApplyResources(this.speedRatioBox, "speedRatioBox");
-            this.speedRatioBox.Name = "speedRatioBox";
-            
             // 
             // buttonOK
             // 
@@ -67,40 +53,34 @@
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
             // 
-            // label2
+            // speedChBox
             // 
-            resources.ApplyResources(this.label2, "label2");
-            this.label2.Name = "label2";
+            resources.ApplyResources(this.speedChBox, "speedChBox");
+            this.speedChBox.Name = "speedChBox";
             // 
-            // HighSpeedSelectionForm
+            // CustomChSelectionForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.label2);
             this.Controls.Add(this.speedChBox);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOK);
-            this.Controls.Add(this.speedRatioBox);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "HighSpeedSelectionForm";
-            ((System.ComponentModel.ISupportInitialize)(this.speedRatioBox)).EndInit();
+            this.Name = "CustomChSelectionForm";
             ((System.ComponentModel.ISupportInitialize)(this.speedChBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-            ActiveControl = this.speedRatioBox;
 
         }
 
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.NumericUpDown speedChBox;
-        private System.Windows.Forms.NumericUpDown speedRatioBox;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.NumericUpDown speedChBox;
     }
 }

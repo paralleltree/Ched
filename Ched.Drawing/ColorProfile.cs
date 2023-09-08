@@ -41,5 +41,23 @@ namespace Ched.Drawing
         public Color AirDownColor { get; set; }
         public Color AirHoldLineColor { get; set; }
         public GradientColor AirStepColor { get; set; }
+
+
+        //ch別用
+        public GradientColor InvBorderColor { get; set; }
+        public GradientColor InvTapColor { get; set; }
+        public GradientColor InvExTapColor { get; set; }
+        public Tuple<GradientColor, GradientColor> InvFlickColor { get; set; }
+        public GradientColor InvDamageColor { get; set; }
+        public GradientColor InvHoldBackgroundColor { get; set; }
+        public GradientColor InvHoldColor { get; set; }
+        public GradientColor InvSlideBackgroundColor { get; set; }
+        public GradientColor InvSlideColor { get; set; }
+        public Color InvSlideLineColor { get; set; }
+        public GradientColor InvAirActionColor { get; set; }
+        public Color InvAirUpColor { get; set; }
+        public Color InvAirDownColor { get; set; }
+        public Color InvAirHoldLineColor { get; set; }
+        public GradientColor InvAirStepColor { get; set; }
     }
 }

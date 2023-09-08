@@ -11,11 +11,15 @@ namespace Ched.Core.Events
     /// ハイスピードの変更を表すクラスです。
     /// </summary>
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
-    [DebuggerDisplay("Tick = {Tick}, Value = {SpeedRatio}")]
+    [DebuggerDisplay("Tick = {Tick}, Value = {SpeedRatio}, Ch = {Channel}")]
     public class HighSpeedChangeEvent : EventBase
     {
         [Newtonsoft.Json.JsonProperty]
         private decimal speedRatio;
+        [Newtonsoft.Json.JsonProperty]
+        private int speedCh;
+
+
 
         /// <summary>
         /// 1を基準とする速度比を設定します。
@@ -25,5 +29,14 @@ namespace Ched.Core.Events
             get { return speedRatio; }
             set { speedRatio = value; }
         }
+        /// <summary>
+        /// ハイスピードのチャンネルを設定します。
+        /// </summary>
+        public int SpeedCh
+        {
+            get { return speedCh; }
+            set { speedCh = value; }
+        }
+
     }
 }

@@ -10,19 +10,19 @@ using System.Windows.Forms;
 
 namespace Ched.UI
 {
-    public partial class BpmSelectionForm : Form
+    public partial class CustomLaneOffsetSelectionForm : Form
     {
-        public double Bpm
+        public decimal LaneOffset
         {
-            get => (double)bpmBox.Value;
+            get { return LaneOffsetBox.Value; }
             set
             {
-                bpmBox.Value = (decimal)value;
-                bpmBox.SelectAll();
+                LaneOffsetBox.Value = value;
+                LaneOffsetBox.SelectAll();
             }
         }
 
-        public BpmSelectionForm()
+        public CustomLaneOffsetSelectionForm()
         {
             InitializeComponent();
             AcceptButton = buttonOK;
@@ -30,11 +30,11 @@ namespace Ched.UI
             buttonOK.DialogResult = DialogResult.OK;
             buttonCancel.DialogResult = DialogResult.Cancel;
 
-            bpmBox.DecimalPlaces = 1;
-            bpmBox.Increment = 1;
-            bpmBox.Maximum = 10000;
-            bpmBox.Minimum = -10000;
-            bpmBox.Value = 120;
+            LaneOffsetBox.Minimum = -100m;
+            LaneOffsetBox.Maximum = 100m;
+            LaneOffsetBox.Increment = 1m;
+            LaneOffsetBox.DecimalPlaces = 0;
+            LaneOffsetBox.Value = 0;
         }
     }
 }

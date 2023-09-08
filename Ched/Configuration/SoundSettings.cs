@@ -30,7 +30,8 @@ namespace Ched.Configuration
         [UserScopedSetting]
         public SoundSource GuideSound
         {
-            get => (SoundSource)this["GuideSound"] ?? new SoundSource("guide.mp3", 0.036);
+            
+            get => (SoundSource)this["GuideSound"] ?? new SoundSource("Sounds/guide.mp3", 0.036);
             set => this["GuideSound"] = value;
         }
     }

@@ -12,12 +12,17 @@ using System.Windows.Forms;
 using System.Reactive.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Configuration;
 
 using Ched.Core;
 using Ched.Core.Notes;
 using Ched.Core.Events;
 using Ched.Drawing;
 using Ched.UI.Operations;
+using System.Security.Cryptography.X509Certificates;
+using System.Windows.Documents;
+using System.Runtime.CompilerServices;
+
 
 namespace Ched.UI
 {
@@ -30,12 +35,17 @@ namespace Ched.UI
         public event EventHandler SelectedRangeChanged;
         public event EventHandler NewNoteTypeChanged;
         public event EventHandler AirDirectionChanged;
+        public event EventHandler LaneVisibleChanged;
         public event EventHandler DragScroll;
+
+        
 
         private Color barLineColor = Color.FromArgb(160, 160, 160);
         private Color beatLineColor = Color.FromArgb(80, 80, 80);
         private Color laneBorderLightColor = Color.FromArgb(60, 60, 60);
         private Color laneBorderDarkColor = Color.FromArgb(30, 30, 30);
+        private Color laneoffsetBorderLightColor = Color.FromArgb(100, 92, 255, 255);
+        private Color laneoffsetBorderDarkColor = Color.FromArgb(100, 40, 125, 125);
         private ColorProfile colorProfile;
         private int unitLaneWidth = 12;
         private int shortNoteHeight = 5;
@@ -45,11 +55,22 @@ namespace Ched.UI
         private int headTick = 0;
         private bool editable = true;
         private EditMode editMode = EditMode.Edit;
+        
         private int currentTick = 0;
+        private int channel = 1;
+        private int viewchannel = 0;
+        private int laneCount;
+        private int minuslaneCount = 0;
+        private bool stepctype = false;
+        public static decimal laneOffset = 0;
+        private bool lanevisual = false;
+        private bool siken = false;
+        private int theme = 0;
         private SelectionRange selectedRange = SelectionRange.Empty;
         private NoteType newNoteType = NoteType.Tap;
         private AirDirection airDirection = new AirDirection(VerticalAirDirection.Up, HorizontalAirDirection.Center);
         private bool isNewSlideStepVisible = true;
+
 
         /// <summary>
         /// 小節の区切り線の色を設定します。
@@ -103,6 +124,33 @@ namespace Ched.UI
             }
         }
 
+
+        /// <summary>
+        /// レーンオフセットのガイド線のメインカラーを設定します。
+        /// </summary>
+        public Color LaneOffsetBorderLightColor
+        {
+            get { return laneoffsetBorderLightColor; }
+            set
+            {
+                laneoffsetBorderLightColor = value;
+                Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// レーンオフセットのガイド線のサブカラーを設定します。
+        /// </summary>
+        public Color LaneOffsetBorderDarkColor
+        {
+            get { return laneoffsetBorderDarkColor; }
+            set
+            {
+                laneoffsetBorderDarkColor = value;
+                Invalidate();
+            }
+        }
+
         /// <summary>
         /// ノーツの描画に利用する<see cref="Ched.Drawing.ColorProfile"/>を取得します。
         /// </summary>
@@ -130,7 +178,7 @@ namespace Ched.UI
         /// </summary>
         public int LaneWidth
         {
-            get { return UnitLaneWidth * Constants.LanesCount + BorderThickness * (Constants.LanesCount - 1); }
+            get { return UnitLaneWidth * constants.LaneCount + BorderThickness * (constants.LaneCount - 1); }
         }
 
         /// <summary>
@@ -315,6 +363,76 @@ namespace Ched.UI
             }
         }
 
+
+        /// <summary>
+        /// チャンネルを設定します。
+        /// </summary>
+        public int Channel
+        {
+            get { return channel; }
+            set
+            {
+                channel = value;
+            }
+        }
+
+
+
+        /// <summary>
+        /// 表示チャンネルを設定します。
+        /// </summary>
+        public int ViewChannel
+        {
+            get { return viewchannel; }
+            set
+            {
+                viewchannel = value;
+            }
+        }
+
+        /// <summary>
+        /// 試験モードか
+        /// </summary>
+        public bool isSiken //
+        {
+            get { return siken; }
+            set
+            {
+                siken = value;
+            }
+        }
+
+
+        /// <summary>
+        /// レーン表示するか
+        /// </summary>
+        public bool LaneVisual
+        {
+            get { return lanevisual; }
+            set
+            {
+                lanevisual = value;
+                LaneVisibleChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+
+        public int Theme
+        {
+            get { return theme; }
+            set
+            {
+                theme = value;
+            }
+        }
+
+
+
+
+
+
+
+
         /// <summary>
         /// AIR-ACTION挿入時に未追加のAIRを追加するかどうか指定します。
         /// </summary>
@@ -342,13 +460,17 @@ namespace Ched.UI
 
         private Dictionary<Score, NoteCollection> NoteCollectionCache { get; } = new Dictionary<Score, NoteCollection>();
 
+        private Constants constants { get; } = new Constants();
+
+        
+        
         public NoteView(OperationManager manager)
         {
             InitializeComponent();
             this.DoubleBuffered = true;
             this.BackColor = Color.Black;
             this.SetStyle(ControlStyles.ResizeRedraw, true);
-            this.SetStyle(ControlStyles.Opaque, true);
+            this.SetStyle(ControlStyles.Opaque, false);
 
             OperationManager = manager;
 
@@ -370,8 +492,25 @@ namespace Ched.UI
                 AirDownColor = Color.FromArgb(192, 21, 216),
                 AirActionColor = new GradientColor(Color.FromArgb(146, 0, 192), Color.FromArgb(212, 92, 255)),
                 AirHoldLineColor = Color.FromArgb(216, 0, 196, 0),
-                AirStepColor = new GradientColor(Color.FromArgb(6, 180, 10), Color.FromArgb(80, 224, 64))
+                AirStepColor = new GradientColor(Color.FromArgb(6, 180, 10), Color.FromArgb(80, 224, 64)),
+
+                InvBorderColor = new GradientColor(Color.FromArgb(100, 100, 100, 200), Color.FromArgb(100, 120, 120, 200)),
+                InvTapColor = new GradientColor(Color.FromArgb( 80, 138, 0, 0), Color.FromArgb(80, 255, 128, 128)),
+                InvExTapColor = new GradientColor(Color.FromArgb(80, 204, 192, 0), Color.FromArgb(80, 255, 236, 68)),
+                InvFlickColor = Tuple.Create(new GradientColor(Color.FromArgb(80, 68, 68, 68), Color.FromArgb(80, 186, 186, 186)), new GradientColor(Color.FromArgb(80, 0, 96, 138), Color.FromArgb(80, 122, 216, 252))),
+                InvDamageColor = new GradientColor(Color.FromArgb(80, 8, 8, 116), Color.FromArgb(80, 22, 40, 180)),
+                InvHoldColor = new GradientColor(Color.FromArgb(196, 86, 0), Color.FromArgb(244, 156, 102)),
+                InvHoldBackgroundColor = new GradientColor(Color.FromArgb(196, 166, 44, 168), Color.FromArgb(196, 216, 216, 0)),
+                InvSlideColor = new GradientColor(Color.FromArgb(80, 0, 16, 138), Color.FromArgb(80, 86, 106, 255)),
+                InvSlideLineColor = Color.FromArgb(84, 0, 214, 192),
+                InvSlideBackgroundColor = new GradientColor(Color.FromArgb(84, 166, 44, 168), Color.FromArgb(84, 0, 164, 146)),
+                InvAirUpColor = Color.FromArgb(80, 28, 206, 22),
+                InvAirDownColor = Color.FromArgb(80, 192, 21, 216),
+                InvAirActionColor = new GradientColor(Color.FromArgb(146, 0, 192), Color.FromArgb(212, 92, 255)),
+                InvAirHoldLineColor = Color.FromArgb(216, 0, 196, 0),
+                InvAirStepColor = new GradientColor(Color.FromArgb(80, 6, 180, 10), Color.FromArgb(80, 80, 224, 64))
             };
+
 
             InitializeHandlers();
         }
@@ -475,7 +614,7 @@ namespace Ched.UI
                     PointF scorePos = matrix.TransformPoint(p.Location);
 
                     // そもそも描画領域外であれば何もしない
-                    RectangleF scoreRect = new RectangleF(0, GetYPositionFromTick(HeadTick), LaneWidth, GetYPositionFromTick(TailTick) - GetYPositionFromTick(HeadTick));
+                    RectangleF scoreRect = new RectangleF(constants.MinusLaneCount * 13, GetYPositionFromTick(HeadTick), LaneWidth + -constants.MinusLaneCount * 13, GetYPositionFromTick(TailTick) - GetYPositionFromTick(HeadTick));
                     if (!scoreRect.Contains(scorePos)) return Observable.Empty<MouseEventArgs>();
 
                     IObservable<MouseEventArgs> actionNoteHandler(AirAction.ActionNote action)
@@ -524,7 +663,9 @@ namespace Ched.UI
                                 note.Tick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int laneIndex = beforeLaneIndex + xdiff;
-                                note.LaneIndex = Math.Min(Constants.LanesCount - note.Width, Math.Max(0, laneIndex));
+                                note.LaneIndex = Math.Min(constants.LaneCount - note.Width, Math.Max(constants.MinusLaneCount, laneIndex));
+                                
+                                note.Channel = channel;
                                 Cursor.Current = Cursors.SizeAll;
                             })
                             .Finally(() => Cursor.Current = Cursors.Default);
@@ -542,9 +683,10 @@ namespace Ched.UI
                                 xdiff = Math.Min(beforePos.Width - 1, Math.Max(-beforePos.LaneIndex, xdiff));
                                 int width = beforePos.Width - xdiff;
                                 int laneIndex = beforePos.LaneIndex + xdiff;
-                                width = Math.Min(Constants.LanesCount - laneIndex, Math.Max(1, width));
-                                laneIndex = Math.Min(Constants.LanesCount - width, Math.Max(0, laneIndex));
+                                width = Math.Min(constants.LaneCount - laneIndex, Math.Max(1, width));
+                                laneIndex = Math.Min(constants.LaneCount - width, Math.Max(0, laneIndex));
                                 note.SetPosition(laneIndex, width);
+                                note.Channel = channel;
                                 Cursor.Current = Cursors.SizeWE;
                             })
                             .Finally(() =>
@@ -564,7 +706,8 @@ namespace Ched.UI
                                 var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int width = beforeWidth + xdiff;
-                                note.Width = Math.Min(Constants.LanesCount - note.LaneIndex, Math.Max(1, width));
+                                note.Width = Math.Min(constants.LaneCount - note.LaneIndex, Math.Max(1, width));
+                                note.Channel = channel;
                                 Cursor.Current = Cursors.SizeWE;
                             })
                             .Finally(() =>
@@ -627,6 +770,7 @@ namespace Ched.UI
                             {
                                 var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                 hold.Duration = (int)Math.Max(QuantizeTick, GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - hold.StartTick);
+                                hold.Channel = channel;
                                 Cursor.Current = Cursors.SizeNS;
                             })
                             .Finally(() => Cursor.Current = Cursors.Default);
@@ -647,6 +791,8 @@ namespace Ched.UI
                                 laneIndexOffset = Math.Min(beforeStepPos.LaneIndexOffset + step.ParentNote.StartWidth + beforeStepPos.WidthChange - 1, Math.Max(-step.ParentNote.StartLaneIndex, laneIndexOffset));
                                 widthChange = Math.Min(step.ParentNote.StartLaneIndex + beforeStepPos.LaneIndexOffset + step.ParentNote.StartWidth + beforeStepPos.WidthChange - step.ParentNote.StartWidth, Math.Max(-step.ParentNote.StartWidth + 1, widthChange));
                                 step.SetPosition(laneIndexOffset, widthChange);
+                                step.Channel = channel;
+                                //step.Channel = step.ParentNote.Channel;
                                 Cursor.Current = Cursors.SizeWE;
                             })
                             .Finally(() =>
@@ -669,7 +815,9 @@ namespace Ched.UI
                                 var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int widthChange = beforeStepPos.WidthChange + xdiff;
-                                step.WidthChange = Math.Min(Constants.LanesCount - step.LaneIndex - step.ParentNote.StartWidth, Math.Max(-step.ParentNote.StartWidth + 1, widthChange));
+                                step.WidthChange = Math.Min(constants.LaneCount - step.LaneIndex - step.ParentNote.StartWidth, Math.Max(-step.ParentNote.StartWidth + 1, widthChange));
+                                step.Channel = channel;
+                                //step.Channel = step.ParentNote.Channel;
                                 Cursor.Current = Cursors.SizeWE;
                             })
                             .Finally(() =>
@@ -697,12 +845,27 @@ namespace Ched.UI
                                 int offset = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - step.ParentNote.StartTick;
                                 int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                 int laneIndexOffset = beforeStepPos.LaneIndexOffset + xdiff;
-                                step.LaneIndexOffset = Math.Min(Constants.LanesCount - step.Width - step.ParentNote.StartLaneIndex, Math.Max(-step.ParentNote.StartLaneIndex, laneIndexOffset));
-                                // 最終Step以降に移動はさせないし同じTickに置かせもしない
-                                if ((!isMaxOffsetStep && offset > maxOffset) || offsets.Contains(offset) || offset <= 0) return;
-                                // 最終Stepは手前のStepより前に動かさない……
-                                if (isMaxOffsetStep && offset <= maxOffset) return;
+                                step.LaneIndexOffset = Math.Min(constants.LaneCount - step.Width - step.ParentNote.StartLaneIndex, Math.Max(-step.ParentNote.StartLaneIndex, laneIndexOffset));
+                                if (bool.Parse(ConfigurationManager.AppSettings["SlideExtend"]) && System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) && System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftAlt))
+                                {
+                                    //若干制限を緩和
+                                    // 最終Step以降に移動はさせないし同じTickに置かせもしない
+                                    if ((!isMaxOffsetStep && offset > maxOffset) || offsets.Contains(offset)) return;
+                                    // 最終Stepは手前のStepより前に動かさない……
+                                    if (isMaxOffsetStep && offset + 1 <= maxOffset) return;
+                                }
+                                else
+                                {
+                                    // 最終Step以降に移動はさせないし同じTickに置かせもしない
+                                    if ((!isMaxOffsetStep && offset > maxOffset) || offsets.Contains(offset) || offset <= 0) return;
+                                    // 最終Stepは手前のStepより前に動かさない……
+                                    if (isMaxOffsetStep && offset <= maxOffset) return;
+                                }
+                                
+
                                 step.TickOffset = offset;
+                                step.Channel = channel;
+                                //step.Channel = step.ParentNote.Channel;
                                 Cursor.Current = Cursors.SizeAll;
                             });
                     }
@@ -759,9 +922,10 @@ namespace Ched.UI
                                     int width = beforePos.StartWidth - xdiff;
                                     int laneIndex = beforePos.StartLaneIndex + xdiff;
                                     // clamp
-                                    width = Math.Min(Constants.LanesCount - slide.StartLaneIndex - leftStepLaneIndexOffset, Math.Max(-minWidthChange + 1, width));
-                                    laneIndex = Math.Min(Constants.LanesCount - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset - beforePos.StartLaneIndex, laneIndex));
+                                    width = Math.Min(constants.LaneCount - slide.StartLaneIndex - leftStepLaneIndexOffset, Math.Max(-minWidthChange + 1, width));
+                                    laneIndex = Math.Min(constants.LaneCount - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset - beforePos.StartLaneIndex, laneIndex));
                                     slide.SetPosition(laneIndex, width);
+                                    slide.Channel = channel;
                                     Cursor.Current = Cursors.SizeWE;
                                 })
                                 .Finally(() =>
@@ -783,7 +947,8 @@ namespace Ched.UI
                                     var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int width = beforePos.StartWidth + xdiff;
-                                    slide.StartWidth = Math.Min(Constants.LanesCount - slide.StartLaneIndex - rightStepLaneIndexOffset, Math.Max(-minWidthChange + 1, width));
+                                    slide.StartWidth = Math.Min(constants.LaneCount - slide.StartLaneIndex - rightStepLaneIndexOffset, Math.Max(-minWidthChange + 1, width));
+                                    slide.Channel = channel;
                                     Cursor.Current = Cursors.SizeWE;
                                 })
                                 .Finally(() =>
@@ -795,7 +960,7 @@ namespace Ched.UI
                                     OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
                                 });
                         }
-
+                        
                         if (startRect.Contains(scorePos))
                         {
                             int beforeLaneIndex = slide.StartNote.LaneIndex;
@@ -807,7 +972,8 @@ namespace Ched.UI
                                     slide.StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int laneIndex = beforeLaneIndex + xdiff;
-                                    slide.StartLaneIndex = Math.Min(Constants.LanesCount - slide.StartWidth - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset, laneIndex));
+                                    slide.StartLaneIndex = Math.Min(constants.LaneCount - slide.StartWidth - rightStepLaneIndexOffset, Math.Max(-leftStepLaneIndexOffset, laneIndex));
+                                    slide.Channel = channel;
                                     Cursor.Current = Cursors.SizeAll;
                                 })
                                 .Finally(() =>
@@ -819,6 +985,7 @@ namespace Ched.UI
                                     OperationManager.Push(new MoveSlideOperation(slide, beforePos, afterPos));
                                 });
                         }
+                        
 
                         return null;
                     }
@@ -851,9 +1018,10 @@ namespace Ched.UI
                                     xdiff = Math.Min(beforePos.Width - 1, Math.Max(-beforePos.LaneIndex, xdiff));
                                     int width = beforePos.Width - xdiff;
                                     int laneIndex = beforePos.LaneIndex + xdiff;
-                                    width = Math.Min(Constants.LanesCount - laneIndex, Math.Max(1, width));
-                                    laneIndex = Math.Min(Constants.LanesCount - width, Math.Max(0, laneIndex));
+                                    width = Math.Min(constants.LaneCount - laneIndex, Math.Max(1, width));
+                                    laneIndex = Math.Min(constants.LaneCount - width, Math.Max(constants.MinusLaneCount, laneIndex));
                                     hold.SetPosition(laneIndex, width);
+                                    hold.Channel = channel;
                                     Cursor.Current = Cursors.SizeWE;
                                 })
                                 .Finally(() =>
@@ -875,7 +1043,8 @@ namespace Ched.UI
                                     var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int width = beforePos.Width + xdiff;
-                                    hold.Width = Math.Min(Constants.LanesCount - hold.LaneIndex, Math.Max(1, width));
+                                    hold.Width = Math.Min(constants.LaneCount - hold.LaneIndex, Math.Max(1, width));
+                                    hold.Channel = channel;
                                     Cursor.Current = Cursors.SizeWE;
                                 })
                                 .Finally(() =>
@@ -898,7 +1067,8 @@ namespace Ched.UI
                                     hold.StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                     int xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
                                     int laneIndex = beforePos.LaneIndex + xdiff;
-                                    hold.LaneIndex = Math.Min(Constants.LanesCount - hold.Width, Math.Max(0, laneIndex));
+                                    hold.LaneIndex = Math.Min(constants.LaneCount - hold.Width, Math.Max(constants.MinusLaneCount, laneIndex));
+                                    hold.Channel = channel;
                                     Cursor.Current = Cursors.SizeAll;
                                 })
                                 .Finally(() =>
@@ -1052,6 +1222,7 @@ namespace Ched.UI
                                 // AIR-ACTION追加時はその後のドラッグをハンドルする
                                 return addAirActionHandler() ?? surfaceNotesHandler() ?? Observable.Empty<MouseEventArgs>();
                         }
+                        
                     }
                     else
                     {
@@ -1097,6 +1268,7 @@ namespace Ched.UI
                         newNote.Width = LastWidth;
                         newNote.Tick = Math.Max(GetQuantizedTick(GetTickFromYPosition(scorePos.Y)), 0);
                         newNote.LaneIndex = GetNewNoteLaneIndex(scorePos.X, newNote.Width);
+                        newNote.Channel = channel;
                         Invalidate();
                         return moveTappableNoteHandler(newNote)
                             .Finally(() => OperationManager.Push(op));
@@ -1110,7 +1282,8 @@ namespace Ched.UI
                                 {
                                     StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(scorePos.Y)), 0),
                                     Width = LastWidth,
-                                    Duration = (int)QuantizeTick
+                                    Duration = (int)QuantizeTick,
+                                    Channel = channel
                                 };
                                 hold.LaneIndex = GetNewNoteLaneIndex(scorePos.X, hold.Width);
                                 Notes.Add(hold);
@@ -1141,11 +1314,12 @@ namespace Ched.UI
                                             {
                                                 int width = note.StepNotes.OrderBy(q => q.TickOffset).LastOrDefault(q => q.TickOffset <= tickOffset)?.Width ?? note.StartWidth;
                                                 int laneIndex = (int)(scorePos.X / (UnitLaneWidth + BorderThickness)) - width / 2;
-                                                laneIndex = Math.Min(Constants.LanesCount - width, Math.Max(0, laneIndex));
+                                                laneIndex = Math.Min(constants.LaneCount - width, Math.Max(constants.MinusLaneCount, laneIndex));
                                                 var newStep = new Slide.StepTap(note)
                                                 {
                                                     TickOffset = tickOffset,
-                                                    IsVisible = IsNewSlideStepVisible
+                                                    IsVisible = IsNewSlideStepVisible,
+                                                    Channel = channel
                                                 };
                                                 newStep.SetPosition(laneIndex - note.StartLaneIndex, width - note.StartWidth);
                                                 note.StepNotes.Add(newStep);
@@ -1161,11 +1335,14 @@ namespace Ched.UI
                                 var slide = new Slide()
                                 {
                                     StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(scorePos.Y)), 0),
-                                    StartWidth = LastWidth
+                                    StartWidth = LastWidth,
+                                    Channel = channel
                                 };
                                 slide.StartLaneIndex = GetNewNoteLaneIndex(scorePos.X, slide.StartWidth);
+                                slide.Channel = channel;
                                 var step = new Slide.StepTap(slide) { TickOffset = (int)QuantizeTick };
                                 slide.StepNotes.Add(step);
+                                step.Channel = step.ParentNote.Channel;
                                 Notes.Add(slide);
                                 Invalidate();
                                 return moveSlideStepNoteHandler(step)
@@ -1181,7 +1358,7 @@ namespace Ched.UI
                 {
                     StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(startPos.Y)), 0),
                     Duration = 0,
-                    StartLaneIndex = 0,
+                    StartLaneIndex = constants.MinusLaneCount,
                     SelectedLanesCount = 0
                 };
 
@@ -1192,8 +1369,8 @@ namespace Ched.UI
                         currentMatrix.Invert();
                         var scorePos = currentMatrix.TransformPoint(q.Location);
 
-                        int startLaneIndex = Math.Min(Math.Max((int)startPos.X / (UnitLaneWidth + BorderThickness), 0), Constants.LanesCount - 1);
-                        int endLaneIndex = Math.Min(Math.Max((int)scorePos.X / (UnitLaneWidth + BorderThickness), 0), Constants.LanesCount - 1);
+                        int startLaneIndex = Math.Min(Math.Max((int)startPos.X / (UnitLaneWidth + BorderThickness), constants.MinusLaneCount), constants.LaneCount - 1);
+                        int endLaneIndex = Math.Min(Math.Max((int)scorePos.X / (UnitLaneWidth + BorderThickness), constants.MinusLaneCount), constants.LaneCount - 1);
                         int endTick = GetQuantizedTick(GetTickFromYPosition(scorePos.Y));
 
                         SelectedRange = new SelectionRange()
@@ -1449,7 +1626,7 @@ namespace Ched.UI
                             {
                                 StartTick = startTick + Math.Max(GetQuantizedTick(GetTickFromYPosition(scorePos.Y) - GetTickFromYPosition(startScorePos.Y)), -startTick - (SelectedRange.Duration < 0 ? SelectedRange.Duration : 0)),
                                 Duration = SelectedRange.Duration,
-                                StartLaneIndex = Math.Min(Math.Max(laneIndex, 0), Constants.LanesCount - SelectedRange.SelectedLanesCount),
+                                StartLaneIndex = Math.Min(Math.Max(laneIndex, constants.MinusLaneCount), constants.LaneCount - SelectedRange.SelectedLanesCount),
                                 SelectedLanesCount = SelectedRange.SelectedLanesCount
                             };
 
@@ -1543,6 +1720,37 @@ namespace Ched.UI
         {
             base.OnPaint(pe);
 
+
+            switch (theme)
+            {
+                case 0:
+                    BackColor = Color.Black;
+
+                    laneBorderLightColor = Color.FromArgb(60, 60, 60);
+                    laneBorderDarkColor = Color.FromArgb(30, 30, 30);
+                    laneoffsetBorderDarkColor = Color.FromArgb(100, 92, 255, 255);
+                    laneoffsetBorderLightColor = Color.FromArgb(100, 40, 125, 125);
+
+                    colorProfile.DamageColor = new GradientColor(Color.FromArgb(8, 8, 116), Color.FromArgb(22, 40, 180));
+
+                    colorProfile.BorderColor = new GradientColor(Color.FromArgb(160, 160, 160), Color.FromArgb(208, 208, 208));
+                    break;
+                case 1:
+                    BackColor = Color.FromArgb(243, 255, 255);
+
+                    laneBorderLightColor = Color.FromArgb(60, 60, 60);
+                    laneBorderDarkColor = Color.FromArgb(30, 30, 30);
+                    laneoffsetBorderDarkColor = Color.FromArgb(150, 0, 255, 255);
+                    laneoffsetBorderLightColor = Color.FromArgb(150, 40, 125, 125);
+
+                    colorProfile.DamageColor = new GradientColor(Color.FromArgb(60, 60, 116), Color.FromArgb(44, 80, 240));
+
+                    colorProfile.BorderColor = new GradientColor(Color.FromArgb(40, 40, 40), Color.FromArgb(52, 52, 52));
+                    break;
+                default:
+                    break;
+            }
+
             // Y軸の正方向をTick増加方向として描画 (y = 0 はコントロール下端)
             // コントロールの中心に描画したいなら後でTranslateしといてね
             var prevMatrix = pe.Graphics.Transform;
@@ -1557,12 +1765,27 @@ namespace Ched.UI
             using (var lightPen = new Pen(LaneBorderLightColor, BorderThickness))
             using (var darkPen = new Pen(LaneBorderDarkColor, BorderThickness))
             {
-                for (int i = 0; i <= Constants.LanesCount; i++)
+                for (int i = constants.MinusLaneCount; i <= constants.LaneCount; i++)
                 {
                     float x = i * (UnitLaneWidth + BorderThickness);
                     pe.Graphics.DrawLine(i % 2 == 0 ? lightPen : darkPen, x, GetYPositionFromTick(HeadTick), x, GetYPositionFromTick(tailTick));
                 }
             }
+
+            if (lanevisual)
+            {
+                // レーンオフセット分割線描画
+                using (var lightPen = new Pen(LaneOffsetBorderLightColor, BorderThickness))
+                using (var darkPen = new Pen(LaneOffsetBorderDarkColor, BorderThickness))
+                {
+                    for (decimal i = -laneOffset + 2; i <= -laneOffset + 14; i++)
+                    {
+                        float x = (float)i * (UnitLaneWidth + BorderThickness);
+                        pe.Graphics.DrawLine(i % 8 == 0 ? lightPen : darkPen, x, GetYPositionFromTick(HeadTick), x, GetYPositionFromTick(tailTick));
+                    }
+                }
+            }
+            
 
 
             // 時間ガイドの描画
@@ -1580,7 +1803,7 @@ namespace Ched.UI
                 {
                     int tick = i * barTick / sigs[0].Denominator;
                     float y = GetYPositionFromTick(tick);
-                    pe.Graphics.DrawLine(i % sigs[0].Numerator == 0 ? barPen : beatPen, 0, y, laneWidth, y);
+                    pe.Graphics.DrawLine(i % sigs[0].Numerator == 0 ? barPen : beatPen, constants.MinusLaneCount * 13, y, laneWidth, y);
                     if (tick > tailTick) break;
                 }
 
@@ -1604,7 +1827,7 @@ namespace Ched.UI
             using (var posPen = new Pen(Color.FromArgb(196, 0, 0)))
             {
                 float y = GetYPositionFromTick(CurrentTick);
-                pe.Graphics.DrawLine(posPen, -UnitLaneWidth * 2, y, laneWidth, y);
+                pe.Graphics.DrawLine(posPen, -UnitLaneWidth * -constants.MinusLaneCount * 1.085f, y, laneWidth, y);
             }
 
             // ノート描画
@@ -1625,27 +1848,32 @@ namespace Ched.UI
             var slides = Notes.Slides.Where(p => p.StartTick <= tailTick && p.StartTick + p.GetDuration() >= HeadTick).ToList();
             foreach (var slide in slides)
             {
-                var bg = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.OrderBy(p => p.Tick)).ToList();
-                var visibleSteps = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.Where(p => p.IsVisible).OrderBy(p => p.Tick)).ToList();
 
-                int stepHead = bg.LastOrDefault(p => p.Tick <= HeadTick)?.Tick ?? bg[0].Tick;
-                int stepTail = bg.FirstOrDefault(p => p.Tick >= tailTick)?.Tick ?? bg[bg.Count - 1].Tick;
-                int visibleHead = visibleSteps.LastOrDefault(p => p.Tick <= HeadTick)?.Tick ?? visibleSteps[0].Tick;
-                int visibleTail = visibleSteps.FirstOrDefault(p => p.Tick >= tailTick)?.Tick ?? visibleSteps[visibleSteps.Count - 1].Tick;
+                bool isch = ((slide.Channel == viewchannel) || viewchannel == 1000);
+                
+                    var bg = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.OrderBy(p => p.Tick)).ToList();
+                    var visibleSteps = new Slide.TapBase[] { slide.StartNote }.Concat(slide.StepNotes.Where(p => p.IsVisible).OrderBy(p => p.Tick)).ToList();
 
-                var steps = bg
-                    .Where(p => p.Tick >= stepHead && p.Tick <= stepTail)
-                    .Select(p => new SlideStepElement()
-                    {
-                        Point = new PointF((UnitLaneWidth + BorderThickness) * p.LaneIndex, GetYPositionFromTick(p.Tick)),
-                        Width = (UnitLaneWidth + BorderThickness) * p.Width - BorderThickness
-                    });
-                var visibleStepPos = visibleSteps
-                    .Where(p => p.Tick >= visibleHead && p.Tick <= visibleTail)
-                    .Select(p => GetYPositionFromTick(p.Tick));
+                    int stepHead = bg.LastOrDefault(p => p.Tick <= HeadTick)?.Tick ?? bg[0].Tick;
+                    int stepTail = bg.FirstOrDefault(p => p.Tick >= tailTick)?.Tick ?? bg[bg.Count - 1].Tick;
+                    int visibleHead = visibleSteps.LastOrDefault(p => p.Tick <= HeadTick)?.Tick ?? visibleSteps[0].Tick;
+                    int visibleTail = visibleSteps.FirstOrDefault(p => p.Tick >= tailTick)?.Tick ?? visibleSteps[visibleSteps.Count - 1].Tick;
 
-                if (stepHead == stepTail) continue;
-                dc.DrawSlideBackground(steps, visibleStepPos, ShortNoteHeight);
+                    var steps = bg
+                        .Where(p => p.Tick >= stepHead && p.Tick <= stepTail)
+                        .Select(p => new SlideStepElement()
+                        {
+                            Point = new PointF((UnitLaneWidth + BorderThickness) * p.LaneIndex, GetYPositionFromTick(p.Tick)),
+                            Width = (UnitLaneWidth + BorderThickness) * p.Width - BorderThickness
+                        });
+                    var visibleStepPos = visibleSteps
+                        .Where(p => p.Tick >= visibleHead && p.Tick <= visibleTail)
+                        .Select(p => GetYPositionFromTick(p.Tick));
+
+                    if (stepHead == stepTail) continue;
+                    dc.DrawSlideBackground(steps, visibleStepPos, ShortNoteHeight, isch);
+                
+                
             }
 
             var airs = Notes.Airs.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick).ToList();
@@ -1654,70 +1882,105 @@ namespace Ched.UI
             // AIR-ACTION(ガイド線)
             foreach (var note in airActions)
             {
+                bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
                 dc.DrawAirHoldLine(
                     (UnitLaneWidth + BorderThickness) * (note.ParentNote.LaneIndex + note.ParentNote.Width / 2f),
                     GetYPositionFromTick(note.StartTick),
                     GetYPositionFromTick(note.StartTick + note.GetDuration()),
-                    ShortNoteHeight);
+                    ShortNoteHeight, isch);
+                
+                    
             }
 
             // ロングノーツ終点AIR
             foreach (var note in airs)
             {
-                if (!(note.ParentNote is LongNoteTapBase)) continue;
-                RectangleF rect = GetRectFromNotePosition(note.ParentNote.Tick, note.ParentNote.LaneIndex, note.ParentNote.Width);
-                dc.DrawAirStep(rect);
+                bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
+                    if (!(note.ParentNote is LongNoteTapBase)) continue;
+                    RectangleF rect = GetRectFromNotePosition(note.ParentNote.Tick, note.ParentNote.LaneIndex, note.ParentNote.Width);
+                    dc.DrawAirStep(rect, isch);
+                
+
             }
 
             // 中継点
             foreach (var hold in holds)
             {
-                if (Notes.GetReferencedAir(hold.EndNote).Count() > 0) continue; // AIR付き終点
-                dc.DrawHoldEnd(GetRectFromNotePosition(hold.StartTick + hold.Duration, hold.LaneIndex, hold.Width));
+                if ((hold.Channel == viewchannel) || viewchannel == 1000)
+                {
+                    if (Notes.GetReferencedAir(hold.EndNote).Count() > 0) continue; // AIR付き終点
+                    dc.DrawHoldEnd(GetRectFromNotePosition(hold.StartTick + hold.Duration, hold.LaneIndex, hold.Width));
+                }
+                    
             }
 
             foreach (var slide in slides)
             {
                 foreach (var step in slide.StepNotes.OrderBy(p => p.TickOffset))
                 {
-                    if (!Editable && !step.IsVisible) continue;
-                    if (Notes.GetReferencedAir(step).Count() > 0) break; // AIR付き終点
-                    RectangleF rect = GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
-                    if (step.IsVisible) dc.DrawSlideStep(rect);
-                    else dc.DrawBorder(rect);
+                    
+                    
+                    bool isch = ((step.Channel == viewchannel) || viewchannel == 1000);
+
+                        if (!Editable && !step.IsVisible) continue;
+                        if (Notes.GetReferencedAir(step).Count() > 0) break; // AIR付き終点
+                        RectangleF rect = GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
+                        if (step.IsVisible) dc.DrawSlideStep(rect,isch);
+                        else dc.DrawBorder(rect, isch);
+
+                        
                 }
             }
 
             // 始点
             foreach (var hold in holds)
             {
-                dc.DrawHoldBegin(GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width));
+                if ((hold.Channel == viewchannel) || viewchannel == 1000) 
+                    dc.DrawHoldBegin(GetRectFromNotePosition(hold.StartTick, hold.LaneIndex, hold.Width));
             }
 
             foreach (var slide in slides)
             {
-                dc.DrawSlideBegin(GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.StartWidth));
+                bool isch = ((slide.Channel == viewchannel) || viewchannel == 1000);
+
+                    dc.DrawSlideBegin(GetRectFromNotePosition(slide.StartTick, slide.StartNote.LaneIndex, slide.StartWidth), isch);
+                
+                    
             }
 
             // TAP, ExTAP, FLICK, DAMAGE
             foreach (var note in Notes.Flicks.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
             {
-                dc.DrawFlick(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
+                bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
+                dc.DrawFlick(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch);
+                
+                    
             }
 
             foreach (var note in Notes.Taps.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
             {
-                dc.DrawTap(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
+                bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
+                dc.DrawTap(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch);
+                
+                    
+                
+                
             }
 
             foreach (var note in Notes.ExTaps.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
             {
-                dc.DrawExTap(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
+                bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
+                dc.DrawExTap(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch);
+                
+                    
             }
 
             foreach (var note in Notes.Damages.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
             {
-                dc.DrawDamage(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width));
+                bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
+                dc.DrawDamage(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch);
+                
+                    
             }
 
             // AIR-ACTION(ActionNote)
@@ -1725,15 +1988,22 @@ namespace Ched.UI
             {
                 foreach (var note in action.ActionNotes)
                 {
-                    dc.DrawAirAction(GetRectFromNotePosition(action.StartTick + note.Offset, action.ParentNote.LaneIndex, action.ParentNote.Width).Expand(-ShortNoteHeight * 0.28f));
+                    bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
+                    dc.DrawAirAction(GetRectFromNotePosition(action.StartTick + note.Offset, action.ParentNote.LaneIndex, action.ParentNote.Width).Expand(-ShortNoteHeight * 0.28f), isch);
+                    
+                        
                 }
             }
 
             // AIR
             foreach (var note in airs)
             {
-                RectangleF rect = GetRectFromNotePosition(note.ParentNote.Tick, note.ParentNote.LaneIndex, note.ParentNote.Width);
-                dc.DrawAir(rect, note.VerticalDirection, note.HorizontalDirection);
+                bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
+                
+                    RectangleF rect = GetRectFromNotePosition(note.ParentNote.Tick, note.ParentNote.LaneIndex, note.ParentNote.Width);
+
+                    dc.DrawAir(rect, note.VerticalDirection, note.HorizontalDirection, isch);
+                
             }
 
             // 選択範囲描画
@@ -1770,7 +2040,7 @@ namespace Ched.UI
                         pos += (sigs[j + 1].Tick - pos) / currentBarLength * currentBarLength;
                 }
 
-                float rightBase = (UnitLaneWidth + BorderThickness) * Constants.LanesCount + strSize.Width / 3;
+                float rightBase = (UnitLaneWidth + BorderThickness) * constants.LaneCount + strSize.Width / 3;
 
                 // BPM描画
                 using (var bpmBrush = new SolidBrush(Color.FromArgb(0, 192, 0)))
@@ -1787,18 +2057,23 @@ namespace Ched.UI
                 {
                     foreach (var item in sigs.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
                     {
-                        var point = new PointF(rightBase + strSize.Width, -GetYPositionFromTick(item.Tick) - strSize.Height);
+                        var point = new PointF(rightBase + strSize.Width + 5f, -GetYPositionFromTick(item.Tick) - strSize.Height);
                         pe.Graphics.DrawString(string.Format("{0}/{1}", item.Numerator, item.Denominator), font, sigBrush, point);
                     }
                 }
 
+                var highSpeedBrush2 = new SolidBrush(Color.FromArgb(0, 228, 255));
                 // ハイスピ描画
                 using (var highSpeedBrush = new SolidBrush(Color.FromArgb(216, 0, 64)))
                 {
                     foreach (var item in ScoreEvents.HighSpeedChangeEvents.Where(p => p.Tick >= HeadTick && p.Tick < tailTick))
                     {
-                        var point = new PointF(rightBase + strSize.Width * 2, -GetYPositionFromTick(item.Tick) - strSize.Height);
-                        pe.Graphics.DrawString(string.Format("x{0: 0.00;-0.00}", item.SpeedRatio), font, highSpeedBrush, point);
+                        if(viewchannel == 1000 || viewchannel == item.SpeedCh)
+                        {
+                            var point = new PointF(rightBase + strSize.Width * 2 + 5f, -GetYPositionFromTick(item.Tick) - strSize.Height);
+                            pe.Graphics.DrawString(string.Format("x{0: 0.00;-0.00} ch {1:00}", item.SpeedRatio, item.SpeedCh), font, highSpeedBrush, point);
+                        }
+                        
                     }
                 }
             }
@@ -1884,7 +2159,7 @@ namespace Ched.UI
         private int GetNewNoteLaneIndex(float xpos, int width)
         {
             int newNoteLaneIndex = (int)Math.Round(xpos / (UnitLaneWidth + BorderThickness) - width / 2);
-            return Math.Min(Constants.LanesCount - width, Math.Max(0, newNoteLaneIndex));
+            return Math.Min(constants.LaneCount - width, Math.Max(0, newNoteLaneIndex));
         }
 
         private Rectangle GetSelectionRect()
@@ -1935,8 +2210,8 @@ namespace Ched.UI
             {
                 StartTick = 0,
                 Duration = Notes.GetLastTick(),
-                StartLaneIndex = 0,
-                SelectedLanesCount = Constants.LanesCount
+                StartLaneIndex = constants.MinusLaneCount,
+                SelectedLanesCount = constants.LaneCount + -constants.MinusLaneCount
             };
         }
 
@@ -1946,8 +2221,8 @@ namespace Ched.UI
             {
                 StartTick = CurrentTick,
                 Duration = Notes.GetLastTick() - CurrentTick,
-                StartLaneIndex = 0,
-                SelectedLanesCount = Constants.LanesCount
+                StartLaneIndex = constants.MinusLaneCount,
+                SelectedLanesCount = constants.LaneCount
             };
         }
 
@@ -1957,8 +2232,8 @@ namespace Ched.UI
             {
                 StartTick = 0,
                 Duration = CurrentTick,
-                StartLaneIndex = 0,
-                SelectedLanesCount = Constants.LanesCount
+                StartLaneIndex = constants.MinusLaneCount,
+                SelectedLanesCount = constants.LaneCount
             };
         }
 
@@ -2156,14 +2431,14 @@ namespace Ched.UI
 
             var opShortNotes = dicShortNotes.Select(p =>
             {
-                p.Key.LaneIndex = Constants.LanesCount - p.Key.LaneIndex - p.Key.Width;
+                p.Key.LaneIndex = constants.LaneCount - p.Key.LaneIndex - p.Key.Width;
                 var after = new MoveShortNoteOperation.NotePosition(p.Key.Tick, p.Key.LaneIndex);
                 return new MoveShortNoteOperation(p.Key, p.Value, after);
             });
 
             var opHolds = dicHolds.Select(p =>
             {
-                p.Key.LaneIndex = Constants.LanesCount - p.Key.LaneIndex - p.Key.Width;
+                p.Key.LaneIndex = constants.LaneCount - p.Key.LaneIndex - p.Key.Width;
                 var after = new MoveHoldOperation.NotePosition(p.Key.StartTick, p.Key.LaneIndex, p.Key.Width);
                 return new MoveHoldOperation(p.Key, p.Value, after);
             });
@@ -2213,6 +2488,8 @@ namespace Ched.UI
             ScoreEvents = score.Events;
             Invalidate();
         }
+
+
 
         public class NoteCollection
         {

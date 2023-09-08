@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,6 +31,8 @@ namespace Ched.Core
         private List<Air> airs;
         [Newtonsoft.Json.JsonProperty]
         private List<AirAction> airActions;
+        [Newtonsoft.Json.JsonProperty]
+        private int channel;
 
         public List<Tap> Taps
         {
@@ -77,6 +80,14 @@ namespace Ched.Core
         {
             get { return damages; }
             set { damages = value; }
+        }
+        public int Channel
+        {
+            get { return channel; }
+            set
+            {
+                channel = value;
+            }
         }
 
         public NoteCollection()

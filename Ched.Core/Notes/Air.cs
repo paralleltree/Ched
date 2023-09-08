@@ -35,6 +35,7 @@ namespace Ched.Core.Notes
         public int LaneIndex { get { return ParentNote.LaneIndex; } }
 
         public int Width { get { return ParentNote.Width; } }
+        public int Channel { get { return ParentNote.Channel; } }
 
         public Air(IAirable parent)
         {
@@ -64,6 +65,11 @@ namespace Ched.Core.Notes
         /// ノートのレーン幅を取得します。
         /// </summary>
         int Width { get; }
+
+        /// <summary>
+        /// ノートのチャンネルを取得します。
+        /// </summary>
+        int Channel { get; }
     }
 
     public enum VerticalAirDirection

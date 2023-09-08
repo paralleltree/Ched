@@ -14,6 +14,8 @@ namespace Ched.Core.Notes
         [Newtonsoft.Json.JsonProperty]
         private int width = 1;
         [Newtonsoft.Json.JsonProperty]
+        private int channel = 1;
+        [Newtonsoft.Json.JsonProperty]
         private int duration = 1;
 
         [Newtonsoft.Json.JsonProperty]
@@ -48,6 +50,18 @@ namespace Ched.Core.Notes
         }
 
         /// <summary>
+        /// ノートのチャンネルを設定します。
+        /// </summary>
+        public int Channel
+        {
+            get { return channel; }
+            set
+            {
+                channel = value;
+            }
+        }
+
+        /// <summary>
         /// ノートの長さを設定します。
         /// </summary>
         public int Duration
@@ -65,7 +79,7 @@ namespace Ched.Core.Notes
         {
             if (width < 1 || width > Constants.LanesCount)
                 throw new ArgumentOutOfRangeException("width", "Invalid width.");
-            if (laneIndex < 0 || laneIndex + width > Constants.LanesCount)
+            if (laneIndex < -16 || laneIndex + width > Constants.LanesCount)
                 throw new ArgumentOutOfRangeException("laneIndex", "Invalid lane index.");
         }
 
@@ -109,6 +123,8 @@ namespace Ched.Core.Notes
         {
             public override int Tick { get { return parent.StartTick; } }
 
+            public override int Channel { get { return parent.Channel; } set { parent.Channel = value; } }
+
             public override bool IsTap { get { return true; } }
 
             public StartTap(Hold parent) : base(parent)
@@ -119,6 +135,8 @@ namespace Ched.Core.Notes
         public class EndTap : TapBase
         {
             public override bool IsTap { get { return false; } }
+
+            public override int Channel { get { return parent.Channel; } set { parent.Channel = value; } }
 
             public override int Tick { get { return parent.StartTick + parent.Duration; } }
 

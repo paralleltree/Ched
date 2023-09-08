@@ -51,5 +51,6 @@ namespace Ched.Core.Notes
         public abstract int LaneIndex { get; }
         public abstract int Tick { get; }
         public abstract int Width { get; }
+        public abstract int Channel { get; set; }
     }
 }

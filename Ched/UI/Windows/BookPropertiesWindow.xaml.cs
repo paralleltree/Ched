@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-
+using System.Windows.Controls;
 using Ched.Core;
 using Ched.Localization;
 
@@ -20,6 +20,7 @@ namespace Ched.UI.Windows
         {
             InitializeComponent();
         }
+
     }
 
     public class BookPropertiesWindowViewModel : ViewModel
@@ -91,6 +92,29 @@ namespace Ched.UI.Windows
             }
         }
 
+        private decimal laneoffset;
+        public decimal LaneOffset
+        {
+            get => laneoffset;
+            set
+            {
+                laneoffset = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public bool siken;
+
+        public bool isSiken
+        {
+            get => siken;
+            set
+            {
+                siken = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         private double musicVolume;
         public double MusicVolume
         {
@@ -113,6 +137,9 @@ namespace Ched.UI.Windows
             }
         }
 
+
+
+
         public BookPropertiesWindowViewModel()
         {
         }
@@ -128,11 +155,13 @@ namespace Ched.UI.Windows
             Title = ScoreBook.Title;
             Artist = ScoreBook.ArtistName;
             NotesDesigner = ScoreBook.NotesDesignerName;
+            LaneOffset = ScoreBook.LaneOffset;
 
             MusicSourcePath = MusicSource.FilePath;
             MusicSourceLatency = MusicSource.Latency;
             MusicVolume = MusicSource.Volume;
             GuideVolume = Configuration.SoundSettings.Default.GuideSound.Volume;
+
         }
 
         public void CommitEdit()
@@ -140,6 +169,8 @@ namespace Ched.UI.Windows
             ScoreBook.Title = Title;
             ScoreBook.ArtistName = Artist;
             ScoreBook.NotesDesignerName = NotesDesigner;
+            ScoreBook.LaneOffset = LaneOffset;
+            NoteView.laneOffset = LaneOffset;
 
             MusicSource.FilePath = MusicSourcePath;
             MusicSource.Latency = MusicSourceLatency;

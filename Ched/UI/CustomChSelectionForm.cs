@@ -10,19 +10,20 @@ using System.Windows.Forms;
 
 namespace Ched.UI
 {
-    public partial class BpmSelectionForm : Form
+    public partial class CustomChSelectionForm : Form
     {
-        public double Bpm
+
+        public int SpeedCh
         {
-            get => (double)bpmBox.Value;
+            get { return (int)speedChBox.Value; }
             set
             {
-                bpmBox.Value = (decimal)value;
-                bpmBox.SelectAll();
+                speedChBox.Value = value;
+
             }
         }
 
-        public BpmSelectionForm()
+        public CustomChSelectionForm()
         {
             InitializeComponent();
             AcceptButton = buttonOK;
@@ -30,11 +31,12 @@ namespace Ched.UI
             buttonOK.DialogResult = DialogResult.OK;
             buttonCancel.DialogResult = DialogResult.Cancel;
 
-            bpmBox.DecimalPlaces = 1;
-            bpmBox.Increment = 1;
-            bpmBox.Maximum = 10000;
-            bpmBox.Minimum = -10000;
-            bpmBox.Value = 120;
+
+            speedChBox.Minimum = 0;
+            speedChBox.Maximum = 99;
+            speedChBox.Increment = 1;
+            speedChBox.DecimalPlaces = 0;
+            speedChBox.Value = 1;
         }
     }
 }

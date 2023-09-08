@@ -22,6 +22,16 @@ namespace Ched.UI
             }
         }
 
+        public int SpeedCh
+        {
+            get { return (int)speedChBox.Value; }
+            set
+            {
+                speedChBox.Value = value;
+
+            }
+        }
+
         public HighSpeedSelectionForm()
         {
             InitializeComponent();
@@ -35,6 +45,12 @@ namespace Ched.UI
             speedRatioBox.Increment = 0.01m;
             speedRatioBox.DecimalPlaces = 2;
             speedRatioBox.Value = 1;
+
+            speedChBox.Minimum = 0;
+            speedChBox.Maximum = 99;
+            speedChBox.Increment = 1;
+            speedChBox.DecimalPlaces = 0;
+            speedChBox.Value = 1;
         }
     }
 }

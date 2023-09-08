@@ -18,6 +18,9 @@ using Ched.Properties;
 using Ched.UI.Shortcuts;
 using Ched.UI.Operations;
 using Ched.UI.Windows;
+using System.Globalization;
+using Ched.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace Ched.UI
 {
@@ -44,7 +47,17 @@ namespace Ched.UI
         private ShortcutManager ShortcutManager => ShortcutManagerHost.ShortcutManager;
 
         private ExportManager ExportManager { get; } = new ExportManager();
+
+        private int Channel { get; set; } = 1;
+        private int ViewChannel { get; set; } = 0;
+
+        private bool LaneVisual { get; set; } = false;
+         
+        private int defaultCh = 1;
+
+
         private Plugins.PluginManager PluginManager { get; } = Plugins.PluginManager.GetInstance();
+
 
         private bool IsPreviewMode
         {
@@ -65,7 +78,7 @@ namespace Ched.UI
 
         private bool CanWidenLaneWidth => !IsPreviewMode && NoteView.UnitLaneWidth < 24;
         private bool CanNarrowLaneWidth => !IsPreviewMode && NoteView.UnitLaneWidth > 12;
-        private bool CanZoomIn => !IsPreviewMode && NoteView.UnitBeatHeight < 960;
+        private bool CanZoomIn => !IsPreviewMode && NoteView.UnitBeatHeight < 9600;
         private bool CanZoomOut => !IsPreviewMode && NoteView.UnitBeatHeight > 30;
         private bool CanEdit => !IsPreviewMode && !PreviewManager.Playing;
 
@@ -447,7 +460,7 @@ namespace Ched.UI
 
         protected void SetText(string filePath)
         {
-            Text = "Ched" + (string.IsNullOrEmpty(filePath) ? "" : " - " + Path.GetFileName(filePath)) + (OperationManager.IsChanged ? " *" : "");
+            Text = "Ched SkEdition" + (string.IsNullOrEmpty(filePath) ? "" : " - " + Path.GetFileName(filePath)) + (OperationManager.IsChanged ? " *" : "");
         }
 
         private void UpdateThumbHeight()
@@ -487,6 +500,7 @@ namespace Ched.UI
             {
                 CommitChanges();
                 var context = new SoundPreviewContext(ScoreBook.Score, CurrentMusicSource, SoundSettings.Default.GuideSound);
+                
                 if (!PreviewManager.Start(context, startTick)) return;
                 PreviewManager.Finished += lambda;
                 NoteView.Editable = CanEdit;
@@ -585,14 +599,17 @@ namespace Ched.UI
             {
                 var form = new HighSpeedSelectionForm()
                 {
-                    SpeedRatio = NoteView.ScoreEvents.HighSpeedChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= NoteView.CurrentTick)?.SpeedRatio ?? 1.0m
+                    SpeedRatio = NoteView.ScoreEvents.HighSpeedChangeEvents.OrderBy(p => p.Tick).LastOrDefault(p => p.Tick <= NoteView.CurrentTick)?.SpeedRatio ?? 1.0m,
+                    SpeedCh = Channel
                 };
                 if (form.ShowDialog(this) != DialogResult.OK) return;
 
                 var item = new HighSpeedChangeEvent()
                 {
                     Tick = NoteView.CurrentTick,
-                    SpeedRatio = form.SpeedRatio
+                    SpeedRatio = form.SpeedRatio,
+                    SpeedCh = form.SpeedCh,
+                    Type = form.SpeedCh
                 };
                 UpdateEvent(NoteView.ScoreEvents.HighSpeedChangeEvents, item);
             });
@@ -605,14 +622,15 @@ namespace Ched.UI
                 {
                     Tick = NoteView.CurrentTick,
                     Numerator = form.Numerator,
-                    DenominatorExponent = form.DenominatorExponent
+                    DenominatorExponent = form.DenominatorExponent                  
                 };
                 UpdateEvent(NoteView.ScoreEvents.TimeSignatureChangeEvents, item);
             });
 
             void UpdateEvent<T>(List<T> list, T item) where T : EventBase
             {
-                var prev = list.SingleOrDefault(p => p.Tick == item.Tick);
+
+                var prev = list.SingleOrDefault(p => p.Tick == item.Tick && p.Type == item.Type);
 
                 var insertOp = new InsertEventOperation<T>(list, item);
                 if (prev == null)
@@ -853,11 +871,29 @@ namespace Ched.UI
             var insertHighSpeedItem = shortcutItemBuilder.BuildItem(Commands.InsertHighSpeedChange, MainFormStrings.HighSpeed);
             var insertTimeSignatureItem = shortcutItemBuilder.BuildItem(Commands.InsertTimeSignatureChange, MainFormStrings.TimeSignature);
 
+
             var insertMenuItems = new ToolStripItem[] { insertBpmItem, insertHighSpeedItem, insertTimeSignatureItem };
+            
 
             var playItem = shortcutItemBuilder.BuildItem(Commands.PlayPreview, MainFormStrings.Play);
 
             var stopItem = new ToolStripMenuItem(MainFormStrings.Stop, null, (s, e) => PreviewManager.Stop());
+
+
+            Rectangle ImageSize = new Rectangle(0, 0, 16, 16);
+
+            Bitmap img = new Bitmap(16, 16);
+            Graphics graph = Graphics.FromImage(img);
+            graph.FillRectangle(Brushes.Black, ImageSize);
+
+            Bitmap img2 = new Bitmap(16, 16);
+            Graphics graph2 = Graphics.FromImage(img2);
+            graph2.FillRectangle(Brushes.White, ImageSize);
+
+
+
+            var themeBlack = new ToolStripMenuItem(MainFormStrings.ThemeBlack, img, (s, e) => noteView.Theme = 0);
+            var themeWhite = new ToolStripMenuItem(MainFormStrings.ThemeWhite, img2, (s, e) => noteView.Theme = 1);
 
             var slowDownPreviewItem = new ToolStripMenuItem(MainFormStrings.SlowDownPreview, null, (s, e) =>
             {
@@ -894,6 +930,10 @@ namespace Ched.UI
                 new ToolStripMenuItem(MainFormStrings.VersionInfo, null, (s, e) => new VersionInfoForm().ShowDialog(this))
             };
 
+            var themeMenuItems = new ToolStripItem[] { themeBlack, themeWhite};
+
+
+
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
                 redoItem.Enabled = OperationManager.CanRedo;
@@ -913,7 +953,8 @@ namespace Ched.UI
                 new ToolStripMenuItem(MainFormStrings.InsertMenu, null, insertMenuItems),
                 // PreviewManager初期化後じゃないといけないのダメ設計でしょ
                 new ToolStripMenuItem(MainFormStrings.PlayMenu, null, playMenuItems) { Enabled = PreviewManager.IsSupported },
-                new ToolStripMenuItem(MainFormStrings.HelpMenu, null, helpMenuItems)
+                new ToolStripMenuItem(MainFormStrings.HelpMenu, null, helpMenuItems),
+                new ToolStripMenuItem(MainFormStrings.ThemeMenu, null, themeMenuItems)
             });
             return menu;
         }
@@ -1076,10 +1117,120 @@ namespace Ched.UI
                 }
             };
 
+            
+
+
+            var speedchCounts = new int[]
+            {
+                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+            };
+
+
+            var speedChBox = new ToolStripComboBox("ハイスピードチャンネル")
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                AutoSize = false,
+                Width = 60
+            };
+            speedChBox.Items.AddRange(speedchCounts.Select(p => "Ch" + p).ToArray());
+            speedChBox.Items.Add(MainFormStrings.Custom);
+
+            speedChBox.SelectedIndexChanged += (s, e) =>
+            {
+                if (speedChBox.SelectedIndex == speedChBox.Items.Count - 1)
+                {
+                    var form = new CustomChSelectionForm();
+                    if (form.ShowDialog(this) == DialogResult.OK)
+                    {
+                        Channel = form.SpeedCh;
+                        
+                    }
+                }
+                else
+                {
+                    Channel = speedchCounts[speedChBox.SelectedIndex];
+                }
+                noteView.Channel = Channel;
+                noteView.Update();
+                noteView.Focus();
+            };
+            speedChBox.SelectedIndex = 1;
+
+
+            var viewchCounts = new int[]
+            {
+                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+            };
+
+
+            var viewChBox = new ToolStripComboBox("表示チャンネル")
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                AutoSize = false,
+                Width = 60
+            };
+            viewChBox.Items.Add(MainFormStrings.All);
+            viewChBox.Items.AddRange(viewchCounts.Select(p => "Ch" + p).ToArray());
+            viewChBox.Items.Add(MainFormStrings.Custom);
+
+            viewChBox.SelectedIndexChanged += (s, e) =>
+            {
+                if (viewChBox.SelectedIndex == viewChBox.Items.Count - 1)
+                {
+                    var form = new CustomViewChSelectionForm();
+                    if (form.ShowDialog(this) == DialogResult.OK)
+                    {
+                        ViewChannel = form.SpeedCh;
+
+                    }
+                }
+                else if (viewChBox.SelectedIndex == 0)
+                {
+                    ViewChannel = 1000;
+                }
+                else
+                {
+                    Console.WriteLine(viewchCounts[viewChBox.SelectedIndex - 1]);
+                    ViewChannel = viewchCounts[viewChBox.SelectedIndex - 1];
+                }
+                noteView.ViewChannel = ViewChannel;
+                noteView.Update();
+                noteView.Focus();
+            };
+            viewChBox.SelectedIndex = 0;
+
+            ToolStripMenuItem laneVisible = new ToolStripMenuItem(MainFormStrings.LaneVisual, null, (s, e) =>
+            {
+                var item = s as ToolStripMenuItem;
+                item.Checked = !item.Checked;
+                NoteView.LaneVisual = item.Checked;
+                item.Text = MainFormStrings.LaneVisual + ": " + item.Checked;
+            })
+            {
+                Checked = false
+            };
+
+            /*
+            var laneVisible2 = new CheckableToolStripSplitButton()
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Text
+            };
+            laneVisible2.Text = "レーン表示";
+            laneVisible2.DropDown.Items.AddRange(new ToolStripItem[]
+            {
+                laneVisible
+
+            });
+            */
+
+
+
+
+
             return new ToolStrip(new ToolStripItem[]
             {
                 tapButton, exTapButton, holdButton, slideButton, slideStepButton, airKind, airActionButton, flickButton, damageButton,
-                quantizeComboBox
+                quantizeComboBox, new ToolStripSeparator(), speedChBox, viewChBox,  laneVisible
             });
         }
     }

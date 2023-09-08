@@ -36,6 +36,8 @@ namespace Ched.Core
         [Newtonsoft.Json.JsonProperty]
         private string notesDesignerName = "";
         [Newtonsoft.Json.JsonProperty]
+        private decimal laneoffset = 0;
+        [Newtonsoft.Json.JsonProperty]
         private Score score = new Score();
         [Newtonsoft.Json.JsonProperty]
         private Dictionary<string, string> exportArgs = new Dictionary<string, string>();
@@ -77,6 +79,16 @@ namespace Ched.Core
             get { return notesDesignerName; }
             set { notesDesignerName = value; }
         }
+        /// <summary>
+        /// レーンオフセット(CCの拡張機能)を設定します。
+        /// </summary>
+        public decimal LaneOffset
+        {
+            get { return laneoffset; }
+            set { laneoffset = value; }
+        }
+
+
 
         /// <summary>
         /// 譜面データを設定します。

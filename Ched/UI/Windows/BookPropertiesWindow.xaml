@@ -96,7 +96,7 @@
                             </i:Interaction.Behaviors>
                         </Button>
                     </Grid>
-                    <Grid Style="{StaticResource ResourceKey=InputFieldRow}">
+                    <Grid Style="{StaticResource ResourceKey=InputFieldRow}" Width="268" Margin="0,0,300,5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
                             <ColumnDefinition Width="Auto" />
@@ -135,6 +135,26 @@
                         <Slider Grid.Row="1" Grid.Column="1" Value="{Binding GuideVolume, Converter={StaticResource VolumeConveter}}" />
                     </Grid>
                 </StackPanel>
+            </GroupBox>
+            <GroupBox Header="{x:Static localization:MainFormStrings.MusicInformation}" Width="576" RenderTransformOrigin="0.506,0.449">
+
+                <StackPanel Margin="0,0,2,0" RenderTransformOrigin="0.498,0.68">
+                    <Grid Style="{StaticResource ResourceKey=InputFieldRow}" Width="550" Margin="0,0,300,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Label" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Column="0" Content="{x:Static localization:MainFormStrings.LaneOffset}" />
+                        <local:BindableNumericUpDown Grid.Column="1" Value="{Binding LaneOffset}" DecimalPlaces="1" Minimum="-100" Maximum="100" Increment="1" />
+
+                    </Grid>
+                    <Label Content="{x:Static localization:MainFormStrings.LaneOffsetdis}" FontFamily="Yu Gothic UI Semibold" />
+
+                </StackPanel>
+                
+
             </GroupBox>
 
             <StackPanel Orientation="Horizontal" Margin="{StaticResource ContainerMargin}" HorizontalAlignment="Right">

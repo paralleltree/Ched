@@ -13,6 +13,21 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -78,6 +93,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.Composition.registration" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Reactive, Version=5.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Reactive.5.0.0\lib\net472\System.Reactive.dll</HintPath>
@@ -105,6 +121,7 @@
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
@@ -120,6 +137,7 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base64Converter.cs" />
     <Compile Include="Components\Exporter\SusExporter.cs" />
     <Compile Include="Configuration\ApplicationSettings.cs" />
     <Compile Include="Configuration\SettingsBase.cs" />
@@ -166,7 +184,26 @@
     <Compile Include="Plugins\SlideReverser.cs" />
     <Compile Include="Plugins\SlideSplitter.cs" />
     <Compile Include="Plugins\SusExportPlugin.cs" />
+    <Compile Include="RadixConvert.cs" />
+    <Compile Include="UI\CustomViewChSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\CustomViewChSelectionForm.Designer.cs">
+      <DependentUpon>CustomViewChSelectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\Helpers.cs" />
+    <Compile Include="UI\CustomLaneOffsetSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\CustomLaneOffsetSelectionForm.Designer.cs">
+      <DependentUpon>CustomLaneOffsetSelectionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\CustomChSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\CustomChSelectionForm.Designer.cs">
+      <DependentUpon>CustomChSelectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\Shortcuts\Commands.cs" />
     <Compile Include="UI\Shortcuts\KeyExtensions.cs" />
     <Compile Include="UI\Shortcuts\ShortcutCommandSource.cs" />
@@ -306,11 +343,29 @@
     <EmbeddedResource Include="UI\BpmSelectionForm.resx">
       <DependentUpon>BpmSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="UI\CustomViewChSelectionForm.en.resx">
+      <DependentUpon>CustomViewChSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\CustomViewChSelectionForm.resx">
+      <DependentUpon>CustomViewChSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\CustomQuantizeSelectionForm.en.resx">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\CustomQuantizeSelectionForm.resx">
       <DependentUpon>CustomQuantizeSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\CustomLaneOffsetSelectionForm.en.resx">
+      <DependentUpon>CustomLaneOffsetSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\CustomLaneOffsetSelectionForm.resx">
+      <DependentUpon>CustomLaneOffsetSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\CustomChSelectionForm.en.resx">
+      <DependentUpon>CustomChSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\CustomChSelectionForm.resx">
+      <DependentUpon>CustomChSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\HighSpeedSelectionForm.en.resx">
       <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
@@ -320,6 +375,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\NoteView.resx">
+      <DependentUpon>NoteView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\ShiftTimeSelectionForm.resx">
       <DependentUpon>ShiftTimeSelectionForm.cs</DependentUpon>
@@ -426,12 +484,6 @@
     <None Include="Resources\clipboard-paste.png" />
   </ItemGroup>
   <ItemGroup>
-    <ContentWithTargetPath Include="Resources\guide.mp3">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>guide.mp3</TargetPath>
-    </ContentWithTargetPath>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\scissors-blue.png" />
   </ItemGroup>
   <ItemGroup>
@@ -482,6 +534,23 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\information.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 および x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Sounds\guide.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\BASS.Native.2.4.12.2\build\BASS.Native.targets" Condition="Exists('..\packages\BASS.Native.2.4.12.2\build\BASS.Native.targets')" />

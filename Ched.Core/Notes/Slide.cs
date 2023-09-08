@@ -14,7 +14,11 @@ namespace Ched.Core.Notes
         [Newtonsoft.Json.JsonProperty]
         private int startLaneIndex;
         [Newtonsoft.Json.JsonProperty]
+        private int channel;
+        [Newtonsoft.Json.JsonProperty]
         private List<StepTap> stepNotes = new List<StepTap>();
+
+        private Constants constants = new Constants();
 
         /// <summary>
         /// 開始ノートの配置されるレーン番号を設定します。。
@@ -42,6 +46,18 @@ namespace Ched.Core.Notes
             }
         }
 
+        /// <summary>
+        /// チャンネルを設定します。
+        /// </summary>
+        public int Channel
+        {
+            get { return channel; }
+            set
+            {
+                channel = value;
+            }
+        }
+
         public List<StepTap> StepNotes { get { return stepNotes; } }
         public StartTap StartNote { get; }
 
@@ -59,9 +75,9 @@ namespace Ched.Core.Notes
             if (StepNotes.Any(p =>
             {
                 int laneIndex = startLaneIndex + p.LaneIndexOffset;
-                return laneIndex < 0 || laneIndex + (startWidth + p.WidthChange) > Constants.LanesCount;
+                return laneIndex < constants.MinusLaneCount || laneIndex + (startWidth + p.WidthChange) > constants.LaneCount;
             })) throw new ArgumentOutOfRangeException("startLaneIndex", "Invalid lane index.");
-            if (startLaneIndex < 0 || startLaneIndex + startWidth > Constants.LanesCount)
+            if (startLaneIndex < constants.MinusLaneCount || startLaneIndex + startWidth > constants.LaneCount)
                 throw new ArgumentOutOfRangeException("startLaneIndex", "Invalid lane index.");
         }
 
@@ -113,6 +129,8 @@ namespace Ched.Core.Notes
 
             public override int Width { get { return ParentNote.StartWidth; } }
 
+            public override int Channel { get { return ParentNote.Channel; } set { ParentNote.Channel = value; } }
+
             public StartTap(Slide parent) : base(parent)
             {
             }
@@ -128,14 +146,18 @@ namespace Ched.Core.Notes
             [Newtonsoft.Json.JsonProperty]
             private int tickOffset = 1;
             [Newtonsoft.Json.JsonProperty]
+            private int channel;
+            [Newtonsoft.Json.JsonProperty]
             private bool isVisible = true;
+
+            private Constants constants = new Constants();
 
             public int TickOffset
             {
                 get { return tickOffset; }
                 set
                 {
-                    if (value <= 0) throw new ArgumentOutOfRangeException("value", "value must be positive.");
+                    //if (value <= 0) throw new ArgumentOutOfRangeException("value", "value must be positive.");
                     tickOffset = value;
                 }
             }
@@ -152,6 +174,12 @@ namespace Ched.Core.Notes
             public override int Tick { get { return ParentNote.StartTick + TickOffset; } }
 
             public override int LaneIndex { get { return ParentNote.StartLaneIndex + LaneIndexOffset; } }
+
+            public override int Channel
+            {
+                get { return channel; }
+                set { channel = value; }
+            }
 
             public int LaneIndexOffset
             {
@@ -189,7 +217,7 @@ namespace Ched.Core.Notes
             protected void CheckPosition(int laneIndexOffset, int widthChange)
             {
                 int laneIndex = ParentNote.StartNote.LaneIndex + laneIndexOffset;
-                if (laneIndex < 0 || laneIndex + (ParentNote.StartWidth + widthChange) > Constants.LanesCount)
+                if (laneIndex < constants.MinusLaneCount || laneIndex + (ParentNote.StartWidth + widthChange) > constants.LaneCount)
                     throw new ArgumentOutOfRangeException("laneIndexOffset", "Invalid lane index offset.");
 
                 int actualWidth = widthChange + ParentNote.StartWidth;

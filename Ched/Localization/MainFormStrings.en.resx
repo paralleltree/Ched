@@ -342,4 +342,25 @@
   <data name="SlowDownPreview" xml:space="preserve">
     <value>Slow Down Preview</value>
   </data>
+  <data name="LaneOffset" xml:space="preserve">
+    <value>Lane Offset</value>
+  </data>
+  <data name="LaneOffsetdis" xml:space="preserve">
+    <value>This is an extended specification limited to ChartCyanvas. (sus only)</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="LaneVisual" xml:space="preserve">
+    <value>Lane Visual</value>
+  </data>
+  <data name="ThemeMenu" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="ThemeBlack" xml:space="preserve">
+    <value>Black</value>
+  </data>
+  <data name="ThemeWhite" xml:space="preserve">
+    <value>White</value>
+  </data>
 </root>

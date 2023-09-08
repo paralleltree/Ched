@@ -12,10 +12,24 @@ namespace Ched.Core.Notes
         [Newtonsoft.Json.JsonProperty]
         private IAirable parentNote;
         [Newtonsoft.Json.JsonProperty]
+        private int channel;
+        [Newtonsoft.Json.JsonProperty]
         private List<ActionNote> actionNotes = new List<ActionNote>();
 
         public List<ActionNote> ActionNotes { get { return actionNotes; } }
         public IAirable ParentNote { get { return parentNote; } }
+
+        /// <summary>
+        /// チャンネルを設定します。
+        /// </summary>
+        public int Channel
+        {
+            get { return channel; }
+            set
+            {
+                channel = value;
+            }
+        }
         public int StartTick => ParentNote.Tick;
 
         /// <summary>
@@ -47,9 +61,13 @@ namespace Ched.Core.Notes
             [Newtonsoft.Json.JsonProperty]
             private int offset;
             [Newtonsoft.Json.JsonProperty]
+            private int channel;
+            [Newtonsoft.Json.JsonProperty]
             private AirAction parentNote;
+ 
 
             public AirAction ParentNote { get { return parentNote; } }
+
 
             public int Offset
             {
@@ -60,6 +78,16 @@ namespace Ched.Core.Notes
                     offset = value;
                 }
             }
+            public int Channel
+            {
+                get { return channel; }
+                set
+                {
+                    channel = value;
+                }
+            }
+
+
 
             /// <summary>
             /// 指定の<see cref="AirAction"/>を親とする<see cref="ActionNote"/>の新しいインスタンスを初期化します。

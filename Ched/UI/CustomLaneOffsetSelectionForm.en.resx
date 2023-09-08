@@ -122,7 +122,7 @@
     <value>66, 13</value>
   </data>
   <data name="label1.Text" xml:space="preserve">
-    <value>Speed Ratio</value>
+    <value>Lane Offset</value>
   </data>
   <data name="speedRatioBox.Location" type="System.Drawing.Point, System.Drawing">
     <value>84, 22</value>
@@ -131,9 +131,6 @@
     <value>Cancel</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
-    <value>High Speed Selection</value>
-  </data>
-  <data name="label2.Text" xml:space="preserve">
-    <value>Speed Channel</value>
+    <value>Lane Offset Selection</value>
   </data>
 </root>

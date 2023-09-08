@@ -342,4 +342,40 @@
   <data name="SlowDownPreview" xml:space="preserve">
     <value>スロー再生</value>
   </data>
+  <data name="LaneOffset" xml:space="preserve">
+    <value>レーンオフセット</value>
+  </data>
+  <data name="LaneOffsetdis" xml:space="preserve">
+    <value>ChartCyanvas限定の拡張仕様です。(susのみ)</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>全部</value>
+  </data>
+  <data name="isSiken" xml:space="preserve">
+    <value>昇格試験用の譜面</value>
+  </data>
+  <data name="isSikendis" xml:space="preserve">
+    <value>オンにするとレーンオフセット、チャンネル分けソフランが使用できなくなります</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>その他</value>
+  </data>
+  <data name="steptype1" xml:space="preserve">
+    <value>ステップのチャンネル移動なし</value>
+  </data>
+  <data name="steptype2" xml:space="preserve">
+    <value>ステップのチャンネル移動あり</value>
+  </data>
+  <data name="LaneVisual" xml:space="preserve">
+    <value>レーン表示</value>
+  </data>
+  <data name="ThemeMenu" xml:space="preserve">
+    <value>テーマ</value>
+  </data>
+  <data name="ThemeBlack" xml:space="preserve">
+    <value>ブラック</value>
+  </data>
+  <data name="ThemeWhite" xml:space="preserve">
+    <value>ホワイト</value>
+  </data>
 </root>

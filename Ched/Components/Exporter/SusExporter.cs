@@ -11,6 +11,12 @@ using System.Threading.Tasks;
 using ConcurrentPriorityQueue;
 using Ched.Core;
 using Ched.Core.Notes;
+using Ched.Core.Events;
+using static System.Net.Mime.MediaTypeNames;
+using System.Data.SqlTypes;
+using Newtonsoft.Json.Linq;
+using System.Reflection;
+using System.Runtime.Remoting.Channels;
 
 namespace Ched.Components.Exporter
 {
@@ -21,6 +27,8 @@ namespace Ched.Components.Exporter
         protected int StandardBarTick => ScoreBook.Score.TicksPerBeat * 4;
         protected int BarIndexOffset => CustomArgs.HasPaddingBar ? 1 : 0;
         public SusArgs CustomArgs { get; }
+
+        public bool Siken { get; }
 
         public SusExporter(ScoreBook book, SusArgs susArgs)
         {
@@ -56,6 +64,8 @@ namespace Ched.Components.Exporter
                 }
 
                 writer.WriteLine("#REQUEST \"ticks_per_beat {0}\"", book.Score.TicksPerBeat);
+                if(!Siken) writer.WriteLine("#REQUEST \"side_lane true\"");
+                if (!Siken) writer.WriteLine("#REQUEST \"lane_offset {0}\"", book.LaneOffset); 
                 writer.WriteLine();
 
                 var timeSignatures = BarIndexCalculator.TimeSignatures.Select(p => new SusDataLine(p.StartBarIndex, barIndex => string.Format("#{0:000}02: {1}", barIndex, 4f * p.TimeSignature.Numerator / p.TimeSignature.Denominator), p.StartBarIndex == 0));
@@ -86,46 +96,192 @@ namespace Ched.Components.Exporter
                 WriteLinesWithOffset(writer, bpmChanges);
                 writer.WriteLine();
 
+
+                var groupByCh = book.Score.Events.HighSpeedChangeEvents.GroupBy(p => p.SpeedCh);
+
+                
+
                 var speeds = book.Score.Events.HighSpeedChangeEvents.Select(p =>
                 {
                     var barPos = BarIndexCalculator.GetBarPositionFromTick(p.Tick);
                     return string.Format("{0}'{1}:{2}", barPos.BarIndex + (p.Tick == 0 ? 0 : BarIndexOffset), barPos.TickOffset, p.SpeedRatio.ToString(CultureInfo.InvariantCulture));
                 });
-                writer.WriteLine("#TIL00: \"{0}\"", string.Join(", ", speeds));
-                writer.WriteLine("#HISPEED 00");
+
+
+                foreach (var item in groupByCh)
+                {
+                    // グループのキーを表示
+                    //Console.WriteLine("key" + item.Key);
+
+
+                    // キーに属するバリューをリスト化
+                    var speedList = item.Select(x => new { SpeedRaito = x.SpeedRatio, Tick = x.Tick, SpeedCh = x.SpeedCh }).ToList();
+                    foreach (var speed in speedList)
+                    {
+                        
+                        var barPos = BarIndexCalculator.GetBarPositionFromTick(speed.Tick);
+                        //Console.WriteLine(string.Format("{0}'{1}:{2}", barPos.BarIndex + (speed.Tick == 0 ? 0 : BarIndexOffset), barPos.TickOffset, speed.SpeedRaito.ToString(CultureInfo.InvariantCulture)));
+
+                        
+                        var speeds2 = item.Select(p =>
+                        {
+                            var barPos2 = BarIndexCalculator.GetBarPositionFromTick(p.Tick);
+                            return string.Format("{0}'{1}:{2}", barPos2.BarIndex + (p.Tick == 0 ? 0 : BarIndexOffset), barPos2.TickOffset, p.SpeedRatio.ToString(CultureInfo.InvariantCulture));
+                        });
+                        //Console.WriteLine(string.Join(", ", speeds2));
+                        //Console.WriteLine("speedlist" + speedList.Count);
+
+                        if ((speed.Tick == speedList[speedList.Count - 1].Tick) && (speed.SpeedRaito == speedList[speedList.Count - 1].SpeedRaito))
+                        {
+                            writer.WriteLine("#TIL{0}: \"{1}\"", speed.SpeedCh.ToString("00"), string.Join(", ", speeds2));
+                            
+                        }
+
+                        
+
+                        
+
+
+                    }
+                    
+
+                }
+
+                var speedchlist = book.Score.Events.HighSpeedChangeEvents
+                    .GroupBy(p => p.SpeedCh);
+
+                foreach (var item in speedchlist)
+                {
+                    int channel = item.Select(p => p.SpeedCh).First();
+                    writer.WriteLine("#HISPEED {0}", channel.ToString("00"));
+                }
+
+
+
+                    //writer.WriteLine("#TIL{0}: \"{1}\"", item.Value.SpeedCh.ToString("00"), string.Join(", ", chspeeds));
+                    
+
+
+                writer.WriteLine();
+
+
+
+                //writer.WriteLine("#TIL00: \"{0}\"", string.Join(", ", speeds));
+
+                
+
+                //writer.WriteLine("#TIL{0}: \"{1}\"", ch[item.Index].ToString("00"), string.Join(", ", speedsgroup));
+
+
+                writer.WriteLine();
+                
                 writer.WriteLine("#MEASUREHS 00");
                 writer.WriteLine();
 
-                var shortNotes = notes.Taps.Cast<TappableBase>().Select(p => new { Type = '1', Note = p })
-                    .Concat(notes.ExTaps.Cast<TappableBase>().Select(p => new { Type = '2', Note = p }))
-                    .Concat(notes.Flicks.Cast<TappableBase>().Select(p => new { Type = '3', Note = p }))
-                    .Concat(notes.Damages.Cast<TappableBase>().Select(p => new { Type = '4', Note = p }))
-                    .Select(p => (p.Note.Tick, p.Note.LaneIndex, p.Type + ToLaneWidthString(p.Note.Width)));
-                WriteLinesWithOffset(writer, GetShortNoteLines("1", shortNotes));
-                writer.WriteLine();
 
-                var airs = notes.Airs.Select(p =>
+                var groupByTapNoteChannel = notes.Taps.GroupBy(x => x.Channel);
+                var groupByExNoteChannel = notes.ExTaps.GroupBy(x => x.Channel);
+                var groupByFlickNoteChannel = notes.Flicks.GroupBy(x => x.Channel);
+                var groupByDamageNoteChannel = notes.Damages.GroupBy(x => x.Channel);
+                var groupByAirChannel = notes.Airs.GroupBy(x => x.Channel);
+                var groupBySlideChannel = notes.Slides.GroupBy(x => x.Channel);
+
+                var groupBySlideStart = notes.Slides.GroupBy(p => p.StartNote);
+                var groupBySlideStartChannel = groupBySlideStart.GroupBy(p => p.Select(x => x.Channel));
+                var groupBySlideStep = notes.Slides.GroupBy(p => p.StepNotes);
+                var groupBySlideStepChannel = groupBySlideStep.GroupBy(p => p.Select(x => x.Channel));
+
+                //通常ノーツ
+                foreach (var item in groupByTapNoteChannel)
                 {
-                    string type = "";
-                    switch (p.HorizontalDirection)
+
+                    //var shortnoteList = item.Select(x => new {SpeedCh = x.Channel, Tick = x.Tick, Width = x.Width, Channel = x.Channel }).ToList();
+                    var channel = item.Select(p => p.Channel).First();
+
+                        var shorttapnotes = item.Cast<TappableBase>().Select(p => new { Type = '1', Note = p })
+                    .Select(p => (p.Note.Tick, p.Note.LaneIndex, p.Type + ToLaneWidthString(p.Note.Width)));
+
+                    writer.WriteLine("#HISPEED {0}", channel.ToString("00"));
+                        WriteLinesWithOffset(writer, GetShortNoteLines("1", (shorttapnotes)));
+                        writer.WriteLine();
+                }
+
+                //Exノーツ
+                foreach (var item in groupByExNoteChannel)
+                {
+
+                    var channel = item.Select(p => p.Channel).First();
+
+                    var shortextapnotes = item.Cast<TappableBase>().Select(p => new { Type = '2', Note = p })
+                .Select(p => (p.Note.Tick, p.Note.LaneIndex, p.Type + ToLaneWidthString(p.Note.Width)));
+
+                    writer.WriteLine("#HISPEED {0}", channel.ToString("00"));
+                    WriteLinesWithOffset(writer, GetShortNoteLines("1", (shortextapnotes)));
+                    writer.WriteLine();
+                }
+
+                //フリックノーツ
+                foreach (var item in groupByFlickNoteChannel)
+                {
+
+                    var channel = item.Select(p => p.Channel).First();
+
+                    var shortflicknotes = item.Cast<TappableBase>().Select(p => new { Type = '3', Note = p })
+                .Select(p => (p.Note.Tick, p.Note.LaneIndex, p.Type + ToLaneWidthString(p.Note.Width)));
+
+                    writer.WriteLine("#HISPEED {0}", channel.ToString("00"));
+                    WriteLinesWithOffset(writer, GetShortNoteLines("1", (shortflicknotes)));
+                    writer.WriteLine();
+                }
+
+                //ダメージノーツ
+                foreach (var item in groupByDamageNoteChannel)
+                {
+
+                    var channel = item.Select(p => p.Channel).First();
+
+                    var shortdamagenotes = item.Cast<TappableBase>().Select(p => new { Type = '4', Note = p })
+                .Select(p => (p.Note.Tick, p.Note.LaneIndex, p.Type + ToLaneWidthString(p.Note.Width)));
+
+                    writer.WriteLine("#HISPEED {0}", channel.ToString("00"));
+                    WriteLinesWithOffset(writer, GetShortNoteLines("1", (shortdamagenotes)));
+                    writer.WriteLine();
+                }
+
+                foreach (var item in groupByAirChannel)
+                {
+                    var channel = item.Select(p => p.Channel).First();
+
+
+                    var airs = item.Select(p =>
                     {
-                        case HorizontalAirDirection.Center:
-                            type = p.VerticalDirection == VerticalAirDirection.Up ? "1" : "2";
-                            break;
+                        string type = "";
+                        switch (p.HorizontalDirection)
+                        {
+                            case HorizontalAirDirection.Center:
+                                type = p.VerticalDirection == VerticalAirDirection.Up ? "1" : "2";
+                                break;
 
-                        case HorizontalAirDirection.Left:
-                            type = p.VerticalDirection == VerticalAirDirection.Up ? "3" : "5";
-                            break;
+                            case HorizontalAirDirection.Left:
+                                type = p.VerticalDirection == VerticalAirDirection.Up ? "3" : "5";
+                                break;
 
-                        case HorizontalAirDirection.Right:
-                            type = p.VerticalDirection == VerticalAirDirection.Up ? "4" : "6";
-                            break;
-                    }
+                            case HorizontalAirDirection.Right:
+                                type = p.VerticalDirection == VerticalAirDirection.Up ? "4" : "6";
+                                break;
+                        }
 
-                    return (p.Tick, p.LaneIndex, type + ToLaneWidthString(p.Width));
-                });
-                WriteLinesWithOffset(writer, GetShortNoteLines("5", airs));
-                writer.WriteLine();
+                        return (p.Tick, p.LaneIndex, type + ToLaneWidthString(p.Width));
+                    });
+                    writer.WriteLine("#HISPEED {0}", channel.ToString("00"));
+                    WriteLinesWithOffset(writer, GetShortNoteLines("5", airs));
+                    writer.WriteLine();
+
+
+                }
+
+
+                
 
                 var identifier = new IdentifierAllocationManager();
 
@@ -137,7 +293,8 @@ namespace Ched.Components.Exporter
                         StartTick = p.StartTick,
                         EndTick = p.StartTick + p.Duration,
                         Width = p.Width,
-                        LaneIndex = p.LaneIndex
+                        LaneIndex = p.LaneIndex,
+                        Channel = p.Channel
                     })
                     .SelectMany(hold =>
                     {
@@ -152,7 +309,15 @@ namespace Ched.Components.Exporter
                 writer.WriteLine();
                 identifier.Clear();
 
-                var slides = notes.Slides
+
+
+
+                foreach (var item in groupBySlideChannel)
+                {
+                    var channel = item.Select(p => p.Channel).First();
+
+
+                    var slides = item
                     .OrderBy(p => p.StartTick)
                     .Select(p => new
                     {
@@ -183,13 +348,26 @@ namespace Ched.Components.Exporter
                             Width = endNote.Width,
                             Type = "2"
                         } };
+
                         var slideNotes = start.Concat(steps).Concat(end);
                         var items = slideNotes.Select(p => (p.Tick, p.LaneIndex, p.Type + ToLaneWidthString(p.Width)));
                         return GetLongNoteLines("3", slide.Identifier.ToString(), items);
                     });
-                WriteLinesWithOffset(writer, slides);
-                writer.WriteLine();
-                identifier.Clear();
+
+
+                    writer.WriteLine("#HISPEED {0}", channel.ToString("00"));
+                    WriteLinesWithOffset(writer, slides);
+                    writer.WriteLine();
+                    identifier.Clear();
+
+                }
+
+
+
+
+
+
+
 
                 var airActions = notes.AirActions
                     .OrderBy(p => p.StartTick)
@@ -260,7 +438,7 @@ namespace Ched.Components.Exporter
                     foreach (var separatedItems in separatedItemList)
                     {
                         var lineItems = separatedItems.Select(p => (p.BarPosition.TickOffset, p.Item.Data));
-                        yield return new SusDataLine(itemsInBar.Key, barIndex => string.Format("#{0:000}{1}{2}: {3}", barIndex, type, itemsInLane.Key.ToString("x"), GenerateLineData(barLength, lineItems)));
+                        yield return new SusDataLine(itemsInBar.Key, barIndex => string.Format("#{0:000}{1}{2}: {3}", barIndex, type, RadixConvert.ToString(itemsInLane.Key, 36,false), GenerateLineData(barLength, lineItems)));
                     }
                 }
             }
@@ -275,7 +453,7 @@ namespace Ched.Components.Exporter
                     var sig = BarIndexCalculator.GetTimeSignatureFromBarIndex(itemsInBar.Key);
                     int barLength = StandardBarTick * sig.Numerator / sig.Denominator;
                     var lineItems = itemsInLane.Select(p => (p.BarPosition.TickOffset, p.Item.Data));
-                    yield return new SusDataLine(itemsInBar.Key, barIndex => string.Format("#{0:000}{1}{2}{3}: {4}", barIndex, type, itemsInLane.Key.ToString("x"), key, GenerateLineData(barLength, lineItems)));
+                    yield return new SusDataLine(itemsInBar.Key, barIndex => string.Format("#{0:000}{1}{2}{3}: {4}", barIndex, type, RadixConvert.ToString(itemsInLane.Key, 36,false), key, GenerateLineData(barLength, lineItems)));
                 }
             }
         }
@@ -306,7 +484,7 @@ namespace Ched.Components.Exporter
 
         public static string ToLaneWidthString(int width)
         {
-            return width == 16 ? "g" : width.ToString("x");
+            return width == 16 ? "g" : RadixConvert.ToString(width, 36, false);
         }
 
         public static readonly IEnumerable<string> NumChars = Enumerable.Range(0, 10).Select(p => ((char)('0' + p)).ToString());

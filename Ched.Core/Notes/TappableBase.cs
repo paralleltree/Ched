@@ -15,6 +15,8 @@ namespace Ched.Core.Notes
         private int laneIndex;
         [Newtonsoft.Json.JsonProperty]
         private int width = 1;
+        [Newtonsoft.Json.JsonProperty]
+        private int channel;
 
         /// <summary>
         /// ノートの位置を表すTickを設定します。
@@ -56,11 +58,23 @@ namespace Ched.Core.Notes
             }
         }
 
+        /// <summary>
+        /// ノートのハイスピードチャンネルを設定します。
+        /// </summary>
+        public int Channel
+        {
+            get { return channel; }
+            set
+            {
+                channel = value;
+            }
+        }
+
         protected void CheckPosition(int laneIndex, int width)
         {
             if (width < 1 || width > Constants.LanesCount)
                 throw new ArgumentOutOfRangeException("width", "Invalid width.");
-            if (laneIndex < 0 || laneIndex + width > Constants.LanesCount)
+            if (laneIndex < Constants.MLanesCount || laneIndex + width > Constants.LanesCount + 32)
                 throw new ArgumentOutOfRangeException("laneIndex", "Invalid lane index.");
         }
 
@@ -69,6 +83,12 @@ namespace Ched.Core.Notes
             CheckPosition(laneIndex, width);
             this.laneIndex = laneIndex;
             this.width = width;
+        }
+        public void SetChannel(int channel)
+        {
+
+            this.channel = channel;
+
         }
     }
 }
