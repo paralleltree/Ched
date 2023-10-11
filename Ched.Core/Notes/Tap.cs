@@ -8,5 +8,7 @@ namespace Ched.Core.Notes
 {
     public class Tap : TappableBase
     {
+        public bool isStart = false;
+        public bool IsStart { get { return isStart; } set { isStart = value; } }
     }
 }

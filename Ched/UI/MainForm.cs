@@ -21,6 +21,7 @@ using Ched.UI.Windows;
 using System.Globalization;
 using Ched.Drawing;
 using System.Runtime.CompilerServices;
+using System.Configuration;
 
 namespace Ched.UI
 {
@@ -50,6 +51,8 @@ namespace Ched.UI
 
         private int Channel { get; set; } = 1;
         private int ViewChannel { get; set; } = 0;
+
+        private float WidthAmount { get; set; } = 1;
 
         private bool LaneVisual { get; set; } = false;
          
@@ -535,7 +538,7 @@ namespace Ched.UI
                         ExportAs(PluginManager.ScoreBookExportPlugins.Single());
                         return;
                     }
-                    MessageBox.Show(this, ErrorStrings.NotExported, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(this, ErrorStrings.NotExported, Program.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
@@ -564,6 +567,7 @@ namespace Ched.UI
             commandSource.RegisterCommand(Commands.FlipSelectedNotes, MainFormStrings.FlipSelectedNotes, () => NoteView.FlipSelectedNotes());
             commandSource.RegisterCommand(Commands.RemoveSelectedNotes, MainFormStrings.RemoveSelectedNotes, () => NoteView.RemoveSelectedNotes());
             commandSource.RegisterCommand(Commands.RemoveSelectedEvents, MainFormStrings.RemoveEvents, () => NoteView.RemoveSelectedEvents());
+            commandSource.RegisterCommand(Commands.ChangeChannelSelectedNotes, MainFormStrings.ChangeChannelSelectedNotes, () => NoteView.ChangeChannelSelectedNotes());
 
             commandSource.RegisterCommand(Commands.SwitchScorePreviewMode, MainFormStrings.ScorePreview, () => IsPreviewMode = !IsPreviewMode);
 
@@ -647,7 +651,7 @@ namespace Ched.UI
 
             commandSource.RegisterCommand(Commands.PlayPreview, MainFormStrings.Play, () => PlayPreview());
 
-            commandSource.RegisterCommand(Commands.ShowHelp, MainFormStrings.Help, () => System.Diagnostics.Process.Start("https://github.com/paralleltree/Ched/wiki"));
+            commandSource.RegisterCommand(Commands.ShowHelp, MainFormStrings.Help, () => System.Diagnostics.Process.Start("https://github.com/myuuskye/Ched/wiki"));
 
             commandSource.RegisterCommand(Commands.SelectPen, MainFormStrings.Pen, () => NoteView.EditMode = EditMode.Edit);
             commandSource.RegisterCommand(Commands.SelectSelection, MainFormStrings.Selection, () => NoteView.EditMode = EditMode.Select);
@@ -668,8 +672,16 @@ namespace Ched.UI
                 UpdateThumbHeight();
             });
 
-            commandSource.RegisterCommand(Commands.SelectTap, "TAP", () => NoteView.NewNoteType = NoteType.Tap);
-            commandSource.RegisterCommand(Commands.SelectExTap, "ExTAP", () => NoteView.NewNoteType = NoteType.ExTap);
+            commandSource.RegisterCommand(Commands.SelectTap, "TAP", () =>
+            {
+                NoteView.NewNoteType = NoteType.Tap;
+                NoteView.IsNewNoteStart = false;
+            });
+            commandSource.RegisterCommand(Commands.SelectExTap, "ExTAP", () =>
+            {
+                NoteView.NewNoteType = NoteType.ExTap;
+                NoteView.IsNewNoteStart = false;
+            });
             commandSource.RegisterCommand(Commands.SelectHold, "HOLD", () => NoteView.NewNoteType = NoteType.Hold);
             commandSource.RegisterCommand(Commands.SelectSlide, "SLIDE", () =>
             {
@@ -702,6 +714,29 @@ namespace Ched.UI
             commandSource.RegisterCommand(Commands.SelectAirAction, "AIR-ACTION", () => NoteView.NewNoteType = NoteType.AirAction);
             commandSource.RegisterCommand(Commands.SelectFlick, "FLICK", () => NoteView.NewNoteType = NoteType.Flick);
             commandSource.RegisterCommand(Commands.SelectDamage, "DAMAGE", () => NoteView.NewNoteType = NoteType.Damage);
+
+            commandSource.RegisterCommand(Commands.SelectGuide, "GUIDE", () =>
+            {
+                NoteView.NewNoteType = NoteType.Guide;
+                NoteView.IsNewGuideStepVisible = false;
+            });
+            commandSource.RegisterCommand(Commands.SelectGuideStep, "GUIDESTEP", () =>
+            {
+                NoteView.NewNoteType = NoteType.Guide;
+                NoteView.IsNewGuideStepVisible = true;
+            });
+
+            commandSource.RegisterCommand(Commands.SelectTap2, "TAP2", () => 
+            {
+                NoteView.NewNoteType = NoteType.Tap;
+                NoteView.IsNewNoteStart = true;
+            });
+            commandSource.RegisterCommand(Commands.SelectExTap2, "ExTAP2", () =>
+            {
+                NoteView.NewNoteType = NoteType.ExTap;
+                NoteView.IsNewNoteStart = true;
+            });
+
 
             void HandleHorizontalAirDirection(VerticalAirDirection verticalDirection)
             {
@@ -800,6 +835,7 @@ namespace Ched.UI
             var flipSelectedNotesItem = shortcutItemBuilder.BuildItem(Commands.FlipSelectedNotes, MainFormStrings.FlipSelectedNotes);
             var removeSelectedNotesItem = shortcutItemBuilder.BuildItem(Commands.RemoveSelectedNotes, MainFormStrings.RemoveSelectedNotes);
             var removeEventsItem = shortcutItemBuilder.BuildItem(Commands.RemoveSelectedEvents, MainFormStrings.RemoveEvents);
+            var changeChannelSelectedNotesItem = shortcutItemBuilder.BuildItem(Commands.ChangeChannelSelectedNotes, MainFormStrings.ChangeChannelSelectedNotes);
 
             var insertAirWithAirActionItem = new ToolStripMenuItem(MainFormStrings.InsertAirWithAirAction, null, (s, e) =>
             {
@@ -894,6 +930,7 @@ namespace Ched.UI
 
             var themeBlack = new ToolStripMenuItem(MainFormStrings.ThemeBlack, img, (s, e) => noteView.Theme = 0);
             var themeWhite = new ToolStripMenuItem(MainFormStrings.ThemeWhite, img2, (s, e) => noteView.Theme = 1);
+            var themePJsekai = new ToolStripMenuItem(MainFormStrings.PJsekai, img2, (s, e) => noteView.Theme = 2);
 
             var slowDownPreviewItem = new ToolStripMenuItem(MainFormStrings.SlowDownPreview, null, (s, e) =>
             {
@@ -915,8 +952,45 @@ namespace Ched.UI
             {
                 Checked = ApplicationSettings.Default.IsPreviewAbortAtLastNote
             };
+
             PreviewManager.Started += (s, e) => isAbortAtLastNoteItem.Enabled = false;
             PreviewManager.Finished += (s, e) => isAbortAtLastNoteItem.Enabled = true;
+
+            var channelMovableItem = new ToolStripMenuItem(MainFormStrings.ChannelMovable, null, (s, e) =>
+            {
+                var item = s as ToolStripMenuItem;
+                item.Checked = !item.Checked;
+                ApplicationSettings.Default.IsAnotherChannelEditable = item.Checked;
+                noteView.EditbyCh = item.Checked;
+            })
+            {
+                Checked = ApplicationSettings.Default.IsAnotherChannelEditable
+            };
+
+            noteView.NoteVisualMode = ApplicationSettings.Default.NoteVisualMode;
+            var noteVisualModeItems = new ToolStripMenuItem[]
+            {
+                new ToolStripMenuItem(MainFormStrings.Visual1, null, (s, e) =>
+                {
+                var item = s as ToolStripMenuItem;
+                ApplicationSettings.Default.NoteVisualMode = 0;
+                noteView.NoteVisualMode = 0;
+                }),
+                new ToolStripMenuItem(MainFormStrings.Visual2, null, (s, e) =>
+                {
+                var item = s as ToolStripMenuItem;
+                ApplicationSettings.Default.NoteVisualMode = 1;
+                noteView.NoteVisualMode = 1;
+                }),
+                new ToolStripMenuItem(MainFormStrings.Visual3, null, (s, e) =>
+                {
+                var item = s as ToolStripMenuItem;
+                ApplicationSettings.Default.NoteVisualMode = 2;
+                noteView.NoteVisualMode = 2;
+                }),
+        };
+            var noteVisualModeItem = new ToolStripMenuItem(MainFormStrings.ChannelNote, null, noteVisualModeItems);
+
 
             var playMenuItems = new ToolStripItem[]
             {
@@ -932,6 +1006,8 @@ namespace Ched.UI
 
             var themeMenuItems = new ToolStripItem[] { themeBlack, themeWhite};
 
+            var channelMenuItems = new ToolStripItem[] { channelMovableItem, noteVisualModeItem, changeChannelSelectedNotesItem };
+
 
 
             OperationManager.OperationHistoryChanged += (s, e) =>
@@ -945,6 +1021,19 @@ namespace Ched.UI
                 BackColor = Color.White,
                 RenderMode = ToolStripRenderMode.Professional
             };
+
+            var lanemenu = new ToolStripMenuItem(MainFormStrings.LaneMenu, null, (s, e) =>
+            {
+                var form = new LaneSelectionForm() { LanesCount = noteView.LanesCount, MinusLanesCount = noteView.MinusLanesCount };
+                if (form.ShowDialog(this) == DialogResult.OK)
+                {
+                    ApplicationSettings.Default.LanesCount = form.LanesCount;
+                    noteView.LanesCount = form.LanesCount;
+                    noteView.MinusLanesCount = form.MinusLanesCount;
+                }
+            });
+
+
             menu.Items.AddRange(new ToolStripItem[]
             {
                 new ToolStripMenuItem(MainFormStrings.FileMenu, null, fileMenuItems),
@@ -954,7 +1043,10 @@ namespace Ched.UI
                 // PreviewManager初期化後じゃないといけないのダメ設計でしょ
                 new ToolStripMenuItem(MainFormStrings.PlayMenu, null, playMenuItems) { Enabled = PreviewManager.IsSupported },
                 new ToolStripMenuItem(MainFormStrings.HelpMenu, null, helpMenuItems),
-                new ToolStripMenuItem(MainFormStrings.ThemeMenu, null, themeMenuItems)
+                new ToolStripMenuItem(MainFormStrings.ThemeMenu, null, themeMenuItems),
+                new ToolStripMenuItem(MainFormStrings.ChannelMenu, null, channelMenuItems),
+                
+                
             });
             return menu;
         }
@@ -991,12 +1083,25 @@ namespace Ched.UI
             {
                 zoomOutButton.Enabled = CanZoomOut;
                 zoomInButton.Enabled = CanZoomIn;
+                
+                if (noteView.UnitBeatHeight > 240)
+                {
+                    if(noteView.UnitBeatHeight >= 960)
+                    NoteViewScrollBar.SmallChange = 60;
+                    else
+                    NoteViewScrollBar.SmallChange = 120;
+                }
+                else
+                {
+                    NoteViewScrollBar.SmallChange = 480;
+                }
             };
 
             OperationManager.OperationHistoryChanged += (s, e) =>
             {
                 undoButton.Enabled = OperationManager.CanUndo;
                 redoButton.Enabled = OperationManager.CanRedo;
+                
             };
 
             noteView.EditModeChanged += (s, e) =>
@@ -1014,6 +1119,7 @@ namespace Ched.UI
                 penButton, selectionButton, eraserButton, new ToolStripSeparator(),
                 zoomInButton, zoomOutButton
             });
+
         }
 
         private ToolStrip CreateNewNoteTypeToolStrip(NoteView noteView)
@@ -1028,6 +1134,10 @@ namespace Ched.UI
             var airActionButton = shortcutItemBuilder.BuildItem(Commands.SelectAirAction, "AIR-ACTION", Resources.AirActionIcon);
             var flickButton = shortcutItemBuilder.BuildItem(Commands.SelectFlick, "FLICK", Resources.FlickIcon);
             var damageButton = shortcutItemBuilder.BuildItem(Commands.SelectDamage, "DAMAGE", Resources.DamgeIcon);
+            var guideButton = shortcutItemBuilder.BuildItem(Commands.SelectGuide, "GUIDE", Resources.GuideIcon);
+            var guideStepButton = shortcutItemBuilder.BuildItem(Commands.SelectGuideStep, "GUIDESTEP", Resources.GuideStepIcon);
+            var tap2Button = shortcutItemBuilder.BuildItem(Commands.SelectTap2, "TAP2", Resources.TapIcon2);
+            var exTap2Button = shortcutItemBuilder.BuildItem(Commands.SelectExTap2, "ExTAP2", Resources.ExTapIcon2);
 
             var airKind = new CheckableToolStripSplitButton()
             {
@@ -1057,7 +1167,7 @@ namespace Ched.UI
 
             var quantizeTicks = new int[]
             {
-                4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192
+                4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 144, 192, 240, 256, 384, 480, 512, 576, 768, 960, 1024, 1152, 1920
             };
             var quantizeComboBox = new ToolStripComboBox("クォンタイズ")
             {
@@ -1088,8 +1198,8 @@ namespace Ched.UI
 
             noteView.NewNoteTypeChanged += (s, e) =>
             {
-                tapButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Tap);
-                exTapButton.Checked = noteView.NewNoteType.HasFlag(NoteType.ExTap);
+                tapButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Tap) && !noteView.IsNewNoteStart;
+                exTapButton.Checked = noteView.NewNoteType.HasFlag(NoteType.ExTap) && !noteView.IsNewNoteStart;
                 holdButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Hold);
                 slideButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Slide) && !noteView.IsNewSlideStepVisible;
                 slideStepButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Slide) && noteView.IsNewSlideStepVisible;
@@ -1097,6 +1207,10 @@ namespace Ched.UI
                 airActionButton.Checked = noteView.NewNoteType.HasFlag(NoteType.AirAction);
                 flickButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Flick);
                 damageButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Damage);
+                guideButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Guide) && !noteView.IsNewGuideStepVisible;
+                guideStepButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Slide) && noteView.IsNewGuideStepVisible;
+                tap2Button.Checked = noteView.NewNoteType.HasFlag(NoteType.Tap) && noteView.IsNewNoteStart;
+                exTap2Button.Checked = noteView.NewNoteType.HasFlag(NoteType.ExTap) && noteView.IsNewNoteStart;
             };
 
             noteView.AirDirectionChanged += (s, e) =>
@@ -1154,7 +1268,7 @@ namespace Ched.UI
                 noteView.Update();
                 noteView.Focus();
             };
-            speedChBox.SelectedIndex = 1;
+            speedChBox.SelectedIndex = 0;
 
 
             var viewchCounts = new int[]
@@ -1199,6 +1313,31 @@ namespace Ched.UI
             };
             viewChBox.SelectedIndex = 0;
 
+
+            var widthAmountCounts = new float[]
+            {
+                1, 0.9f, 0.8f, 0.7f, 0.6f, 0.5f, 0.4f, 0.3f, 0.2f, 0.1f
+            };
+
+
+            var widthAmountBox = new ToolStripComboBox("幅変化量")
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                AutoSize = false,
+                Width = 60
+            };
+            widthAmountBox.Items.AddRange(widthAmountCounts.Select(p => "" + p).ToArray());
+
+            widthAmountBox.SelectedIndexChanged += (s, e) =>
+            {
+
+                    WidthAmount= widthAmountCounts[widthAmountBox.SelectedIndex];
+                noteView.WidthAmount = WidthAmount;
+                noteView.Update();
+                noteView.Focus();
+            };
+            widthAmountBox.SelectedIndex = 0;
+
             ToolStripMenuItem laneVisible = new ToolStripMenuItem(MainFormStrings.LaneVisual, null, (s, e) =>
             {
                 var item = s as ToolStripMenuItem;
@@ -1229,8 +1368,9 @@ namespace Ched.UI
 
             return new ToolStrip(new ToolStripItem[]
             {
-                tapButton, exTapButton, holdButton, slideButton, slideStepButton, airKind, airActionButton, flickButton, damageButton,
-                quantizeComboBox, new ToolStripSeparator(), speedChBox, viewChBox,  laneVisible
+                tapButton, exTapButton, holdButton, slideButton, slideStepButton, airKind, airActionButton, flickButton, damageButton, guideButton,
+                 guideStepButton, tap2Button, exTap2Button,
+                quantizeComboBox, new ToolStripSeparator(), speedChBox, viewChBox,  laneVisible, widthAmountBox
             });
         }
     }

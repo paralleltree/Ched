@@ -32,9 +32,9 @@ namespace Ched.Core.Notes
 
         public int Tick { get { return ParentNote.Tick; } }
 
-        public int LaneIndex { get { return ParentNote.LaneIndex; } }
+        public float LaneIndex { get { return ParentNote.LaneIndex; } }
 
-        public int Width { get { return ParentNote.Width; } }
+        public float Width { get { return ParentNote.Width; } }
         public int Channel { get { return ParentNote.Channel; } }
 
         public Air(IAirable parent)
@@ -47,6 +47,7 @@ namespace Ched.Core.Notes
             if (HorizontalDirection == HorizontalAirDirection.Center) return;
             HorizontalDirection = HorizontalDirection == HorizontalAirDirection.Left ? HorizontalAirDirection.Right : HorizontalAirDirection.Left;
         }
+
     }
 
     public interface IAirable
@@ -59,12 +60,12 @@ namespace Ched.Core.Notes
         /// <summary>
         /// ノートの配置されるレーン番号を取得します。。
         /// </summary>
-        int LaneIndex { get; }
+        float LaneIndex { get; }
 
         /// <summary>
         /// ノートのレーン幅を取得します。
         /// </summary>
-        int Width { get; }
+        float Width { get; }
 
         /// <summary>
         /// ノートのチャンネルを取得します。

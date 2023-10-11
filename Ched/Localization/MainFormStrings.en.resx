@@ -352,7 +352,7 @@
     <value>All</value>
   </data>
   <data name="LaneVisual" xml:space="preserve">
-    <value>Lane Visual</value>
+    <value>Lane Display</value>
   </data>
   <data name="ThemeMenu" xml:space="preserve">
     <value>Theme</value>
@@ -362,5 +362,35 @@
   </data>
   <data name="ThemeWhite" xml:space="preserve">
     <value>White</value>
+  </data>
+  <data name="PJsekai" xml:space="preserve">
+    <value>PJsekai</value>
+  </data>
+  <data name="ChannelMenu" xml:space="preserve">
+    <value>Channel</value>
+  </data>
+  <data name="Channel" xml:space="preserve">
+    <value>Channel</value>
+  </data>
+  <data name="ChannelMovable" xml:space="preserve">
+    <value>Edit by channel</value>
+  </data>
+  <data name="ChannelNote" xml:space="preserve">
+    <value>Note Visual</value>
+  </data>
+  <data name="Visual1" xml:space="preserve">
+    <value>Hidden</value>
+  </data>
+  <data name="Visual2" xml:space="preserve">
+    <value>Translucent</value>
+  </data>
+  <data name="Visual3" xml:space="preserve">
+    <value>Display</value>
+  </data>
+  <data name="ChangeChannelSelectedNotes" xml:space="preserve">
+    <value>Move Notes Channel within Selection</value>
+  </data>
+  <data name="LaneMenu" xml:space="preserve">
+    <value>Lane</value>
   </data>
 </root>

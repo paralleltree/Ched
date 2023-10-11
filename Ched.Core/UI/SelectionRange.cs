@@ -60,7 +60,6 @@ namespace Ched.UI
             get { return startLaneIndex; }
             set
             {
-                if (value < -32 || value > Constants.LanesCount - 1) throw new ArgumentOutOfRangeException();
                 startLaneIndex = value;
             }
         }
@@ -73,7 +72,7 @@ namespace Ched.UI
             get { return selectedLanesCount; }
             set
             {
-                if (StartLaneIndex + value < -32 || StartLaneIndex + value > Constants.LanesCount) throw new ArgumentOutOfRangeException();
+                if (StartLaneIndex + value < -32) throw new ArgumentOutOfRangeException();
                 selectedLanesCount = value;
             }
         }

@@ -328,4 +328,43 @@ namespace Ched.UI.Operations
             Collection.Add(Note);
         }
     }
+
+    public class InsertGuideOperation : NoteCollectionOperation<Guide>
+    {
+        public override string Description { get { return "GUIDEの追加"; } }
+
+        public InsertGuideOperation(NoteView.NoteCollection collection, Guide note) : base(collection, note)
+        {
+        }
+
+        public override void Redo()
+        {
+            Collection.Add(Note);
+        }
+
+        public override void Undo()
+        {
+            Collection.Remove(Note);
+        }
+    }
+
+    public class RemoveGuideOperation : NoteCollectionOperation<Guide>
+    {
+        public override string Description { get { return "GUIDEの削除"; } }
+
+        public RemoveGuideOperation(NoteView.NoteCollection collection, Guide note) : base(collection, note)
+        {
+        }
+
+        public override void Redo()
+        {
+            Collection.Remove(Note);
+        }
+
+        public override void Undo()
+        {
+            Collection.Add(Note);
+        }
+    }
+
 }

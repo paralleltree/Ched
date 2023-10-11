@@ -32,7 +32,8 @@ namespace Ched.Core
         [Newtonsoft.Json.JsonProperty]
         private List<AirAction> airActions;
         [Newtonsoft.Json.JsonProperty]
-        private int channel;
+        private List<Guide> guides;
+
 
         public List<Tap> Taps
         {
@@ -81,14 +82,13 @@ namespace Ched.Core
             get { return damages; }
             set { damages = value; }
         }
-        public int Channel
+
+        public List<Guide> Guides
         {
-            get { return channel; }
-            set
-            {
-                channel = value;
-            }
+            get { return guides; }
+            set { guides = value; }
         }
+
 
         public NoteCollection()
         {
@@ -100,6 +100,7 @@ namespace Ched.Core
             AirActions = new List<AirAction>();
             Flicks = new List<Flick>();
             Damages = new List<Damage>();
+            Guides = new List<Guide>();
         }
 
         public NoteCollection(NoteCollection collection)
@@ -112,6 +113,7 @@ namespace Ched.Core
             AirActions = collection.AirActions.ToList();
             Flicks = collection.Flicks.ToList();
             Damages = collection.Damages.ToList();
+            Guides = collection.Guides.ToList();
         }
 
         public IEnumerable<TappableBase> GetShortNotes()
@@ -134,6 +136,13 @@ namespace Ched.Core
             {
                 slide.StartTick = (int)(slide.StartTick * factor);
                 foreach (var step in slide.StepNotes)
+                    step.TickOffset = (int)(step.TickOffset * factor);
+            }
+
+            foreach (var guide in Guides)
+            {
+                guide.StartTick = (int)(guide.StartTick * factor);
+                foreach (var step in guide.StepNotes)
                     step.TickOffset = (int)(step.TickOffset * factor);
             }
 

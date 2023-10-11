@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Ched.Core.Notes
 {
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.OptIn)]
-    public class Slide : MovableLongNoteBase
+    public class Guide : MovableLongNoteBase
     {
         [Newtonsoft.Json.JsonProperty]
         private float startWidth = 1;
@@ -61,7 +61,7 @@ namespace Ched.Core.Notes
         public List<StepTap> StepNotes { get { return stepNotes; } }
         public StartTap StartNote { get; }
 
-        public Slide()
+        public Guide()
         {
             StartNote = new StartTap(this);
         }
@@ -96,14 +96,14 @@ namespace Ched.Core.Notes
         }
 
         /// <summary>
-        /// このスライドを反転します。
+        /// このガイドを反転します。
         /// </summary>
         public void Flip()
         {
-            startLaneIndex = Constants.LanesCount - startLaneIndex - startWidth;
+            startLaneIndex =  Constants.LanesCount - startLaneIndex - startWidth;
             foreach (var step in StepNotes)
             {
-                step.LaneIndexOffset =  -step.LaneIndexOffset - step.WidthChange;
+                step.LaneIndexOffset = -step.LaneIndexOffset - step.WidthChange;
             }
         }
 
@@ -116,11 +116,11 @@ namespace Ched.Core.Notes
         public abstract class TapBase : LongNoteTapBase, IAirable
         {
             [Newtonsoft.Json.JsonProperty]
-            private Slide parentNote;
+            private Guide parentNote;
 
-            public Slide ParentNote { get { return parentNote; } }
+            public Guide ParentNote { get { return parentNote; } }
 
-            public TapBase(Slide parent)
+            public TapBase(Guide parent)
             {
                 parentNote = parent;
             }
@@ -138,7 +138,7 @@ namespace Ched.Core.Notes
 
             public override int Channel { get { return ParentNote.Channel; } set { ParentNote.Channel = value; } }
 
-            public StartTap(Slide parent) : base(parent)
+            public StartTap(Guide parent) : base(parent)
             {
             }
         }
@@ -210,7 +210,7 @@ namespace Ched.Core.Notes
 
             public override float Width { get { return ParentNote.StartWidth + WidthChange; } }
 
-            public StepTap(Slide parent) : base(parent)
+            public StepTap(Guide parent) : base(parent)
             {
             }
 

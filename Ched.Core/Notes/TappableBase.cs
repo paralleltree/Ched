@@ -12,11 +12,13 @@ namespace Ched.Core.Notes
         [Newtonsoft.Json.JsonProperty]
         private int tick;
         [Newtonsoft.Json.JsonProperty]
-        private int laneIndex;
+        private float laneIndex;
         [Newtonsoft.Json.JsonProperty]
-        private int width = 1;
+        private float width = 1;
         [Newtonsoft.Json.JsonProperty]
         private int channel;
+        [Newtonsoft.Json.JsonProperty]
+        private bool isStart = false;
 
         /// <summary>
         /// ノートの位置を表すTickを設定します。
@@ -35,7 +37,7 @@ namespace Ched.Core.Notes
         /// <summary>
         /// ノートの配置されるレーン番号を設定します。。
         /// </summary>
-        public int LaneIndex
+        public float LaneIndex
         {
             get { return laneIndex; }
             set
@@ -48,7 +50,7 @@ namespace Ched.Core.Notes
         /// <summary>
         /// ノートのレーン幅を設定します。
         /// </summary>
-        public int Width
+        public float Width
         {
             get { return width; }
             set
@@ -70,15 +72,26 @@ namespace Ched.Core.Notes
             }
         }
 
-        protected void CheckPosition(int laneIndex, int width)
+        /// <summary>
+        /// ノートのハイスピードチャンネルを設定します。
+        /// </summary>
+        public bool IsStart
         {
-            if (width < 1 || width > Constants.LanesCount)
-                throw new ArgumentOutOfRangeException("width", "Invalid width.");
-            if (laneIndex < Constants.MLanesCount || laneIndex + width > Constants.LanesCount + 32)
-                throw new ArgumentOutOfRangeException("laneIndex", "Invalid lane index.");
+            get { return isStart; }
+            set
+            {
+                isStart = value;
+            }
         }
 
-        public void SetPosition(int laneIndex, int width)
+        protected void CheckPosition(float laneIndex, float width)
+        {
+            if (width < 0.1 )
+                throw new ArgumentOutOfRangeException("width", "Invalid width.");
+
+        }
+
+        public void SetPosition(float laneIndex, float width)
         {
             CheckPosition(laneIndex, width);
             this.laneIndex = laneIndex;

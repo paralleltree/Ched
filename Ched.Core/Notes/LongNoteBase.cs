@@ -48,9 +48,9 @@ namespace Ched.Core.Notes
     public abstract class LongNoteTapBase : IAirable
     {
         public abstract bool IsTap { get; }
-        public abstract int LaneIndex { get; }
+        public abstract float LaneIndex { get; }
         public abstract int Tick { get; }
-        public abstract int Width { get; }
+        public abstract float Width { get; }
         public abstract int Channel { get; set; }
     }
 }

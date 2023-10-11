@@ -133,6 +133,16 @@ namespace Ched.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        public static System.Drawing.Bitmap BackGround {
+            get {
+                object obj = ResourceManager.GetObject("BackGround", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         public static System.Drawing.Bitmap CopyIcon {
             get {
                 object obj = ResourceManager.GetObject("CopyIcon", resourceCulture);
@@ -213,9 +223,39 @@ namespace Ched.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        public static System.Drawing.Bitmap ExTapIcon2 {
+            get {
+                object obj = ResourceManager.GetObject("ExTapIcon2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         public static System.Drawing.Bitmap FlickIcon {
             get {
                 object obj = ResourceManager.GetObject("FlickIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap GuideIcon {
+            get {
+                object obj = ResourceManager.GetObject("GuideIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap GuideStepIcon {
+            get {
+                object obj = ResourceManager.GetObject("GuideStepIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -336,6 +376,16 @@ namespace Ched.Properties {
         public static System.Drawing.Bitmap TapIcon {
             get {
                 object obj = ResourceManager.GetObject("TapIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap TapIcon2 {
+            get {
+                object obj = ResourceManager.GetObject("TapIcon2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

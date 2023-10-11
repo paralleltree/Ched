@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 using Ched.Core.Notes;
 using System.Diagnostics.Eventing.Reader;
+using System.Runtime.CompilerServices;
+using System.Security.Permissions;
 
 namespace Ched.Drawing
 {
@@ -16,7 +18,9 @@ namespace Ched.Drawing
     {
 
 
-        public static void DrawTap(this DrawingContext dc, RectangleF rect, bool isch)
+
+
+        public static void DrawTap(this DrawingContext dc, RectangleF rect, bool isch, int mode)
         {
             if (isch)
             {
@@ -24,12 +28,24 @@ namespace Ched.Drawing
             }
             else
             {
-                dc.Graphics.DrawTappableNote(rect, dc.ColorProfile.InvTapColor, dc.ColorProfile.InvBorderColor);
+                switch (mode)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        dc.Graphics.DrawTappableNote(rect, dc.ColorProfile.InvTapColor, dc.ColorProfile.InvBorderColor);
+                        break;
+                    case 2:
+                        dc.Graphics.DrawTappableNote(rect, dc.ColorProfile.TapColor, dc.ColorProfile.BorderColor);
+                        break;
+
+                }
+                
             }
             
         }
 
-        public static void DrawExTap(this DrawingContext dc, RectangleF rect, bool isch)
+        public static void DrawExTap(this DrawingContext dc, RectangleF rect, bool isch, int mode)
         {
             if (isch)
             {
@@ -37,12 +53,22 @@ namespace Ched.Drawing
             }
             else
             {
-                dc.Graphics.DrawTappableNote(rect, dc.ColorProfile.InvExTapColor, dc.ColorProfile.InvBorderColor);
+                switch (mode)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        dc.Graphics.DrawTappableNote(rect, dc.ColorProfile.InvExTapColor, dc.ColorProfile.InvBorderColor);
+                        break;
+                    case 2:
+                        dc.Graphics.DrawTappableNote(rect, dc.ColorProfile.ExTapColor, dc.ColorProfile.BorderColor);
+                        break;
+                }
             }
             
         }
 
-        public static void DrawFlick(this DrawingContext dc, RectangleF rect, bool isch)
+        public static void DrawFlick(this DrawingContext dc, RectangleF rect, bool isch, int mode)
         {
             if (isch)
             {
@@ -50,20 +76,35 @@ namespace Ched.Drawing
                 dc.Graphics.DrawNoteBase(rect, dc.ColorProfile.FlickColor.Item1);
                 dc.Graphics.DrawNoteBase(foregroundRect, dc.ColorProfile.FlickColor.Item2);
                 dc.Graphics.DrawBorder(rect, dc.ColorProfile.BorderColor);
-                dc.Graphics.DrawTapSymbol(foregroundRect);
+                dc.Graphics.DrawTapSymbol(foregroundRect, mode);
             }
             else
             {
                 var foregroundRect = new RectangleF(rect.Left + rect.Width / 4, rect.Top, rect.Width / 2, rect.Height);
-                dc.Graphics.DrawNoteBase(rect, dc.ColorProfile.InvFlickColor.Item1);
-                dc.Graphics.DrawNoteBase(foregroundRect, dc.ColorProfile.InvFlickColor.Item2);
-                dc.Graphics.DrawBorder(rect, dc.ColorProfile.InvBorderColor);
-                dc.Graphics.DrawTapSymbol(foregroundRect);
+                switch (mode)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        
+                        dc.Graphics.DrawNoteBase(rect, dc.ColorProfile.InvFlickColor.Item1);
+                        dc.Graphics.DrawNoteBase(foregroundRect, dc.ColorProfile.InvFlickColor.Item2);
+                        dc.Graphics.DrawBorder(rect, dc.ColorProfile.InvBorderColor);
+                        dc.Graphics.DrawTapSymbol(foregroundRect, mode);
+                        break;
+                    case 2:
+                        dc.Graphics.DrawNoteBase(rect, dc.ColorProfile.FlickColor.Item1);
+                        dc.Graphics.DrawNoteBase(foregroundRect, dc.ColorProfile.FlickColor.Item2);
+                        dc.Graphics.DrawBorder(rect, dc.ColorProfile.BorderColor);
+                        dc.Graphics.DrawTapSymbol(foregroundRect, mode);
+                        break;
+                }
+
             }
             
         }
 
-        public static void DrawDamage(this DrawingContext dc, RectangleF rect, bool isch)
+        public static void DrawDamage(this DrawingContext dc, RectangleF rect, bool isch, int mode)
         {
             if (isch)
             {
@@ -71,15 +112,26 @@ namespace Ched.Drawing
             }
             else
             {
-                dc.Graphics.DrawSquarishNote(rect, dc.ColorProfile.InvDamageColor, dc.ColorProfile.InvBorderColor);
+                switch (mode)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        dc.Graphics.DrawSquarishNote(rect, dc.ColorProfile.InvDamageColor, dc.ColorProfile.InvBorderColor);
+                        break;
+                    case 2:
+                        dc.Graphics.DrawSquarishNote(rect, dc.ColorProfile.DamageColor, dc.ColorProfile.BorderColor);
+                        break;
+                }
+                
             }
             
         }
 
-        public static void DrawHoldBegin(this DrawingContext dc, RectangleF rect)
+        public static void DrawHoldBegin(this DrawingContext dc, RectangleF rect, int mode)
         {
             dc.DrawHoldEnd(rect);
-            dc.Graphics.DrawTapSymbol(rect);
+            dc.Graphics.DrawTapSymbol(rect, mode);
         }
 
         public static void DrawHoldEnd(this DrawingContext dc, RectangleF rect)
@@ -107,14 +159,14 @@ namespace Ched.Drawing
             dc.Graphics.SmoothingMode = prevMode;
         }
 
-        public static void DrawSlideBegin(this DrawingContext dc, RectangleF rect, bool isch)
+        public static void DrawSlideBegin(this DrawingContext dc, RectangleF rect, bool isch, int mode)
         {
-            dc.DrawSlideStep(rect, isch);
-            dc.Graphics.DrawTapSymbol(rect);
+            dc.DrawSlideStep(rect, isch, mode);
+            dc.Graphics.DrawTapSymbol(rect, mode);
 
         }
 
-        public static void DrawSlideStep(this DrawingContext dc, RectangleF rect, bool isch)
+        public static void DrawSlideStep(this DrawingContext dc, RectangleF rect, bool isch, int mode)
         {
             if (isch)
             {
@@ -122,7 +174,18 @@ namespace Ched.Drawing
             }
             else
             {
-                dc.Graphics.DrawNote(rect, dc.ColorProfile.InvSlideColor, dc.ColorProfile.InvBorderColor);
+                switch (mode)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        dc.Graphics.DrawNote(rect, dc.ColorProfile.InvSlideColor, dc.ColorProfile.InvBorderColor);
+                        break;
+                    case 2:
+                        dc.Graphics.DrawNote(rect, dc.ColorProfile.SlideColor, dc.ColorProfile.BorderColor);
+                        break;
+                }
+                
             }
             
         }
@@ -134,7 +197,7 @@ namespace Ched.Drawing
         /// <param name="steps">全ての中継点位置からなるリスト</param>
         /// <param name="visibleSteps">可視中継点のY座標からなるリスト</param>
         /// <param name="noteHeight">ノート描画高さ</param>
-        public static void DrawSlideBackground(this DrawingContext dc, IEnumerable<SlideStepElement> steps, IEnumerable<float> visibleSteps, float noteHeight, bool isch)
+        public static void DrawSlideBackground(this DrawingContext dc, IEnumerable<SlideStepElement> steps, IEnumerable<float> visibleSteps, float noteHeight, bool isch, int mode)
         {
             if (isch)
             {
@@ -149,7 +212,7 @@ namespace Ched.Drawing
 
                 if (orderedSteps[0].Point.Y < orderedVisibleSteps[0] || orderedSteps[orderedSteps.Count - 1].Point.Y > orderedVisibleSteps[orderedVisibleSteps.Count - 1])
                 {
-                    throw new ArgumentOutOfRangeException("visibleSteps", "visibleSteps must contain steps");
+                    //throw new ArgumentOutOfRangeException("visibleSteps", "visibleSteps must contain steps");
                 }
 
                 using (var path = new GraphicsPath())
@@ -186,49 +249,101 @@ namespace Ched.Drawing
             else
             {
                 var prevMode = dc.Graphics.SmoothingMode;
-                dc.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                Color BackgroundEdgeColor = dc.ColorProfile.InvSlideBackgroundColor.DarkColor;
-                Color BackgroundMiddleColor = dc.ColorProfile.InvSlideBackgroundColor.LightColor;
+                Color BackgroundEdgeColor = dc.ColorProfile.SlideBackgroundColor.DarkColor;
+                Color BackgroundMiddleColor = dc.ColorProfile.SlideBackgroundColor.LightColor;
 
                 var orderedSteps = steps.OrderBy(p => p.Point.Y).ToList();
                 var orderedVisibleSteps = visibleSteps.OrderBy(p => p).ToList();
-
-                if (orderedSteps[0].Point.Y < orderedVisibleSteps[0] || orderedSteps[orderedSteps.Count - 1].Point.Y > orderedVisibleSteps[orderedVisibleSteps.Count - 1])
+                switch (mode)
                 {
-                    throw new ArgumentOutOfRangeException("visibleSteps", "visibleSteps must contain steps");
-                }
+                    case 0:
+                        break;
+                    case 1:
+                        
+                        dc.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                using (var path = new GraphicsPath())
-                {
-                    var left = orderedSteps.Select(p => p.Point);
-                    var right = orderedSteps.Select(p => new PointF(p.Point.X + p.Width, p.Point.Y)).Reverse();
-                    path.AddPolygon(left.Concat(right).ToArray());
+                        BackgroundEdgeColor = dc.ColorProfile.InvSlideBackgroundColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.InvSlideBackgroundColor.LightColor;
 
-                    float head = orderedVisibleSteps[0];
-                    float height = orderedVisibleSteps[orderedVisibleSteps.Count - 1] - head;
-                    var pathBounds = path.GetBounds();
-                    var blendBounds = new RectangleF(pathBounds.X, head, pathBounds.Width, height);
-                    using (var brush = new LinearGradientBrush(blendBounds, Color.Black, Color.Black, LinearGradientMode.Vertical))
-                    {
-                        var heights = orderedVisibleSteps.Zip(orderedVisibleSteps.Skip(1), (p, q) => Tuple.Create(p, q - p));
-                        var absPos = new[] { head }.Concat(heights.SelectMany(p => new[] { p.Item1 + p.Item2 * 0.3f, p.Item1 + p.Item2 * 0.7f, p.Item1 + p.Item2 }));
-                        var blend = new ColorBlend()
+
+                        if (orderedSteps[0].Point.Y < orderedVisibleSteps[0] || orderedSteps[orderedSteps.Count - 1].Point.Y > orderedVisibleSteps[orderedVisibleSteps.Count - 1])
                         {
-                            Positions = absPos.Select(p => (p - head) / height).ToArray(),
-                            Colors = new[] { BackgroundEdgeColor }.Concat(Enumerable.Range(0, orderedVisibleSteps.Count - 1).SelectMany(p => new[] { BackgroundMiddleColor, BackgroundMiddleColor, BackgroundEdgeColor })).ToArray()
-                        };
-                        brush.InterpolationColors = blend;
-                        dc.Graphics.FillPath(brush, path);
-                    }
-                }
+                            //throw new ArgumentOutOfRangeException("visibleSteps", "visibleSteps must contain steps");
+                        }
 
-                using (var pen = new Pen(dc.ColorProfile.SlideLineColor, noteHeight * 0.4f))
-                {
-                    dc.Graphics.DrawLines(pen, orderedSteps.Select(p => new PointF(p.Point.X + p.Width / 2, p.Point.Y)).ToArray());
-                }
+                        using (var path = new GraphicsPath())
+                        {
+                            var left = orderedSteps.Select(p => p.Point);
+                            var right = orderedSteps.Select(p => new PointF(p.Point.X + p.Width, p.Point.Y)).Reverse();
+                            path.AddPolygon(left.Concat(right).ToArray());
 
-                dc.Graphics.SmoothingMode = prevMode;
+                            float head = orderedVisibleSteps[0];
+                            float height = orderedVisibleSteps[orderedVisibleSteps.Count - 1] - head;
+                            var pathBounds = path.GetBounds();
+                            var blendBounds = new RectangleF(pathBounds.X, head, pathBounds.Width, height);
+                            using (var brush = new LinearGradientBrush(blendBounds, Color.Black, Color.Black, LinearGradientMode.Vertical))
+                            {
+                                var heights = orderedVisibleSteps.Zip(orderedVisibleSteps.Skip(1), (p, q) => Tuple.Create(p, q - p));
+                                var absPos = new[] { head }.Concat(heights.SelectMany(p => new[] { p.Item1 + p.Item2 * 0.3f, p.Item1 + p.Item2 * 0.7f, p.Item1 + p.Item2 }));
+                                var blend = new ColorBlend()
+                                {
+                                    Positions = absPos.Select(p => (p - head) / height).ToArray(),
+                                    Colors = new[] { BackgroundEdgeColor }.Concat(Enumerable.Range(0, orderedVisibleSteps.Count - 1).SelectMany(p => new[] { BackgroundMiddleColor, BackgroundMiddleColor, BackgroundEdgeColor })).ToArray()
+                                };
+                                brush.InterpolationColors = blend;
+                                dc.Graphics.FillPath(brush, path);
+                            }
+                        }
+
+                        using (var pen = new Pen(dc.ColorProfile.SlideLineColor, noteHeight * 0.4f))
+                        {
+                            dc.Graphics.DrawLines(pen, orderedSteps.Select(p => new PointF(p.Point.X + p.Width / 2, p.Point.Y)).ToArray());
+                        }
+
+                        dc.Graphics.SmoothingMode = prevMode;
+                        break;
+                    case 2:
+                        dc.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+                        BackgroundEdgeColor = dc.ColorProfile.SlideBackgroundColor.DarkColor;
+                        BackgroundEdgeColor = dc.ColorProfile.SlideBackgroundColor.LightColor;
+
+                        
+
+                        using (var path = new GraphicsPath())
+                        {
+                            var left = orderedSteps.Select(p => p.Point);
+                            var right = orderedSteps.Select(p => new PointF(p.Point.X + p.Width, p.Point.Y)).Reverse();
+                            path.AddPolygon(left.Concat(right).ToArray());
+
+                            float head = orderedVisibleSteps[0];
+                            float height = orderedVisibleSteps[orderedVisibleSteps.Count - 1] - head;
+                            var pathBounds = path.GetBounds();
+                            var blendBounds = new RectangleF(pathBounds.X, head, pathBounds.Width, height);
+                            using (var brush = new LinearGradientBrush(blendBounds, Color.Black, Color.Black, LinearGradientMode.Vertical))
+                            {
+                                var heights = orderedVisibleSteps.Zip(orderedVisibleSteps.Skip(1), (p, q) => Tuple.Create(p, q - p));
+                                var absPos = new[] { head }.Concat(heights.SelectMany(p => new[] { p.Item1 + p.Item2 * 0.3f, p.Item1 + p.Item2 * 0.7f, p.Item1 + p.Item2 }));
+                                var blend = new ColorBlend()
+                                {
+                                    Positions = absPos.Select(p => (p - head) / height).ToArray(),
+                                    Colors = new[] { BackgroundEdgeColor }.Concat(Enumerable.Range(0, orderedVisibleSteps.Count - 1).SelectMany(p => new[] { BackgroundMiddleColor, BackgroundMiddleColor, BackgroundEdgeColor })).ToArray()
+                                };
+                                brush.InterpolationColors = blend;
+                                dc.Graphics.FillPath(brush, path);
+                            }
+                        }
+
+                        using (var pen = new Pen(dc.ColorProfile.SlideLineColor, noteHeight * 0.4f))
+                        {
+                            dc.Graphics.DrawLines(pen, orderedSteps.Select(p => new PointF(p.Point.X + p.Width / 2, p.Point.Y)).ToArray());
+                        }
+
+                        dc.Graphics.SmoothingMode = prevMode;
+                        break;
+                }
+                
             }
             
         }
@@ -246,7 +361,206 @@ namespace Ched.Drawing
             return path;
         }
 
-        public static void DrawAir(this DrawingContext dc, RectangleF targetNoteRect, VerticalAirDirection verticalDirection, HorizontalAirDirection horizontalDirection, bool isch)
+
+        public static void DrawGuideBegin(this DrawingContext dc, RectangleF rect, bool isch, int mode)
+        {
+            dc.DrawGuideStep(rect, isch, mode);
+            dc.Graphics.DrawTapSymbol(rect, mode);
+
+        }
+
+        public static void DrawGuideStep(this DrawingContext dc, RectangleF rect, bool isch, int mode)
+        {
+            if (isch)
+            {
+                dc.Graphics.DrawNote(rect, dc.ColorProfile.GuideColor, dc.ColorProfile.BorderColor);
+            }
+            else
+            {
+                switch (mode)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        dc.Graphics.DrawNote(rect, dc.ColorProfile.InvGuideColor, dc.ColorProfile.InvBorderColor);
+                        break;
+                    case 2:
+                        dc.Graphics.DrawNote(rect, dc.ColorProfile.GuideColor, dc.ColorProfile.BorderColor);
+                        break;
+                }
+
+            }
+
+        }
+
+
+        /// <summary>
+        /// GUIDEの背景を描画します。
+        /// </summary>
+        /// <param name="dc">処理対象の<see cref="DrawingContext"/></param>
+        /// <param name="steps">全ての中継点位置からなるリスト</param>
+        /// <param name="visibleSteps">可視中継点のY座標からなるリスト</param>
+        /// <param name="noteHeight">ノート描画高さ</param>
+        public static void DrawGuideBackground(this DrawingContext dc, IEnumerable<GuideStepElement> steps, IEnumerable<float> visibleSteps, float noteHeight, bool isch, int mode)
+        {
+            if (isch)
+            {
+                var prevMode = dc.Graphics.SmoothingMode;
+                dc.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+                Color BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundColor.DarkColor;
+                Color BackgroundMiddleColor = dc.ColorProfile.GuideBackgroundColor.LightColor;
+
+                var orderedSteps = steps.OrderBy(p => p.Point.Y).ToList();
+                var orderedVisibleSteps = visibleSteps.OrderBy(p => p).ToList();
+
+
+
+                using (var path = new GraphicsPath())
+                {
+                    var left = orderedSteps.Select(p => p.Point);
+                    var right = orderedSteps.Select(p => new PointF(p.Point.X + p.Width, p.Point.Y)).Reverse();
+                    path.AddPolygon(left.Concat(right).ToArray());
+
+                    float head = orderedVisibleSteps[0];
+                    float height = orderedVisibleSteps[orderedVisibleSteps.Count - 1] - head;
+                    var pathBounds = path.GetBounds();
+                    var blendBounds = new RectangleF(pathBounds.X, head, pathBounds.Width, height);
+                    using (var brush = new LinearGradientBrush(blendBounds, Color.Black, Color.Black, LinearGradientMode.Vertical))
+                    {
+                        var heights = orderedVisibleSteps.Zip(orderedVisibleSteps.Skip(1), (p, q) => Tuple.Create(p, q - p));
+                        var absPos = new[] { head }.Concat(heights.SelectMany(p => new[] { p.Item1 + p.Item2 * 0.3f, p.Item1 + p.Item2 * 0.7f, p.Item1 + p.Item2 }));
+                        var blend = new ColorBlend()
+                        {
+                            Positions = absPos.Select(p => (p - head) / height).ToArray(),
+                            Colors = new[] { BackgroundEdgeColor }.Concat(Enumerable.Range(0, orderedVisibleSteps.Count - 1).SelectMany(p => new[] { BackgroundMiddleColor, BackgroundMiddleColor, BackgroundEdgeColor })).ToArray()
+                        };
+                        brush.InterpolationColors = blend;
+                        dc.Graphics.FillPath(brush, path);
+                    }
+                }
+
+                using (var pen = new Pen(dc.ColorProfile.SlideLineColor, noteHeight * 0.4f))
+                {
+                    dc.Graphics.DrawLines(pen, orderedSteps.Select(p => new PointF(p.Point.X + p.Width / 2, p.Point.Y)).ToArray());
+                }
+
+                dc.Graphics.SmoothingMode = prevMode;
+            }
+            else
+            {
+                var prevMode = dc.Graphics.SmoothingMode;
+
+                Color BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundColor.DarkColor;
+                Color BackgroundMiddleColor = dc.ColorProfile.GuideBackgroundColor.LightColor;
+
+                var orderedSteps = steps.OrderBy(p => p.Point.Y).ToList();
+                var orderedVisibleSteps = visibleSteps.OrderBy(p => p).ToList();
+                switch (mode)
+                {
+                    case 0:
+                        break;
+                    case 1:
+
+                        dc.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+                        BackgroundEdgeColor = dc.ColorProfile.InvGuideBackgroundColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.InvGuideBackgroundColor.LightColor;
+
+
+                        using (var path = new GraphicsPath())
+                        {
+                            var left = orderedSteps.Select(p => p.Point);
+                            var right = orderedSteps.Select(p => new PointF(p.Point.X + p.Width, p.Point.Y)).Reverse();
+                            path.AddPolygon(left.Concat(right).ToArray());
+
+                            float head = orderedVisibleSteps[0];
+                            float height = orderedVisibleSteps[orderedVisibleSteps.Count - 1] - head;
+                            var pathBounds = path.GetBounds();
+                            var blendBounds = new RectangleF(pathBounds.X, head, pathBounds.Width, height);
+                            using (var brush = new LinearGradientBrush(blendBounds, Color.Black, Color.Black, LinearGradientMode.Vertical))
+                            {
+                                var heights = orderedVisibleSteps.Zip(orderedVisibleSteps.Skip(1), (p, q) => Tuple.Create(p, q - p));
+                                var absPos = new[] { head }.Concat(heights.SelectMany(p => new[] { p.Item1 + p.Item2 * 0.3f, p.Item1 + p.Item2 * 0.7f, p.Item1 + p.Item2 }));
+                                var blend = new ColorBlend()
+                                {
+                                    Positions = absPos.Select(p => (p - head) / height).ToArray(),
+                                    Colors = new[] { BackgroundEdgeColor }.Concat(Enumerable.Range(0, orderedVisibleSteps.Count - 1).SelectMany(p => new[] { BackgroundMiddleColor, BackgroundMiddleColor, BackgroundEdgeColor })).ToArray()
+                                };
+                                brush.InterpolationColors = blend;
+                                dc.Graphics.FillPath(brush, path);
+                            }
+                        }
+
+                        using (var pen = new Pen(dc.ColorProfile.SlideLineColor, noteHeight * 0.4f))
+                        {
+                            dc.Graphics.DrawLines(pen, orderedSteps.Select(p => new PointF(p.Point.X + p.Width / 2, p.Point.Y)).ToArray());
+                        }
+
+                        dc.Graphics.SmoothingMode = prevMode;
+                        break;
+                    case 2:
+                        dc.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+                        BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundColor.DarkColor;
+                        BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundColor.LightColor;
+
+
+
+                        using (var path = new GraphicsPath())
+                        {
+                            var left = orderedSteps.Select(p => p.Point);
+                            var right = orderedSteps.Select(p => new PointF(p.Point.X + p.Width, p.Point.Y)).Reverse();
+                            path.AddPolygon(left.Concat(right).ToArray());
+
+                            float head = orderedVisibleSteps[0];
+                            float height = orderedVisibleSteps[orderedVisibleSteps.Count - 1] - head;
+                            var pathBounds = path.GetBounds();
+                            var blendBounds = new RectangleF(pathBounds.X, head, pathBounds.Width, height);
+                            using (var brush = new LinearGradientBrush(blendBounds, Color.Black, Color.Black, LinearGradientMode.Vertical))
+                            {
+                                var heights = orderedVisibleSteps.Zip(orderedVisibleSteps.Skip(1), (p, q) => Tuple.Create(p, q - p));
+                                var absPos = new[] { head }.Concat(heights.SelectMany(p => new[] { p.Item1 + p.Item2 * 0.3f, p.Item1 + p.Item2 * 0.7f, p.Item1 + p.Item2 }));
+                                var blend = new ColorBlend()
+                                {
+                                    Positions = absPos.Select(p => (p - head) / height).ToArray(),
+                                    Colors = new[] { BackgroundEdgeColor }.Concat(Enumerable.Range(0, orderedVisibleSteps.Count - 1).SelectMany(p => new[] { BackgroundMiddleColor, BackgroundMiddleColor, BackgroundEdgeColor })).ToArray()
+                                };
+                                brush.InterpolationColors = blend;
+                                dc.Graphics.FillPath(brush, path);
+                            }
+                        }
+
+                        using (var pen = new Pen(dc.ColorProfile.SlideLineColor, noteHeight * 0.4f))
+                        {
+                            dc.Graphics.DrawLines(pen, orderedSteps.Select(p => new PointF(p.Point.X + p.Width / 2, p.Point.Y)).ToArray());
+                        }
+
+                        dc.Graphics.SmoothingMode = prevMode;
+                        break;
+                }
+
+            }
+
+        }
+
+        public static GraphicsPath GetGuideBackgroundPath(float width1, float width2, float x1, float y1, float x2, float y2)
+        {
+            var path = new GraphicsPath();
+            path.AddPolygon(new PointF[]
+            {
+                new PointF(x1, y1),
+                new PointF(x1 + width1, y1),
+                new PointF(x2 + width2, y2),
+                new PointF(x2, y2)
+            });
+            return path;
+        }
+
+
+
+
+        public static void DrawAir(this DrawingContext dc, RectangleF targetNoteRect, VerticalAirDirection verticalDirection, HorizontalAirDirection horizontalDirection, bool isch, int mode)
         {
             if (isch)
             {
@@ -310,6 +624,7 @@ namespace Ched.Drawing
                 new PointF(box.Left + box.Width / 2, box.Bottom - box.Height / 3)
                 };
 
+
                 using (var path = new GraphicsPath())
                 {
                     path.AddPolygon(points);
@@ -327,15 +642,33 @@ namespace Ched.Drawing
 
                     dc.Graphics.Transform = matrix;
 
-                    using (var brush = new SolidBrush(verticalDirection == VerticalAirDirection.Down ? dc.ColorProfile.InvAirDownColor : dc.ColorProfile.InvAirUpColor))
+                    
+                    switch (mode)
                     {
-                        dc.Graphics.FillPath(brush, path);
+                        case 0:
+                            break;
+                        case 1:
+                            using (var brush = new SolidBrush(verticalDirection == VerticalAirDirection.Down ? dc.ColorProfile.InvAirDownColor : dc.ColorProfile.InvAirUpColor))
+                            {
+                                dc.Graphics.FillPath(brush, path);
+                            }
+                            using (var pen = new Pen(dc.ColorProfile.InvBorderColor.LightColor, targetRect.Height * (horizontalDirection == HorizontalAirDirection.Center ? 0.12f : 0.1f)) { LineJoin = LineJoin.Bevel })
+                            {
+                                dc.Graphics.DrawPath(pen, path);
+                            }
+                            break;
+                        case 2:
+                            using (var brush = new SolidBrush(verticalDirection == VerticalAirDirection.Down ? dc.ColorProfile.AirDownColor : dc.ColorProfile.AirUpColor))
+                            {
+                                dc.Graphics.FillPath(brush, path);
+                            }
+                            using (var pen = new Pen(dc.ColorProfile.BorderColor.LightColor, targetRect.Height * (horizontalDirection == HorizontalAirDirection.Center ? 0.12f : 0.1f)) { LineJoin = LineJoin.Bevel })
+                            {
+                                dc.Graphics.DrawPath(pen, path);
+                            }
+                            break;
                     }
-                    // 斜めになると太さが大きく出てしまう
-                    using (var pen = new Pen(dc.ColorProfile.InvBorderColor.LightColor, targetRect.Height * (horizontalDirection == HorizontalAirDirection.Center ? 0.12f : 0.1f)) { LineJoin = LineJoin.Bevel })
-                    {
-                        dc.Graphics.DrawPath(pen, path);
-                    }
+                    
 
                     dc.Graphics.Transform = prevMatrix;
                 }
@@ -350,7 +683,7 @@ namespace Ched.Drawing
             return new RectangleF(targetLocation, targetSize);
         }
 
-        public static void DrawAirAction(this DrawingContext dc, RectangleF rect, bool isch)
+        public static void DrawAirAction(this DrawingContext dc, RectangleF rect, bool isch, int mode)
         {
             if (isch)
             {
@@ -404,7 +737,7 @@ namespace Ched.Drawing
             }
         }
 
-        public static void DrawBorder(this DrawingContext dc, RectangleF rect, bool isch)
+        public static void DrawBorder(this DrawingContext dc, RectangleF rect, bool isch, int mode)
         {
             if (isch)
             {
@@ -412,13 +745,79 @@ namespace Ched.Drawing
             }
             else
             {
-                dc.Graphics.DrawBorder(rect, dc.ColorProfile.InvBorderColor);
+                switch (mode)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        dc.Graphics.DrawBorder(rect, dc.ColorProfile.InvBorderColor);
+                        break;
+                    case 2:
+                        dc.Graphics.DrawBorder(rect, dc.ColorProfile.BorderColor);
+                        break;
+                }
+                
             }
             
         }
+
+        public static void DrawBorder(this DrawingContext dc, RectangleF rect, bool isch, int mode, GradientColor color, GradientColor invcolor)
+        {
+            if (isch)
+            {
+                dc.Graphics.DrawBorder(rect, color, 0.4f);
+            }
+            else
+            {
+                switch (mode)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        dc.Graphics.DrawBorder(rect, invcolor);
+                        break;
+                    case 2:
+                        dc.Graphics.DrawBorder(rect, invcolor);
+                        break;
+                }
+
+            }
+
+        }
+
+        public static void DrawTapBorder(this DrawingContext dc, RectangleF rect, bool isch, int mode)
+        {
+            if (isch)
+            {
+                dc.Graphics.DrawBorder(rect, dc.ColorProfile.TapColor);
+            }
+            else
+            {
+                switch (mode)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        dc.Graphics.DrawBorder(rect, dc.ColorProfile.InvTapColor);
+                        break;
+                    case 2:
+                        dc.Graphics.DrawBorder(rect, dc.ColorProfile.TapColor);
+                        break;
+                }
+            }
+        }
+
+        
+
+
     }
 
     public class SlideStepElement
+    {
+        public PointF Point { get; set; }
+        public float Width { get; set; }
+    }
+    public class GuideStepElement
     {
         public PointF Point { get; set; }
         public float Width { get; set; }

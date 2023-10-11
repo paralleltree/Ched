@@ -13,6 +13,7 @@ namespace Ched.UI
     {
         private bool _Checked = false;
         private VisualStyleRenderer renderer = null;
+        private System.ComponentModel.IContainer components;
         private readonly VisualStyleElement element = VisualStyleElement.ToolBar.Button.Checked;
 
         public CheckableToolStripSplitButton()
@@ -77,6 +78,11 @@ namespace Ched.UI
             {
                 base.OnPaint(e);
             }
+        }
+
+        private void InitializeComponent()
+        {
+
         }
     }
 }

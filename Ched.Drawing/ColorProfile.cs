@@ -42,6 +42,9 @@ namespace Ched.Drawing
         public Color AirHoldLineColor { get; set; }
         public GradientColor AirStepColor { get; set; }
 
+        public GradientColor GuideBackgroundColor { get; set; }
+        public GradientColor GuideColor { get; set; }
+
 
         //ch別用
         public GradientColor InvBorderColor { get; set; }
@@ -59,5 +62,8 @@ namespace Ched.Drawing
         public Color InvAirDownColor { get; set; }
         public Color InvAirHoldLineColor { get; set; }
         public GradientColor InvAirStepColor { get; set; }
+        public GradientColor InvGuideBackgroundColor { get; set; }
+        public GradientColor InvGuideColor { get; set; }
+
     }
 }

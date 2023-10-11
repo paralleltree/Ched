@@ -187,6 +187,51 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   選択範囲内のノーツチャンネルを移動 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ChangeChannelSelectedNotes {
+            get {
+                return ResourceManager.GetString("ChangeChannelSelectedNotes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   チャンネル に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Channel {
+            get {
+                return ResourceManager.GetString("Channel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   チャンネル に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ChannelMenu {
+            get {
+                return ResourceManager.GetString("ChannelMenu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   チャンネル別編集 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ChannelMovable {
+            get {
+                return ResourceManager.GetString("ChannelMovable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ノーツ表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ChannelNote {
+            get {
+                return ResourceManager.GetString("ChannelNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   クリア に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Clear {
@@ -430,6 +475,15 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   レーン に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string LaneMenu {
+            get {
+                return ResourceManager.GetString("LaneMenu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   レーンオフセット に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string LaneOffset {
@@ -561,6 +615,15 @@ namespace Ched.Localization {
         public static string Pen {
             get {
                 return ResourceManager.GetString("Pen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   プロセカ に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string PJsekai {
+            get {
+                return ResourceManager.GetString("PJsekai", resourceCulture);
             }
         }
         
@@ -813,6 +876,33 @@ namespace Ched.Localization {
         public static string ViewMenu {
             get {
                 return ResourceManager.GetString("ViewMenu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   非表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Visual1 {
+            get {
+                return ResourceManager.GetString("Visual1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   半透明 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Visual2 {
+            get {
+                return ResourceManager.GetString("Visual2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Visual3 {
+            get {
+                return ResourceManager.GetString("Visual3", resourceCulture);
             }
         }
         

@@ -47,7 +47,7 @@ namespace Ched.UI
             speedRatioBox.Value = 1;
 
             speedChBox.Minimum = 0;
-            speedChBox.Maximum = 99;
+            speedChBox.Maximum = 359;
             speedChBox.Increment = 1;
             speedChBox.DecimalPlaces = 0;
             speedChBox.Value = 1;

@@ -13,7 +13,7 @@ namespace Ched.Drawing
         public static void DrawTappableNote(this Graphics g, RectangleF rect, GradientColor foregroundColors, GradientColor borderColors)
         {
             g.DrawNote(rect, foregroundColors, borderColors);
-            g.DrawTapSymbol(rect);
+            g.DrawTapSymbol(rect, 1);
         }
 
         public static void DrawNote(this Graphics g, RectangleF rect, GradientColor foregroundColors, GradientColor borderColors)
@@ -48,6 +48,21 @@ namespace Ched.Drawing
             }
         }
 
+        public static void DrawBorder(this Graphics g, RectangleF rect, GradientColor colors, float width)
+        {
+            float borderWidth = rect.Height * width;
+            using (var brush = new LinearGradientBrush(rect.Expand(borderWidth), colors.DarkColor, colors.LightColor, LinearGradientMode.Vertical))
+            {
+                using (var pen = new Pen(brush, borderWidth))
+                {
+                    using (var path = rect.ToRoundedPath(rect.Height * 0.3f))
+                    {
+                        g.DrawPath(pen, path);
+                    }
+                }
+            }
+        }
+
         public static void DrawSquarishNote(this Graphics g, RectangleF rect, GradientColor foregroundColors, GradientColor borderColors)
         {
             float borderWidth = rect.Height * 0.1f;
@@ -65,11 +80,23 @@ namespace Ched.Drawing
             }
         }
 
-        public static void DrawTapSymbol(this Graphics g, RectangleF rect)
+        public static void DrawTapSymbol(this Graphics g, RectangleF rect, int mode)
         {
+
             using (var pen = new Pen(Color.White, rect.Height * 0.1f))
             {
-                g.DrawLine(pen, rect.Left + rect.Width * 0.2f, rect.Top + rect.Height / 2f, rect.Right - rect.Width * 0.2f, rect.Top + rect.Height / 2);
+                switch (mode)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        g.DrawLine(pen, rect.Left + rect.Width * 0.2f, rect.Top + rect.Height / 2f, rect.Right - rect.Width * 0.2f, rect.Top + rect.Height / 2);
+                        break;
+                    case 2:
+                        g.DrawLine(pen, rect.Left + rect.Width * 0.2f, rect.Top + rect.Height / 2f, rect.Right - rect.Width * 0.2f, rect.Top + rect.Height / 2);
+                        break;
+                }
+                
             }
         }
     }

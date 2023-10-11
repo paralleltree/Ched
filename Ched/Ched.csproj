@@ -139,6 +139,7 @@
   <ItemGroup>
     <Compile Include="Base64Converter.cs" />
     <Compile Include="Components\Exporter\SusExporter.cs" />
+    <Compile Include="Components\Exporter\UscExporter.cs" />
     <Compile Include="Configuration\ApplicationSettings.cs" />
     <Compile Include="Configuration\SettingsBase.cs" />
     <Compile Include="Configuration\SoundSettings.cs" />
@@ -183,8 +184,20 @@
     <Compile Include="Plugins\SlideMerger.cs" />
     <Compile Include="Plugins\SlideReverser.cs" />
     <Compile Include="Plugins\SlideSplitter.cs" />
+    <Compile Include="Plugins\UscExportPlugin.cs" />
     <Compile Include="Plugins\SusExportPlugin.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="RadixConvert.cs" />
+    <Compile Include="UI\LaneSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\LaneSelectionForm.Designer.cs">
+      <DependentUpon>LaneSelectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\CustomViewChSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -329,19 +342,23 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <EmbeddedResource Include="UI\BpmSelectionForm.en.resx">
       <DependentUpon>BpmSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\BpmSelectionForm.resx">
       <DependentUpon>BpmSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\CheckableToolStripSplitButton.resx">
+      <DependentUpon>CheckableToolStripSplitButton.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\LaneSelectionForm.en.resx">
+      <DependentUpon>LaneSelectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\LaneSelectionForm.resx">
+      <DependentUpon>LaneSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\CustomViewChSelectionForm.en.resx">
       <DependentUpon>CustomViewChSelectionForm.cs</DependentUpon>
@@ -551,6 +568,24 @@
     <None Include="Sounds\guide.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\BackGround.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\background.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\guide.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\guidestep.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tap2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\extap2.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\BASS.Native.2.4.12.2\build\BASS.Native.targets" Condition="Exists('..\packages\BASS.Native.2.4.12.2\build\BASS.Native.targets')" />

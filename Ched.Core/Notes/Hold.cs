@@ -10,9 +10,9 @@ namespace Ched.Core.Notes
     public class Hold : MovableLongNoteBase
     {
         [Newtonsoft.Json.JsonProperty]
-        private int laneIndex;
+        private float laneIndex;
         [Newtonsoft.Json.JsonProperty]
-        private int width = 1;
+        private float width = 1;
         [Newtonsoft.Json.JsonProperty]
         private int channel = 1;
         [Newtonsoft.Json.JsonProperty]
@@ -26,7 +26,7 @@ namespace Ched.Core.Notes
         /// <summary>
         /// ノートの配置されるレーン番号を設定します。。
         /// </summary>
-        public int LaneIndex
+        public float LaneIndex
         {
             get { return laneIndex; }
             set
@@ -39,7 +39,7 @@ namespace Ched.Core.Notes
         /// <summary>
         /// ノートのレーン幅を設定します。
         /// </summary>
-        public int Width
+        public float Width
         {
             get { return width; }
             set
@@ -75,15 +75,15 @@ namespace Ched.Core.Notes
             }
         }
 
-        protected void CheckPosition(int laneIndex, int width)
+        protected void CheckPosition(float laneIndex, float width)
         {
-            if (width < 1 || width > Constants.LanesCount)
+            if (width < 0.1)
                 throw new ArgumentOutOfRangeException("width", "Invalid width.");
-            if (laneIndex < -16 || laneIndex + width > Constants.LanesCount)
+            if (laneIndex < -16)
                 throw new ArgumentOutOfRangeException("laneIndex", "Invalid lane index.");
         }
 
-        public void SetPosition(int laneIndex, int width)
+        public void SetPosition(float laneIndex, float width)
         {
             CheckPosition(laneIndex, width);
             this.laneIndex = laneIndex;
@@ -109,9 +109,9 @@ namespace Ched.Core.Notes
         {
             protected Hold parent;
 
-            public override int LaneIndex { get { return parent.LaneIndex; } }
+            public override float LaneIndex { get { return parent.LaneIndex; } }
 
-            public override int Width { get { return parent.Width; } }
+            public override float Width { get { return parent.Width; } }
 
             public TapBase(Hold parent)
             {

@@ -51,9 +51,9 @@ namespace Ched.UI.Operations
         public struct NotePosition
         {
             public int Tick { get; }
-            public int LaneIndex { get; }
+            public float LaneIndex { get; }
 
-            public NotePosition(int tick, int laneIndex)
+            public NotePosition(int tick, float laneIndex)
             {
                 Tick = tick;
                 LaneIndex = laneIndex;
@@ -68,7 +68,7 @@ namespace Ched.UI.Operations
 
             public override int GetHashCode()
             {
-                return Tick ^ LaneIndex;
+                return Tick ^ (int)LaneIndex;
             }
 
             public static bool operator ==(NotePosition a, NotePosition b)
@@ -90,8 +90,6 @@ namespace Ched.UI.Operations
         protected NotePosition BeforePosition { get; }
         protected NotePosition AfterPosition { get; }
 
-        protected NotePosition BeforeChannel { get; }
-        protected NotePosition AfterChannel { get; }
 
         public ChangeShortNoteWidthOperation(TappableBase note, NotePosition before, NotePosition after) : base(note)
         {
@@ -111,10 +109,10 @@ namespace Ched.UI.Operations
 
         public struct NotePosition
         {
-            public int LaneIndex { get; }
-            public int Width { get; }
+            public float LaneIndex { get; }
+            public float Width { get; }
 
-            public NotePosition(int laneIndex, int width)
+            public NotePosition(float laneIndex, float width)
             {
                 LaneIndex = laneIndex;
                 Width = width;
@@ -129,7 +127,7 @@ namespace Ched.UI.Operations
 
             public override int GetHashCode()
             {
-                return LaneIndex ^ Width;
+                return (int)LaneIndex ^ (int)Width;
             }
 
             public static bool operator ==(NotePosition a, NotePosition b)
@@ -262,10 +260,10 @@ namespace Ched.UI.Operations
         public struct NotePosition
         {
             public int StartTick { get; }
-            public int LaneIndex { get; }
-            public int Width { get; set; }
+            public float LaneIndex { get; }
+            public float Width { get; set; }
 
-            public NotePosition(int startTick, int laneIndex, int width)
+            public NotePosition(int startTick, float laneIndex, float width)
             {
                 StartTick = startTick;
                 LaneIndex = laneIndex;
@@ -281,7 +279,7 @@ namespace Ched.UI.Operations
 
             public override int GetHashCode()
             {
-                return StartTick ^ LaneIndex ^ Width;
+                return StartTick ^ (int)LaneIndex ^ (int)Width;
             }
 
             public static bool operator ==(NotePosition a, NotePosition b)
@@ -326,10 +324,10 @@ namespace Ched.UI.Operations
         public struct NotePosition
         {
             public int TickOffset { get; }
-            public int LaneIndexOffset { get; }
-            public int WidthChange { get; }
+            public float LaneIndexOffset { get; }
+            public float WidthChange { get; }
 
-            public NotePosition(int tickOffset, int laneIndexOffset, int widthChange)
+            public NotePosition(int tickOffset, float laneIndexOffset, float widthChange)
             {
                 TickOffset = tickOffset;
                 LaneIndexOffset = laneIndexOffset;
@@ -345,7 +343,7 @@ namespace Ched.UI.Operations
 
             public override int GetHashCode()
             {
-                return TickOffset ^ LaneIndexOffset ^ WidthChange;
+                return TickOffset ^ (int)LaneIndexOffset ^ (int)WidthChange;
             }
 
             public static bool operator ==(NotePosition a, NotePosition b)
@@ -398,10 +396,10 @@ namespace Ched.UI.Operations
         public struct NotePosition
         {
             public int StartTick { get; }
-            public int StartLaneIndex { get; }
-            public int StartWidth { get; }
+            public float StartLaneIndex { get; }
+            public float StartWidth { get; }
 
-            public NotePosition(int startTick, int startLaneIndex, int startWidth)
+            public NotePosition(int startTick, float startLaneIndex, float startWidth)
             {
                 StartTick = startTick;
                 StartLaneIndex = startLaneIndex;
@@ -417,7 +415,7 @@ namespace Ched.UI.Operations
 
             public override int GetHashCode()
             {
-                return StartTick ^ StartLaneIndex ^ StartWidth;
+                return StartTick ^ (int)StartLaneIndex ^ (int)StartWidth;
             }
 
             public static bool operator ==(NotePosition a, NotePosition b)
@@ -430,6 +428,66 @@ namespace Ched.UI.Operations
                 return !a.Equals(b);
             }
         }
+    }
+
+    public class ChangeSlideChannelOperation : IOperation
+    {
+        public string Description { get { return "スライドチャンネルの変更"; } }
+
+        protected Slide Note;
+
+        protected NoteChannel BeforeChannel { get; }
+        protected NoteChannel AfterChannel { get; }
+
+        public ChangeSlideChannelOperation(Slide slide, NoteChannel before, NoteChannel after)
+        {
+            Note = slide;
+            BeforeChannel = before;
+            AfterChannel = after;
+        }
+
+        public void Redo()
+        {
+            Note.SetChannel(AfterChannel.Channel);
+        }
+
+        public void Undo()
+        {
+            Note.SetChannel(BeforeChannel.Channel);
+        }
+
+        public struct NoteChannel
+        {
+            public int Channel { get; }
+
+            public NoteChannel(int channel)
+            {
+                Channel = channel;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || !(obj is NoteChannel)) return false;
+                NoteChannel other = (NoteChannel)obj;
+                return Channel == other.Channel;
+            }
+
+            public override int GetHashCode()
+            {
+                return Channel * 2 ^ 2;
+            }
+
+            public static bool operator ==(NoteChannel a, NoteChannel b)
+            {
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(NoteChannel a, NoteChannel b)
+            {
+                return !a.Equals(b);
+            }
+        }
+
     }
 
     public class FlipSlideOperation : IOperation
@@ -508,6 +566,285 @@ namespace Ched.UI.Operations
             ParentNote.StepNotes.Add(StepNote);
         }
     }
+
+
+    //GUIDE
+
+    public class MoveGuideStepNoteOperation : IOperation
+    {
+        public string Description { get { return "GUIDE中継点の移動"; } }
+
+        public Guide.StepTap StepNote { get; }
+        public NotePosition BeforePosition { get; }
+        public NotePosition AfterPosition { get; }
+
+        public MoveGuideStepNoteOperation(Guide.StepTap note, NotePosition before, NotePosition after)
+        {
+            StepNote = note;
+            BeforePosition = before;
+            AfterPosition = after;
+        }
+
+        public void Redo()
+        {
+            StepNote.TickOffset = AfterPosition.TickOffset;
+            StepNote.SetPosition(AfterPosition.LaneIndexOffset, AfterPosition.WidthChange);
+        }
+
+        public void Undo()
+        {
+            StepNote.TickOffset = BeforePosition.TickOffset;
+            StepNote.SetPosition(BeforePosition.LaneIndexOffset, BeforePosition.WidthChange);
+        }
+
+        public struct NotePosition
+        {
+            public int TickOffset { get; }
+            public float LaneIndexOffset { get; }
+            public float WidthChange { get; }
+
+            public NotePosition(int tickOffset, float laneIndexOffset, float widthChange)
+            {
+                TickOffset = tickOffset;
+                LaneIndexOffset = laneIndexOffset;
+                WidthChange = widthChange;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || !(obj is NotePosition)) return false;
+                NotePosition other = (NotePosition)obj;
+                return TickOffset == other.TickOffset && LaneIndexOffset == other.LaneIndexOffset && WidthChange == other.WidthChange;
+            }
+
+            public override int GetHashCode()
+            {
+                return TickOffset ^ (int)LaneIndexOffset ^ (int)WidthChange;
+            }
+
+            public static bool operator ==(NotePosition a, NotePosition b)
+            {
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(NotePosition a, NotePosition b)
+            {
+                return !a.Equals(b);
+            }
+        }
+    }
+
+    public class MoveGuideOperation : IOperation
+    {
+        public string Description { get { return "GUIDEの移動"; } }
+
+        protected Guide Note;
+        protected Guide.StartTap Note2;
+        protected NotePosition BeforePosition { get; }
+        protected NotePosition AfterPosition { get; }
+
+        public MoveGuideOperation(Guide note, NotePosition before, NotePosition after)
+        {
+            Note = note;
+            BeforePosition = before;
+            AfterPosition = after;
+        }
+
+        public MoveGuideOperation(Guide.StartTap note, NotePosition before, NotePosition after)
+        {
+            Note2 = note;
+            BeforePosition = before;
+            AfterPosition = after;
+        }
+
+        public void Redo()
+        {
+            Note.StartTick = AfterPosition.StartTick;
+            Note.SetPosition(AfterPosition.StartLaneIndex, AfterPosition.StartWidth);
+        }
+
+        public void Undo()
+        {
+            Note.StartTick = BeforePosition.StartTick;
+            Note.SetPosition(BeforePosition.StartLaneIndex, BeforePosition.StartWidth);
+        }
+
+        public struct NotePosition
+        {
+            public int StartTick { get; }
+            public float StartLaneIndex { get; }
+            public float StartWidth { get; }
+
+            public NotePosition(int startTick, float startLaneIndex, float startWidth)
+            {
+                StartTick = startTick;
+                StartLaneIndex = startLaneIndex;
+                StartWidth = startWidth;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || !(obj is NotePosition)) return false;
+                NotePosition other = (NotePosition)obj;
+                return StartTick == other.StartTick && StartLaneIndex == other.StartLaneIndex && StartWidth == other.StartWidth;
+            }
+
+            public override int GetHashCode()
+            {
+                return StartTick ^ (int)StartLaneIndex ^ (int)StartWidth;
+            }
+
+            public static bool operator ==(NotePosition a, NotePosition b)
+            {
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(NotePosition a, NotePosition b)
+            {
+                return !a.Equals(b);
+            }
+        }
+    }
+
+    public class ChangeGuideChannelOperation : IOperation
+    {
+        public string Description { get { return "GUIDEチャンネルの変更"; } }
+
+        protected Guide Note;
+
+        protected NoteChannel BeforeChannel { get; }
+        protected NoteChannel AfterChannel { get; }
+
+        public ChangeGuideChannelOperation(Guide guide, NoteChannel before, NoteChannel after)
+        {
+            Note = guide;
+            BeforeChannel = before;
+            AfterChannel = after;
+        }
+
+        public void Redo()
+        {
+            Note.SetChannel(AfterChannel.Channel);
+        }
+
+        public void Undo()
+        {
+            Note.SetChannel(BeforeChannel.Channel);
+        }
+
+        public struct NoteChannel
+        {
+            public int Channel { get; }
+
+            public NoteChannel(int channel)
+            {
+                Channel = channel;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || !(obj is NoteChannel)) return false;
+                NoteChannel other = (NoteChannel)obj;
+                return Channel == other.Channel;
+            }
+
+            public override int GetHashCode()
+            {
+                return Channel * 2 ^ 2;
+            }
+
+            public static bool operator ==(NoteChannel a, NoteChannel b)
+            {
+                return a.Equals(b);
+            }
+
+            public static bool operator !=(NoteChannel a, NoteChannel b)
+            {
+                return !a.Equals(b);
+            }
+        }
+
+    }
+
+    public class FlipGuideOperation : IOperation
+    {
+        public string Description { get { return "GUIDEの反転"; } }
+
+        protected Guide Note;
+
+        public FlipGuideOperation(Guide note)
+        {
+            Note = note;
+        }
+
+        public void Redo()
+        {
+            Note.Flip();
+        }
+
+        public void Undo()
+        {
+            Note.Flip();
+        }
+    }
+
+    public abstract class GuideStepNoteCollectionOperation : IOperation
+    {
+        public abstract string Description { get; }
+
+        protected Guide ParentNote { get; }
+        protected Guide.StepTap StepNote { get; }
+
+        public GuideStepNoteCollectionOperation(Guide parent, Guide.StepTap stepNote)
+        {
+            ParentNote = parent;
+            StepNote = stepNote;
+        }
+
+        public abstract void Redo();
+        public abstract void Undo();
+    }
+
+    public class InsertGuideStepNoteOperation : GuideStepNoteCollectionOperation
+    {
+        public override string Description { get { return "GUIDE中継点の追加"; } }
+
+        public InsertGuideStepNoteOperation(Guide parent, Guide.StepTap stepNote) : base(parent, stepNote)
+        {
+        }
+
+        public override void Redo()
+        {
+            ParentNote.StepNotes.Add(StepNote);
+        }
+
+        public override void Undo()
+        {
+            ParentNote.StepNotes.Remove(StepNote);
+        }
+    }
+
+    public class RemoveGuideStepNoteOperation : GuideStepNoteCollectionOperation
+    {
+        public override string Description { get { return "GUIDE中継点の追加"; } }
+
+        public RemoveGuideStepNoteOperation(Guide parent, Guide.StepTap stepNote) : base(parent, stepNote)
+        {
+        }
+
+        public override void Redo()
+        {
+            ParentNote.StepNotes.Remove(StepNote);
+        }
+
+        public override void Undo()
+        {
+            ParentNote.StepNotes.Add(StepNote);
+        }
+    }
+
+
+
 
     public class FlipAirHorizontalDirectionOperation : IOperation
     {
@@ -611,4 +948,8 @@ namespace Ched.UI.Operations
             ParentNote.ActionNotes.Add(ActionNote);
         }
     }
+
+    
+
+
 }

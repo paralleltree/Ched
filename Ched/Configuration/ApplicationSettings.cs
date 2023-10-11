@@ -54,5 +54,37 @@ namespace Ched.Configuration
             get => (bool)this["IsSlowDownPreviewEnabled"];
             set => this["IsSlowDownPreviewEnabled"] = value;
         }
+
+        [UserScopedSetting]
+        [DefaultSettingValue("True")]
+        public bool IsAnotherChannelEditable
+        {
+            get => (bool)this["IsAnotherChannelEditable"];
+            set => this["IsAnotherChannelEditable"] = value;
+        }
+
+        [UserScopedSetting]
+        [DefaultSettingValue("1")]
+        public int NoteVisualMode
+        {
+            get => (int)this["NoteVisualMode"];
+            set => this["NoteVisualMode"] = value;
+        }
+
+        [UserScopedSetting]
+        [DefaultSettingValue("16")]
+        public int LanesCount
+        {
+            get => (int)this["LanesCount"];
+            set => this["LanesCount"] = value;
+        }
+
+        [UserScopedSetting]
+        [DefaultSettingValue("0")]
+        public int MinusLanesCount
+        {
+            get => (int)this["MinusLanesCount"];
+            set => this["MinusLanesCount"] = value;
+        }
     }
 }

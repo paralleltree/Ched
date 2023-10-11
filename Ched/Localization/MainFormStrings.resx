@@ -378,4 +378,34 @@
   <data name="ThemeWhite" xml:space="preserve">
     <value>ホワイト</value>
   </data>
+  <data name="PJsekai" xml:space="preserve">
+    <value>プロセカ</value>
+  </data>
+  <data name="ChannelMenu" xml:space="preserve">
+    <value>チャンネル</value>
+  </data>
+  <data name="Channel" xml:space="preserve">
+    <value>チャンネル</value>
+  </data>
+  <data name="ChannelMovable" xml:space="preserve">
+    <value>チャンネル別編集</value>
+  </data>
+  <data name="ChannelNote" xml:space="preserve">
+    <value>ノーツ表示</value>
+  </data>
+  <data name="Visual1" xml:space="preserve">
+    <value>非表示</value>
+  </data>
+  <data name="Visual2" xml:space="preserve">
+    <value>半透明</value>
+  </data>
+  <data name="Visual3" xml:space="preserve">
+    <value>表示</value>
+  </data>
+  <data name="ChangeChannelSelectedNotes" xml:space="preserve">
+    <value>選択範囲内のノーツチャンネルを移動</value>
+  </data>
+  <data name="LaneMenu" xml:space="preserve">
+    <value>レーン</value>
+  </data>
 </root>
