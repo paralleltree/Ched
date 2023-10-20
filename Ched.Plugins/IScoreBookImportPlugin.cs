@@ -36,5 +36,6 @@ namespace Ched.Plugins
         /// データを読み取るストリームを取得します。
         /// </summary>
         Stream Stream { get; }
+        string Path { get; }
     }
 }

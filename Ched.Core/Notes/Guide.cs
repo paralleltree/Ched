@@ -16,6 +16,8 @@ namespace Ched.Core.Notes
         [Newtonsoft.Json.JsonProperty]
         private int channel;
         [Newtonsoft.Json.JsonProperty]
+        private USCGuideColor color;
+        [Newtonsoft.Json.JsonProperty]
         private List<StepTap> stepNotes = new List<StepTap>();
 
         private Constants constants = new Constants();
@@ -57,6 +59,16 @@ namespace Ched.Core.Notes
                 channel = value;
             }
         }
+
+        /// <summary>
+        /// ガイドカラーを設定します。
+        /// </summary>
+        public USCGuideColor GuideColor
+        {
+            get { return color; }
+            set { color = value; }
+        }
+
 
         public List<StepTap> StepNotes { get { return stepNotes; } }
         public StartTap StartNote { get; }
@@ -233,5 +245,19 @@ namespace Ched.Core.Notes
                     throw new ArgumentOutOfRangeException("widthChange", "Invalid width change value.");
             }
         }
+
+
+        public enum USCGuideColor
+        {
+            neutral,
+            red,
+            green,
+            blue,
+            yellow,
+            purple,
+            cyan
+        }
+
+
     }
 }

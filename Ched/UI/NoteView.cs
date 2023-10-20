@@ -24,6 +24,7 @@ using System.Windows.Documents;
 using System.Runtime.CompilerServices;
 using Ched.Properties;
 using Ched.Configuration;
+using static Ched.Core.Notes.Guide;
 
 namespace Ched.UI
 {
@@ -36,6 +37,7 @@ namespace Ched.UI
         public event EventHandler SelectedRangeChanged;
         public event EventHandler NewNoteTypeChanged;
         public event EventHandler AirDirectionChanged;
+        public event EventHandler GuideColorChanged;
         public event EventHandler LaneVisibleChanged;
         public event EventHandler DragScroll;
         public event EventHandler ChEditChanged;
@@ -67,11 +69,12 @@ namespace Ched.UI
         private bool lanevisual = false;
         private bool siken = false;
         private int theme = 0;
-        private bool editablebyCh = true;
+        private bool editablebyCh = ApplicationSettings.Default.IsAnotherChannelEditable;
         private int noteVisualMode = 1;
         private SelectionRange selectedRange = SelectionRange.Empty;
         private NoteType newNoteType = NoteType.Tap;
         private AirDirection airDirection = new AirDirection(VerticalAirDirection.Up, HorizontalAirDirection.Center);
+        private USCGuideColor newGuideColor = USCGuideColor.neutral;
         private bool isNewSlideStepVisible = true;
         private bool isNewGuideStepVisible = true;
         private bool isNewNoteStart = false;
@@ -396,6 +399,19 @@ namespace Ched.UI
             }
         }
 
+        /// <summary>
+        /// 追加するGUIDEの色を設定します。
+        /// </summary>
+        public USCGuideColor NewGuideColor
+        {
+            get { return newGuideColor; }
+            set
+            {
+                newGuideColor = value;
+                GuideColorChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
 
         /// <summary>
         /// チャンネルを設定します。
@@ -582,8 +598,21 @@ namespace Ched.UI
                 AirActionColor = new GradientColor(Color.FromArgb(146, 0, 192), Color.FromArgb(212, 92, 255)),
                 AirHoldLineColor = Color.FromArgb(216, 0, 196, 0),
                 AirStepColor = new GradientColor(Color.FromArgb(6, 180, 10), Color.FromArgb(80, 224, 64)),
-                GuideColor = new GradientColor(Color.FromArgb(0, 111, 41), Color.FromArgb(86, 255, 106)),
+
+                GuideColor = new GradientColor(Color.FromArgb(0, 111, 41), Color.FromArgb(86, 255, 106)),//前半暗い色 後半明るい色
                 GuideBackgroundColor = new GradientColor(Color.FromArgb(196, 0, 112, 72), Color.FromArgb(196, 0, 164, 72)),
+                GuideNeutralColor = new GradientColor(Color.FromArgb(240, 240, 240), Color.FromArgb(255, 255, 255)),
+                GuideBackgroundNeutralColor = new GradientColor(Color.FromArgb(100, 230, 230, 230), Color.FromArgb(100, 245, 245, 245)),
+                GuideRedColor = new GradientColor(Color.FromArgb(240, 45, 50), Color.FromArgb(255, 86, 106)),
+                GuideBackgroundRedColor = new GradientColor(Color.FromArgb(100, 170, 70, 70), Color.FromArgb(100, 240, 70, 70)),
+                GuideBlueColor = new GradientColor(Color.FromArgb(50, 45, 240), Color.FromArgb(106, 86, 255)),
+                GuideBackgroundBlueColor = new GradientColor(Color.FromArgb(100, 30, 70, 240), Color.FromArgb(100, 50, 100, 240)),
+                GuideYellowColor = new GradientColor(Color.FromArgb(240, 220, 0), Color.FromArgb(255, 255, 106)),
+                GuideBackgroundYellowColor = new GradientColor(Color.FromArgb(100, 235, 200, 0), Color.FromArgb(100, 255, 200, 0)),
+                GuidePurpleColor = new GradientColor(Color.FromArgb(150, 50, 150), Color.FromArgb(200, 0, 200)),
+                GuideBackgroundPurpleColor = new GradientColor(Color.FromArgb(100, 220, 30, 200), Color.FromArgb(100, 255, 50, 230)),
+                GuideCyanColor = new GradientColor(Color.FromArgb(60, 150, 240), Color.FromArgb(60, 220, 240)),
+                GuideBackgroundCyanColor = new GradientColor(Color.FromArgb(100, 60, 160, 240), Color.FromArgb(100, 60, 220, 220)),
 
                 InvBorderColor = new GradientColor(Color.FromArgb(100, 100, 100, 200), Color.FromArgb(100, 120, 120, 200)),
                 InvTapColor = new GradientColor(Color.FromArgb( 80, 138, 0, 0), Color.FromArgb(80, 255, 128, 128)),
@@ -602,6 +631,19 @@ namespace Ched.UI
                 InvAirStepColor = new GradientColor(Color.FromArgb(80, 6, 180, 10), Color.FromArgb(80, 80, 224, 64)),
                 InvGuideColor = new GradientColor(Color.FromArgb(80, 0, 111, 41), Color.FromArgb(80, 86, 255, 106)),
                 InvGuideBackgroundColor = new GradientColor(Color.FromArgb(84, 0, 112, 72), Color.FromArgb(84, 0, 164, 72)),
+
+                InvGuideNeutralColor = new GradientColor(Color.FromArgb(80, 240, 240, 240), Color.FromArgb(80, 255, 255, 255)),
+                InvGuideBackgroundNeutralColor = new GradientColor(Color.FromArgb(40, 230, 230, 230), Color.FromArgb(40, 245, 245, 245)),
+                InvGuideRedColor = new GradientColor(Color.FromArgb(80, 240, 45, 50), Color.FromArgb(80, 255, 86, 106)),
+                InvGuideBackgroundRedColor = new GradientColor(Color.FromArgb(40, 170, 70, 70), Color.FromArgb(40, 240, 70, 70)),
+                InvGuideBlueColor = new GradientColor(Color.FromArgb(80, 50, 45, 240), Color.FromArgb(80, 106, 86, 255)),
+                InvGuideBackgroundBlueColor = new GradientColor(Color.FromArgb(40, 30, 70, 240), Color.FromArgb(40, 50, 100, 240)),
+                InvGuideYellowColor = new GradientColor(Color.FromArgb(80, 240, 220, 0), Color.FromArgb(80, 255, 255, 106)),
+                InvGuideBackgroundYellowColor = new GradientColor(Color.FromArgb(40, 235, 200, 0), Color.FromArgb(40, 255, 200, 0)),
+                InvGuidePurpleColor = new GradientColor(Color.FromArgb(80, 150, 50, 150), Color.FromArgb(80, 200, 0, 200)),
+                InvGuideBackgroundPurpleColor = new GradientColor(Color.FromArgb(40, 220, 30, 200), Color.FromArgb(40, 255, 50, 230)),
+                InvGuideCyanColor = new GradientColor(Color.FromArgb(80, 60, 150, 240), Color.FromArgb(80, 60, 220, 240)),
+                InvGuideBackgroundCyanColor = new GradientColor(Color.FromArgb(40, 60, 160, 240), Color.FromArgb(40, 60, 220, 220)),
             };
 
 
@@ -768,7 +810,8 @@ namespace Ched.UI
                             .Do(q =>
                             {
                                 if ((note.Channel != channel) && (editablebyCh == true)) return;
-                                
+
+
                                 var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                 note.Tick = Math.Max(GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)), 0);
                                 float xdiff =  (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
@@ -1029,10 +1072,18 @@ namespace Ched.UI
                                 var currentScorePos = GetDrawingMatrix(new Matrix()).GetInvertedMatrix().TransformPoint(q.Location);
                                 int offset = GetQuantizedTick(GetTickFromYPosition(currentScorePos.Y)) - step.ParentNote.StartTick;
                                 float xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
-
+                                if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) && System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftAlt))
+                                {
+                                    xdiff = widthamount * (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                }
+                                else
+                                {
+                                    xdiff = (int)((currentScorePos.X - scorePos.X) / (UnitLaneWidth + BorderThickness));
+                                }
                                 float laneIndexOffset = beforeStepPos.LaneIndexOffset + xdiff;
-                                step.LaneIndexOffset = (int)Math.Min(Constants.LanesCount - step.Width - step.ParentNote.StartLaneIndex, Math.Max(-step.ParentNote.StartLaneIndex, laneIndexOffset));
-                                if (bool.Parse(ConfigurationManager.AppSettings["SlideExtend"]) && System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) && System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftAlt))
+                                step.LaneIndexOffset = Math.Min(Constants.LanesCount - step.Width - step.ParentNote.StartLaneIndex, Math.Max(-step.ParentNote.StartLaneIndex, laneIndexOffset));
+                                
+                                    if (bool.Parse(ConfigurationManager.AppSettings["SlideExtend"]) && System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) && System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftAlt))
                                 {
                                     if (isMaxOffsetStep) step.IsVisible = true;
                                     //若干制限を緩和
@@ -1687,7 +1738,6 @@ namespace Ched.UI
                                 RectangleF rect = GetClickableRectFromNotePosition(note.Tick, note.LaneIndex, note.Width);
                                 if (rect.Contains(scorePos))
                                 {
-                                    
                                     // 既に配置されていれば追加しない
                                     if (Notes.GetReferencedAir(note).Count() > 0) break;
                                     if ((note.Channel != channel) && (editablebyCh == true)) break;
@@ -1749,6 +1799,7 @@ namespace Ched.UI
                                     var action = new AirAction.ActionNote(airAction) { Offset = (int)QuantizeTick };
                                     airAction.ActionNotes.Add(action);
                                     var op = new InsertAirActionOperation(Notes, airAction);
+                                    
                                     IOperation comp = InsertAirWithAirAction && Notes.GetReferencedAir(note).Count() == 0 ? (IOperation)new CompositeOperation("AIR, AIR-ACTIONの追加", new IOperation[] { new InsertAirOperation(Notes, new Air(note)), op }) : op;
                                     comp.Redo();
                                     Invalidate();
@@ -1786,7 +1837,6 @@ namespace Ched.UI
                         switch (NewNoteType)
                         {
                             case NoteType.Tap:
-                                Console.WriteLine(IsNewNoteStart);
                                 var tap = new Tap() { IsStart = IsNewNoteStart };
                                 Notes.Add(tap);
                                 newNote = tap;
@@ -1942,7 +1992,8 @@ namespace Ched.UI
                                 {
                                     StartTick = Math.Max(GetQuantizedTick(GetTickFromYPosition(scorePos.Y)), 0),
                                     StartWidth = LastWidth,
-                                    Channel = channel
+                                    Channel = channel,
+                                    GuideColor = newGuideColor
                                 };
                                 guide.StartLaneIndex = GetNewNoteLaneIndex(scorePos.X, guide.StartWidth);
                                 guide.Channel = channel;
@@ -2594,7 +2645,7 @@ namespace Ched.UI
                     .Select(p => GetYPositionFromTick(p.Tick));
 
                 if (stepHead == stepTail) continue;
-                dc.DrawGuideBackground(steps, visibleStepPos, ShortNoteHeight, isch, noteVisualMode);
+                dc.DrawGuideBackground(steps, visibleStepPos, ShortNoteHeight, isch, noteVisualMode, guide.GuideColor);
 
 
             }
@@ -2667,7 +2718,7 @@ namespace Ched.UI
                     if (!Editable && !step.IsVisible) continue;
                     if (Notes.GetReferencedAir(step).Count() > 0) break; // AIR付き終点
                     RectangleF rect = GetRectFromNotePosition(step.Tick, step.LaneIndex, step.Width);
-                    if (step.IsVisible) dc.DrawGuideStep(rect, isch, noteVisualMode);
+                    if (step.IsVisible) dc.DrawGuideStep(rect, isch, noteVisualMode, guide.GuideColor);
                     else dc.DrawBorder(rect, isch, noteVisualMode);
 
 
@@ -2693,7 +2744,7 @@ namespace Ched.UI
             {
                 bool isch = ((guide.Channel == viewchannel) || viewchannel == 1000);
 
-                dc.DrawGuideBegin(GetRectFromNotePosition(guide.StartTick, guide.StartNote.LaneIndex, guide.StartWidth), isch, noteVisualMode);
+                dc.DrawGuideBegin(GetRectFromNotePosition(guide.StartTick, guide.StartNote.LaneIndex, guide.StartWidth), isch, noteVisualMode, guide.GuideColor);
 
 
             }
@@ -2709,33 +2760,32 @@ namespace Ched.UI
 
 
 
-            foreach (var note in Notes.Taps.Where(q => q.IsStart == true).Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
+            foreach (var note in Notes.Taps.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
             {
                 bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
-
-                dc.DrawBorder(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch, noteVisualMode, colorProfile.TapColor, colorProfile.InvTapColor) ;
-
+                if (note.IsStart)
+                {
+                    dc.DrawBorder(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch, noteVisualMode, colorProfile.TapColor, colorProfile.InvTapColor);
+                }
+                else
+                {
+                    dc.DrawTap(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch, noteVisualMode);
+                }
+                
             }
 
-            foreach (var note in Notes.Taps.Where(q => q.IsStart == false).Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
+
+            foreach (var note in Notes.ExTaps.Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
             {
                 bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
-
-                dc.DrawTap(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch, noteVisualMode);
-
-            }
-
-            foreach (var note in Notes.ExTaps.Where(q => q.IsStart == true).Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
-            {
-                bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
-                dc.DrawBorder(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch, noteVisualMode, colorProfile.ExTapColor, colorProfile.InvExTapColor);
-            }
-
-            foreach (var note in Notes.ExTaps.Where(q => q.IsStart == false).Where(p => p.Tick >= HeadTick && p.Tick <= tailTick))
-            {
-                bool isch = ((note.Channel == viewchannel) || viewchannel == 1000);
-                dc.DrawExTap(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch, noteVisualMode);
-
+                if (note.IsStart)
+                {
+                    dc.DrawBorder(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch, noteVisualMode, colorProfile.ExTapColor, colorProfile.InvExTapColor);
+                }
+                else
+                {
+                    dc.DrawExTap(GetRectFromNotePosition(note.Tick, note.LaneIndex, note.Width), isch, noteVisualMode);
+                }
 
             }
 
@@ -3550,6 +3600,16 @@ namespace Ched.UI
         {
             VerticalDirection = verticalDirection;
             HorizontalDirection = horizontaiDirection;
+        }
+    }
+
+    public struct GuideColor
+    {
+        public USCGuideColor guideColor { get; }
+
+        public GuideColor(USCGuideColor color)
+        {
+            guideColor = color;
         }
     }
 

@@ -243,9 +243,59 @@ namespace Ched.Properties {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        public static System.Drawing.Bitmap GuideIcon {
+        public static System.Drawing.Bitmap GuideBlue {
             get {
-                object obj = ResourceManager.GetObject("GuideIcon", resourceCulture);
+                object obj = ResourceManager.GetObject("GuideBlue", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap GuideCyan {
+            get {
+                object obj = ResourceManager.GetObject("GuideCyan", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap GuideGreen {
+            get {
+                object obj = ResourceManager.GetObject("GuideGreen", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap GuideNeutral {
+            get {
+                object obj = ResourceManager.GetObject("GuideNeutral", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap GuidePurple {
+            get {
+                object obj = ResourceManager.GetObject("GuidePurple", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap GuideRed {
+            get {
+                object obj = ResourceManager.GetObject("GuideRed", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -256,6 +306,16 @@ namespace Ched.Properties {
         public static System.Drawing.Bitmap GuideStepIcon {
             get {
                 object obj = ResourceManager.GetObject("GuideStepIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        public static System.Drawing.Bitmap GuideYellow {
+            get {
+                object obj = ResourceManager.GetObject("GuideYellow", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -43,7 +43,19 @@ namespace Ched.Drawing
         public GradientColor AirStepColor { get; set; }
 
         public GradientColor GuideBackgroundColor { get; set; }
+        public GradientColor GuideBackgroundNeutralColor { get; set; }
+        public GradientColor GuideBackgroundRedColor { get; set; }
+        public GradientColor GuideBackgroundBlueColor { get; set; }
+        public GradientColor GuideBackgroundYellowColor { get; set; }
+        public GradientColor GuideBackgroundPurpleColor { get; set; }
+        public GradientColor GuideBackgroundCyanColor { get; set; }
         public GradientColor GuideColor { get; set; }
+        public GradientColor GuideNeutralColor { get; set; }
+        public GradientColor GuideRedColor { get; set; }
+        public GradientColor GuideBlueColor { get; set; }
+        public GradientColor GuideYellowColor { get; set; }
+        public GradientColor GuidePurpleColor { get; set; }
+        public GradientColor GuideCyanColor { get; set; }
 
 
         //ch別用
@@ -63,7 +75,19 @@ namespace Ched.Drawing
         public Color InvAirHoldLineColor { get; set; }
         public GradientColor InvAirStepColor { get; set; }
         public GradientColor InvGuideBackgroundColor { get; set; }
+        public GradientColor InvGuideBackgroundNeutralColor { get; set; }
+        public GradientColor InvGuideBackgroundRedColor { get; set; }
+        public GradientColor InvGuideBackgroundBlueColor { get; set; }
+        public GradientColor InvGuideBackgroundYellowColor { get; set; }
+        public GradientColor InvGuideBackgroundPurpleColor { get; set; }
+        public GradientColor InvGuideBackgroundCyanColor { get; set; }
         public GradientColor InvGuideColor { get; set; }
+        public GradientColor InvGuideNeutralColor { get; set; }
+        public GradientColor InvGuideRedColor { get; set; }
+        public GradientColor InvGuideBlueColor { get; set; }
+        public GradientColor InvGuideYellowColor { get; set; }
+        public GradientColor InvGuidePurpleColor { get; set; }
+        public GradientColor InvGuideCyanColor { get; set; }
 
     }
 }

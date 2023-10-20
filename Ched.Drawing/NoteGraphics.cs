@@ -10,6 +10,7 @@ using Ched.Core.Notes;
 using System.Diagnostics.Eventing.Reader;
 using System.Runtime.CompilerServices;
 using System.Security.Permissions;
+using static Ched.Core.Notes.Guide;
 
 namespace Ched.Drawing
 {
@@ -362,18 +363,53 @@ namespace Ched.Drawing
         }
 
 
-        public static void DrawGuideBegin(this DrawingContext dc, RectangleF rect, bool isch, int mode)
+        public static void DrawGuideBegin(this DrawingContext dc, RectangleF rect, bool isch, int mode, USCGuideColor color)
         {
-            dc.DrawGuideStep(rect, isch, mode);
+            dc.DrawGuideStep(rect, isch, mode, color);
             dc.Graphics.DrawTapSymbol(rect, mode);
 
         }
 
-        public static void DrawGuideStep(this DrawingContext dc, RectangleF rect, bool isch, int mode)
+        public static void DrawGuideStep(this DrawingContext dc,  RectangleF rect, bool isch, int mode, USCGuideColor color)
         {
+            var guidecolor = dc.ColorProfile.GuideColor;
+            var invguidecolor = dc.ColorProfile.InvGuideColor;
+
+            switch (color)
+            {
+                case USCGuideColor.neutral:
+                    guidecolor = dc.ColorProfile.GuideNeutralColor;
+                    invguidecolor = dc.ColorProfile.InvGuideNeutralColor;
+                    break;
+                case USCGuideColor.red:
+                    guidecolor = dc.ColorProfile.GuideRedColor;
+                    invguidecolor = dc.ColorProfile.InvGuideRedColor;
+                    break;
+                case USCGuideColor.green:
+                    guidecolor = dc.ColorProfile.GuideColor;
+                    invguidecolor = dc.ColorProfile.InvGuideColor;
+                    break;
+                case USCGuideColor.blue:
+                    guidecolor = dc.ColorProfile.GuideBlueColor;
+                    invguidecolor = dc.ColorProfile.InvGuideBlueColor;
+                    break;
+                case USCGuideColor.yellow:
+                    guidecolor = dc.ColorProfile.GuideYellowColor;
+                    invguidecolor = dc.ColorProfile.InvGuideYellowColor;
+                    break;
+                case USCGuideColor.purple:
+                    guidecolor = dc.ColorProfile.GuidePurpleColor;
+                    invguidecolor = dc.ColorProfile.InvGuidePurpleColor;
+                    break;
+                case USCGuideColor.cyan:
+                    guidecolor = dc.ColorProfile.GuideCyanColor;
+                    invguidecolor = dc.ColorProfile.InvGuideCyanColor;
+                    break;
+            }
+
             if (isch)
             {
-                dc.Graphics.DrawNote(rect, dc.ColorProfile.GuideColor, dc.ColorProfile.BorderColor);
+                dc.Graphics.DrawNote(rect, guidecolor, dc.ColorProfile.BorderColor);
             }
             else
             {
@@ -382,10 +418,10 @@ namespace Ched.Drawing
                     case 0:
                         break;
                     case 1:
-                        dc.Graphics.DrawNote(rect, dc.ColorProfile.InvGuideColor, dc.ColorProfile.InvBorderColor);
+                        dc.Graphics.DrawNote(rect, invguidecolor, dc.ColorProfile.InvBorderColor);
                         break;
                     case 2:
-                        dc.Graphics.DrawNote(rect, dc.ColorProfile.GuideColor, dc.ColorProfile.BorderColor);
+                        dc.Graphics.DrawNote(rect, guidecolor, dc.ColorProfile.BorderColor);
                         break;
                 }
 
@@ -401,7 +437,7 @@ namespace Ched.Drawing
         /// <param name="steps">全ての中継点位置からなるリスト</param>
         /// <param name="visibleSteps">可視中継点のY座標からなるリスト</param>
         /// <param name="noteHeight">ノート描画高さ</param>
-        public static void DrawGuideBackground(this DrawingContext dc, IEnumerable<GuideStepElement> steps, IEnumerable<float> visibleSteps, float noteHeight, bool isch, int mode)
+        public static void DrawGuideBackground(this DrawingContext dc, IEnumerable<GuideStepElement> steps, IEnumerable<float> visibleSteps, float noteHeight, bool isch, int mode, USCGuideColor color)
         {
             if (isch)
             {
@@ -410,6 +446,39 @@ namespace Ched.Drawing
 
                 Color BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundColor.DarkColor;
                 Color BackgroundMiddleColor = dc.ColorProfile.GuideBackgroundColor.LightColor;
+
+                switch (color)
+                {
+                    case USCGuideColor.neutral:
+                        BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundNeutralColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.GuideBackgroundNeutralColor.LightColor;
+                        break;
+                    case USCGuideColor.red: 
+                        BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundRedColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.GuideBackgroundRedColor.LightColor;
+                        break;
+                    case USCGuideColor.green:
+                        BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.GuideBackgroundColor.LightColor;
+                        break;
+                    case USCGuideColor.blue:
+                        BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundBlueColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.GuideBackgroundBlueColor.LightColor;
+                        break;
+                    case USCGuideColor.yellow:
+                        BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundYellowColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.GuideBackgroundYellowColor.LightColor;
+                        break;
+                    case USCGuideColor.purple:
+                        BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundPurpleColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.GuideBackgroundPurpleColor.LightColor;
+                        break;
+                    case USCGuideColor.cyan:
+                        BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundCyanColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.GuideBackgroundCyanColor.LightColor;
+                        break;
+                }
+
 
                 var orderedSteps = steps.OrderBy(p => p.Point.Y).ToList();
                 var orderedVisibleSteps = visibleSteps.OrderBy(p => p).ToList();
@@ -454,6 +523,38 @@ namespace Ched.Drawing
                 Color BackgroundEdgeColor = dc.ColorProfile.GuideBackgroundColor.DarkColor;
                 Color BackgroundMiddleColor = dc.ColorProfile.GuideBackgroundColor.LightColor;
 
+                switch (color)
+                {
+                    case USCGuideColor.neutral:
+                        BackgroundEdgeColor = dc.ColorProfile.InvGuideBackgroundNeutralColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.InvGuideBackgroundNeutralColor.LightColor;
+                        break;
+                    case USCGuideColor.red:
+                        BackgroundEdgeColor = dc.ColorProfile.InvGuideBackgroundRedColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.InvGuideBackgroundRedColor.LightColor;
+                        break;
+                    case USCGuideColor.green:
+                        BackgroundEdgeColor = dc.ColorProfile.InvGuideBackgroundColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.InvGuideBackgroundColor.LightColor;
+                        break;
+                    case USCGuideColor.blue:
+                        BackgroundEdgeColor = dc.ColorProfile.InvGuideBackgroundBlueColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.InvGuideBackgroundBlueColor.LightColor;
+                        break;
+                    case USCGuideColor.yellow:
+                        BackgroundEdgeColor = dc.ColorProfile.InvGuideBackgroundYellowColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.InvGuideBackgroundYellowColor.LightColor;
+                        break;
+                    case USCGuideColor.purple:
+                        BackgroundEdgeColor = dc.ColorProfile.InvGuideBackgroundPurpleColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.InvGuideBackgroundPurpleColor.LightColor;
+                        break;
+                    case USCGuideColor.cyan:
+                        BackgroundEdgeColor = dc.ColorProfile.InvGuideBackgroundCyanColor.DarkColor;
+                        BackgroundMiddleColor = dc.ColorProfile.InvGuideBackgroundCyanColor.LightColor;
+                        break;
+                }
+
                 var orderedSteps = steps.OrderBy(p => p.Point.Y).ToList();
                 var orderedVisibleSteps = visibleSteps.OrderBy(p => p).ToList();
                 switch (mode)
@@ -464,8 +565,6 @@ namespace Ched.Drawing
 
                         dc.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                        BackgroundEdgeColor = dc.ColorProfile.InvGuideBackgroundColor.DarkColor;
-                        BackgroundMiddleColor = dc.ColorProfile.InvGuideBackgroundColor.LightColor;
 
 
                         using (var path = new GraphicsPath())

@@ -393,4 +393,25 @@
   <data name="LaneMenu" xml:space="preserve">
     <value>Lane</value>
   </data>
+  <data name="ColorBlue" xml:space="preserve">
+    <value>Blue</value>
+  </data>
+  <data name="ColorCyan" xml:space="preserve">
+    <value>Cyan</value>
+  </data>
+  <data name="ColorGreen" xml:space="preserve">
+    <value>Green</value>
+  </data>
+  <data name="ColorPurple" xml:space="preserve">
+    <value>Purple</value>
+  </data>
+  <data name="ColorRed" xml:space="preserve">
+    <value>Red</value>
+  </data>
+  <data name="ColorYellow" xml:space="preserve">
+    <value>Yellow</value>
+  </data>
+  <data name="ColorNeutral" xml:space="preserve">
+    <value>Neutral</value>
+  </data>
 </root>

@@ -14,6 +14,8 @@ namespace Ched.UI.Shortcuts
         public static string Save => "files.save";
         public static string SaveAs => "files.saveAs";
         public static string ReExport => "files.reExport";
+        public static string SUSExport => "files.SUSExport";
+        public static string USCExport => "files.USCExport";
         public static string ShowScoreBookProperties => "editor.action.showScoreBookProperties";
         public static string ShowShortcutSettings => "application.showShortcutSettings";
 

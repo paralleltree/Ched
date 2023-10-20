@@ -408,4 +408,25 @@
   <data name="LaneMenu" xml:space="preserve">
     <value>レーン</value>
   </data>
+  <data name="ColorBlue" xml:space="preserve">
+    <value>ブルー</value>
+  </data>
+  <data name="ColorCyan" xml:space="preserve">
+    <value>シアン</value>
+  </data>
+  <data name="ColorGreen" xml:space="preserve">
+    <value>グリーン</value>
+  </data>
+  <data name="ColorNeutral" xml:space="preserve">
+    <value>グレー</value>
+  </data>
+  <data name="ColorPurple" xml:space="preserve">
+    <value>パープル</value>
+  </data>
+  <data name="ColorRed" xml:space="preserve">
+    <value>レッド</value>
+  </data>
+  <data name="ColorYellow" xml:space="preserve">
+    <value>イエロー</value>
+  </data>
 </root>

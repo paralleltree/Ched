@@ -12,10 +12,12 @@ namespace Ched.Plugins
         private readonly List<Diagnostic> _diagnostics = new List<Diagnostic>();
         public IReadOnlyCollection<Diagnostic> Diagnostics => _diagnostics;
         public Stream Stream { get; }
+        public string Path { get; }
 
-        public ScoreBookImportPluginArgs(Stream stream)
+        public ScoreBookImportPluginArgs(Stream stream, string path)
         {
             Stream = stream;
+            Path = path;
         }
 
         public void ReportDiagnostic(Diagnostic diagnostic)

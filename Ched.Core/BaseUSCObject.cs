@@ -4,9 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ched.Core.Notes
+namespace Ched.Core
 {
-    public class Tap : TappableBase
-    {
-    }
+    
 }

@@ -217,7 +217,7 @@
   <data name="BackGround" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\background.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="GuideIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="GuideNeutral" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\guide.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="GuideStepIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -228,5 +228,23 @@
   </data>
   <data name="TapIcon2" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\tap2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="GuideBlue" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\guideblue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="GuideCyan" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\guidecyan.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="GuidePurple" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\guidepurple.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="GuideRed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\guidered.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="GuideYellow" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\guideyellow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="GuideGreen" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\guidegreen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

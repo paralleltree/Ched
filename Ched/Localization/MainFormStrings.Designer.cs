@@ -241,6 +241,69 @@ namespace Ched.Localization {
         }
         
         /// <summary>
+        ///   ブルー に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorBlue {
+            get {
+                return ResourceManager.GetString("ColorBlue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   シアン に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorCyan {
+            get {
+                return ResourceManager.GetString("ColorCyan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   グリーン に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorGreen {
+            get {
+                return ResourceManager.GetString("ColorGreen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   グレー に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorNeutral {
+            get {
+                return ResourceManager.GetString("ColorNeutral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   パープル に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorPurple {
+            get {
+                return ResourceManager.GetString("ColorPurple", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   レッド に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorRed {
+            get {
+                return ResourceManager.GetString("ColorRed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   イエロー に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ColorYellow {
+            get {
+                return ResourceManager.GetString("ColorYellow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   コマンド に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Command {

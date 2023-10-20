@@ -544,6 +544,27 @@ namespace Ched.UI
 
                 HandleExport(ScoreBook, ExportManager.PrepareReExport());
             });
+            commandSource.RegisterCommand(Commands.SUSExport, "SUS" +MainFormStrings.Export, () =>
+            {
+                if (!ExportManager.CanReExport)
+                {
+                    ExportAs(PluginManager.ScoreBookExportPlugins.Where(p => p.FileFilter == "Sliding Universal Score (*.sus)|*.sus").First());
+                    return;
+                }
+                    
+                HandleExport(ScoreBook, ExportManager.PrepareReExport());
+                
+            });
+            commandSource.RegisterCommand(Commands.USCExport, "USC" + MainFormStrings.Export, () =>
+            {
+                if (!ExportManager.CanReExport)
+                {
+                    ExportAs(PluginManager.ScoreBookExportPlugins.Where(p => p.FileFilter == "Universal Sekai Chart (*.usc)|*.usc").First());
+                    return;
+                }
+                
+                HandleExport(ScoreBook, ExportManager.PrepareReExport());
+            });
             commandSource.RegisterCommand(Commands.ShowScoreBookProperties, MainFormStrings.BookProperty, () =>
             {
                 var vm = new BookPropertiesWindowViewModel(ScoreBook, CurrentMusicSource);
@@ -788,8 +809,9 @@ namespace Ched.UI
 
                 using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
-                    var args = new ScoreBookImportPluginArgs(stream);
+                    var args = new ScoreBookImportPluginArgs(stream, stream.Name);
                     HandleImport(p, args);
+
                 }
             })).ToArray();
 
@@ -1134,7 +1156,7 @@ namespace Ched.UI
             var airActionButton = shortcutItemBuilder.BuildItem(Commands.SelectAirAction, "AIR-ACTION", Resources.AirActionIcon);
             var flickButton = shortcutItemBuilder.BuildItem(Commands.SelectFlick, "FLICK", Resources.FlickIcon);
             var damageButton = shortcutItemBuilder.BuildItem(Commands.SelectDamage, "DAMAGE", Resources.DamgeIcon);
-            var guideButton = shortcutItemBuilder.BuildItem(Commands.SelectGuide, "GUIDE", Resources.GuideIcon);
+            var guideButton = shortcutItemBuilder.BuildItem(Commands.SelectGuide, "GUIDE", Resources.GuideNeutral);
             var guideStepButton = shortcutItemBuilder.BuildItem(Commands.SelectGuideStep, "GUIDESTEP", Resources.GuideStepIcon);
             var tap2Button = shortcutItemBuilder.BuildItem(Commands.SelectTap2, "TAP2", Resources.TapIcon2);
             var exTap2Button = shortcutItemBuilder.BuildItem(Commands.SelectExTap2, "ExTAP2", Resources.ExTapIcon2);
@@ -1164,6 +1186,43 @@ namespace Ched.UI
                 }
                 airKind.Text = "AIR";
             };
+
+
+            var guideKind = new CheckableToolStripSplitButton()
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image
+            };
+            guideKind.Text = "GUIDE";
+            guideKind.Click += (s, e) =>
+            {
+                noteView.NewNoteType = NoteType.Guide;
+                noteView.IsNewGuideStepVisible = false;
+                
+
+            };
+            guideKind.DropDown.Items.AddRange(new ToolStripItem[]
+            {
+                new ToolStripMenuItem(MainFormStrings.ColorNeutral, Resources.GuideNeutral, (s, e) => noteView.NewGuideColor = Guide.USCGuideColor.neutral),
+                new ToolStripMenuItem(MainFormStrings.ColorRed, Resources.GuideRed, (s, e) => noteView.NewGuideColor = Guide.USCGuideColor.red),
+                new ToolStripMenuItem(MainFormStrings.ColorGreen, Resources.GuideGreen, (s, e) => noteView.NewGuideColor = Guide.USCGuideColor.green),
+                new ToolStripMenuItem(MainFormStrings.ColorBlue, Resources.GuideBlue, (s, e) => noteView.NewGuideColor = Guide.USCGuideColor.blue),
+                new ToolStripMenuItem(MainFormStrings.ColorYellow, Resources.GuideYellow, (s, e) => noteView.NewGuideColor = Guide.USCGuideColor.yellow),
+                new ToolStripMenuItem(MainFormStrings.ColorPurple, Resources.GuidePurple, (s, e) => noteView.NewGuideColor = Guide.USCGuideColor.purple),
+                new ToolStripMenuItem(MainFormStrings.ColorCyan, Resources.GuideCyan, (s, e) => noteView.NewGuideColor = Guide.USCGuideColor.cyan),
+            });
+            guideKind.Image = Resources.GuideNeutral;
+            ShortcutManager.ShortcutUpdated += (s, e) =>
+            {
+                if (ShortcutManager.ResolveShortcutKey(Commands.SelectGuide, out Keys key))
+                {
+                    guideKind.Text = $"GUIDE ({key.ToShortcutChar()})";
+                    return;
+                }
+                guideKind.Text = "GUIDE";
+            };
+
+
+
 
             var quantizeTicks = new int[]
             {
@@ -1211,6 +1270,7 @@ namespace Ched.UI
                 guideStepButton.Checked = noteView.NewNoteType.HasFlag(NoteType.Slide) && noteView.IsNewGuideStepVisible;
                 tap2Button.Checked = noteView.NewNoteType.HasFlag(NoteType.Tap) && noteView.IsNewNoteStart;
                 exTap2Button.Checked = noteView.NewNoteType.HasFlag(NoteType.ExTap) && noteView.IsNewNoteStart;
+                guideKind.Checked = noteView.NewNoteType.HasFlag(NoteType.Guide) && !noteView.IsNewGuideStepVisible;
             };
 
             noteView.AirDirectionChanged += (s, e) =>
@@ -1231,7 +1291,35 @@ namespace Ched.UI
                 }
             };
 
-            
+            noteView.GuideColorChanged += (s, e) =>
+            {
+                switch (noteView.NewGuideColor)
+                {
+                    case Guide.USCGuideColor.neutral:
+                        guideKind.Image = Resources.GuideNeutral;
+                        break;
+                    case Guide.USCGuideColor.red:
+                        guideKind.Image = Resources.GuideRed;
+                        break;
+                    case Guide.USCGuideColor.green:
+                        guideKind.Image = Resources.GuideGreen;
+                        break;
+                    case Guide.USCGuideColor.blue:
+                        guideKind.Image = Resources.GuideBlue;
+                        break;
+                    case Guide.USCGuideColor.yellow:
+                        guideKind.Image = Resources.GuideYellow;
+                        break;
+                    case Guide.USCGuideColor.purple:
+                        guideKind.Image = Resources.GuidePurple;
+                        break;
+                    case Guide.USCGuideColor.cyan:
+                        guideKind.Image = Resources.GuideCyan;
+                        break;
+                }
+            };
+
+
 
 
             var speedchCounts = new int[]
@@ -1368,7 +1456,7 @@ namespace Ched.UI
 
             return new ToolStrip(new ToolStripItem[]
             {
-                tapButton, exTapButton, holdButton, slideButton, slideStepButton, airKind, airActionButton, flickButton, damageButton, guideButton,
+                tapButton, exTapButton, holdButton, slideButton, slideStepButton, airKind, airActionButton, flickButton, damageButton, guideKind,
                  guideStepButton, tap2Button, exTap2Button,
                 quantizeComboBox, new ToolStripSeparator(), speedChBox, viewChBox,  laneVisible, widthAmountBox
             });

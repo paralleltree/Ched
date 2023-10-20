@@ -71,6 +71,7 @@ namespace Ched.Core.Notes
         /// ノートのチャンネルを取得します。
         /// </summary>
         int Channel { get; }
+
     }
 
     public enum VerticalAirDirection

@@ -383,6 +383,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\CustomChSelectionForm.resx">
       <DependentUpon>CustomChSelectionForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\HighSpeedSelectionForm.en.resx">
       <DependentUpon>HighSpeedSelectionForm.cs</DependentUpon>
@@ -586,6 +587,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\extap2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\guidered.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\guideblue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\guideyellow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\guidepurple.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\guidecyan.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\guidegreen.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\BASS.Native.2.4.12.2\build\BASS.Native.targets" Condition="Exists('..\packages\BASS.Native.2.4.12.2\build\BASS.Native.targets')" />

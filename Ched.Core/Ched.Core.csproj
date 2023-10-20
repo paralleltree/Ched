@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BarIndexCalculator.cs" />
+    <Compile Include="BaseUSCObject.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="EventCollection.cs" />
     <Compile Include="Events\BpmChangeEvent.cs" />
@@ -89,6 +90,8 @@
     <Compile Include="ScoreBook.cs" />
     <Compile Include="TimeCalculator.cs" />
     <Compile Include="UI\SelectionRange.cs" />
+    <Compile Include="USC.cs" />
+    <Compile Include="USCObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Ched.Core.nuspec" />

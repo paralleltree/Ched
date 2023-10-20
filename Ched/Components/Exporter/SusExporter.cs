@@ -326,7 +326,7 @@ namespace Ched.Components.Exporter
                     .OrderBy(p => p.StartTick)
                     .Select(p => new
                     {
-                        Identifier = identifier.Allocate(p.StartTick, p.GetDuration()),
+                        Identifier = identifier.Allocate(p.StartTick, p.GetDuration()) ,
                         Note = p
                     })
                     .SelectMany(slide =>
@@ -456,6 +456,7 @@ namespace Ched.Components.Exporter
                         return GetLongNoteLines("4", airAction.Identifier.ToString(), items);
                     });
                 WriteLinesWithOffset(writer, airActions);
+
             }
         }
 
@@ -488,7 +489,7 @@ namespace Ched.Components.Exporter
                 {
                     var sig = BarIndexCalculator.GetTimeSignatureFromBarIndex(itemsInBar.Key);
                     int barLength = StandardBarTick * sig.Numerator / sig.Denominator;
-
+                    
                     var offsetGroups = itemsInLane.GroupBy(p => p.BarPosition.TickOffset).Select(p => p.ToList()).ToList();
                     var separatedItemList = Enumerable.Range(0, offsetGroups.Max(p => p.Count)).Select(p => offsetGroups.Where(q => q.Count >= p + 1).Select(q => q[p]));
 
